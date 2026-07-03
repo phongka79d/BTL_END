@@ -118,7 +118,7 @@ Plan 1 is the first implementation phase. Later batches need a predictable direc
 
 ### Tasks
 
-- [ ] (01A): Inspect repository and establish root project files
+- [x] (01A): Inspect repository and establish root project files
   - Source of Truth: `docs/plans/Plan_1.md` > `## 3. Prerequisites from Prior Phases`; `docs/plans/Plan_1.md` > `## 8. Implementation Steps`
   - Source Requirements:
     - This is the first implementation phase.
@@ -140,7 +140,7 @@ Plan 1 is the first implementation phase. Later batches need a predictable direc
   - Blocked Condition: None
   - Files: `.gitignore`, `README.md`, `docs/database-design.md`, `docs/demo-checklist.md`
 
-- [ ] (01B): Scaffold backend package and MVC folders
+- [x] (01B): Scaffold backend package and MVC folders
   - Source of Truth: `docs/plans/Plan_1.md` > `## 4. Scope`; `docs/plans/Plan_1.md` > `## 6. Target Directory Structure`; `docs/plans/Master_Plan.md` > `## 10. Back-end MVC Structure`
   - Source Requirements:
     - Create an Express backend shell.
@@ -162,7 +162,7 @@ Plan 1 is the first implementation phase. Later batches need a predictable direc
   - Blocked Condition: None
   - Files: `backend/package.json`, `backend/src/app.js`, `backend/src/server.js`, backend MVC folders, `backend/prisma/`
 
-- [ ] (01C): Scaffold frontend Vite React package and folders
+- [x] (01C): Scaffold frontend Vite React package and folders
   - Source of Truth: `docs/plans/Plan_1.md` > `## 4. Scope`; `docs/plans/Plan_1.md` > `## 6. Target Directory Structure`; `docs/plans/Master_Plan.md` > `## 9. Front-end MVC View Structure`
   - Source Requirements:
     - Create a Vite React frontend.
@@ -184,7 +184,7 @@ Plan 1 is the first implementation phase. Later batches need a predictable direc
   - Blocked Condition: None
   - Files: `frontend/package.json`, `frontend/vite.config.js`, `frontend/src/App.jsx`, `frontend/src/main.jsx`, frontend source folders
 
-- [ ] (01D): Add environment examples and secret boundaries
+- [x] (01D): Add environment examples and secret boundaries
   - Source of Truth: `docs/plans/Plan_1.md` > `### 7.2 Environment Variables`; `docs/plans/Master_Plan.md` > `## 18. Environment Variables`
   - Source Requirements:
     - Backend env example must include `PORT`, `DATABASE_URL`, `DIRECT_URL`, `JWT_SECRET`, `JWT_EXPIRES_IN`, and `NODE_ENV`.
@@ -1049,10 +1049,10 @@ Batch04 can prepare static UI shell work after Batch01, but live auth validation
 ### Task IDs
 
 #### Batch01
-- [ ] (01A): Inspect repository and establish root project files
-- [ ] (01B): Scaffold backend package and MVC folders
-- [ ] (01C): Scaffold frontend Vite React package and folders
-- [ ] (01D): Add environment examples and secret boundaries
+- [x] (01A): Inspect repository and establish root project files
+- [x] (01B): Scaffold backend package and MVC folders
+- [x] (01C): Scaffold frontend Vite React package and folders
+- [x] (01D): Add environment examples and secret boundaries
 
 #### Batch02
 - [ ] (02A): Configure Prisma datasource and client generation
