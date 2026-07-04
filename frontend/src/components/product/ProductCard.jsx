@@ -28,6 +28,7 @@ export const ProductCard = ({ product }) => {
       onClick={() => navigate(`/products/${product.id}`)}
       padding={4}
       variant="default"
+      style={{ '--_card-radius': 'var(--radius-none)' }}
     >
       <VStack gap={3}>
         <VStack
@@ -35,7 +36,7 @@ export const ProductCard = ({ product }) => {
             width: '100%',
             aspectRatio: '4 / 3',
             overflow: 'hidden',
-            borderRadius: 'var(--radius-element)',
+            borderRadius: 'var(--radius-none)',
             backgroundColor: 'var(--color-background-muted)'
           }}
         >

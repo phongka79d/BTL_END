@@ -2,17 +2,17 @@
 import { Card, Grid, Skeleton, VStack } from '@astryxdesign/core';
 
 const LoadingCard = () => (
-  <Card padding={4}>
+  <Card padding={4} style={{ '--_card-radius': 'var(--radius-none)' }}>
     <VStack gap={3}>
       <VStack
         style={{
           width: '100%',
           aspectRatio: '4 / 3',
           overflow: 'hidden',
-          borderRadius: 'var(--radius-element)'
+          borderRadius: 'var(--radius-none)'
         }}
       >
-        <Skeleton width="100%" height="100%" radius="rounded" />
+        <Skeleton width="100%" height="100%" radius="none" />
       </VStack>
       <Skeleton width="72%" height="var(--spacing-5)" radius="rounded" />
       <Skeleton width="44%" height="var(--spacing-4)" radius="rounded" />
