@@ -721,7 +721,7 @@ Phase 2 requires products and categories to be manageable by admins, not just br
 
 ### Tasks
 
-- [ ] (05A): Run Astryx discovery and establish admin table/form/dialog component choices
+- [x] (05A): Run Astryx discovery and establish admin table/form/dialog component choices
   - Source of Truth: `docs/plans/Plan_2.md` > `### 7.4 Frontend UI Contract`; `docs/design/design.md` > `# 14. Admin Product Components`; `docs/design/design.md` > `# 15. Admin Category Components`; `docs/design/design.md` > `# 20. Common Form Components`; `docs/design/design.md` > `# 21. Common Feedback Components`; root `AGENTS.md` > `<!-- ASTRYX:START -->`
   - Source Requirements:
     - Admin pages use Astryx tables/forms/dialogs and no direct database calls.
@@ -742,7 +742,7 @@ Phase 2 requires products and categories to be manageable by admins, not just br
   - Blocked Condition: None unless Astryx tooling is unavailable, in which case record the tooling failure and continue only with installed component evidence.
   - Files: Execution report; no required source changes unless component placeholders are adjusted.
 
-- [ ] (05B): Build admin product management table, form dialog, and delete confirmation
+- [x] (05B): Build admin product management table, form dialog, and delete confirmation
   - Source of Truth: `docs/plans/Plan_2.md` > `## 4. Scope`; `docs/plans/Plan_2.md` > `### 7.1 Product API`; `docs/plans/Plan_2.md` > `### 7.4 Frontend UI Contract`; `docs/design/design.md` > `## 24.12 Admin Products Page`; `docs/design/design.md` > `# 14. Admin Product Components`; `docs/design/design.md` > `## 25.4 Admin Table States`
   - Source Requirements:
     - `AdminProductView` supports table, simple search if feasible, create/edit form dialog, and delete confirmation.
@@ -767,7 +767,7 @@ Phase 2 requires products and categories to be manageable by admins, not just br
   - Blocked Condition: `BLOCKED_BY_USER_ACTION` only if live backend/admin credentials are unavailable.
   - Files: `frontend/src/views/admin/AdminProductView.jsx`, `frontend/src/components/admin/ProductForm.jsx`, `frontend/src/components/admin/AdminTable.jsx`, `frontend/src/api/productApi.js`, `frontend/src/api/categoryApi.js`
 
-- [ ] (05C): Build admin category management table, form dialog, and delete confirmation
+- [x] (05C): Build admin category management table, form dialog, and delete confirmation
   - Source of Truth: `docs/plans/Plan_2.md` > `## 4. Scope`; `docs/plans/Plan_2.md` > `### 7.2 Category API`; `docs/plans/Plan_2.md` > `### 7.4 Frontend UI Contract`; `docs/design/design.md` > `## 24.13 Admin Categories Page`; `docs/design/design.md` > `# 15. Admin Category Components`; `docs/design/design.md` > `## 25.4 Admin Table States`
   - Source Requirements:
     - `AdminCategoryView` supports table, create/edit form dialog, and delete confirmation.
@@ -791,7 +791,7 @@ Phase 2 requires products and categories to be manageable by admins, not just br
   - Blocked Condition: `BLOCKED_BY_USER_ACTION` only if live backend/admin credentials are unavailable.
   - Files: `frontend/src/views/admin/AdminCategoryView.jsx`, `frontend/src/components/admin/CategoryForm.jsx`, `frontend/src/components/admin/AdminTable.jsx`, `frontend/src/api/categoryApi.js`
 
-- [ ] (05D): Polish admin navigation, guard behavior, and admin table states
+- [x] (05D): Polish admin navigation, guard behavior, and admin table states
   - Source of Truth: `docs/plans/Plan_2.md` > `### 7.4 Frontend UI Contract`; `docs/plans/Plan_2.md` > `## 9. Verification & Testing Plan`; `docs/design/design.md` > `## 5.2 AdminLayout`; `docs/design/design.md` > `## 6.2 AdminSidebar`; `docs/design/design.md` > `## 25.4 Admin Table States`
   - Source Requirements:
     - Admin product/category pages use Astryx tables/forms/dialogs and no direct database calls.
@@ -1103,10 +1103,10 @@ Batch04 customer UI and Batch05 admin UI can be implemented in parallel after Ba
 - [x] (04D): Build cart view, item controls, removal, subtotal, and checkout placeholder
 
 #### Batch05
-- [ ] (05A): Run Astryx discovery and establish admin table/form/dialog component choices
-- [ ] (05B): Build admin product management table, form dialog, and delete confirmation
-- [ ] (05C): Build admin category management table, form dialog, and delete confirmation
-- [ ] (05D): Polish admin navigation, guard behavior, and admin table states
+- [x] (05A): Run Astryx discovery and establish admin table/form/dialog component choices
+- [x] (05B): Build admin product management table, form dialog, and delete confirmation
+- [x] (05C): Build admin category management table, form dialog, and delete confirmation
+- [x] (05D): Polish admin navigation, guard behavior, and admin table states
 
 #### Batch06
 - [ ] (06A): Run backend command checks and product/category/cart API smoke tests

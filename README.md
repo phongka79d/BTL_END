@@ -75,17 +75,17 @@ The application implements a multi-role web interface utilizing the Astryx Desig
 - **Admin Layout (Console Layout):** Collapsible dashboard sidebar layout mapping management sections (Dashboard, Products, Categories, Users, Orders, Reviews, Reports).
 - **Frontend API Helpers:** `productApi.js`, `categoryApi.js`, and `cartApi.js` wrap the Express REST endpoints through the shared `apiClient.js`.
 - **Cart State:** `CartProvider` and `useCart` load authenticated cart state from the backend, expose cart actions, and provide the navigation badge item count.
-- **Phase 2 Routes:** `/products`, `/products/:id`, `/cart`, `/admin/products`, and `/admin/categories` are registered with the existing customer, private, and admin route guards. These views are intentionally minimal placeholders until the customer/admin UI batches fill them in.
+- **Phase 2 Routes:** `/products`, `/products/:id`, `/cart`, `/admin/products`, and `/admin/categories` are registered with the existing customer, private, and admin route guards. These views are fully implemented with the customer and admin UI components.
 - **Views:**
   - `HomeView`: Main customer landing page featuring a welcome hero panel and categories layout.
-  - `ProductListView`: Placeholder customer product listing route.
-  - `ProductDetailView`: Placeholder customer product detail route.
-  - `CartView`: Protected placeholder cart route.
+  - `ProductListView`: Functional customer product catalog search and filtering view.
+  - `ProductDetailView`: Functional customer product detail and cart addition view.
+  - `CartView`: Functional customer cart management view with subtotal and stock validations.
   - `LoginView`: Auth login form with email/password validation, inline errors, and loading states.
   - `RegisterView`: Detailed profile signup form supporting field validation and shipping address text area.
   - `AdminDashboardView`: Administrative statistics panels for sales and inventory tracking.
-  - `AdminProductView`: Admin-protected placeholder product management route.
-  - `AdminCategoryView`: Admin-protected placeholder category management route.
+  - `AdminProductView`: Functional administrative product CRUD management view with form validation.
+  - `AdminCategoryView`: Functional administrative category CRUD management view with unique-name and deletion checks.
 
 ## Local Commands
 
