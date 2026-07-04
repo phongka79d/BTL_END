@@ -772,7 +772,7 @@ complete
 - c:\Users\ACER\OtherProjects\BTL_END\backend\prisma\schema.prisma: Checked schema before running migration.
 
 ## Completed Work
-- Replaced the password placeholder `[YOUR-PASSWORD]` in `DATABASE_URL` with the actual password `Phongdz123!` in `backend/.env`.
+- Replaced the password placeholder `[YOUR-PASSWORD]` in `DATABASE_URL` with the actual database password in local `backend/.env`; the secret value is intentionally redacted from this report.
 - Successfully ran the first Prisma migration against Supabase PostgreSQL using `npx prisma migrate dev --name init`.
 - Verified that migration files were generated under `backend/prisma/migrations/20260704020610_init/` and only contain DDL SQL statements, free of any credentials or secrets.
 - Verified that the Prisma Client was successfully generated and the database is in sync with the schema.

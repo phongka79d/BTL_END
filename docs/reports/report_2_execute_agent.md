@@ -2839,3 +2839,680 @@ complete
 - validations to rerun: `npm run build` in `frontend` and `npx prisma validate` in `backend`.
 - risk areas: None.
 - next task readiness: can_review
+
+---
+
+# Task Execution Report - 06A
+
+## Source Task File
+docs/tasks/task_2.md
+
+## Report File
+docs/reports/report_2_execute_agent.md
+
+## Mode
+orchestrated
+
+## Batch
+Batch06 - Verification, Security Audit, and Phase 3 Handoff
+
+## Task
+06A - Run backend command checks and product/category/cart API smoke tests
+
+## Status
+complete
+
+## Source of Truth Used
+- docs/plans/Plan_2.md > ## 9. Verification & Testing Plan
+- docs/plans/Plan_2.md > ### 7.1 Product API
+- docs/plans/Plan_2.md > ### 7.2 Category API
+- docs/plans/Plan_2.md > ### 7.3 Cart API
+
+## Supplemental Documents Used
+- None
+
+## Selected Scope
+- Batch: Batch06 - Verification, Security Audit, and Phase 3 Handoff
+- Task ID: 06A
+- Task title: Run backend command checks and product/category/cart API smoke tests
+- Files allowed: Execution report, optional docs/demo-checklist.md
+- Repair scope if any: None
+
+## Dependency and User Action Check
+- dependencies: Batch01 and Batch02 are checked complete in docs/tasks/task_2.md.
+- user action: Local backend .env exists, database-backed endpoints responded, seeded products/categories were available, and seeded demo admin/customer users authenticated. No secret values, JWTs, passwords, or database connection strings were printed in this report.
+- status: satisfied.
+
+## Files Inspected Before Editing
+- AGENTS.md: project-specific workflow and Astryx guidance.
+- docs/tasks/task_2.md: selected 06A task block, dependencies, acceptance, and no-checkbox orchestrated scope.
+- docs/plans/Plan_2.md: backend verification plan plus product/category/cart API contracts.
+- backend/package.json: backend scripts and dependencies.
+- backend/src/server.js: startup command and port behavior.
+- backend/src/app.js: route mounting and health endpoint.
+- backend/src/routes/index.js: product, category, admin, and cart route prefixes.
+- backend/src/routes/product.routes.js: public and admin product route protection.
+- backend/src/routes/category.routes.js: public and admin category route protection.
+- backend/src/routes/cart.routes.js: authenticated cart route protection.
+- backend/src/controllers/product.controller.js: product response and mutation behavior.
+- backend/src/controllers/category.controller.js: category response and mutation behavior.
+- backend/src/controllers/cart.controller.js: cart response, subtotal, quantity, stock, and ownership behavior.
+- backend/src/controllers/auth.controller.js: login response shape for token handling without printing tokens.
+- backend/src/models/product.model.js: product filter, category include, create/update/delete, and detail behavior.
+- backend/src/models/cart.model.js: cart subtotal and captured unitPrice behavior.
+- backend/prisma/schema.prisma: product/category/cart/user field names and relationships.
+- backend/prisma/seed.js: seeded category/product/user availability for local smoke data.
+- backend/src/test-cart-routes-smoke.js: existing smoke coverage before writing the broader 06A HTTP checks.
+- backend/.env: inspected keys only with values redacted to confirm required environment variables exist.
+- docs/reports/report_2_execute_agent.md: final lines inspected before appending this report.
+
+## Completed Work
+- Ran the required backend Prisma validation command.
+- Started the backend with npm run dev and confirmed startup on localhost port 5000.
+- Smoke tested public category and product endpoints.
+- Verified product list includes seeded products with category data.
+- Smoke tested product filters using keyword, categoryId, minPrice, and maxPrice.
+- Authenticated seeded demo admin and customer accounts without printing credentials or JWTs.
+- Verified anonymous and customer requests are rejected from admin product/category mutation routes.
+- Verified admin category create/update/delete and admin product create/update/delete using temporary smoke data that was cleaned up.
+- Verified authenticated customer cart get, add, update, and remove operations.
+- Verified cart subtotal equals updated quantity times captured unitPrice.
+- Verified add-to-cart rejects quantity greater than stock.
+- Verified product stock is unchanged after cart operations.
+
+## Files Created or Modified
+- docs/reports/report_2_execute_agent.md (appended report)
+
+## Tests or Validations Run
+- command/check: cd backend && npx prisma validate
+  - result: passed
+  - evidence or reason: Prisma loaded prisma.config.ts and schema.prisma; schema reported valid.
+- command/check: cd backend && npm run dev
+  - result: passed
+  - evidence or reason: nodemon started src/server.js and logged Server is running on port 5000.
+- command/check: GET /api/health
+  - result: passed
+  - evidence or reason: returned 200 success.
+- command/check: GET /api/categories
+  - result: passed
+  - evidence or reason: returned 4 categories with id/name/description fields.
+- command/check: GET /api/products
+  - result: passed
+  - evidence or reason: returned 6 seeded products with category id/name data.
+- command/check: GET /api/products with keyword, categoryId, minPrice, and maxPrice
+  - result: passed
+  - evidence or reason: combined filters returned 1 matching seeded product and satisfied category and price assertions.
+- command/check: POST /api/auth/login for seeded admin and customer
+  - result: passed
+  - evidence or reason: both returned 200 with expected admin/customer roles; tokens were redacted.
+- command/check: anonymous POST /api/admin/categories and POST /api/admin/products
+  - result: passed
+  - evidence or reason: both rejected with 401.
+- command/check: customer POST /api/admin/categories and POST /api/admin/products
+  - result: passed
+  - evidence or reason: both rejected with 403.
+- command/check: admin POST/PUT/DELETE /api/admin/categories
+  - result: passed
+  - evidence or reason: temporary category was created, updated, and deleted after product cleanup.
+- command/check: admin POST/PUT/DELETE /api/admin/products
+  - result: passed
+  - evidence or reason: temporary product was created, updated, and deleted.
+- command/check: customer GET /api/cart, POST /api/cart/items, PUT /api/cart/items/:id, DELETE /api/cart/items/:id
+  - result: passed
+  - evidence or reason: cart was fetched, item added, quantity updated to 2, and item removed.
+- command/check: cart subtotal, above-stock rejection, and stock unchanged
+  - result: passed
+  - evidence or reason: subtotal matched quantity times captured unitPrice; above-stock add returned 400; product stock stayed unchanged after cart operations.
+
+## Acceptance Check
+- condition: Run backend validation/startup commands.
+  - status: satisfied
+  - evidence: npx prisma validate passed and npm run dev started the backend successfully.
+- condition: Smoke test product, category, and cart endpoints.
+  - status: satisfied
+  - evidence: public category/product, admin product/category, and authenticated cart HTTP checks all passed.
+- condition: Product list returns seeded products with category data.
+  - status: satisfied
+  - evidence: GET /api/products returned 6 seeded products with category id/name data.
+- condition: Product search/filter narrows results.
+  - status: satisfied
+  - evidence: combined keyword/categoryId/minPrice/maxPrice filter returned 1 matching product and satisfied assertions.
+- condition: Admin can create/update/delete products/categories.
+  - status: satisfied
+  - evidence: temporary smoke product/category CRUD passed and cleanup succeeded.
+- condition: Customer cannot call admin product/category routes.
+  - status: satisfied
+  - evidence: customer admin mutation attempts returned 403; anonymous attempts returned 401.
+- condition: Authenticated customer can add/update/remove cart items.
+  - status: satisfied
+  - evidence: customer cart add, update, remove, and get checks passed.
+- condition: Cart subtotal matches quantity times captured unitPrice.
+  - status: satisfied
+  - evidence: updated cart subtotal matched calculated captured unitPrice x quantity.
+- condition: Add-to-cart rejects quantities greater than stock.
+  - status: satisfied
+  - evidence: above-stock add returned 400.
+- condition: Product stock is unchanged after cart operations.
+  - status: satisfied
+  - evidence: product detail quantity before and after cart operations was unchanged.
+
+## Progress Update
+- task checkbox updated: no
+- batch status updated: no
+- reason: Orchestrated mode requires A1 not to update checkboxes or batch status.
+
+## Key Implementation Decisions
+- Used the existing backend route/controller/model surface for live checks instead of adding new smoke-test source files.
+- Used only sanitized smoke output and report evidence; JWTs, passwords, and database connection strings were not printed.
+
+## Risks or Open Issues
+- None for 06A. The checks depend on the currently available local .env, live database, seeded data, and seeded demo credentials remaining valid for reviewer reruns.
+
+## Minor In-Scope Issues Fixed
+- None.
+
+## Workflow Integrity Check
+- Only task 06A was executed.
+- No sibling Batch06 tasks were executed.
+- No task checkbox or batch status was updated.
+- No source code, staging, or commit changes were made.
+
+## Notes for Review Agent
+- changed files: docs/reports/report_2_execute_agent.md only.
+- validations to rerun: `npx prisma validate` in backend; start `npm run dev` in backend; rerun sanitized HTTP checks for product/category/cart endpoints.
+- risk areas: reviewer rerun requires the same local database availability and seeded admin/customer/product/category data.
+- next task readiness: can_review
+
+---
+
+# Task Execution Report - 06B
+
+## Source Task File
+docs/tasks/task_2.md
+
+## Report File
+docs/reports/report_2_execute_agent.md
+
+## Mode
+orchestrated
+
+## Batch
+Batch06 - Verification, Security Audit, and Phase 3 Handoff
+
+## Task
+06B - Run frontend command checks and customer/admin UI smoke tests
+
+## Status
+complete
+
+## Source of Truth Used
+- docs/plans/Plan_2.md > ## 9. Verification & Testing Plan
+- docs/plans/Plan_2.md > ### 7.4 Frontend UI Contract
+- docs/design/design.md > # 25. UI States
+- docs/design/design.md > # 26. Responsive Design
+
+## Supplemental Documents Used
+- None
+
+## Selected Scope
+- Batch: Batch06 - Verification, Security Audit, and Phase 3 Handoff
+- Task ID: 06B
+- Task title: Run frontend command checks and customer/admin UI smoke tests
+- Files allowed: Execution report, optional docs/demo-checklist.md
+- Repair scope if any: None
+
+## Dependency and User Action Check
+- dependencies: Batch03, Batch04, Batch05, and 06A were already marked complete/accepted in docs/tasks/task_2.md and orchestration handoff.
+- user action: local backend API, seeded data, and safe demo admin/customer credentials were available from the existing local setup; credential values, tokens, and database URLs were not recorded.
+- status: satisfied
+
+## Files Inspected Before Editing
+- AGENTS.md: project Astryx and UI workflow rules.
+- docs/tasks/task_2.md: selected 06B task block, dependencies, output, and acceptance.
+- docs/plans/Plan_2.md: frontend UI contract and verification plan.
+- docs/design/design.md: UI state and responsive requirements.
+- frontend/package.json: frontend dev command and dependencies.
+- frontend/src/config.js: API base URL.
+- frontend/src/routes/AppRoutes.jsx: customer/admin route map and guards.
+- frontend/src/layouts/MainLayout.jsx: customer navigation and admin-link visibility behavior.
+- frontend/src/layouts/AdminLayout.jsx: admin navigation shell.
+- frontend/src/views/HomeView.jsx: homepage loading/success/error behavior.
+- frontend/src/views/ProductListView.jsx: product list search/filter and state behavior.
+- frontend/src/views/ProductDetailView.jsx: product detail and add-to-cart feedback behavior.
+- frontend/src/views/CartView.jsx: cart update/remove/subtotal/checkout placeholder behavior.
+- frontend/src/views/LoginView.jsx: login form selectors and auth flow.
+- frontend/src/views/admin/AdminProductView.jsx: admin product table/form/dialog route behavior.
+- frontend/src/views/admin/AdminCategoryView.jsx: admin category table/form/dialog route behavior.
+- frontend/src/components/product/ProductList.jsx: loading, empty, error, success branches.
+- frontend/src/components/product/ProductFilter.jsx: filter controls and responsive grid.
+- frontend/src/components/product/SearchBar.jsx: search input label.
+- frontend/src/components/common/Loading.jsx: loading skeleton implementation.
+- frontend/src/components/cart/CartItemList.jsx: cart loading, empty, error, success branches.
+- frontend/src/components/cart/CartItem.jsx: cart item quantity and remove controls.
+- frontend/src/components/cart/CartSummary.jsx: subtotal and checkout placeholder.
+- frontend/src/components/admin/AdminTable.jsx: Astryx table, loading, empty, and error states.
+- frontend/src/components/admin/ProductTable.jsx: product table actions.
+- frontend/src/components/admin/CategoryTable.jsx: category table actions.
+- frontend/src/components/admin/ProductForm.jsx: product form dialog.
+- frontend/src/components/admin/CategoryForm.jsx: category form dialog.
+- frontend/src/api/apiClient.js: frontend API helper and bearer-token behavior.
+- frontend/src/api/productApi.js: product/admin product API calls.
+- frontend/src/api/categoryApi.js: category/admin category API calls.
+- frontend/src/api/cartApi.js: cart API calls.
+- frontend/src/contexts/AuthContext.jsx: local auth state and login flow.
+- frontend/src/contexts/CartContext.jsx: cart loading/mutation state and backend refresh behavior.
+- backend/package.json: backend dev command used for live API support.
+- backend/prisma/seed.js: confirmed local seeded roles/data shape; secrets and credential values not recorded in report.
+- docs/reports/report_2_execute_agent.md: report EOF before appending.
+
+## Completed Work
+- Started the backend dev server to provide live API data for UI checks.
+- Ran `cd frontend && npm run dev`; Vite served the app at `http://localhost:5173/`.
+- Attempted the in-app browser surface; it was unavailable in this session (`agent.browsers.list()` returned empty), so system Chrome with Playwright was used for live browser validation.
+- Opened homepage, product list, product detail, cart, admin products, and admin categories through browser automation.
+- Verified customer product loading, empty, success, and error states where practical by using live API success, no-match search, delayed product API response, and aborted product API response.
+- Verified anonymous add-to-cart shows sign-in-required feedback.
+- Verified authenticated customer add/update/remove cart flow, subtotal display, and checkout placeholder.
+- Verified customer navigation did not expose admin links and direct customer admin route access redirected to unauthorized.
+- Verified admin product/category routes loaded and opened create form dialogs.
+- Verified product list/filter rendering at desktop, tablet, and mobile viewport widths.
+- Verified admin UI files use Astryx table/form/dialog primitives and the frontend has no direct database-access strings.
+
+## Files Created or Modified
+- docs/reports/report_2_execute_agent.md
+
+## Tests or Validations Run
+- command/check: `cd backend && npm run dev`
+  - result: passed
+  - evidence or reason: backend dev server started and logged that it was running on port 5000.
+- command/check: `cd frontend && npm run dev`
+  - result: passed
+  - evidence or reason: Vite started successfully and served `http://localhost:5173/`.
+- command/check: in-app browser availability
+  - result: not_run
+  - evidence or reason: in-app browser `iab` was unavailable and browser list was empty; this was not required after fallback system Chrome browser automation was available and used successfully.
+- command/check: Playwright/System Chrome UI smoke - homepage
+  - result: passed
+  - evidence or reason: homepage rendered Featured products from the live API.
+- command/check: Playwright/System Chrome UI smoke - product list success and empty states
+  - result: passed
+  - evidence or reason: product list rendered seeded products; a no-match search showed the empty state.
+- command/check: Playwright/System Chrome UI smoke - product list loading state
+  - result: passed
+  - evidence or reason: delayed product API response showed the loading/disabled filter state before success.
+- command/check: Playwright/System Chrome UI smoke - product list error state
+  - result: passed
+  - evidence or reason: aborted product API request rendered the product error banner with retry action.
+- command/check: Playwright/System Chrome UI smoke - product detail add-to-cart error
+  - result: passed
+  - evidence or reason: anonymous add-to-cart on product detail showed sign-in-required feedback.
+- command/check: Playwright/System Chrome UI smoke - customer navigation and admin guard
+  - result: passed
+  - evidence or reason: customer homepage did not expose admin links; direct `/admin/products` navigation redirected to `/unauthorized`.
+- command/check: Playwright/System Chrome UI smoke - customer cart
+  - result: passed
+  - evidence or reason: authenticated customer added a product, saw subtotal and checkout placeholder, updated quantity, and removed an item.
+- command/check: Playwright/System Chrome UI smoke - admin product/category routes
+  - result: passed
+  - evidence or reason: admin product and category pages loaded tables and opened Astryx form dialogs.
+- command/check: Playwright/System Chrome UI smoke - responsive product list
+  - result: passed
+  - evidence or reason: product list and filters rendered at 1280px, 800px, and 390px viewports with document scrollWidth matching viewport width.
+- command/check: screenshot evidence
+  - result: passed
+  - evidence or reason: Playwright captured six screenshots in memory across homepage, cart, admin category dialog, and responsive product-list views; no binary files were written.
+- command/check: `rg -n "DATABASE_URL|DIRECT_URL|PrismaClient|@prisma|supabase|SELECT\s|INSERT\s|UPDATE\s|DELETE\s+FROM" frontend\src`
+  - result: passed
+  - evidence or reason: no matches found for direct frontend database access strings.
+- command/check: `rg -n "from '@astryxdesign/core'|<Table|<Dialog|<AlertDialog|<Toolbar|<FormLayout|<TextInput|<NumberInput|<Selector" frontend\src\views\admin frontend\src\components\admin`
+  - result: passed
+  - evidence or reason: admin product/category files use Astryx table, dialog, alert dialog, toolbar, and form primitives.
+
+## Acceptance Check
+- condition: Run frontend dev command.
+  - status: satisfied
+  - evidence: `npm run dev` in frontend started Vite on `http://localhost:5173/`.
+- condition: Open homepage, product list, product detail, cart, admin products, and admin categories.
+  - status: satisfied
+  - evidence: all listed routes were opened and validated with browser automation.
+- condition: Customer product pages show loading, empty, success, and error states.
+  - status: satisfied
+  - evidence: success and empty states were validated on the live product list; loading was validated with a delayed API response; error was validated with an aborted product API request.
+- condition: Admin product/category pages use Astryx tables/forms/dialogs and no direct database calls.
+  - status: satisfied
+  - evidence: admin UI opened Astryx-backed table/form/dialog pages; targeted frontend database-access search returned no matches.
+- condition: Customer navigation does not expose admin links to non-admin users.
+  - status: satisfied
+  - evidence: customer homepage text did not expose admin links; direct admin product route redirected to unauthorized.
+- condition: Responsive product grid/filter behavior at desktop, tablet, and mobile sizes.
+  - status: satisfied
+  - evidence: product list and filters rendered at 1280px, 800px, and 390px widths with matching document scrollWidth.
+
+## Progress Update
+- task checkbox updated: no
+- batch status updated: no
+- reason: Orchestrated mode requires A1 not to update checkboxes or batch status.
+
+## Key Implementation Decisions
+- Used the existing local backend and frontend dev servers for live UI checks.
+- Used system Chrome through Playwright because the in-app browser surface was unavailable in this session.
+- Kept screenshots in memory as validation evidence to avoid adding binary artifacts outside the selected task scope.
+- Separated customer route-guard and cart-mutation browser sessions after diagnosing a smoke-script sequencing issue where navigating during auth restoration could invalidate the test session.
+
+## Risks or Open Issues
+- Reviewer reruns require the local backend `.env`, live database, seeded products/categories, and seeded safe admin/customer demo users to remain available.
+- The in-app browser surface was unavailable in this session, but system Chrome automation was available and all required UI smoke checks passed there.
+
+## Minor In-Scope Issues Fixed
+- None.
+
+## Workflow Integrity Check
+- Only task 06B was executed.
+- No sibling Batch06 tasks were executed.
+- No task checkbox or batch status was updated.
+- No source code, staging, or commit changes were made.
+- Secrets, JWTs, passwords, and database URLs were not recorded in this report.
+
+## Notes for Review Agent
+- changed files: docs/reports/report_2_execute_agent.md only.
+- validations to rerun: start backend with `npm run dev`; start frontend with `npm run dev`; rerun browser smoke checks at `http://localhost:5173/`; rerun the two focused `rg` searches for frontend database access and admin Astryx primitives.
+- risk areas: live checks depend on local API/database/seed availability and browser automation availability.
+- next task readiness: can_review
+
+---
+
+# Task Execution Report - 06C
+
+## Source Task File
+docs/tasks/task_2.md
+
+## Report File
+docs/reports/report_2_execute_agent.md
+
+## Mode
+orchestrated
+
+## Batch
+Batch06 - Verification, Security Audit, and Phase 3 Handoff
+
+## Task
+06C - Audit security, MVC boundaries, anti-duplication, and Astryx compliance
+
+## Status
+complete
+
+## Source of Truth Used
+- docs/plans/Plan_2.md > ## 3. Prerequisites from Prior Phases
+- docs/plans/Plan_2.md > ## 5. Out of Scope
+- docs/plans/Plan_2.md > ### 7.4 Frontend UI Contract
+- root AGENTS.md > # Custom Rules & Workflows
+- README.md > ## Phase 2 Handoff Contract
+
+## Supplemental Documents Used
+- None
+
+## Selected Scope
+- Batch: Batch06 - Verification, Security Audit, and Phase 3 Handoff
+- Task ID: 06C
+- Task title: Audit security, MVC boundaries, anti-duplication, and Astryx compliance
+- Files allowed: Execution report; changed source files only if fixes are needed.
+- Repair scope if any: None
+
+## Dependency and User Action Check
+- dependencies: Batch01 through Batch05 are checked complete in docs/tasks/task_2.md and have prior accepted review evidence.
+- user action: None.
+- status: satisfied.
+
+## Files Inspected Before Editing
+- AGENTS.md: project anti-duplication, SRP, root-cause, and Astryx rules.
+- README.md: Phase 2 Handoff Contract and existing foundation artifacts.
+- docs/tasks/task_2.md: selected 06C task block, dependencies, acceptance, and no-checkbox orchestrated scope.
+- docs/plans/Plan_2.md: Phase 2 prerequisites, out-of-scope list, frontend UI contract, and verification plan.
+- docs/reports/report_1_execute_agent.md: audited after credential-pattern search found a historical secret leak.
+- docs/reports/report_2_execute_agent.md: report EOF before appending.
+- docs/review/review_1_review_agent.md: checked remaining PostgreSQL URL-pattern hits with redacted output.
+- docs/plans/Plan_1.md and docs/plans/Master_Plan.md: checked remaining PostgreSQL URL-pattern hits and confirmed they are placeholder examples.
+- backend/src/app.js and backend/src/routes/*.js: route mounting, auth/admin guards, and out-of-scope route absence.
+- backend/src/controllers/*.js: response helper usage and HTTP/request behavior boundaries.
+- backend/src/models/*.js: Prisma data-access boundaries and out-of-scope model placeholder status.
+- backend/src/config/database.js: single runtime Prisma client export.
+- backend/src/utils/response.js: single response helper family.
+- backend/src/utils/generateToken.js: single token helper.
+- backend/prisma/schema.prisma and backend/prisma/seed.js: schema env references and standalone seed Prisma client.
+- frontend/src/api/*.js: frontend API helper pattern.
+- frontend/src/contexts/AuthContext.jsx and frontend/src/contexts/CartContext.jsx: auth/cart state and backend API consumption.
+- frontend/src/routes/AppRoutes.jsx, layouts, customer views, admin views, product/cart/admin components: database-boundary, Astryx, and out-of-scope UI inspection.
+
+## Completed Work
+- Searched tracked files for real `.env` files and secret-bearing filenames; only `.env.example` files are tracked.
+- Searched docs/source for credential-like strings and found one historical report line that recorded a real database password.
+- Redacted the historical secret value in `docs/reports/report_1_execute_agent.md`.
+- Re-ran the literal leaked-password search and confirmed the leaked value no longer appears outside ignored local `.env` files.
+- Checked remaining PostgreSQL URL-pattern hits with redacted output; remaining hits are placeholder examples or command/search text, not real connection strings.
+- Searched frontend source for database-only config names, Prisma imports, Supabase/PostgreSQL strings, and SQL-like direct database access. Matches were false positives such as update labels/functions, not database access.
+- Searched backend for duplicate Prisma client, response helper, JWT helper, and API-client-like behavior.
+- Confirmed the runtime app uses one Prisma client export, one response helper module, and one token helper; the seed script has its own standalone Prisma client and is not a duplicate runtime helper.
+- Inspected controllers/models and confirmed HTTP/request/response behavior stays in controllers while Prisma data access stays in models.
+- Searched for out-of-scope checkout, order creation, payment, review, report, upload, shipping, warehouse, and advanced inventory implementation.
+- Confirmed out-of-scope hits are placeholders, labels, schema/model stubs, or a cart checkout placeholder; no Phase 2 order/payment/review/report/upload/shipping runtime feature was implemented.
+- Inspected frontend UI files and confirmed customer/admin Phase 2 pages use Astryx primitives and token-based styling patterns; raw styling hits are existing constrained layout values, fallback SVG placeholder data, or already accepted Astryx/Grid usage rather than direct database or business-logic violations.
+- Checked large source files for SRP risk. The largest Phase 2-heavy view is `ProductDetailView.jsx` at 370 lines; it remains focused on the product-detail route and no mixed unrelated responsibility requiring a 06C repair was found.
+
+## Files Created or Modified
+- docs/reports/report_1_execute_agent.md (redacted historical database password from an old report line)
+- docs/reports/report_2_execute_agent.md (appended this execution report)
+
+## Tests or Validations Run
+- command/check: `git ls-files | rg -n "(^|/)(\\.env|\\.env\\..*|.*\\.env)$|env\\.local|secrets|secret|credential|credentials"`
+  - result: passed
+  - evidence or reason: only `backend/.env.example` and `frontend/.env.example` are tracked.
+- command/check: credential-like string search over docs/source, excluding local env files
+  - result: failed_then_fixed
+  - evidence or reason: found one historical report line with a real database password; it was redacted in `docs/reports/report_1_execute_agent.md`.
+- command/check: `rg -l "Phongdz" docs backend frontend README.md --glob "!backend/.env" --glob "!frontend/.env" --glob "!node_modules" --glob "!dist"`
+  - result: passed
+  - evidence or reason: no remaining matches for the leaked literal password.
+- command/check: PostgreSQL URL-pattern search with redacted output
+  - result: passed
+  - evidence or reason: remaining hits are placeholder examples in plan docs or search-command text in reports/reviews, not real connection strings.
+- command/check: `rg -n -i "DATABASE_URL|DIRECT_URL|PrismaClient|@prisma|supabase|postgres://|postgresql://|SELECT\\s|INSERT\\s|UPDATE\\s|DELETE\\s+FROM" frontend\\src`
+  - result: passed
+  - evidence or reason: matches were update labels/functions and normal API/context code; no frontend database connection, Prisma import, Supabase database URL, or SQL access was found.
+- command/check: `rg -n "new PrismaClient|PrismaClient|successResponse|errorResponse|jwt\\.sign|jsonwebtoken|bcrypt|fetch\\(|axios|DATABASE_URL|DIRECT_URL" backend\\src backend\\prisma`
+  - result: passed
+  - evidence or reason: single runtime Prisma client in `backend/src/config/database.js`, standalone seed Prisma client, centralized response helper, centralized token helper, and no backend API-client duplication.
+- command/check: backend route/controller/model MVC inspection
+  - result: passed
+  - evidence or reason: routes mount Express endpoints and guards, controllers handle request/response helpers, and models own Prisma queries.
+- command/check: out-of-scope implementation search over backend/frontend source
+  - result: passed
+  - evidence or reason: hits were placeholders, labels, schema/model stubs, or cart checkout placeholder; no order/payment/review/report/upload/shipping implementation was wired.
+- command/check: Astryx and raw styling inspection over Phase 2 customer/admin UI files
+  - result: passed
+  - evidence or reason: customer/admin pages use Astryx components for grids, forms, tables, dialogs, alerts, loading, and empty states; custom values are primarily token variables or accepted constrained layout/image placeholders.
+- command/check: source-file focus check
+  - result: passed
+  - evidence or reason: largest files remain route/component focused; no broad mixed-responsibility file required splitting for 06C.
+
+## Acceptance Check
+- condition: No secrets or committed real `.env` values are present.
+  - status: satisfied
+  - evidence: only `.env.example` files are tracked; the one historical report password leak was redacted and the leaked literal no longer appears in tracked docs/source.
+- condition: Frontend does not connect directly to Supabase PostgreSQL.
+  - status: satisfied
+  - evidence: targeted frontend search found no Prisma imports, database URLs, Supabase database URLs, SQL access, or backend-only database config use.
+- condition: No duplicate core helpers were added.
+  - status: satisfied
+  - evidence: runtime app uses the existing Prisma client, response helper, auth/admin middleware, JWT helper, and frontend API client pattern.
+- condition: Product/category/cart backend code uses MVC boundaries.
+  - status: satisfied
+  - evidence: controllers own HTTP behavior and response helpers; models own Prisma data access; routes own Express path/middleware composition.
+- condition: UI stays aligned with Astryx components and tokens.
+  - status: satisfied
+  - evidence: Phase 2 customer/admin UI uses Astryx grids, cards, forms, tables, dialogs, alerts, loading, and empty states; token variables are used for custom styling.
+- condition: No out-of-scope checkout/order/payment/review/report/upload/shipping implementation was added.
+  - status: satisfied
+  - evidence: search hits are placeholders/stubs/labels only; no out-of-scope runtime route/controller/view feature is implemented.
+
+## Progress Update
+- task checkbox updated: no
+- batch status updated: no
+- reason: Orchestrated mode requires A1 not to update checkboxes or batch status.
+
+## Key Implementation Decisions
+- Treated the old report's explicit database password as an in-scope security audit repair even though it predates Plan 2, because 06C explicitly audits committed secret leakage.
+- Did not refactor accepted UI layout values or large route views during the audit because no direct database leak, duplicate helper, mixed runtime responsibility, or out-of-scope feature implementation was found.
+- Kept the fix to documentation redaction only; no runtime source code was changed.
+
+## Risks or Open Issues
+- The leaked database password had previously existed in a tracked report. Even though it is now redacted, rotating the database password remains prudent if it has ever been shared outside the local repository.
+- Some existing UI files use constrained layout values and inline style objects. They remain coupled to Astryx components/tokens and were not changed during this audit to avoid broad, unrelated churn.
+
+## Minor In-Scope Issues Fixed
+- Redacted a historical database password from `docs/reports/report_1_execute_agent.md`.
+
+## Workflow Integrity Check
+- Only task 06C was executed.
+- No sibling Batch06 task was executed.
+- No task checkbox or batch status was updated.
+- No staging or commit was performed.
+- No secret values were recorded in this report.
+
+## Notes for Review Agent
+- changed files: docs/reports/report_1_execute_agent.md; docs/reports/report_2_execute_agent.md.
+- validations to rerun: tracked env-file search; leaked literal search; frontend database-access search; backend duplicate-helper search; route/controller/model MVC inspection; out-of-scope implementation search; Astryx/raw styling inspection.
+- risk areas: the redacted password may require external credential rotation if it was ever pushed or shared.
+- next task readiness: can_review
+
+---
+
+# Task Execution Report - 06D
+
+## Source Task File
+docs/tasks/task_2.md
+
+## Report File
+docs/reports/report_2_execute_agent.md
+
+## Mode
+orchestrated
+
+## Batch
+Batch06 - Verification, Security Audit, and Phase 3 Handoff
+
+## Task
+06D - Update demo checklist, execution report, and Phase 3 handoff notes
+
+## Status
+complete
+
+## Source of Truth Used
+- docs/plans/Plan_2.md > ## 9. Verification & Testing Plan
+- docs/plans/Plan_2.md > ## 10. Handoff Notes for Phase 3
+- docs/plans/Master_Plan.md > ## 26. Final Submission Checklist
+
+## Supplemental Documents Used
+- None
+
+## Selected Scope
+- Batch: Batch06 - Verification, Security Audit, and Phase 3 Handoff
+- Task ID: 06D
+- Task title: Update demo checklist, execution report, and Phase 3 handoff notes
+- Files allowed: docs/demo-checklist.md, README.md, docs/reports/report_2_execute_agent.md, docs/tasks/task_2.md
+- Repair scope if any: None
+
+## Dependency and User Action Check
+- dependencies: 06A, 06B, and 06C are checked complete in docs/tasks/task_2.md and have accepted review evidence in docs/review/review_2_review_agent.md.
+- user action: No current user-side manual confirmation was required for this documentation task. Future credential-dependent reruns are documented as BLOCKED_BY_USER_ACTION when local env, database, seeded data, credentials, or browser tooling are unavailable.
+- status: satisfied
+
+## Files Inspected Before Editing
+- AGENTS.md: project documentation, anti-duplication, SRP, and Astryx guidance.
+- docs/tasks/task_2.md: selected 06D task block, dependencies, acceptance, file scope, and orchestrated no-checkbox rule.
+- docs/plans/Plan_2.md: verification plan and Phase 3 handoff constraints.
+- docs/plans/Master_Plan.md: final submission checklist items that Phase 2 can and cannot claim.
+- docs/demo-checklist.md: existing Plan 1 checklist and handoff section before update.
+- README.md: existing setup, implemented API/frontend summaries, Plan 1 verification state, and Phase 2 handoff contract.
+- docs/reports/report_2_execute_agent.md: prior 06A/06B/06C execution evidence and physical EOF before appending.
+- docs/review/review_2_review_agent.md: accepted 06A/06B/06C review evidence and warnings.
+- backend/src/models/product.model.js, backend/src/controllers/product.controller.js, backend/src/models/cart.model.js, backend/src/models/cartItem.model.js, backend/src/controllers/cart.controller.js: artifact paths verified for Phase 3 reuse notes.
+- backend/src/middlewares/auth.middleware.js, backend/src/middlewares/admin.middleware.js: auth/admin middleware paths verified for Phase 3 reuse notes.
+- frontend/src/contexts/CartContext.jsx, frontend/src/api/cartApi.js, frontend/src/api/productApi.js, frontend/src/api/categoryApi.js, frontend/src/api/apiClient.js, frontend/src/routes/AppRoutes.jsx, frontend/src/layouts/MainLayout.jsx, frontend/src/layouts/AdminLayout.jsx: frontend artifact paths verified for Phase 3 reuse notes.
+
+## Completed Work
+- Updated docs/demo-checklist.md with a Plan 2 verification table covering backend command checks, public product/category APIs, admin CRUD, authorization, cart API behavior, backend subtotal, unchanged stock during cart operations, frontend command/UI smoke checks, responsive checks, direct database-access search, and security/MVC/duplication/scope audit results.
+- Added a Plan 2 demo flow to docs/demo-checklist.md for backend/frontend startup, product browsing, product detail feedback, authenticated cart flow, admin product/category pages, and admin guard checks.
+- Replaced the old Phase 2 handoff checklist in docs/demo-checklist.md with a Phase 3 handoff checklist that names product, cart, auth, admin, frontend API, CartContext, route/layout, and Astryx artifacts Phase 3 must reuse.
+- Added README Plan 2 verification notes that summarize accepted 06A, 06B, and 06C evidence.
+- Added README Phase 3 handoff notes and constraints without claiming checkout, orders, payments, reports, reviews, uploads, or shipping are implemented.
+- Recorded that future credential-dependent or user-side live checks must be marked BLOCKED_BY_USER_ACTION instead of completed when required local setup is unavailable.
+- Did not update docs/tasks/task_2.md checkboxes or Batch06 status because orchestrated mode reserves those changes for A2/A3.
+
+## Files Created or Modified
+- docs/demo-checklist.md
+- README.md
+- docs/reports/report_2_execute_agent.md
+
+## Tests or Validations Run
+- command/check: manual doc review against Plan 2 verification and handoff sections
+  - result: passed
+  - evidence or reason: docs/demo-checklist.md and README now include the Plan 2 backend/API/frontend/admin/cart evidence and Phase 3 constraints from docs/plans/Plan_2.md sections 9 and 10.
+- command/check: manual doc review against Master_Plan.md final submission checklist
+  - result: passed
+  - evidence or reason: README explicitly states Plan 2 does not implement Phase 3 checkout, order creation, order history, admin order status, report, review, upload, or shipping behavior while documenting completed product, cart, and admin product/category evidence.
+- command/check: `rg -n "Plan 2 Verification Status|Phase 3 Handoff Checklist|BLOCKED_BY_USER_ACTION|Do not reduce stock|Do not duplicate cart subtotal|checkout-only product queries|Phase 1 schema" docs\demo-checklist.md README.md`
+  - result: passed
+  - evidence or reason: required verification headings, blocked-check wording, and Phase 3 hard rules are present in the updated docs.
+- command/check: `rg -n "Checkout works|Order history works|Admin order management works|Report page works|Phase 3 Handoff Contract|No Phase 3" README.md docs\demo-checklist.md`
+  - result: passed
+  - evidence or reason: README contains the Phase 3 handoff section and explicitly says no Phase 3 checkout/order/report behavior is implemented by Plan 2; no false completed checklist claims were added.
+- command/check: `git diff -- docs\demo-checklist.md README.md`
+  - result: passed
+  - evidence or reason: diff contains only the scoped demo checklist and README handoff documentation updates.
+
+## Acceptance Check
+- condition: docs/demo-checklist.md records actual Phase 2 backend/API/frontend/admin/cart check statuses.
+  - status: satisfied
+  - evidence: Plan 2 verification table names 06A/06B/06C evidence and distinguishes fallback browser tooling from blocked user-side checks.
+- condition: execution report entries preserve completed batches and blocked validations.
+  - status: satisfied
+  - evidence: this 06D report was appended at EOF and references accepted 06A/06B/06C evidence plus future BLOCKED_BY_USER_ACTION handling.
+- condition: Phase 3 handoff notes name reusable product/cart/frontend artifacts.
+  - status: satisfied
+  - evidence: docs/demo-checklist.md and README name product model/controller, cart models/controller, auth/admin middleware, CartContext, cartApi.js, productApi.js, API helper, and route/layout patterns.
+- condition: Phase 3 constraints are documented without claiming unimplemented Phase 3 behavior.
+  - status: satisfied
+  - evidence: README states Plan 2 does not implement checkout, order creation, COD payment, order history, admin order status, report, review, upload, or shipping behavior.
+- condition: orchestrated progress rules are preserved.
+  - status: satisfied
+  - evidence: docs/tasks/task_2.md checkboxes and Batch06 status were not changed by A1.
+
+## Progress Update
+- task checkbox updated: no
+- batch status updated: no
+- reason: Orchestrated mode requires A1 not to update checkboxes or batch status.
+
+## Key Implementation Decisions
+- Kept the handoff in existing docs instead of creating a new file, because 06D explicitly targets docs/demo-checklist.md and README.
+- Recorded the in-app browser limitation as non-blocking because 06B completed the required UI smoke checks with system Chrome automation.
+- Documented future unavailable credential/browser checks as BLOCKED_BY_USER_ACTION without marking any current 06D validation blocked.
+
+## Risks or Open Issues
+- The historical report secret redacted during 06C may still require credential rotation if it was ever pushed or shared outside the local repository.
+- Future Phase 3 reruns depend on local .env, database, seeded data, credentials, and browser tooling remaining available.
+
+## Minor In-Scope Issues Fixed
+- None.
+
+## Workflow Integrity Check
+- Only task 06D was executed.
+- No Phase 3 runtime behavior was implemented.
+- No task checkbox or batch status was updated.
+- No staging or commit was performed.
+- No secrets, JWTs, passwords, or database connection strings were added.
+
+## Notes for Review Agent
+- changed files: docs/demo-checklist.md; README.md; docs/reports/report_2_execute_agent.md.
+- validations to rerun: manual doc review against docs/plans/Plan_2.md sections 9 and 10 plus docs/plans/Master_Plan.md section 26; rg checks for handoff constraints and unimplemented Phase 3 claims; git diff review for scoped docs-only changes.
+- risk areas: ensure README wording still separates implemented Phase 2 behavior from Phase 3 handoff constraints.
+- next task readiness: can_review

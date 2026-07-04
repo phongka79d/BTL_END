@@ -116,6 +116,15 @@ Plan 1 foundation checks are recorded in `docs/demo-checklist.md` and the Batch0
 - 05D security, MVC boundary, and duplication audit passed.
 - Supabase Table Editor visual confirmation is still user-side unless the user has manually confirmed the dashboard view.
 
+## Plan 2 Verification State
+
+Plan 2 product, category, cart, customer UI, admin UI, and handoff checks are recorded in `docs/demo-checklist.md` and the Batch06 execution/review reports.
+
+- 06A backend checks passed: Prisma validation, backend startup, product/category APIs, admin product/category CRUD, admin authorization boundaries, authenticated cart add/update/remove, backend subtotal, above-stock rejection, and unchanged stock after cart operations.
+- 06B frontend checks passed: Vite dev startup, homepage, product list states, product detail add-to-cart feedback, customer cart mutation flow, admin product/category pages, responsive product list, and frontend database-access search.
+- 06C security, MVC, duplication, scope, and Astryx audit passed. A historical report secret was redacted; rotate that credential if it was ever pushed or shared outside the local repository.
+- No Phase 3 checkout, order creation, COD payment, order history, admin order status, report, review, upload, or shipping behavior is implemented by Plan 2.
+
 ## Phase 2 Handoff Contract
 
 Phase 2 should build product, category, and cart behavior on top of the existing foundation. It must consume these Plan 1 artifacts instead of redefining them:
@@ -131,3 +140,23 @@ Phase 2 should build product, category, and cart behavior on top of the existing
 - `frontend/src/main.jsx` and installed `@astryxdesign/core` - Astryx reset/style setup.
 
 Phase 2 must not rename database fields or enum values without a documented migration, create second database/response/JWT helpers, use Supabase Auth, or let React connect directly to Supabase PostgreSQL.
+
+## Phase 3 Handoff Contract
+
+Phase 3 checkout and order work must consume the verified Phase 2 artifacts instead of redefining product, cart, auth, admin, API, context, route, or layout behavior:
+
+- `backend/src/models/product.model.js` and `backend/src/controllers/product.controller.js` - product lookup, filters, category include behavior, and stock reads.
+- `backend/src/models/cart.model.js`, `backend/src/models/cartItem.model.js`, and `backend/src/controllers/cart.controller.js` - authenticated cart ownership, item shape, captured `unitPrice`, quantity validation, and backend subtotal behavior.
+- `backend/src/middlewares/auth.middleware.js` - current-user identity for checkout and customer order routes.
+- `backend/src/middlewares/admin.middleware.js` - admin-only order management routes.
+- `frontend/src/contexts/CartContext.jsx` and `frontend/src/api/cartApi.js` - frontend cart state and cart mutation calls.
+- `frontend/src/api/productApi.js`, `frontend/src/api/categoryApi.js`, and `frontend/src/api/apiClient.js` - existing REST helper pattern and API base URL behavior.
+- `frontend/src/routes/AppRoutes.jsx`, `frontend/src/layouts/MainLayout.jsx`, and `frontend/src/layouts/AdminLayout.jsx` - existing customer/admin route guard and layout patterns.
+
+Phase 3 constraints:
+
+- Do not reduce stock during cart add/update/remove operations; stock reduction belongs to order creation.
+- Do not duplicate cart subtotal logic in the frontend as the source of truth. Use backend cart/order totals.
+- Do not create separate checkout-only product queries when existing product model helpers can be reused.
+- Do not alter the Phase 1 schema without an explicit migration section and verification of affected Plan 2 APIs.
+- Record credential-dependent or user-side live checks as `BLOCKED_BY_USER_ACTION` instead of claiming completion when local `.env`, database, seeded data, credentials, or browser tooling are unavailable.

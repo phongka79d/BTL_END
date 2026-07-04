@@ -873,7 +873,7 @@ Phase 3 checkout/order work depends on verified product lookup, cart behavior, a
 
 ### Tasks
 
-- [ ] (06A): Run backend command checks and product/category/cart API smoke tests
+- [x] (06A): Run backend command checks and product/category/cart API smoke tests
   - Source of Truth: `docs/plans/Plan_2.md` > `## 9. Verification & Testing Plan`; `docs/plans/Plan_2.md` > `### 7.1 Product API`; `docs/plans/Plan_2.md` > `### 7.2 Category API`; `docs/plans/Plan_2.md` > `### 7.3 Cart API`
   - Source Requirements:
     - Run backend validation/startup commands.
@@ -906,7 +906,7 @@ Phase 3 checkout/order work depends on verified product lookup, cart behavior, a
   - Blocked Condition: `BLOCKED_BY_USER_ACTION` if real env values, live database, backend server, seeded data, or test credentials are unavailable.
   - Files: Execution report, optional `docs/demo-checklist.md`
 
-- [ ] (06B): Run frontend command checks and customer/admin UI smoke tests
+- [x] (06B): Run frontend command checks and customer/admin UI smoke tests
   - Source of Truth: `docs/plans/Plan_2.md` > `## 9. Verification & Testing Plan`; `docs/plans/Plan_2.md` > `### 7.4 Frontend UI Contract`; `docs/design/design.md` > `# 25. Page State Requirements`; `docs/design/design.md` > `# 26. Responsive Rules`
   - Source Requirements:
     - Run frontend dev command.
@@ -933,7 +933,7 @@ Phase 3 checkout/order work depends on verified product lookup, cart behavior, a
   - Blocked Condition: `BLOCKED_BY_USER_ACTION` if backend, seeded data, login credentials, or browser tooling is unavailable.
   - Files: Execution report, optional `docs/demo-checklist.md`
 
-- [ ] (06C): Audit security, MVC boundaries, anti-duplication, and Astryx compliance
+- [x] (06C): Audit security, MVC boundaries, anti-duplication, and Astryx compliance
   - Source of Truth: `docs/plans/Plan_2.md` > `## 3. Prerequisites from Prior Phases`; `docs/plans/Plan_2.md` > `## 5. Out of Scope`; `docs/plans/Plan_2.md` > `### 7.4 Frontend UI Contract`; root `AGENTS.md` > `# Custom Rules & Workflows`; README > `## Phase 2 Handoff Contract`
   - Source Requirements:
     - Phase 2 must reuse existing foundation artifacts.
@@ -958,7 +958,7 @@ Phase 3 checkout/order work depends on verified product lookup, cart behavior, a
   - Blocked Condition: None
   - Files: Execution report; changed source files only if fixes are needed.
 
-- [ ] (06D): Update demo checklist, execution report, and Phase 3 handoff notes
+- [x] (06D): Update demo checklist, execution report, and Phase 3 handoff notes
   - Source of Truth: `docs/plans/Plan_2.md` > `## 9. Verification & Testing Plan`; `docs/plans/Plan_2.md` > `## 10. Handoff Notes for Phase 3`; `docs/plans/Master_Plan.md` > `## 26. Final Submission Checklist`
   - Source Requirements:
     - Phase 3 must consume product lookup/stock behavior, cart behavior and item shape, auth middleware/current-user identity, admin middleware, `CartContext`, `cartApi.js`, `productApi.js`, and route/layout patterns.
@@ -1109,10 +1109,10 @@ Batch04 customer UI and Batch05 admin UI can be implemented in parallel after Ba
 - [x] (05D): Polish admin navigation, guard behavior, and admin table states
 
 #### Batch06
-- [ ] (06A): Run backend command checks and product/category/cart API smoke tests
-- [ ] (06B): Run frontend command checks and customer/admin UI smoke tests
-- [ ] (06C): Audit security, MVC boundaries, anti-duplication, and Astryx compliance
-- [ ] (06D): Update demo checklist, execution report, and Phase 3 handoff notes
+- [x] (06A): Run backend command checks and product/category/cart API smoke tests
+- [x] (06B): Run frontend command checks and customer/admin UI smoke tests
+- [x] (06C): Audit security, MVC boundaries, anti-duplication, and Astryx compliance
+- [x] (06D): Update demo checklist, execution report, and Phase 3 handoff notes
 
 ## Completion Reporting Rules for Future Execution Agents
 
