@@ -290,7 +290,7 @@ Cart behavior depends on stable catalog data but must be implemented before cust
 
 ### Tasks
 
-- [ ] (02A): Implement cart model functions for get/create, add, update, remove, and subtotal
+- [x] (02A): Implement cart model functions for get/create, add, update, remove, and subtotal
   - Source of Truth: `docs/plans/Plan_2.md` > `## 4. Scope`; `docs/plans/Plan_2.md` > `### 7.3 Cart API`; `docs/plans/Plan_2.md` > `## 6. Target Directory Structure`
   - Source Requirements:
     - `GET /api/cart` returns the authenticated user's cart with items and subtotal.
@@ -316,7 +316,7 @@ Cart behavior depends on stable catalog data but must be implemented before cust
   - Blocked Condition: `BLOCKED_BY_USER_ACTION` only if live database validation needs missing real `backend/.env` values.
   - Files: `backend/src/models/cart.model.js`, `backend/src/models/cartItem.model.js`, `backend/src/models/product.model.js`
 
-- [ ] (02B): Enforce cart quantity and stock validation at the backend source of truth
+- [x] (02B): Enforce cart quantity and stock validation at the backend source of truth
   - Source of Truth: `docs/plans/Plan_2.md` > `### 7.3 Cart API`; `docs/plans/Plan_2.md` > `## 10. Handoff Notes for Phase 3`
   - Source Requirements:
     - Quantity must be at least `1`.
@@ -340,7 +340,7 @@ Cart behavior depends on stable catalog data but must be implemented before cust
   - Blocked Condition: `BLOCKED_BY_USER_ACTION` only if live database/API checks need missing setup.
   - Files: `backend/src/models/cart.model.js`, `backend/src/models/cartItem.model.js`, `backend/src/controllers/cart.controller.js`
 
-- [ ] (02C): Implement cart controller, authenticated routes, and route mounting
+- [x] (02C): Implement cart controller, authenticated routes, and route mounting
   - Source of Truth: `docs/plans/Plan_2.md` > `## 4. Scope`; `docs/plans/Plan_2.md` > `### 7.3 Cart API`; `docs/plans/Plan_2.md` > `## 8. Implementation Steps`
   - Source Requirements:
     - Implement `GET /api/cart`.
@@ -1089,7 +1089,7 @@ Batch04 customer UI and Batch05 admin UI can be implemented in parallel after Ba
 #### Batch02
 - [ ] (02A): Implement cart model functions for get/create, add, update, remove, and subtotal
 - [ ] (02B): Enforce cart quantity and stock validation at the backend source of truth
-- [ ] (02C): Implement cart controller, authenticated routes, and route mounting
+- [x] (02C): Implement cart controller, authenticated routes, and route mounting
 
 #### Batch03
 - [ ] (03A): Add product, category, and cart API helpers using the existing API client pattern

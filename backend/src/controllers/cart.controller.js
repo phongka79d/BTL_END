@@ -1,0 +1,164 @@
+const cartModel = require('../models/cart.model');
+const cartItemModel = require('../models/cartItem.model');
+const productModel = require('../models/product.model');
+const { successResponse, errorResponse } = require('../utils/response');
+
+/**
+ * Get user's cart
+ * GET /api/cart
+ */
+const getCart = async (req, res, next) => {
+  try {
+    const userId = req.user.id;
+    const cart = await cartModel.getOrCreateCart(userId);
+    return successResponse(res, 200, 'Cart retrieved successfully', cart);
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * Add item to cart
+ * POST /api/cart/items
+ */
+const addCartItem = async (req, res, next) => {
+  try {
+    const userId = req.user.id;
+    const { productId, quantity } = req.body;
+
+    // Validate productId and quantity payloads before mutation
+    if (!productId || typeof productId !== 'string') {
+      return errorResponse(res, 400, 'Product ID is required and must be a string');
+    }
+    if (quantity === undefined || quantity === null) {
+      return errorResponse(res, 400, 'Quantity is required');
+    }
+    const parsedQuantity = parseInt(quantity, 10);
+    if (isNaN(parsedQuantity) || parsedQuantity < 1) {
+      return errorResponse(res, 400, 'Quantity must be at least 1');
+    }
+
+    // Load the product record needed for price and stock checks
+    const product = await productModel.findById(productId);
+    if (!product) {
+      return errorResponse(res, 404, 'Product not found');
+    }
+
+    // Load the cart to check total quantity
+    const cart = await cartModel.getOrCreateCart(userId);
+    const existingItem = cart.items.find(item => item.productId === productId);
+    const newQuantity = existingItem ? (existingItem.quantity + parsedQuantity) : parsedQuantity;
+
+    // Reject total cart quantity above product stock
+    if (newQuantity > product.quantity) {
+      return errorResponse(res, 400, `Requested quantity exceeds available stock (${product.quantity})`);
+    }
+
+    const cartItem = await cartModel.addItem(userId, productId, parsedQuantity);
+    return successResponse(res, 201, 'Item added to cart successfully', { cartItem });
+  } catch (error) {
+    if (error.message === 'Product not found') {
+      return errorResponse(res, 404, error.message);
+    }
+    if (error.message.includes('Quantity must be at least 1') || error.message.includes('exceeds available stock')) {
+      return errorResponse(res, 400, error.message);
+    }
+    next(error);
+  }
+};
+
+/**
+ * Update cart item quantity
+ * PUT /api/cart/items/:id
+ */
+const updateCartItem = async (req, res, next) => {
+  try {
+    const userId = req.user.id;
+    const { id } = req.params; // cartItemId
+    const { quantity } = req.body;
+
+    if (quantity === undefined || quantity === null) {
+      return errorResponse(res, 400, 'Quantity is required');
+    }
+    const parsedQuantity = parseInt(quantity, 10);
+    if (isNaN(parsedQuantity) || parsedQuantity < 1) {
+      return errorResponse(res, 400, 'Quantity must be at least 1');
+    }
+
+    // Pre-check existence and ownership for precise 404/403 response
+    const cartItem = await cartItemModel.findById(id);
+    if (!cartItem) {
+      return errorResponse(res, 404, 'Cart item not found');
+    }
+
+    // Retrieve cart to check ownership
+    const cart = await cartModel.getOrCreateCart(userId);
+    if (cartItem.cartId !== cart.id) {
+      return errorResponse(res, 403, 'Unauthorized access to cart item');
+    }
+
+    // Load product for stock check
+    const product = await productModel.findById(cartItem.productId);
+    if (!product) {
+      return errorResponse(res, 404, 'Product not found');
+    }
+
+    if (parsedQuantity > product.quantity) {
+      return errorResponse(res, 400, `Requested quantity exceeds available stock (${product.quantity})`);
+    }
+
+    const updatedItem = await cartItemModel.updateQuantity(userId, id, parsedQuantity);
+    return successResponse(res, 200, 'Cart item updated successfully', { cartItem: updatedItem });
+  } catch (error) {
+    if (error.message === 'Cart item not found') {
+      return errorResponse(res, 404, error.message);
+    }
+    if (error.message.includes('Unauthorized access')) {
+      return errorResponse(res, 403, error.message);
+    }
+    if (error.message.includes('Quantity must be at least 1') || error.message.includes('exceeds available stock')) {
+      return errorResponse(res, 400, error.message);
+    }
+    next(error);
+  }
+};
+
+/**
+ * Remove item from cart
+ * DELETE /api/cart/items/:id
+ */
+const deleteCartItem = async (req, res, next) => {
+  try {
+    const userId = req.user.id;
+    const { id } = req.params; // cartItemId
+
+    const cartItem = await cartItemModel.findById(id);
+    if (!cartItem) {
+      return errorResponse(res, 404, 'Cart item not found');
+    }
+
+    // Retrieve cart to check ownership
+    const cart = await cartModel.getOrCreateCart(userId);
+    if (cartItem.cartId !== cart.id) {
+      return errorResponse(res, 403, 'Unauthorized access to cart item');
+    }
+
+    await cartItemModel.removeItem(userId, id);
+    return successResponse(res, 200, 'Item removed from cart successfully');
+  } catch (error) {
+    if (error.message === 'Cart item not found') {
+      return errorResponse(res, 404, error.message);
+    }
+    if (error.message.includes('Unauthorized access')) {
+      return errorResponse(res, 403, error.message);
+    }
+    next(error);
+  }
+};
+
+module.exports = {
+  getCart,
+  addCartItem,
+  updateCartItem,
+  deleteCartItem
+};

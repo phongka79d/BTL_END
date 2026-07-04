@@ -415,3 +415,321 @@ complete
 - risk areas: None. All endpoint logic and route guards verified to be functioning properly.
 - next task readiness: can_review
 
+---
+
+# Task Execution Report - 02A
+
+## Source Task File
+docs/tasks/task_2.md
+
+## Report File
+docs/reports/report_2_execute_agent.md
+
+## Mode
+orchestrated
+
+## Batch
+Batch02 - Backend Cart APIs
+
+## Task
+02A - Implement cart model functions for get/create, add, update, remove, and subtotal
+
+## Status
+complete
+
+## Source of Truth Used
+- docs/plans/Plan_2.md > ## 4. Scope
+- docs/plans/Plan_2.md > ### 7.3 Cart API
+- docs/plans/Plan_2.md > ## 6. Target Directory Structure
+
+## Supplemental Documents Used
+- None
+
+## Selected Scope
+- Batch: Batch02 - Backend Cart APIs
+- Task ID: 02A
+- Task title: Implement cart model functions for get/create, add, update, remove, and subtotal
+- Files allowed: backend/src/models/cart.model.js, backend/src/models/cartItem.model.js, backend/src/models/product.model.js
+- Repair scope if any: None
+
+## Dependency and User Action Check
+- dependencies: Batch01 (satisfied)
+- user action: None
+- status: satisfied
+
+## Files Inspected Before Editing
+- [backend/src/models/cart.model.js](file:///c:/Users/ACER/OtherProjects/BTL_END/backend/src/models/cart.model.js): Inspected existing cart model placeholder.
+- [backend/src/models/cartItem.model.js](file:///c:/Users/ACER/OtherProjects/BTL_END/backend/src/models/cartItem.model.js): Inspected existing cart item model placeholder.
+- [backend/src/models/product.model.js](file:///c:/Users/ACER/OtherProjects/BTL_END/backend/src/models/product.model.js): Inspected product model.
+- [backend/prisma/schema.prisma](file:///c:/Users/ACER/OtherProjects/BTL_END/backend/prisma/schema.prisma): Inspected exact fields, relations, and unique constraints of Cart and CartItem models.
+
+## Completed Work
+- Modified [backend/src/models/cart.model.js](file:///c:/Users/ACER/OtherProjects/BTL_END/backend/src/models/cart.model.js) to implement:
+  - `calculateSubtotal(items)`: Calculates the subtotal as a string matching the `50.00` format from captured unit prices and item quantities.
+  - `findByUserId(userId)`: Finds the user's cart including cart items and related products, calculating the subtotal backend-side.
+  - `getOrCreateCart(userId, tx)`: Fetches or creates the user's cart inside an optional transaction.
+  - `addItem(userId, productId, quantity)`: Uses a Prisma transaction to retrieve/create the cart, check product availability, and insert a new item (capturing `unitPrice` from product price only when first added) or increment an existing item's quantity.
+- Modified [backend/src/models/cartItem.model.js](file:///c:/Users/ACER/OtherProjects/BTL_END/backend/src/models/cartItem.model.js) to implement:
+  - `updateQuantity(userId, cartItemId, quantity)`: Updates cart item quantity scoped to the user's cart (with user ownership authorization check).
+  - `removeItem(userId, cartItemId)`: Removes cart item from the database scoped to the user's cart.
+- Validated logic with an execution test script verifying all cart operations, database connection, transactional safety, and subtotal recalculation.
+
+## Files Created or Modified
+- [backend/src/models/cart.model.js](file:///c:/Users/ACER/OtherProjects/BTL_END/backend/src/models/cart.model.js) (Modified)
+- [backend/src/models/cartItem.model.js](file:///c:/Users/ACER/OtherProjects/BTL_END/backend/src/models/cartItem.model.js) (Modified)
+
+## Tests or Validations Run
+- command/check: `cd backend && npx prisma validate`
+  - result: passed
+  - evidence or reason: Loaded Prisma config and verified that schema is valid.
+- command/check: Run temporary test file `src/test-models.js` executing database connect, get/create, add item, subtotal check, update item quantity, and remove item operations.
+  - result: passed
+  - evidence or reason: Database connection, transactional cart creation, and unit price capture worked successfully. Subtotal recalculated correctly. Quantity updates and item deletions scoped to the user's cart were verified.
+
+## Acceptance Check
+- condition: Cart model functions are user-scoped, reusable, and do not duplicate catalog product queries where an existing helper can be reused safely.
+  - status: satisfied
+  - evidence: The model functions use shared helper `findByUserId` and `getOrCreateCart`, do not duplicate queries unnecessarily, perform user ownership checks, and are independent of Express controllers.
+
+## Progress Update
+- task checkbox updated: no
+- batch status updated: no
+- reason: Orchestrated mode requires A1 not to update checkboxes or batch status.
+
+## Key Implementation Decisions
+- Used `tx` transaction client propagation for `getOrCreateCart` to safely run the operations inside `prisma.$transaction`.
+- Verified user ownership in both `updateQuantity` and `removeItem` by checking `cartItem.cart.userId === userId` to prevent cross-user mutations.
+
+## Risks or Open Issues
+- None
+
+## Minor In-Scope Issues Fixed
+- None
+
+## Workflow Integrity Check
+- None
+
+## Notes for Review Agent
+- changed files:
+  - [backend/src/models/cart.model.js](file:///c:/Users/ACER/OtherProjects/BTL_END/backend/src/models/cart.model.js)
+  - [backend/src/models/cartItem.model.js](file:///c:/Users/ACER/OtherProjects/BTL_END/backend/src/models/cartItem.model.js)
+- validations to rerun: `cd backend && npx prisma validate`
+- risk areas: Ensure decimal conversion is correct. Handled in `calculateSubtotal` with `parseFloat(item.unitPrice)`.
+- next task readiness: can_review
+
+---
+
+# Task Execution Report - 02B
+
+## Source Task File
+docs/tasks/task_2.md
+
+## Report File
+docs/reports/report_2_execute_agent.md
+
+## Mode
+orchestrated
+
+## Batch
+Batch02 - Backend Cart APIs
+
+## Task
+02B - Enforce cart quantity and stock validation at the backend source of truth
+
+## Status
+complete
+
+## Source of Truth Used
+- docs/plans/Plan_2.md > ### 7.3 Cart API
+- docs/plans/Plan_2.md > ## 10. Handoff Notes for Phase 3
+
+## Supplemental Documents Used
+- None
+
+## Selected Scope
+- Batch: Batch02 - Backend Cart APIs
+- Task ID: 02B
+- Task title: Enforce cart quantity and stock validation at the backend source of truth
+- Files allowed: `backend/src/models/cart.model.js`, `backend/src/models/cartItem.model.js`, `backend/src/controllers/cart.controller.js`
+- Repair scope if any: None
+
+## Dependency and User Action Check
+- dependencies: 02A, Batch01 (satisfied)
+- user action: None
+- status: satisfied
+
+## Files Inspected Before Editing
+- [backend/src/models/cart.model.js](file:///c:/Users/ACER/OtherProjects/BTL_END/backend/src/models/cart.model.js): Inspected and modified to enforce validations on add item.
+- [backend/src/models/cartItem.model.js](file:///c:/Users/ACER/OtherProjects/BTL_END/backend/src/models/cartItem.model.js): Inspected and modified to enforce validations on quantity update.
+- [backend/src/controllers/cart.controller.js](file:///c:/Users/ACER/OtherProjects/BTL_END/backend/src/controllers/cart.controller.js): Created to handle API requests and translate model error results.
+- [backend/prisma/schema.prisma](file:///c:/Users/ACER/OtherProjects/BTL_END/backend/prisma/schema.prisma): Checked schemas and product quantity field.
+
+## Completed Work
+- Modified `backend/src/models/cart.model.js` `addItem` function to:
+  - Validate that `productId` is a valid string.
+  - Validate that `quantity` is an integer >= 1.
+  - Load the product record inside transaction to capture price and check stock.
+  - Reject missing products with an error `Product not found`.
+  - Calculate combined new quantity (existing + added quantity) and reject if it exceeds product stock `product.quantity`.
+- Modified `backend/src/models/cartItem.model.js` `updateQuantity` function to:
+  - Validate `quantity` parameter is an integer >= 1.
+  - Query the cart item including product.
+  - Reject if quantity exceeds product stock `cartItem.product.quantity`.
+- Created `backend/src/controllers/cart.controller.js` to implement:
+  - `getCart`: Fetches or creates user cart with calculated subtotal.
+  - `addCartItem`: Validates input payload, verifies product existence, rejects if quantity < 1 or cumulative quantity > stock, and returns HTTP 201 on success.
+  - `updateCartItem`: Validates input quantity, verifies cart item existence and ownership, checks stock limit, and updates quantity (HTTP 200).
+  - `deleteCartItem`: Verifies cart item existence and ownership, and removes item (HTTP 200).
+- Wrote and executed a detailed verification script `src/test-cart-validation.js` which verifies all validation scenarios and confirms product stock remains unchanged (non-decremented) during cart mutations.
+
+## Files Created or Modified
+- [backend/src/models/cart.model.js](file:///c:/Users/ACER/OtherProjects/BTL_END/backend/src/models/cart.model.js) (Modified)
+- [backend/src/models/cartItem.model.js](file:///c:/Users/ACER/OtherProjects/BTL_END/backend/src/models/cartItem.model.js) (Modified)
+- [backend/src/controllers/cart.controller.js](file:///c:/Users/ACER/OtherProjects/BTL_END/backend/src/controllers/cart.controller.js) (Created)
+
+## Tests or Validations Run
+- command/check: `cd backend && npx prisma validate`
+  - result: passed
+  - evidence or reason: Verified Prisma schema is valid.
+- command/check: `node src/test-cart-validation.js`
+  - result: passed
+  - evidence or reason: Successfully ran the comprehensive validation test suite showing:
+    - Rejects quantity < 1 (Test 1 & 2 passed)
+    - Rejects quantity > stock (Test 3 & 5 passed)
+    - Successful item addition (Test 4 passed)
+    - Rejects quantity update > stock (Test 6 passed)
+    - Rejects quantity update < 1 (Test 7 passed)
+    - Successful quantity update (Test 8 passed)
+    - Successful item deletion (Test 9 passed)
+    - Product stock in database remains completely unchanged/non-mutated (all tests verified).
+
+## Acceptance Check
+- condition: Invalid quantities and above-stock requests fail consistently, and stock remains unchanged after cart operations.
+  - status: satisfied
+  - evidence: Model validations and controller handlers reject invalid quantities (<= 0) or quantities exceeding stock limits. Test logs show all validation checks passed and product stock was not mutated/decremented.
+
+## Progress Update
+- task checkbox updated: no
+- batch status updated: no
+- reason: Orchestrated mode requires A1 not to update checkboxes or batch status.
+
+## Key Implementation Decisions
+- Captured product price during `addItem` only when first added as required by Plan 2.
+- Verified that cart updates do not decrement or mutate product stock. Stock is preserved and only checked as a boundary.
+- Performed both model and controller validation checks to centralize quantity and stock checks, ensuring frontend bypasses are impossible.
+
+## Risks or Open Issues
+- None
+
+## Minor In-Scope Issues Fixed
+- None
+
+## Workflow Integrity Check
+- None
+
+## Notes for Review Agent
+- changed files:
+  - [backend/src/models/cart.model.js](file:///c:/Users/ACER/OtherProjects/BTL_END/backend/src/models/cart.model.js)
+  - [backend/src/models/cartItem.model.js](file:///c:/Users/ACER/OtherProjects/BTL_END/backend/src/models/cartItem.model.js)
+  - [backend/src/controllers/cart.controller.js](file:///c:/Users/ACER/OtherProjects/BTL_END/backend/src/controllers/cart.controller.js)
+- validations to rerun: `cd backend && npx prisma validate`
+- risk areas: None. All validation checks have been implemented.
+- next task readiness: can_review
+
+---
+
+# Task Execution Report - 02C
+
+## Source Task File
+docs/tasks/task_2.md
+
+## Report File
+docs/reports/report_2_execute_agent.md
+
+## Mode
+orchestrated
+
+## Batch
+Batch02 - Backend Cart APIs
+
+## Task
+02C - Implement cart controller, authenticated routes, and route mounting
+
+## Status
+complete
+
+## Source of Truth Used
+- docs/plans/Plan_2.md > ## 4. Scope
+- docs/plans/Plan_2.md > ### 7.3 Cart API
+- docs/plans/Plan_2.md > ## 8. Implementation Steps
+
+## Supplemental Documents Used
+- None
+
+## Selected Scope
+- Batch: Batch02 - Backend Cart APIs
+- Task ID: 02C
+- Task title: Implement cart controller, authenticated routes, and route mounting
+- Files allowed: `backend/src/controllers/cart.controller.js`, `backend/src/routes/cart.routes.js`, `backend/src/routes/index.js`, `backend/src/app.js`
+- Repair scope if any: None
+
+## Dependency and User Action Check
+- dependencies: 02A, 02B (satisfied)
+- user action: None
+- status: satisfied
+
+## Files Inspected Before Editing
+- [backend/src/controllers/cart.controller.js](file:///c:/Users/ACER/OtherProjects/BTL_END/backend/src/controllers/cart.controller.js): Inspected existing cart controller implementation.
+- [backend/src/routes/index.js](file:///c:/Users/ACER/OtherProjects/BTL_END/backend/src/routes/index.js): Inspected route index mapping.
+- [backend/src/app.js](file:///c:/Users/ACER/OtherProjects/BTL_END/backend/src/app.js): Inspected root Express app mapping.
+- [backend/src/middlewares/auth.middleware.js](file:///c:/Users/ACER/OtherProjects/BTL_END/backend/src/middlewares/auth.middleware.js): Inspected JWT protect middleware.
+
+## Completed Work
+- Created [backend/src/routes/cart.routes.js](file:///c:/Users/ACER/OtherProjects/BTL_END/backend/src/routes/cart.routes.js) applying `protect` middleware to all routes: `GET /`, `POST /items`, `PUT /items/:id`, `DELETE /items/:id`.
+- Mounted `cartRoutes` in [backend/src/routes/index.js](file:///c:/Users/ACER/OtherProjects/BTL_END/backend/src/routes/index.js) under `/cart`, making all endpoints available under `/api/cart`.
+- Wrote and executed an integration smoke test [backend/src/test-cart-routes-smoke.js](file:///c:/Users/ACER/OtherProjects/BTL_END/backend/src/test-cart-routes-smoke.js) that spins up the app and calls the cart endpoints anonymously, verifying they all return 401 Unauthorized correctly.
+
+## Files Created or Modified
+- [backend/src/routes/cart.routes.js](file:///c:/Users/ACER/OtherProjects/BTL_END/backend/src/routes/cart.routes.js) (Created)
+- [backend/src/routes/index.js](file:///c:/Users/ACER/OtherProjects/BTL_END/backend/src/routes/index.js) (Modified)
+- [backend/src/test-cart-routes-smoke.js](file:///c:/Users/ACER/OtherProjects/BTL_END/backend/src/test-cart-routes-smoke.js) (Created)
+
+## Tests or Validations Run
+- command/check: `cd backend && npx prisma validate`
+  - result: passed
+  - evidence or reason: Verified Prisma schema is valid.
+- command/check: `node src/test-cart-routes-smoke.js`
+  - result: passed
+  - evidence or reason: Successfully ran the smoke test suite which verified that anonymous requests to `GET /api/cart`, `POST /api/cart/items`, `PUT /api/cart/items/:id`, and `DELETE /api/cart/items/:id` are all rejected with 401 Unauthorized as expected.
+
+## Acceptance Check
+- condition: Cart endpoint paths match Plan 2 and reject anonymous requests.
+  - status: satisfied
+  - evidence: Smoke tests verify that anonymous access is rejected with a 401 status code. The endpoints map to `/api/cart`, `/api/cart/items`, `/api/cart/items/:id` (for both PUT and DELETE) as required by Plan 2.
+
+## Progress Update
+- task checkbox updated: no
+- batch status updated: no
+- reason: Orchestrated mode requires A1 not to update checkboxes or batch status.
+
+## Key Implementation Decisions
+- Leveraged `router.use(protect)` at the top of the cart routes router to enforce authentication across all cart operations uniformly.
+- Placed cart endpoints under `/cart` in `routes/index.js` so they mount under `/api/cart` in `app.js` without modifying `app.js`.
+
+## Risks or Open Issues
+- None
+
+## Minor In-Scope Issues Fixed
+- None
+
+## Workflow Integrity Check
+- None
+
+## Notes for Review Agent
+- changed files:
+  - [backend/src/routes/cart.routes.js](file:///c:/Users/ACER/OtherProjects/BTL_END/backend/src/routes/cart.routes.js)
+  - [backend/src/routes/index.js](file:///c:/Users/ACER/OtherProjects/BTL_END/backend/src/routes/index.js)
+- validations to rerun: `cd backend && npx prisma validate` and `node src/test-cart-routes-smoke.js`
+- risk areas: None. Verification verifies strict security enforcement.
+- next task readiness: can_review
+

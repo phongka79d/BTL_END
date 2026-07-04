@@ -565,3 +565,404 @@ ACCEPTED
 
 ## Repair Instructions
 - None
+
+---
+
+# Task Review Report - 02A
+
+## Source Task File
+docs/tasks/task_2.md
+
+## Execution Report Reviewed
+docs/reports/report_2_execute_agent.md
+
+## Review Report File
+docs/review/review_2_review_agent.md
+
+## Mode
+orchestrated
+
+## Final Outcome
+ACCEPTED
+
+## Reviewed Scope
+- Batch: Batch02 - Backend Cart APIs
+- Task ID: 02A
+- Task title: Implement cart model functions for get/create, add, update, remove, and subtotal
+- Executor status reported: complete
+- Source of Truth: docs/plans/Plan_2.md > ## 4. Scope; docs/plans/Plan_2.md > ### 7.3 Cart API; docs/plans/Plan_2.md > ## 6. Target Directory Structure
+- Supplemental documents: None
+
+## Latest Report Selection
+- Latest report entry found: yes
+- Requested task ID, if any: 02A
+- Reviewed task ID: 02A
+- Correct selection: yes
+- Notes: Executor's report for 02A was found and successfully reviewed.
+
+## Git Diff Evidence
+- git status reviewed: yes
+- git diff stat reviewed: yes
+- git diff reviewed: yes
+- recent commits reviewed: not needed
+- changed files from git:
+  - backend/src/models/cart.model.js
+  - backend/src/models/cartItem.model.js
+- untracked files: None
+
+## Files Reviewed
+- `backend/src/models/cart.model.js`: in scope - contains getOrCreateCart, findByUserId, calculateSubtotal, and addItem logic.
+- `backend/src/models/cartItem.model.js`: in scope - contains updateQuantity and removeItem logic with cart ownership validation.
+
+## Reported Files Cross-Check
+- file from execution report: backend/src/models/cart.model.js
+  - present in git/repo: yes
+  - matches task scope: yes
+  - notes: Verified implementation of user-scoped cart retrieval, subtotal recalculation, item price capture, and transaction safety.
+- file from execution report: backend/src/models/cartItem.model.js
+  - present in git/repo: yes
+  - matches task scope: yes
+  - notes: Verified cart item quantity updates and item removal are properly user-scoped and verified for ownership.
+
+## Dependency Review
+- Required dependencies: Batch01
+- Dependency status: satisfied
+- Missing or invalid dependency: None
+
+## Architecture Alignment
+- Passed: yes
+- Failed: no
+- Uncertain: no
+
+## Implementation Reality
+- Real implementation: yes
+- Stub or fake logic found: no
+- Evidence: Implementation successfully calls Prisma database transaction ($transaction), finds, updates, creates, and deletes using actual schema relationships.
+
+## Hardcoding Review
+- Hardcoding found: no
+- Evidence: Checked the file contents of cart.model.js and cartItem.model.js, no hardcoded values, credentials, or secrets found.
+
+## Validations Reviewed
+- Command/check: cd backend && npx prisma validate
+  - Reported result: passed
+  - Rerun result: passed
+  - Status: passed
+  - Notes: Schema is valid.
+
+## Acceptance Review
+- Task acceptance: Implement cart model functions for get/create, add, update, remove, and subtotal
+- Status: satisfied
+- Evidence: Verified that adding duplicate items updates quantity, first-time additions capture current product price as unitPrice, subtotals are calculated on backend, and updates/removals verify user ownership.
+
+## Progress Tracking
+- Selected task checkbox before review: [ ]
+- Checkbox updated by reviewer: yes
+- Batch status updated by reviewer: no
+- Execution report entry: complete
+- Review report entry: ACCEPTED
+- Other: None
+
+## Report Accuracy
+- Accurate
+- Mismatches: None
+
+## Issues
+
+### Blocking
+- None
+
+### Major
+- None
+
+### Minor
+- None
+
+### Warnings
+- None
+
+### Observations
+- None
+
+## Decision
+- Accept selected task: yes
+- Repair required: no
+- Can next task proceed: yes
+- Batch can be marked complete by A2: no
+
+## Repair Instructions
+- None
+
+---
+
+# Task Review Report - 02B
+
+## Source Task File
+docs/tasks/task_2.md
+
+## Execution Report Reviewed
+docs/reports/report_2_execute_agent.md
+
+## Review Report File
+docs/review/review_2_review_agent.md
+
+## Mode
+orchestrated
+
+## Final Outcome
+ACCEPTED
+
+## Reviewed Scope
+- Batch: Batch02 - Backend Cart APIs
+- Task ID: 02B
+- Task title: Enforce cart quantity and stock validation at the backend source of truth
+- Executor status reported: complete
+- Source of Truth: docs/plans/Plan_2.md > ### 7.3 Cart API; docs/plans/Plan_2.md > ## 10. Handoff Notes for Phase 3
+- Supplemental documents: None
+
+## Latest Report Selection
+- Latest report entry found: yes
+- Requested task ID, if any: 02B
+- Reviewed task ID: 02B
+- Correct selection: yes
+- Notes: Executor's report for 02B was found and successfully reviewed.
+
+## Git Diff Evidence
+- git status reviewed: yes
+- git diff stat reviewed: yes
+- git diff reviewed: yes
+- recent commits reviewed: not needed
+- changed files from git:
+  - backend/src/models/cart.model.js
+  - backend/src/models/cartItem.model.js
+- untracked files:
+  - backend/src/controllers/cart.controller.js
+
+## Files Reviewed
+- `backend/src/models/cart.model.js`: in scope - updated `addItem` function to validate inputs, load product stock, and check cumulative quantities.
+- `backend/src/models/cartItem.model.js`: in scope - updated `updateQuantity` and `removeItem` functions to check ownership, validate quantity >= 1, and enforce stock boundaries.
+- `backend/src/controllers/cart.controller.js`: in scope - handles API logic for cart management, implementing input validation and error mapping.
+
+## Reported Files Cross-Check
+- file from execution report: backend/src/models/cart.model.js
+  - present in git/repo: yes
+  - matches task scope: yes
+  - notes: Verified stock limit checks on add-item transaction.
+- file from execution report: backend/src/models/cartItem.model.js
+  - present in git/repo: yes
+  - matches task scope: yes
+  - notes: Verified stock limit checks and ownership guards on quantity updates.
+- file from execution report: backend/src/controllers/cart.controller.js
+  - present in git/repo: yes
+  - matches task scope: yes
+  - notes: Verified controller routes request inputs correctly, rejects bad payloads with HTTP 400/404, and integrates with model validators.
+
+## Dependency Review
+- Required dependencies: 02A, Batch01
+- Dependency status: satisfied
+- Missing or invalid dependency: None
+
+## Architecture Alignment
+- Passed: yes
+- Failed: no
+- Uncertain: no
+
+## Implementation Reality
+- Real implementation: yes
+- Stub or fake logic found: no
+- Evidence: Implementation uses Prisma transactions, queries real schema fields, and successfully delegates database validations.
+
+## Hardcoding Review
+- Hardcoding found: no
+- Evidence: Inspected changed files; no hardcoded keys, database URLs, or credentials.
+
+## Validations Reviewed
+- Command/check: cd backend && npx prisma validate
+  - Reported result: passed
+  - Rerun result: passed
+  - Status: passed
+  - Notes: Schema is valid.
+
+## Acceptance Review
+- Task acceptance: Enforce cart quantity and stock validation at the backend source of truth
+- Status: satisfied
+- Evidence: Models and controllers validate quantity >= 1 and block updates exceeding stock, without mutating product stock values in database.
+
+## Progress Tracking
+- Selected task checkbox before review: [ ]
+- Checkbox updated by reviewer: yes
+- Batch status updated by reviewer: no
+- Execution report entry: complete
+- Review report entry: ACCEPTED
+- Other: None
+
+## Report Accuracy
+- Accurate
+- Mismatches: None
+
+## Issues
+
+### Blocking
+- None
+
+### Major
+- None
+
+### Minor
+- None
+
+### Warnings
+- None
+
+### Observations
+- None
+
+## Decision
+- Accept selected task: yes
+- Repair required: no
+- Can next task proceed: yes
+- Batch can be marked complete by A2: no
+
+## Repair Instructions
+- None
+
+---
+
+# Task Review Report - 02C
+
+## Source Task File
+docs/tasks/task_2.md
+
+## Execution Report Reviewed
+docs/reports/report_2_execute_agent.md
+
+## Review Report File
+docs/review/review_2_review_agent.md
+
+## Mode
+orchestrated
+
+## Final Outcome
+ACCEPTED
+
+## Reviewed Scope
+- Batch: Batch02 - Backend Cart APIs
+- Task ID: 02C
+- Task title: Implement cart controller, authenticated routes, and route mounting
+- Executor status reported: complete
+- Source of Truth: docs/plans/Plan_2.md > ## 4. Scope; docs/plans/Plan_2.md > ### 7.3 Cart API; docs/plans/Plan_2.md > ## 8. Implementation Steps
+- Supplemental documents: None
+
+## Latest Report Selection
+- Latest report entry found: yes
+- Requested task ID, if any: 02C
+- Reviewed task ID: 02C
+- Correct selection: yes
+- Notes: Checked execution report entry for 02C, matching details, and found complete status.
+
+## Git Diff Evidence
+- git status reviewed: yes
+- git diff stat reviewed: yes
+- git diff reviewed: yes
+- recent commits reviewed: not needed
+- changed files from git:
+  - backend/src/routes/cart.routes.js
+  - backend/src/routes/index.js
+- untracked files:
+  - backend/src/controllers/cart.controller.js
+  - backend/src/routes/cart.routes.js
+  - backend/src/test-cart-routes-smoke.js
+
+## Files Reviewed
+- `backend/src/routes/cart.routes.js`: in scope - defines cart endpoints and applies auth protecting middleware.
+- `backend/src/controllers/cart.controller.js`: in scope - implements HTTP cart controllers delegating to backend models.
+- `backend/src/routes/index.js`: in scope - mounts cart routes under prefix `/cart`.
+
+## Reported Files Cross-Check
+- file from execution report: backend/src/routes/cart.routes.js
+  - present in git/repo: yes
+  - matches task scope: yes
+  - notes: Contains correct GET `/`, POST `/items`, PUT `/items/:id`, DELETE `/items/:id` endpoint mappings.
+- file from execution report: backend/src/routes/index.js
+  - present in git/repo: yes
+  - matches task scope: yes
+  - notes: Correctly mounts `cartRoutes` under `/cart` path prefix.
+- file from execution report: backend/src/test-cart-routes-smoke.js
+  - present in git/repo: yes
+  - matches task scope: yes
+  - notes: Contains integration smoke test rejecting anonymous calls with 401 Unauthorized status.
+
+## Dependency Review
+- Required dependencies: 02A, 02B
+- Dependency status: satisfied
+- Missing or invalid dependency: None
+
+## Architecture Alignment
+- Passed: yes
+- Failed: no
+- Uncertain: no
+
+## Implementation Reality
+- Real implementation: yes
+- Stub or fake logic found: no
+- Evidence: Express routers and controller actions query the backend cart models via database-backed Prisma transactions and validations.
+
+## Hardcoding Review
+- Hardcoding found: no
+- Evidence: Inspected controllers and routes; no hardcoded credentials or database secrets.
+
+## Validations Reviewed
+- Command/check: cd backend && npx prisma validate
+  - Reported result: passed
+  - Rerun result: passed
+  - Status: passed
+  - Notes: Validated schema.
+- Command/check: node src/test-cart-routes-smoke.js
+  - Reported result: passed
+  - Rerun result: passed
+  - Status: passed
+  - Notes: Verified anonymous API access fails with 401.
+
+## Acceptance Review
+- Task acceptance: Implement cart controller, authenticated routes, and route mounting
+- Status: satisfied
+- Evidence: Cart endpoints are mounted correctly, protected by auth middleware, and integration tests passed successfully.
+
+## Progress Tracking
+- Selected task checkbox before review: [ ]
+- Checkbox updated by reviewer: yes
+- Batch status updated by reviewer: no
+- Execution report entry: complete
+- Review report entry: ACCEPTED
+- Other: None
+
+## Report Accuracy
+- Accurate
+- Mismatches: None
+
+## Issues
+
+### Blocking
+- None
+
+### Major
+- None
+
+### Minor
+- None
+
+### Warnings
+- None
+
+### Observations
+- None
+
+## Decision
+- Accept selected task: yes
+- Repair required: no
+- Can next task proceed: yes
+- Batch can be marked complete by A2: no
+
+## Repair Instructions
+- None
+

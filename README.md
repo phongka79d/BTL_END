@@ -33,7 +33,7 @@ Create a `backend/.env` file with the following variables:
 Create a `frontend/.env` file with the following variables:
 - `VITE_API_BASE_URL`: Express REST API endpoint URL (default `http://localhost:5000/api`)
 
-## Implemented API Endpoints (Auth & Users)
+## Implemented API Endpoints
 
 All API endpoints are mounted under `/api`:
 
@@ -59,6 +59,12 @@ All API endpoints are mounted under `/api`:
 - `POST /api/admin/categories` - Create a new category (requires admin JWT)
 - `PUT /api/admin/categories/:id` - Update a category (requires admin JWT)
 - `DELETE /api/admin/categories/:id` - Delete a category (requires admin JWT, blocked if referenced by products)
+
+### Cart APIs
+- `GET /api/cart` - Retrieve the user's cart including items, products and backend-calculated subtotal (requires JWT)
+- `POST /api/cart/items` - Add a product to the cart, capturing current product price as unitPrice (requires JWT, stock validated)
+- `PUT /api/cart/items/:id` - Update cart item quantity (requires JWT, stock validated)
+- `DELETE /api/cart/items/:id` - Remove a product from the cart (requires JWT)
 
 ## Implemented Frontend Views & Layouts
 
