@@ -733,3 +733,394 @@ complete
 - risk areas: None. Verification verifies strict security enforcement.
 - next task readiness: can_review
 
+---
+
+# Task Execution Report - 03A
+
+## Source Task File
+docs/tasks/task_2.md
+
+## Report File
+docs/reports/report_2_execute_agent.md
+
+## Mode
+orchestrated
+
+## Batch
+Batch03 - Frontend API, Cart State, and Routing
+
+## Task
+03A - Add product, category, and cart API helpers using the existing API client pattern
+
+## Status
+complete
+
+## Source of Truth Used
+- docs/plans/Plan_2.md > ## 4. Scope
+- docs/plans/Plan_2.md > ## 6. Target Directory Structure
+- docs/plans/Plan_2.md > ## 8. Implementation Steps
+- docs/plans/Plan_2.md > ### 7.1 Product API
+- docs/plans/Plan_2.md > ### 7.2 Category API
+- docs/plans/Plan_2.md > ### 7.3 Cart API
+
+## Supplemental Documents Used
+- None
+
+## Selected Scope
+- Batch: Batch03 - Frontend API, Cart State, and Routing
+- Task ID: 03A
+- Task title: Add product, category, and cart API helpers using the existing API client pattern
+- Files allowed: frontend/src/api/productApi.js, frontend/src/api/categoryApi.js, frontend/src/api/cartApi.js, frontend/src/api/apiClient.js, docs/reports/report_2_execute_agent.md
+- Repair scope if any: None
+
+## Dependency and User Action Check
+- dependencies: Batch01 and Batch02 were reported accepted by the orchestrator state.
+- user action: None required.
+- status: satisfied
+
+## Files Inspected Before Editing
+- AGENTS.md: project API/frontend rules and Astryx guidance.
+- docs/tasks/task_2.md: selected task block and batch scope.
+- docs/plans/Plan_2.md: cited scope, directory structure, API contracts, and implementation steps.
+- frontend/src/api/apiClient.js: existing shared API client pattern and token/base URL behavior.
+- frontend/src/api/authApi.js: existing frontend API module shape.
+- frontend/src/api/userApi.js: existing frontend API module shape.
+- frontend/src/config.js: existing VITE_API_BASE_URL/API_BASE_URL flow.
+- backend/src/controllers/product.controller.js: confirmed product route request/response behavior.
+- backend/src/controllers/category.controller.js: confirmed category route request/response behavior.
+- backend/src/controllers/cart.controller.js: confirmed cart route request/response behavior.
+- backend/src/routes/index.js and backend route search results: confirmed mounted endpoint paths.
+
+## Completed Work
+- Added product API helpers for product list with query filters, product detail, and admin create/update/delete operations.
+- Added category API helpers for category list and admin create/update/delete operations.
+- Added cart API helpers for authenticated get/add/update/remove cart operations.
+- Reused the existing apiClient for all requests so token handling and API base URL configuration remain centralized.
+
+## Files Created or Modified
+- frontend/src/api/productApi.js
+- frontend/src/api/categoryApi.js
+- frontend/src/api/cartApi.js
+- docs/reports/report_2_execute_agent.md
+
+## Tests or Validations Run
+- command/check: rg "DATABASE_URL|DIRECT_URL|PrismaClient|@prisma|supabase" frontend/src
+- result: passed
+- evidence or reason: No matches were found in frontend source.
+- command/check: npm run build
+- result: passed
+- evidence or reason: Vite build completed successfully with 495 modules transformed.
+- command/check: npm run lint
+- result: not_run
+- evidence or reason: Attempted as a non-required local check, but it is not available as validation because ESLint reported no configuration file in the frontend project.
+
+## Acceptance Check
+- condition: UI code can consume typed, focused product/category/cart helper functions.
+- status: satisfied
+- evidence: productApi, categoryApi, and cartApi expose focused helpers for Plan 2 endpoint families.
+- condition: No second API client is created and no base URL is hardcoded outside existing config.
+- status: satisfied
+- evidence: all new helpers import and call frontend/src/api/apiClient.js only.
+- condition: Product APIs support search/filter query parameters.
+- status: satisfied
+- evidence: productApi.getProducts serializes provided filters with URLSearchParams.
+
+## Progress Update
+- task checkbox updated: no
+- batch status updated: no
+- reason: Orchestrated mode requires A1 not to update checkboxes or batch status.
+
+## Key Implementation Decisions
+- Kept query-string serialization local to productApi because only product listing requires query filters for this task.
+- Used the existing named API object export style from authApi.js and userApi.js.
+
+## Risks or Open Issues
+- ESLint is configured as an npm script but the frontend project currently has no ESLint config, so lint could not be used as verification.
+
+## Minor In-Scope Issues Fixed
+- None
+
+## Workflow Integrity Check
+- None
+
+## Notes for Review Agent
+- changed files:
+  - frontend/src/api/productApi.js
+  - frontend/src/api/categoryApi.js
+  - frontend/src/api/cartApi.js
+  - docs/reports/report_2_execute_agent.md
+- validations to rerun: `rg "DATABASE_URL|DIRECT_URL|PrismaClient|@prisma|supabase" frontend/src` and `cd frontend && npm run build`
+- risk areas: productApi query serialization and cartApi helper signatures.
+- next task readiness: can_review
+
+---
+
+# Task Execution Report - 03B
+
+## Source Task File
+docs/tasks/task_2.md
+
+## Report File
+docs/reports/report_2_execute_agent.md
+
+## Mode
+orchestrated
+
+## Batch
+Batch03 - Frontend API, Cart State, and Routing
+
+## Task
+03B - Build `CartContext` using auth state and backend cart APIs
+
+## Status
+complete
+
+## Source of Truth Used
+- docs/plans/Plan_2.md > ## 4. Scope
+- docs/plans/Plan_2.md > ## 6. Target Directory Structure
+- docs/plans/Plan_2.md > ### 7.3 Cart API
+- docs/plans/Plan_2.md > ## 8. Implementation Steps
+
+## Supplemental Documents Used
+- None
+
+## Selected Scope
+- Batch: Batch03 - Frontend API, Cart State, and Routing
+- Task ID: 03B
+- Task title: Build `CartContext` using auth state and backend cart APIs
+- Files allowed: frontend/src/contexts/CartContext.jsx, frontend/src/App.jsx, frontend/src/contexts/AuthContext.jsx, docs/reports/report_2_execute_agent.md
+- Repair scope if any: None
+
+## Dependency and User Action Check
+- dependencies: 03A and Batch02 were already completed/accepted per orchestrator state and task file context.
+- user action: None required.
+- status: satisfied
+
+## Files Inspected Before Editing
+- docs/tasks/task_2.md: selected task block, dependency, validation, and file scope.
+- docs/plans/Plan_2.md: authoritative scope, target structure, cart API contract, and implementation checklist.
+- frontend/src/contexts/AuthContext.jsx: auth state shape, loading state, logout behavior, and token ownership.
+- frontend/src/api/cartApi.js: existing 03A cart API helper methods to reuse.
+- frontend/src/App.jsx: provider tree location.
+- frontend/src/api/apiClient.js: existing token and API response pattern.
+- frontend/src/api/authApi.js: existing named API helper style.
+- frontend/src/routes/AppRoutes.jsx: route tree context, without implementing 03C routing work.
+- frontend/src/layouts/MainLayout.jsx: navigation badge context, without implementing sibling route/navigation rendering.
+- backend/src/controllers/cart.controller.js: backend cart response wrapping and mutation behavior.
+- backend/src/models/cart.model.js: backend subtotal source and cart item shape.
+- backend/src/utils/response.js: shared success/error envelope shape.
+
+## Completed Work
+- Added `frontend/src/contexts/CartContext.jsx` with `CartProvider` and `useCart`.
+- Loaded cart state only after `AuthContext` reports an authenticated user.
+- Cleared cart state when auth is loading/unauthenticated or logout flips auth state.
+- Added stale-request guarding so an older cart response cannot repopulate state after logout.
+- Exposed `refreshCart`, `addItem`, `updateItem`, and `removeItem` actions that call `cartApi.js`.
+- Refreshed the backend cart after each mutation so displayed `items` and `subtotal` remain sourced from backend responses.
+- Exposed `itemCount` and `hasItems` for later product detail, cart view, and navigation badge consumers without wiring 03C routes/navigation.
+- Wrapped `AppRoutes` with `CartProvider` inside `AuthProvider`.
+
+## Files Created or Modified
+- frontend/src/contexts/CartContext.jsx
+- frontend/src/App.jsx
+- docs/reports/report_2_execute_agent.md
+
+## Tests or Validations Run
+- command/check: `npm run build` from `frontend`
+- result: passed
+- evidence or reason: Vite built successfully; 497 modules transformed and production assets emitted.
+- command/check: `npm run lint` from `frontend`
+- result: not_run
+- evidence or reason: Attempted as a non-required local check, but it is not available as validation because ESLint reported no configuration file in the frontend project.
+- command/check: `rg -n "DATABASE_URL|DIRECT_URL|PrismaClient|@prisma|supabase" frontend/src`
+- result: passed
+- evidence or reason: no matches; frontend context does not access database clients or backend-only env directly.
+- command/check: `rg -n "localStorage|userId|setUser|getItem\(|setItem\(" frontend/src/contexts/CartContext.jsx`
+- result: passed
+- evidence or reason: no matches; `CartContext` does not store user identity or localStorage cart/user state.
+- command/check: Frontend smoke through Batch06
+- result: not_run
+- evidence or reason: task file schedules smoke validation through later Batch06; direct local build and static checks were run for this task.
+
+## Acceptance Check
+- condition: `CartContext.jsx` is built.
+- status: satisfied
+- evidence: `frontend/src/contexts/CartContext.jsx` exports `CartProvider` and `useCart`.
+- condition: Cart context uses auth state instead of storing user identity separately.
+- status: satisfied
+- evidence: `CartProvider` reads `isAuthenticated` and `loading` from `useAuth`; no `userId`, user localStorage, or duplicated auth state exists in `CartContext`.
+- condition: Cart subtotal and validation come from backend responses.
+- status: satisfied
+- evidence: `subtotal` and `items` are stored from `GET /cart` response data, and add/update/remove actions refresh the backend cart after mutation instead of recalculating or validating stock client-side.
+- condition: Cart state is user-scoped through auth and can refresh after add/update/remove actions.
+- status: satisfied
+- evidence: cart loading is gated by `isAuthenticated`, logout/unauthenticated state clears cart, and mutations call `refreshCart` after backend API completion.
+
+## Progress Update
+- task checkbox updated: no
+- batch status updated: no
+- reason: Orchestrated mode requires A1 not to update checkboxes or batch status.
+
+## Key Implementation Decisions
+- Kept route and navigation rendering untouched to avoid implementing sibling task 03C.
+- Exposed badge-ready derived `itemCount` from backend item quantities without persisting or validating cart state client-side.
+- Used the existing `cartApi.js` and `apiClient.js` response envelope rather than creating another client/helper layer.
+
+## Risks or Open Issues
+- `npm run lint` cannot be used until the frontend has an ESLint configuration.
+- Live backend-backed UI smoke remains deferred to Batch06 per task validation text.
+
+## Minor In-Scope Issues Fixed
+- Prevented stale in-flight cart loads from repopulating cart state after logout.
+
+## Workflow Integrity Check
+- None
+
+## Notes for Review Agent
+- changed files:
+  - frontend/src/contexts/CartContext.jsx
+  - frontend/src/App.jsx
+  - docs/reports/report_2_execute_agent.md
+- validations to rerun: `cd frontend && npm run build`, `rg -n "DATABASE_URL|DIRECT_URL|PrismaClient|@prisma|supabase" frontend/src`, and `rg -n "localStorage|userId|setUser|getItem\(|setItem\(" frontend/src/contexts/CartContext.jsx`
+- risk areas: auth-gated cart loading, mutation refresh behavior, and stale-request guard.
+- next task readiness: can_review
+
+---
+
+# Task Execution Report - 03C
+
+## Source Task File
+docs/tasks/task_2.md
+
+## Report File
+docs/reports/report_2_execute_agent.md
+
+## Mode
+orchestrated
+
+## Batch
+Batch03 - Frontend API, Cart State, and Routing
+
+## Task
+03C - Wire Phase 2 routes, navigation entries, and route guards
+
+## Status
+complete
+
+## Source of Truth Used
+- docs/plans/Plan_2.md > ## 4. Scope
+- docs/plans/Plan_2.md > ## 6. Target Directory Structure
+- docs/plans/Plan_2.md > ## 8. Implementation Steps
+- docs/plans/Plan_2.md > ### 7.4 Frontend UI Contract
+- docs/design/design.md > ## 4. Page Inventory
+- docs/design/design.md > ## 5. Main Layouts
+
+## Supplemental Documents Used
+- None
+
+## Selected Scope
+- Batch: Batch03 - Frontend API, Cart State, and Routing
+- Task ID: 03C
+- Task title: Wire Phase 2 routes, navigation entries, and route guards
+- Files allowed: frontend/src/routes/AppRoutes.jsx, frontend/src/layouts/MainLayout.jsx, frontend/src/layouts/AdminLayout.jsx, frontend/src/App.jsx, route placeholder views if missing
+- Repair scope if any: None
+
+## Dependency and User Action Check
+- dependencies: 03B accepted per orchestrator state; CartProvider already present in frontend/src/App.jsx
+- user action: None
+- status: satisfied
+
+## Files Inspected Before Editing
+- docs/tasks/task_2.md: selected task, dependencies, acceptance, and validation
+- docs/plans/Plan_2.md: Phase 2 route, directory, and frontend contract requirements
+- docs/design/design.md: customer/admin page inventory and layout expectations
+- frontend/src/routes/AppRoutes.jsx: existing route tree and guard placement
+- frontend/src/layouts/MainLayout.jsx: existing customer product/cart navigation
+- frontend/src/layouts/AdminLayout.jsx: existing admin-only product/category navigation
+- frontend/src/App.jsx: provider wrapping and existing CartProvider placement
+- frontend/src/views/HomeView.jsx: existing placeholder/UI style and Astryx usage
+- frontend/src/contexts/AuthContext.jsx: auth state, loading, and admin-role behavior
+- frontend/src/contexts/CartContext.jsx: cart state and itemCount already exposed by 03B
+- frontend/src/components/common/LayoutIcons.jsx: existing layout icon helpers
+- frontend/package.json: frontend scripts and dependencies
+
+## Completed Work
+- Added route entries for /products, /products/:id, /cart, /admin/products, and /admin/categories in the existing React Router tree.
+- Preserved existing PrivateRoute protection for /cart and AdminRoute protection for admin product/category routes.
+- Added minimal placeholder route targets for customer product list, product detail, cart, admin products, and admin categories.
+- Added a small reusable PlaceholderView to avoid duplicating placeholder layout logic across route targets.
+- Kept existing customer Products and Cart navigation, and connected the cart badge to the existing CartContext itemCount instead of a hardcoded zero.
+- Confirmed admin Products and Categories links already exist only inside AdminLayout, which is mounted under AdminRoute.
+- Confirmed CartProvider already wraps AppRoutes in frontend/src/App.jsx, so no provider change was needed.
+
+## Files Created or Modified
+- frontend/src/components/common/PlaceholderView.jsx
+- frontend/src/views/ProductListView.jsx
+- frontend/src/views/ProductDetailView.jsx
+- frontend/src/views/CartView.jsx
+- frontend/src/views/admin/AdminProductView.jsx
+- frontend/src/views/admin/AdminCategoryView.jsx
+- frontend/src/routes/AppRoutes.jsx
+- frontend/src/layouts/MainLayout.jsx
+- docs/reports/report_2_execute_agent.md
+
+## Tests or Validations Run
+- command/check: cd frontend && npm run build
+- result: passed
+- evidence or reason: Vite production build completed successfully with 503 modules transformed.
+- command/check: rg direct database/secret patterns over touched frontend route/view/layout files
+- result: passed
+- evidence or reason: no matches for DATABASE_URL, DIRECT_URL, PrismaClient, @prisma, supabase, or localStorage in the touched route/view/layout files.
+- command/check: inspected AppRoutes route block after edit
+- result: passed
+- evidence or reason: /products, /products/:id, /cart, /admin/products, and /admin/categories are registered in the expected customer/private/admin guard locations.
+
+## Acceptance Check
+- condition: Routes compile.
+- status: satisfied
+- evidence: npm run build passed.
+- condition: Guards are preserved.
+- status: satisfied
+- evidence: /cart is nested under PrivateRoute; /admin/products and /admin/categories are nested under AdminRoute and AdminLayout.
+- condition: No heavy UI work from Batch04/Batch05 is implemented early.
+- status: satisfied
+- evidence: added only minimal placeholders and route wiring; no API-backed product grids, cart controls, admin tables, forms, dialogs, delete confirmations, search, filters, or live data flows were added.
+- condition: Customer and admin navigation entries are wired appropriately.
+- status: satisfied
+- evidence: Products and Cart remain in MainLayout; Products and Categories exist in AdminLayout only, which is admin guarded.
+
+## Progress Update
+- task checkbox updated: no
+- batch status updated: no
+- reason: Orchestrated mode requires A1 not to update checkboxes or batch status.
+
+## Key Implementation Decisions
+- Reused the existing route guard components and layout structure instead of introducing new guard abstractions.
+- Added a reusable placeholder component because five route placeholder pages needed the same minimal layout.
+- Left full customer catalog/cart UI and admin management UI for Batch04 and Batch05.
+
+## Risks or Open Issues
+- Browser/manual route smoke is deferred to Batch06 as specified by the task.
+- Existing future admin links for users, orders, reviews, and reports remain in AdminLayout from prior work and were not changed by this task.
+
+## Minor In-Scope Issues Fixed
+- Replaced the hardcoded cart nav badge value with the existing CartContext itemCount.
+
+## Workflow Integrity Check
+- None
+
+## Notes for Review Agent
+- changed files:
+  - frontend/src/components/common/PlaceholderView.jsx
+  - frontend/src/views/ProductListView.jsx
+  - frontend/src/views/ProductDetailView.jsx
+  - frontend/src/views/CartView.jsx
+  - frontend/src/views/admin/AdminProductView.jsx
+  - frontend/src/views/admin/AdminCategoryView.jsx
+  - frontend/src/routes/AppRoutes.jsx
+  - frontend/src/layouts/MainLayout.jsx
+  - docs/reports/report_2_execute_agent.md
+- validations to rerun: cd frontend && npm run build
+- risk areas: route guard nesting, placeholder scope boundaries, and cart badge useCart dependency
+- next task readiness: can_review
+

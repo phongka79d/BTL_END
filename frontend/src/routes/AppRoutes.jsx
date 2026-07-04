@@ -9,7 +9,12 @@ import AdminLayout from '../layouts/AdminLayout';
 import HomeView from '../views/HomeView';
 import LoginView from '../views/LoginView';
 import RegisterView from '../views/RegisterView';
+import ProductListView from '../views/ProductListView';
+import ProductDetailView from '../views/ProductDetailView';
+import CartView from '../views/CartView';
 import AdminDashboardView from '../views/AdminDashboardView';
+import AdminProductView from '../views/admin/AdminProductView';
+import AdminCategoryView from '../views/admin/AdminCategoryView';
 
 /**
  * Route guard for authenticated users (Customer/Admin).
@@ -105,10 +110,13 @@ export const AppRoutes = () => {
       {/* Customer Area: Wrapped in MainLayout */}
       <Route element={<MainLayout />}>
         <Route path="/" element={<HomeView />} />
+        <Route path="/products" element={<ProductListView />} />
+        <Route path="/products/:id" element={<ProductDetailView />} />
         <Route path="/unauthorized" element={<div>Unauthorized Access (Placeholder)</div>} />
 
         {/* Protected Customer Routes inside MainLayout */}
         <Route element={<PrivateRoute />}>
+          <Route path="/cart" element={<CartView />} />
           <Route path="/profile" element={<div>Profile Page (Placeholder)</div>} />
         </Route>
 
@@ -128,6 +136,8 @@ export const AppRoutes = () => {
       <Route element={<AdminRoute />}>
         <Route element={<AdminLayout />}>
           <Route path="/admin" element={<AdminDashboardView />} />
+          <Route path="/admin/products" element={<AdminProductView />} />
+          <Route path="/admin/categories" element={<AdminCategoryView />} />
         </Route>
       </Route>
     </Routes>

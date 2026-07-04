@@ -73,11 +73,19 @@ The application implements a multi-role web interface utilizing the Astryx Desig
 - **Main Layout (Customer Layout):** Provides main user shell with top navigation bar, TechMart logo, search placeholder, cart badge, and dynamic user dropdown.
 - **Auth Layout (Centered Card):** Center-aligned card shell wrapping login and registration panels.
 - **Admin Layout (Console Layout):** Collapsible dashboard sidebar layout mapping management sections (Dashboard, Products, Categories, Users, Orders, Reviews, Reports).
+- **Frontend API Helpers:** `productApi.js`, `categoryApi.js`, and `cartApi.js` wrap the Express REST endpoints through the shared `apiClient.js`.
+- **Cart State:** `CartProvider` and `useCart` load authenticated cart state from the backend, expose cart actions, and provide the navigation badge item count.
+- **Phase 2 Routes:** `/products`, `/products/:id`, `/cart`, `/admin/products`, and `/admin/categories` are registered with the existing customer, private, and admin route guards. These views are intentionally minimal placeholders until the customer/admin UI batches fill them in.
 - **Views:**
   - `HomeView`: Main customer landing page featuring a welcome hero panel and categories layout.
+  - `ProductListView`: Placeholder customer product listing route.
+  - `ProductDetailView`: Placeholder customer product detail route.
+  - `CartView`: Protected placeholder cart route.
   - `LoginView`: Auth login form with email/password validation, inline errors, and loading states.
   - `RegisterView`: Detailed profile signup form supporting field validation and shipping address text area.
   - `AdminDashboardView`: Administrative statistics panels for sales and inventory tracking.
+  - `AdminProductView`: Admin-protected placeholder product management route.
+  - `AdminCategoryView`: Admin-protected placeholder category management route.
 
 ## Local Commands
 
@@ -117,7 +125,9 @@ Phase 2 should build product, category, and cart behavior on top of the existing
 - `backend/src/utils/response.js` - shared JSON success/error response helpers.
 - `backend/src/middlewares/auth.middleware.js` and `backend/src/middlewares/admin.middleware.js` - auth/admin route protection.
 - `frontend/src/contexts/AuthContext.jsx` - frontend auth state and auth actions.
-- `frontend/src/api/apiClient.js`, `frontend/src/api/authApi.js`, and `frontend/src/api/userApi.js` - frontend API helper pattern using `VITE_API_BASE_URL`.
+- `frontend/src/api/apiClient.js`, `frontend/src/api/authApi.js`, `frontend/src/api/userApi.js`, `frontend/src/api/productApi.js`, `frontend/src/api/categoryApi.js`, and `frontend/src/api/cartApi.js` - frontend API helper pattern using `VITE_API_BASE_URL`.
+- `frontend/src/contexts/CartContext.jsx` - authenticated frontend cart state that consumes backend cart APIs and backend-calculated subtotal/item data.
+- `frontend/src/routes/AppRoutes.jsx` and layout route guards - customer, cart, and admin product/category routes for subsequent UI batches.
 - `frontend/src/main.jsx` and installed `@astryxdesign/core` - Astryx reset/style setup.
 
 Phase 2 must not rename database fields or enum values without a documented migration, create second database/response/JWT helpers, use Supabase Auth, or let React connect directly to Supabase PostgreSQL.

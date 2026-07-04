@@ -15,6 +15,7 @@ import {
   Text
 } from '@astryxdesign/core';
 import { useAuth } from '../contexts/AuthContext';
+import { useCart } from '../contexts/CartContext';
 import {
   AdminIcon,
   CartIcon,
@@ -30,6 +31,7 @@ import {
  */
 export const MainLayout = () => {
   const { user, isAuthenticated, logout } = useAuth();
+  const { itemCount } = useCart();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -129,7 +131,7 @@ export const MainLayout = () => {
                   borderRadius: 'var(--radius-full)'
                 }}
               >
-                0
+                {itemCount}
               </Badge>
             </HStack>
           </Link>

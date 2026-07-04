@@ -427,7 +427,7 @@ Customer and admin views need stable API wrappers, route entries, and cart state
 
 ### Tasks
 
-- [ ] (03A): Add product, category, and cart API helpers using the existing API client pattern
+- [x] (03A): Add product, category, and cart API helpers using the existing API client pattern
   - Source of Truth: `docs/plans/Plan_2.md` > `## 4. Scope`; `docs/plans/Plan_2.md` > `## 6. Target Directory Structure`; `docs/plans/Plan_2.md` > `## 8. Implementation Steps`
   - Source Requirements:
     - Build `productApi.js`, `categoryApi.js`, and `cartApi.js` using the existing API helper pattern.
@@ -451,7 +451,7 @@ Customer and admin views need stable API wrappers, route entries, and cart state
   - Blocked Condition: None for helper creation; `BLOCKED_BY_USER_ACTION` only for live backend-backed UI validation if backend setup is unavailable.
   - Files: `frontend/src/api/productApi.js`, `frontend/src/api/categoryApi.js`, `frontend/src/api/cartApi.js`, `frontend/src/api/apiClient.js`
 
-- [ ] (03B): Build `CartContext` using auth state and backend cart APIs
+- [x] (03B): Build `CartContext` using auth state and backend cart APIs
   - Source of Truth: `docs/plans/Plan_2.md` > `## 4. Scope`; `docs/plans/Plan_2.md` > `## 6. Target Directory Structure`; `docs/plans/Plan_2.md` > `## 8. Implementation Steps`; `docs/plans/Plan_2.md` > `### 7.3 Cart API`
   - Source Requirements:
     - Build `CartContext.jsx`.
@@ -475,7 +475,7 @@ Customer and admin views need stable API wrappers, route entries, and cart state
   - Blocked Condition: `BLOCKED_BY_USER_ACTION` only if live backend validation is unavailable.
   - Files: `frontend/src/contexts/CartContext.jsx`, `frontend/src/App.jsx`, `frontend/src/contexts/AuthContext.jsx`
 
-- [ ] (03C): Wire Phase 2 routes, navigation entries, and route guards
+- [x] (03C): Wire Phase 2 routes, navigation entries, and route guards
   - Source of Truth: `docs/plans/Plan_2.md` > `## 4. Scope`; `docs/plans/Plan_2.md` > `## 6. Target Directory Structure`; `docs/plans/Plan_2.md` > `### 7.4 Frontend UI Contract`
   - Source Requirements:
     - Build customer product browsing views: `HomeView`, `ProductListView`, `ProductDetailView`.
