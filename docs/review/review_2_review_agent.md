@@ -163,184 +163,6 @@ ACCEPTED
 
 ---
 
-# Task Review Report - 06C
-
-## Source Task File
-docs/tasks/task_2.md
-
-## Execution Report Reviewed
-docs/reports/report_2_execute_agent.md
-
-## Review Report File
-docs/review/review_2_review_agent.md
-
-## Mode
-orchestrated
-
-## Final Outcome
-ACCEPTED
-
-## Reviewed Scope
-- Batch: Batch06 - Verification, Security Audit, and Phase 3 Handoff
-- Task ID: 06C
-- Task title: Audit security, MVC boundaries, anti-duplication, and Astryx compliance
-- Executor status reported: complete
-- Source of Truth: docs/plans/Plan_2.md > ## 3. Prerequisites from Prior Phases; docs/plans/Plan_2.md > ## 5. Out of Scope; docs/plans/Plan_2.md > ### 7.4 Frontend UI Contract; root AGENTS.md > # Custom Rules & Workflows; README.md > ## Phase 2 Handoff Contract
-- Supplemental documents: None
-
-## Latest Report Selection
-- Latest report entry found: yes
-- Requested task ID, if any: 06C
-- Reviewed task ID: 06C
-- Correct selection: yes
-- Notes: Reviewed the latest `# Task Execution Report - 06C` entry appended to `docs/reports/report_2_execute_agent.md`.
-
-## Git Diff Evidence
-- git status reviewed: yes
-- git diff stat reviewed: yes
-- git diff reviewed: yes
-- recent commits reviewed: not needed
-- changed files from git: docs/reports/report_1_execute_agent.md, docs/reports/report_2_execute_agent.md, docs/review/review_2_review_agent.md, docs/tasks/task_2.md
-- untracked files: None
-
-## Files Reviewed
-- `docs/tasks/task_2.md`: in scope - selected 06C task entry, dependencies, acceptance criteria, and mirrored progress tracker were reviewed.
-- `docs/reports/report_2_execute_agent.md`: in scope - latest 06C execution report and surrounding Batch06 entries were reviewed.
-- `docs/reports/report_1_execute_agent.md`: in scope - A1 redacted a historical database password in an old execution report as part of the 06C secret audit.
-- `docs/review/review_2_review_agent.md`: in scope - EOF and existing Batch06 review history were reviewed before appending this report.
-- `docs/plans/Plan_2.md`: in scope - prerequisites, out-of-scope boundaries, and frontend UI contract were reviewed.
-- `README.md`: in scope - Phase 2 handoff contract was reviewed.
-- `AGENTS.md`: in scope - anti-duplication, SRP, root-cause, and Astryx guidance were reviewed.
-- `backend/src/routes/index.js`: in scope - route mounting was reviewed for product/category/cart scope and out-of-scope route absence.
-- `backend/src/controllers/cart.controller.js`: in scope - HTTP/request/response boundary and model calls were reviewed.
-- `backend/src/models/cart.model.js`: in scope - Prisma data access and subtotal logic were reviewed.
-- `backend/src/models/cartItem.model.js`: in scope - Prisma data access and ownership/stock checks were reviewed.
-- `frontend/src/routes/AppRoutes.jsx`: in scope - customer/admin route registration and placeholder-only out-of-scope paths were reviewed.
-- `frontend/src`: in scope - safe searches reviewed direct database access, out-of-scope feature wiring, Astryx/token styling signals, and source-file focus.
-- `backend/src` and `backend/prisma`: in scope - safe searches reviewed Prisma client use, response helper use, JWT helper use, API-client-like duplication, MVC boundaries, and out-of-scope feature wiring.
-
-## Reported Files Cross-Check
-- file from execution report: docs/reports/report_1_execute_agent.md
-- present in git/repo: yes
-- matches task scope: yes
-- notes: The old report contained a committed database password value. Redacting it is a security-audit fix directly tied to 06C acceptance.
-- file from execution report: docs/reports/report_2_execute_agent.md
-- present in git/repo: yes
-- matches task scope: yes
-- notes: A1 appended the 06C execution evidence.
-
-## Dependency Review
-- Required dependencies: Batch01 through Batch05 completed; accepted 06A and 06B evidence available; no user action required.
-- Dependency status: satisfied
-- Missing or invalid dependency: None
-
-## Architecture Alignment
-- Passed: yes
-- Failed: no
-- Uncertain: no
-
-## Implementation Reality
-- Real implementation: yes
-- Stub or fake logic found: no
-- Evidence: A2 reran focused repository searches and inspected the route/controller/model and frontend routing surfaces. The only A1 source change was a report redaction; no fake runtime implementation was added.
-
-## Hardcoding Review
-- Hardcoding found: no
-- Evidence: Tracked env-file search shows only example env files. The historical database password value was redacted from `docs/reports/report_1_execute_agent.md`; remaining PostgreSQL/database references reviewed by A2 are placeholders, schema env references, or search/report text rather than active committed secrets.
-
-## Validations Reviewed
-- Command/check: `git ls-files | rg -n "(^|/)(\\.env|\\.env\\..*|.*\\.env)$|env\\.local|secrets|secret|credential|credentials"`
-  - Reported result: passed
-  - Rerun result: passed
-  - Status: passed
-  - Notes: Only `backend/.env.example` and `frontend/.env.example` are tracked.
-- Command/check: credential-like string search over docs/source, excluding local env files
-  - Reported result: failed_then_fixed
-  - Rerun result: passed
-  - Status: passed
-  - Notes: Git diff confirms the old report line now redacts the historical database password value.
-- Command/check: leaked literal search
-  - Reported result: passed
-  - Rerun result: passed_with_note
-  - Status: passed
-  - Notes: The full historical secret value is redacted. A broad partial-literal search now matches only A1's own search-command text in the 06C report, not the password value.
-- Command/check: `rg -n -i "DATABASE_URL|DIRECT_URL|PrismaClient|@prisma|supabase|postgres://|postgresql://|SELECT\\s|INSERT\\s|UPDATE\\s|DELETE\\s+FROM" frontend\\src`
-  - Reported result: passed
-  - Rerun result: passed
-  - Status: passed
-  - Notes: Matches were update labels/functions and normal API/context code; no frontend database connection, Prisma import, Supabase database URL, or SQL access was found.
-- Command/check: `rg -n "new PrismaClient|PrismaClient|successResponse|errorResponse|jwt\\.sign|jsonwebtoken|bcrypt|fetch\\(|axios|DATABASE_URL|DIRECT_URL" backend\\src backend\\prisma`
-  - Reported result: passed
-  - Rerun result: passed
-  - Status: passed
-  - Notes: Runtime has a single Prisma client export, centralized response helpers, centralized token generation, expected auth middleware JWT verification, and a standalone seed Prisma client.
-- Command/check: backend route/controller/model MVC inspection
-  - Reported result: passed
-  - Rerun result: passed
-  - Status: passed
-  - Notes: Routes mount product/category/cart endpoints and guards; controllers handle HTTP validation/responses; models own Prisma queries.
-- Command/check: out-of-scope implementation search over backend/frontend source
-  - Reported result: passed
-  - Rerun result: passed
-  - Status: passed
-  - Notes: Hits are placeholders, labels, schema/model stubs, Prisma ordering fields, or cart checkout placeholder text. No order/payment/review/report/upload/shipping runtime route/view was wired for Phase 2.
-- Command/check: Astryx and raw styling inspection over Phase 2 customer/admin UI files
-  - Reported result: passed
-  - Rerun result: passed
-  - Status: passed
-  - Notes: Phase 2 customer/admin UI uses Astryx components and token-based styling. Existing raw fallback placeholders and constrained layout values do not create a direct database, security, or business-logic violation for 06C.
-- Command/check: source-file focus check
-  - Reported result: passed
-  - Rerun result: passed_with_note
-  - Status: passed
-  - Notes: A2 found `ProductDetailView.jsx` is over the ideal 300-line guideline, but it remains route-focused and no mixed-responsibility split is required to satisfy 06C.
-
-## Acceptance Review
-- Task acceptance: No secrets, direct frontend database access, duplicate core helpers, or out-of-scope behavior are present.
-- Status: satisfied
-- Evidence: A1 redacted the only identified committed password value, A2 reran tracked-env and database-access searches, inspected backend route/controller/model boundaries, checked helper duplication signals, reviewed out-of-scope hits, and confirmed Phase 2 UI remains Astryx/token aligned enough for this audit.
-
-## Progress Tracking
-- Selected task checkbox before review: [ ]
-- Checkbox updated by reviewer: yes
-- Batch status updated by reviewer: no
-- Execution report entry: complete
-- Review report entry: ACCEPTED
-- Other: Updated only the selected 06C task checkbox and its mirrored progress tracker occurrence. Batch06 remains unchecked.
-
-## Report Accuracy
-- Accurate with minor notes
-- Mismatches: A1's broad partial leaked-literal search now matches the 06C report command text itself, though the full secret value is redacted. A1 also reported the largest Phase 2-heavy view as 370 lines; A2 counted the current `ProductDetailView.jsx` at 417 lines. Neither mismatch changes acceptance because no active secret, direct DB access, duplicate helper, out-of-scope implementation, or mixed-responsibility runtime issue remains.
-
-## Issues
-
-### Blocking
-- None
-
-### Major
-- None
-
-### Minor
-- None
-
-### Warnings
-- The historical database password had been present in a tracked report before A1 redacted it. Credential rotation remains prudent if that value was ever pushed or shared outside the local repository.
-- `ProductDetailView.jsx` exceeds the ideal 300-line guideline, but the file remains focused on one product-detail route and no 06C-blocking split is required.
-
-### Observations
-- `frontend/src/routes/AppRoutes.jsx` still uses a few placeholder `<div>` route elements and fallback token colors from earlier accepted work. They are placeholders rather than Phase 2 out-of-scope feature implementations.
-
-## Decision
-- Accept selected task: yes
-- Repair required: no
-- Can next task proceed: yes
-- Batch can be marked complete by A2: no
-
-## Repair Instructions
-- None
-
----
-
 # Task Review Report - 01B
 
 ## Source Task File
@@ -3407,6 +3229,184 @@ ACCEPTED
 
 ### Observations
 - Interactive authenticated browser reruns were limited by missing Playwright/Puppeteer in A2, so A2 used source inspection plus Chrome headless route checks and live API checks to corroborate A1's full UI smoke evidence.
+
+## Decision
+- Accept selected task: yes
+- Repair required: no
+- Can next task proceed: yes
+- Batch can be marked complete by A2: no
+
+## Repair Instructions
+- None
+
+---
+
+# Task Review Report - 06C
+
+## Source Task File
+docs/tasks/task_2.md
+
+## Execution Report Reviewed
+docs/reports/report_2_execute_agent.md
+
+## Review Report File
+docs/review/review_2_review_agent.md
+
+## Mode
+orchestrated
+
+## Final Outcome
+ACCEPTED
+
+## Reviewed Scope
+- Batch: Batch06 - Verification, Security Audit, and Phase 3 Handoff
+- Task ID: 06C
+- Task title: Audit security, MVC boundaries, anti-duplication, and Astryx compliance
+- Executor status reported: complete
+- Source of Truth: docs/plans/Plan_2.md > ## 3. Prerequisites from Prior Phases; docs/plans/Plan_2.md > ## 5. Out of Scope; docs/plans/Plan_2.md > ### 7.4 Frontend UI Contract; root AGENTS.md > # Custom Rules & Workflows; README.md > ## Phase 2 Handoff Contract
+- Supplemental documents: None
+
+## Latest Report Selection
+- Latest report entry found: yes
+- Requested task ID, if any: 06C
+- Reviewed task ID: 06C
+- Correct selection: yes
+- Notes: Reviewed the latest `# Task Execution Report - 06C` entry appended to `docs/reports/report_2_execute_agent.md`.
+
+## Git Diff Evidence
+- git status reviewed: yes
+- git diff stat reviewed: yes
+- git diff reviewed: yes
+- recent commits reviewed: not needed
+- changed files from git: docs/reports/report_1_execute_agent.md, docs/reports/report_2_execute_agent.md, docs/review/review_2_review_agent.md, docs/tasks/task_2.md
+- untracked files: None
+
+## Files Reviewed
+- `docs/tasks/task_2.md`: in scope - selected 06C task entry, dependencies, acceptance criteria, and mirrored progress tracker were reviewed.
+- `docs/reports/report_2_execute_agent.md`: in scope - latest 06C execution report and surrounding Batch06 entries were reviewed.
+- `docs/reports/report_1_execute_agent.md`: in scope - A1 redacted a historical database password in an old execution report as part of the 06C secret audit.
+- `docs/review/review_2_review_agent.md`: in scope - EOF and existing Batch06 review history were reviewed before appending this report.
+- `docs/plans/Plan_2.md`: in scope - prerequisites, out-of-scope boundaries, and frontend UI contract were reviewed.
+- `README.md`: in scope - Phase 2 handoff contract was reviewed.
+- `AGENTS.md`: in scope - anti-duplication, SRP, root-cause, and Astryx guidance were reviewed.
+- `backend/src/routes/index.js`: in scope - route mounting was reviewed for product/category/cart scope and out-of-scope route absence.
+- `backend/src/controllers/cart.controller.js`: in scope - HTTP/request/response boundary and model calls were reviewed.
+- `backend/src/models/cart.model.js`: in scope - Prisma data access and subtotal logic were reviewed.
+- `backend/src/models/cartItem.model.js`: in scope - Prisma data access and ownership/stock checks were reviewed.
+- `frontend/src/routes/AppRoutes.jsx`: in scope - customer/admin route registration and placeholder-only out-of-scope paths were reviewed.
+- `frontend/src`: in scope - safe searches reviewed direct database access, out-of-scope feature wiring, Astryx/token styling signals, and source-file focus.
+- `backend/src` and `backend/prisma`: in scope - safe searches reviewed Prisma client use, response helper use, JWT helper use, API-client-like duplication, MVC boundaries, and out-of-scope feature wiring.
+
+## Reported Files Cross-Check
+- file from execution report: docs/reports/report_1_execute_agent.md
+- present in git/repo: yes
+- matches task scope: yes
+- notes: The old report contained a committed database password value. Redacting it is a security-audit fix directly tied to 06C acceptance.
+- file from execution report: docs/reports/report_2_execute_agent.md
+- present in git/repo: yes
+- matches task scope: yes
+- notes: A1 appended the 06C execution evidence.
+
+## Dependency Review
+- Required dependencies: Batch01 through Batch05 completed; accepted 06A and 06B evidence available; no user action required.
+- Dependency status: satisfied
+- Missing or invalid dependency: None
+
+## Architecture Alignment
+- Passed: yes
+- Failed: no
+- Uncertain: no
+
+## Implementation Reality
+- Real implementation: yes
+- Stub or fake logic found: no
+- Evidence: A2 reran focused repository searches and inspected the route/controller/model and frontend routing surfaces. The only A1 source change was a report redaction; no fake runtime implementation was added.
+
+## Hardcoding Review
+- Hardcoding found: no
+- Evidence: Tracked env-file search shows only example env files. The historical database password value was redacted from `docs/reports/report_1_execute_agent.md`; remaining PostgreSQL/database references reviewed by A2 are placeholders, schema env references, or search/report text rather than active committed secrets.
+
+## Validations Reviewed
+- Command/check: `git ls-files | rg -n "(^|/)(\\.env|\\.env\\..*|.*\\.env)$|env\\.local|secrets|secret|credential|credentials"`
+  - Reported result: passed
+  - Rerun result: passed
+  - Status: passed
+  - Notes: Only `backend/.env.example` and `frontend/.env.example` are tracked.
+- Command/check: credential-like string search over docs/source, excluding local env files
+  - Reported result: failed_then_fixed
+  - Rerun result: passed
+  - Status: passed
+  - Notes: Git diff confirms the old report line now redacts the historical database password value.
+- Command/check: leaked literal search
+  - Reported result: passed
+  - Rerun result: passed_with_note
+  - Status: passed
+  - Notes: The full historical secret value is redacted. A broad partial-literal search now matches only A1's own search-command text in the 06C report, not the password value.
+- Command/check: `rg -n -i "DATABASE_URL|DIRECT_URL|PrismaClient|@prisma|supabase|postgres://|postgresql://|SELECT\\s|INSERT\\s|UPDATE\\s|DELETE\\s+FROM" frontend\\src`
+  - Reported result: passed
+  - Rerun result: passed
+  - Status: passed
+  - Notes: Matches were update labels/functions and normal API/context code; no frontend database connection, Prisma import, Supabase database URL, or SQL access was found.
+- Command/check: `rg -n "new PrismaClient|PrismaClient|successResponse|errorResponse|jwt\\.sign|jsonwebtoken|bcrypt|fetch\\(|axios|DATABASE_URL|DIRECT_URL" backend\\src backend\\prisma`
+  - Reported result: passed
+  - Rerun result: passed
+  - Status: passed
+  - Notes: Runtime has a single Prisma client export, centralized response helpers, centralized token generation, expected auth middleware JWT verification, and a standalone seed Prisma client.
+- Command/check: backend route/controller/model MVC inspection
+  - Reported result: passed
+  - Rerun result: passed
+  - Status: passed
+  - Notes: Routes mount product/category/cart endpoints and guards; controllers handle HTTP validation/responses; models own Prisma queries.
+- Command/check: out-of-scope implementation search over backend/frontend source
+  - Reported result: passed
+  - Rerun result: passed
+  - Status: passed
+  - Notes: Hits are placeholders, labels, schema/model stubs, Prisma ordering fields, or cart checkout placeholder text. No order/payment/review/report/upload/shipping runtime route/view was wired for Phase 2.
+- Command/check: Astryx and raw styling inspection over Phase 2 customer/admin UI files
+  - Reported result: passed
+  - Rerun result: passed
+  - Status: passed
+  - Notes: Phase 2 customer/admin UI uses Astryx components and token-based styling. Existing raw fallback placeholders and constrained layout values do not create a direct database, security, or business-logic violation for 06C.
+- Command/check: source-file focus check
+  - Reported result: passed
+  - Rerun result: passed_with_note
+  - Status: passed
+  - Notes: A2 found `ProductDetailView.jsx` is over the ideal 300-line guideline, but it remains route-focused and no mixed-responsibility split is required to satisfy 06C.
+
+## Acceptance Review
+- Task acceptance: No secrets, direct frontend database access, duplicate core helpers, or out-of-scope behavior are present.
+- Status: satisfied
+- Evidence: A1 redacted the only identified committed password value, A2 reran tracked-env and database-access searches, inspected backend route/controller/model boundaries, checked helper duplication signals, reviewed out-of-scope hits, and confirmed Phase 2 UI remains Astryx/token aligned enough for this audit.
+
+## Progress Tracking
+- Selected task checkbox before review: [ ]
+- Checkbox updated by reviewer: yes
+- Batch status updated by reviewer: no
+- Execution report entry: complete
+- Review report entry: ACCEPTED
+- Other: Updated only the selected 06C task checkbox and its mirrored progress tracker occurrence. Batch06 remains unchecked.
+
+## Report Accuracy
+- Accurate with minor notes
+- Mismatches: A1's broad partial leaked-literal search now matches the 06C report command text itself, though the full secret value is redacted. A1 also reported the largest Phase 2-heavy view as 370 lines; A2 counted the current `ProductDetailView.jsx` at 417 lines. Neither mismatch changes acceptance because no active secret, direct DB access, duplicate helper, out-of-scope implementation, or mixed-responsibility runtime issue remains.
+
+## Issues
+
+### Blocking
+- None
+
+### Major
+- None
+
+### Minor
+- None
+
+### Warnings
+- The historical database password had been present in a tracked report before A1 redacted it. Credential rotation remains prudent if that value was ever pushed or shared outside the local repository.
+- `ProductDetailView.jsx` exceeds the ideal 300-line guideline, but the file remains focused on one product-detail route and no 06C-blocking split is required.
+
+### Observations
+- `frontend/src/routes/AppRoutes.jsx` still uses a few placeholder `<div>` route elements and fallback token colors from earlier accepted work. They are placeholders rather than Phase 2 out-of-scope feature implementations.
 
 ## Decision
 - Accept selected task: yes
