@@ -2094,8 +2094,6 @@ complete
 - risk areas: None
 - next task readiness: can_review
 
----
-
 # Task Execution Report - 04F
 
 ## Source Task File
@@ -2187,4 +2185,818 @@ complete
 - risk areas: None
 - next task readiness: can_review
 
+---
 
+# Task Execution Report - 05A
+
+## Source Task File
+docs/tasks/task_1.md
+
+## Report File
+docs/reports/report_1_execute_agent.md
+
+## Mode
+orchestrated
+
+## Batch
+Batch05 - Verification, Security Audit, and Phase 2 Handoff
+
+## Task
+05A - Run backend install, Prisma, migration, seed, and startup validations
+
+## Status
+complete
+
+## Source of Truth Used
+- docs/plans/Plan_1.md > ## 9. Verification & Testing Plan
+- docs/plans/Master_Plan.md > ## 20. Recommended Commands
+
+## Supplemental Documents Used
+- None
+
+## Selected Scope
+- Batch: Batch05 - Verification, Security Audit, and Phase 2 Handoff
+- Task ID: 05A
+- Task title: Run backend install, Prisma, migration, seed, and startup validations
+- Files allowed: Execution report only unless validation found a required in-scope fix.
+- Repair scope if any: None
+
+## Dependency and User Action Check
+- dependencies: Batch02 and Batch03 were marked complete in docs/tasks/task_1.md.
+- user action: backend/.env existed and contained non-placeholder-shaped values for PORT, DATABASE_URL, DIRECT_URL, JWT_SECRET, JWT_EXPIRES_IN, and NODE_ENV. Secret values were not printed or recorded.
+- status: satisfied
+
+## Files Inspected Before Editing
+- AGENTS.md: project instructions.
+- docs/tasks/task_1.md: selected task and Batch05 scope.
+- docs/plans/Plan_1.md: verification source of truth.
+- docs/plans/Master_Plan.md: recommended backend commands.
+- backend/package.json: backend scripts and dependencies.
+- backend/prisma/schema.prisma: Prisma datasource/schema used by validation.
+- backend/prisma/seed.js: seed command behavior.
+- backend/src/server.js: backend startup entry.
+- backend/src/app.js: health route and app wiring for startup verification.
+- backend/src/config/database.js: Prisma client initialization path.
+- docs/reports/report_1_execute_agent.md: existing report EOF before append.
+
+## Completed Work
+- Ran backend dependency installation.
+- Ran Prisma schema validation.
+- Ran Prisma migration validation against the configured Supabase PostgreSQL database.
+- Ran Prisma seed against the configured database.
+- Started the backend dev server long enough to confirm startup and health response, then stopped it.
+- Checked git status before and after validation to confirm no implementation files were changed.
+
+## Files Created or Modified
+- docs/reports/report_1_execute_agent.md
+
+## Tests or Validations Run
+- command/check: `npm install` in `backend`
+- result: passed
+- evidence or reason: Completed successfully; audited 149 packages and reported 0 vulnerabilities.
+
+- command/check: `npx prisma validate` in `backend`
+- result: passed
+- evidence or reason: Prisma loaded `backend/prisma/schema.prisma` and reported the schema is valid. Non-blocking warnings noted that `package.json#prisma` is deprecated and overridden by `prisma.config.ts`.
+
+- command/check: `npx prisma migrate dev --name init` in `backend`
+- result: passed
+- evidence or reason: Connected to the configured PostgreSQL database, found the schema already in sync with no pending migration, and generated Prisma Client successfully.
+
+- command/check: `npx prisma db seed` in `backend`
+- result: passed
+- evidence or reason: Seed command ran `node prisma/seed.js`, seeded demo admin/customer records, four categories, and products successfully.
+
+- command/check: `npm run dev` in `backend`
+- result: passed
+- evidence or reason: Nodemon started `src/server.js`, loaded env from `.env`, and logged that the server was running on port 5000.
+
+- command/check: `GET http://localhost:5000/api/health`
+- result: passed
+- evidence or reason: Returned HTTP 200 with the shared success response shape and message `Backend is healthy`.
+
+- command/check: `git status --short`
+- result: passed
+- evidence or reason: Worktree was clean before appending this execution report.
+
+## Acceptance Check
+- condition: Run backend install.
+- status: satisfied
+- evidence: `npm install` passed.
+
+- condition: Run Prisma validate, migration, seed, and backend dev startup.
+- status: satisfied
+- evidence: `npx prisma validate`, `npx prisma migrate dev --name init`, `npx prisma db seed`, and `npm run dev` all passed.
+
+- condition: Backend starts without Prisma connection errors.
+- status: satisfied
+- evidence: Backend started on port 5000 and `/api/health` returned HTTP 200; no Prisma connection error appeared during startup.
+
+## Progress Update
+- task checkbox updated: no
+- batch status updated: no
+- reason: Orchestrated mode requires A1 not to modify task checkboxes or batch status.
+
+## Key Implementation Decisions
+- No code fix was made because all required 05A validations passed.
+- Secret-bearing env values were checked only for presence and placeholder shape; values were not printed or recorded.
+
+## Risks or Open Issues
+- Prisma reported a non-blocking deprecation warning for `package.json#prisma`; validation still passed using `prisma.config.ts`.
+
+## Minor In-Scope Issues Fixed
+- None
+
+## Workflow Integrity Check
+- None
+
+## Notes for Review Agent
+- changed files: docs/reports/report_1_execute_agent.md
+- validations to rerun: `npm install`, `npx prisma validate`, `npx prisma migrate dev --name init`, `npx prisma db seed`, `npm run dev`, and `GET http://localhost:5000/api/health` from the backend setup.
+- risk areas: live Supabase/database state is environment-dependent; do not print `.env` values while reviewing.
+- next task readiness: can_review
+
+---
+
+# Task Execution Report - 05B
+
+## Source Task File
+docs/tasks/task_1.md
+
+## Report File
+docs/reports/report_1_execute_agent.md
+
+## Mode
+orchestrated
+
+## Batch
+Batch05 - Verification, Security Audit, and Phase 2 Handoff
+
+## Task
+05B - Run auth and user API smoke tests
+
+## Status
+complete
+
+## Source of Truth Used
+- docs/plans/Plan_1.md > ## 9. Verification & Testing Plan
+- docs/plans/Plan_1.md > ### 7.5 Auth API Contract
+
+## Supplemental Documents Used
+- None
+
+## Selected Scope
+- Batch: Batch05 - Verification, Security Audit, and Phase 2 Handoff
+- Task ID: 05B
+- Task title: Run auth and user API smoke tests
+- Files allowed: Execution report, optional docs/demo-checklist.md
+- Repair scope if any: None
+
+## Dependency and User Action Check
+- dependencies: 05A is checked complete in docs/tasks/task_1.md, and the prior 05A report records backend install, Prisma, migration, seed, and startup validations as passing.
+- user action: live backend env/database/admin setup was available locally; no secret values were printed or recorded.
+- status: satisfied
+
+## Files Inspected Before Editing
+- AGENTS.md: project guidance and workflow rules.
+- docs/tasks/task_1.md: selected task block, dependency, acceptance, and reporting requirements.
+- docs/plans/Plan_1.md: verification plan and auth API contract.
+- backend/package.json: backend dev/start scripts.
+- backend/src/app.js: route mounting and health endpoint.
+- backend/src/routes/auth.routes.js: auth endpoint paths.
+- backend/src/routes/user.routes.js: profile and admin endpoint paths.
+- backend/src/controllers/auth.controller.js: register, login, and current-user behavior.
+- backend/src/controllers/user.controller.js: profile read/update and admin user-list behavior.
+- backend/src/middlewares/auth.middleware.js: JWT authorization behavior.
+- backend/src/middlewares/admin.middleware.js: admin authorization behavior.
+- backend/src/models/user.model.js: user lookup/create/update/list data access.
+- backend/src/utils/response.js: shared response shape.
+- backend/src/utils/generateToken.js: JWT generation behavior.
+- backend/prisma/seed.js: seed admin/customer account shape; credentials were used only transiently and not recorded.
+- docs/reports/report_1_execute_agent.md: append location and prior 05A evidence.
+
+## Completed Work
+- Started the backend with `npm run dev` on `http://localhost:5000`.
+- Ran local HTTP smoke checks for register, login, `/api/auth/me`, profile read/update, and `/api/admin/users`.
+- Verified customer registration and login return token-bearing successful responses without printing tokens.
+- Verified `/api/auth/me` returns 401 without authorization and 200 with a valid customer token.
+- Verified customer profile read and update return successful responses without exposing `passwordHash`.
+- Verified seeded admin login returns a token-bearing admin response without printing the token.
+- Verified `GET /api/admin/users` succeeds for admin, rejects customer with 403, and rejects anonymous requests with 401.
+- Stopped the local backend after the smoke checks.
+
+## Files Created or Modified
+- docs/reports/report_1_execute_agent.md
+
+## Tests or Validations Run
+- command/check: `cd backend && npm run dev`
+- result: passed
+- evidence or reason: backend started on port 5000 using local env; no Prisma startup error was observed.
+
+- command/check: HTTP smoke suite against `http://localhost:5000/api/auth/register`, `POST /api/auth/login`, `GET /api/auth/me`, `GET /api/users/profile`, `PUT /api/users/profile`, and `GET /api/admin/users`
+- result: passed
+- evidence or reason: register returned 201 with token present and customer role; login returned 200 with token present; anonymous `/auth/me` returned 401; authorized `/auth/me` returned 200; profile read/update returned 200 and no `passwordHash`; admin login returned 200 with token present and admin role; admin users returned 200 for admin, 403 for customer, and 401 for anonymous.
+
+## Acceptance Check
+- condition: Smoke test register, login, auth me, profile read/update, and admin users.
+- status: satisfied
+- evidence: all required endpoints were exercised with local HTTP checks.
+
+- condition: Login returns a JWT.
+- status: satisfied
+- evidence: customer and admin login responses both contained token values; token contents were not printed or recorded.
+
+- condition: Current user works with valid token and fails without one.
+- status: satisfied
+- evidence: `/api/auth/me` returned 200 with the customer token and 401 without authorization.
+
+- condition: Admin users can list users; customers cannot.
+- status: satisfied
+- evidence: `/api/admin/users` returned 200 for admin, 403 for customer, and 401 for anonymous.
+
+## Progress Update
+- task checkbox updated: no
+- batch status updated: no
+- reason: Orchestrated mode requires A1 not to modify task checkboxes or batch status.
+
+## Key Implementation Decisions
+- No runtime code was changed because the implemented APIs satisfied the 05B contract.
+- JWTs and passwords were kept only in transient process variables during smoke checks and were not written to reports.
+
+## Risks or Open Issues
+- The smoke test created temporary customer accounts in the configured database.
+
+## Minor In-Scope Issues Fixed
+- None
+
+## Workflow Integrity Check
+- None
+
+## Notes for Review Agent
+- changed files: docs/reports/report_1_execute_agent.md
+- validations to rerun: start backend with `npm run dev`, then repeat safe HTTP checks for auth/register, auth/login, auth/me with and without token, users/profile GET/PUT, and admin/users as admin/customer/anonymous.
+- risk areas: do not print `.env` values, demo passwords, JWTs, or database URLs while reviewing.
+- next task readiness: can_review
+
+---
+
+# Task Execution Report - 05C
+
+## Source Task File
+docs/tasks/task_1.md
+
+## Report File
+docs/reports/report_1_execute_agent.md
+
+## Mode
+orchestrated
+
+## Batch
+Batch05 - Verification, Security Audit, and Phase 2 Handoff
+
+## Task
+05C - Run frontend install/start and auth UI smoke tests
+
+## Status
+blocked
+
+## Source of Truth Used
+- docs/plans/Plan_1.md > ## 9. Verification & Testing Plan
+- docs/design/design.md > # 9. Authentication Components
+- docs/design/design.md > # 21. Common Feedback Components
+
+## Supplemental Documents Used
+- None
+
+## Selected Scope
+- Batch: Batch05 - Verification, Security Audit, and Phase 2 Handoff
+- Task ID: 05C
+- Task title: Run frontend install/start and auth UI smoke tests
+- Files allowed: execution report and frontend dependency manifest files required to make the planned install/start validation work
+- Repair scope if any: None
+
+## Dependency and User Action Check
+- dependencies: Batch04 and 05B were marked complete in docs/tasks/task_1.md; backend was available locally on http://localhost:5000 during this run
+- user action: backend availability was satisfied for non-browser API-backed checks, but browser/manual interaction tooling was unavailable in this session
+- status: blocked for browser/manual UI smoke coverage
+
+## Files Inspected Before Editing
+- AGENTS.md: project guidance and Astryx workflow rules.
+- docs/tasks/task_1.md: selected 05C scope, dependencies, acceptance, and blocked condition.
+- docs/plans/Plan_1.md: frontend verification plan and expected evidence.
+- docs/design/design.md: auth and feedback UI state requirements.
+- C:/Users/ACER/.codex/skills/task-execution-agent/SKILL.md: A1 execution workflow.
+- C:/Users/ACER/.codex/skills/task-execution-agent/references/handoff-json.md: orchestrated JSON schema.
+- C:/Users/ACER/.codex/skills/task-execution-agent/references/report-template.md: execution report format.
+- C:/Users/ACER/.codex/skills/orchestrator-agent/references/handoff-contracts.md: required A1 handoff contract.
+- C:/Users/ACER/.codex/plugins/cache/openai-bundled/browser/26.623.42026/skills/control-in-app-browser/SKILL.md: browser workflow and blocker reporting requirements.
+- frontend/package.json: frontend scripts and dependency versions.
+- frontend/package-lock.json: installed dependency graph and Astryx peer dependency requirement.
+- frontend/.env.example: frontend API base URL placeholder.
+- frontend/src/config.js: API base URL fallback.
+- frontend/src/api/apiClient.js: shared API request helper and bearer-token handling.
+- frontend/src/api/authApi.js: auth endpoint helpers used by the views.
+- frontend/src/contexts/AuthContext.jsx: login/register/auth state behavior.
+- frontend/src/routes/AppRoutes.jsx: home/login/register/admin route and guard behavior.
+- frontend/src/views/HomeView.jsx: home route shell.
+- frontend/src/views/LoginView.jsx: login form loading, success, and error state code.
+- frontend/src/views/RegisterView.jsx: register form loading, success, and error state code.
+- frontend/src/views/AdminDashboardView.jsx: guarded admin placeholder view.
+- docs/reports/report_1_execute_agent.md: append location and prior evidence.
+
+## Completed Work
+- Ran the required `npm install`; it initially failed because `@astryxdesign/core@0.1.2` requires React 19 while the frontend package was pinned to React 18.
+- Updated only the frontend React runtime/type dependency versions to React 19-compatible ranges and regenerated the lockfile through npm.
+- Reran the required `npm install`; it passed.
+- Started the frontend Vite dev server on http://127.0.0.1:5173 and confirmed it served via http://localhost:5173.
+- Started the backend dev server on http://localhost:5000 and confirmed `/api/health` returned 200.
+- Ran a production build to confirm the React/Astryx app compiles after the dependency fix.
+- Confirmed Vite served `/`, `/login`, `/register`, and `/admin` with HTTP 200 fallback responses.
+- Confirmed frontend source and env example contain no Prisma, Supabase, or database connection strings using a forbidden-term search.
+- Attempted to connect the in-app browser for manual/browser UI interactions; browser selection failed with `Browser is not available: iab`, and `agent.browsers.list()` returned `[]`.
+
+## Files Created or Modified
+- frontend/package.json
+- frontend/package-lock.json
+- docs/reports/report_1_execute_agent.md
+
+## Tests or Validations Run
+- command/check: `cd frontend && npm install`
+- result: passed
+- evidence or reason: initial run failed with React 18 versus Astryx React 19 peer conflict; after updating React package ranges, rerun completed successfully with audit warnings only.
+
+- command/check: `cd frontend && npm run dev -- --host 127.0.0.1`
+- result: passed
+- evidence or reason: Vite v5.4.21 reported ready and served `http://127.0.0.1:5173/`.
+
+- command/check: `cd backend && npm run dev`
+- result: passed
+- evidence or reason: backend started on port 5000 using local env.
+
+- command/check: `Invoke-WebRequest http://localhost:5000/api/health`
+- result: passed
+- evidence or reason: backend health endpoint returned HTTP 200 with the standard success response.
+
+- command/check: `npm run build`
+- result: passed
+- evidence or reason: Vite production build completed; 494 modules transformed and output assets were generated.
+
+- command/check: `Invoke-WebRequest` for `http://localhost:5173/`, `/login`, `/register`, and `/admin`
+- result: passed
+- evidence or reason: all four routes returned HTTP 200 from the Vite dev server.
+
+- command/check: `rg "prisma|DATABASE_URL|DIRECT_URL|SUPABASE|supabase|postgresql://|postgres://" frontend/src frontend/.env.example`
+- result: passed
+- evidence or reason: no matches were returned.
+
+- command/check: in-app browser setup for route/UI smoke tests
+- result: blocked
+- evidence or reason: browser target selection failed with `Browser is not available: iab`; browser troubleshooting check showed `agent.browsers.list()` returned `[]`.
+
+## Acceptance Check
+- condition: Frontend starts on Vite.
+- status: satisfied
+- evidence: `npm run dev -- --host 127.0.0.1` started Vite and HTTP checks against localhost routes returned 200.
+
+- condition: Login and register views display loading, success, and error states.
+- status: blocked
+- evidence: source inspection confirms state code exists, but required browser/manual interaction checks could not run because no browser backend was available.
+
+- condition: Views call backend APIs and do not access the database.
+- status: partially satisfied
+- evidence: source inspection confirms auth views use `AuthContext` and `authApi`; forbidden database-access search returned no matches. Browser interaction confirmation was blocked.
+
+- condition: Verify live login/register success/error states when backend is available.
+- status: blocked
+- evidence: backend was available, but browser/manual UI submission could not run because no browser backend was available.
+
+- condition: Verify admin route guard behavior.
+- status: blocked
+- evidence: `/admin` was served by Vite, and route guard code was inspected, but browser navigation/auth-state verification could not run.
+
+## Progress Update
+- task checkbox updated: no
+- batch status updated: no
+- reason: Orchestrated mode requires A1 not to modify task checkboxes or batch status.
+
+## Key Implementation Decisions
+- Updated React and React DOM to React 19 because the existing Astryx dependency explicitly requires React 19 or newer.
+- Did not use `--force` or `--legacy-peer-deps`; the root dependency mismatch was fixed in the manifest instead.
+- Did not use unrelated browser automation after the in-app browser target remained unavailable.
+
+## Risks or Open Issues
+- Browser/manual UI smoke tests for login validation, register validation, live success/error banners, and admin guard remain blocked by unavailable browser tooling.
+- `npm install` reports 2 audit vulnerabilities; this task did not broaden into dependency security remediation.
+- Existing unrelated modified files were present in the worktree and were not reverted or staged.
+
+## Minor In-Scope Issues Fixed
+- Fixed the frontend dependency manifest mismatch that prevented the required `npm install` from succeeding.
+
+## Workflow Integrity Check
+- Browser smoke validation is incomplete because no browser backend was available in this session.
+
+## Notes for Review Agent
+- changed files: frontend/package.json, frontend/package-lock.json, docs/reports/report_1_execute_agent.md
+- validations to rerun: `cd frontend && npm install`, `cd frontend && npm run dev -- --host 127.0.0.1`, `cd frontend && npm run build`, route checks for `/`, `/login`, `/register`, and `/admin`, forbidden database-access search, and browser/manual auth UI smoke tests when browser tooling is available.
+- risk areas: do not print passwords, JWTs, database URLs, or real secrets while rerunning live auth UI checks.
+- next task readiness: cannot_review
+
+---
+
+# Task Execution Report - 05C
+
+## Source Task File
+docs/tasks/task_1.md
+
+## Report File
+docs/reports/report_1_execute_agent.md
+
+## Mode
+same_task_repair
+
+## Batch
+Batch05 - Verification, Security Audit, and Phase 2 Handoff
+
+## Task
+05C - Run frontend install/start and auth UI smoke tests
+
+## Status
+complete
+
+## Source of Truth Used
+- docs/plans/Plan_1.md > ## 9. Verification & Testing Plan
+- docs/design/design.md > # 9. Authentication Components
+- docs/design/design.md > # 21. Common Feedback Components
+
+## Supplemental Documents Used
+- None
+
+## Selected Scope
+- Batch: Batch05 - Verification, Security Audit, and Phase 2 Handoff
+- Task ID: 05C
+- Task title: Run frontend install/start and auth UI smoke tests
+- Files allowed: execution report only for this same-task continuation; prior 05C dependency manifest changes remain part of the task evidence
+- Repair scope if any: Replace the prior browser-tooling blocker with user-provided manual UI confirmation for the requested auth UI smoke checks
+
+## Dependency and User Action Check
+- dependencies: Batch04 and 05B were already marked complete in docs/tasks/task_1.md; prior 05C evidence showed frontend install/start and backend availability checks passed
+- user action: user manually provided the missing UI smoke evidence for home, login, register, logout, admin guards, admin dashboard, and fatal console errors
+- status: satisfied
+
+## Files Inspected Before Editing
+- AGENTS.md: project guidance and Astryx workflow rules.
+- docs/tasks/task_1.md: selected 05C scope, dependencies, acceptance, and validation requirements.
+- docs/reports/report_1_execute_agent.md: prior 05C blocked report and append location.
+- C:/Users/ACER/.codex/skills/task-execution-agent/SKILL.md: A1 same-task repair workflow.
+- C:/Users/ACER/.codex/skills/task-execution-agent/references/handoff-json.md: orchestrated JSON schema.
+- C:/Users/ACER/.codex/skills/task-execution-agent/references/report-template.md: execution report format.
+- C:/Users/ACER/.codex/skills/orchestrator-agent/references/handoff-contracts.md: required A1 handoff contract.
+
+## Completed Work
+- Appended same-task continuation evidence for 05C using the user-provided manual UI confirmation.
+- Preserved prior 05C non-browser validation evidence: frontend `npm install` passed after the React 19 compatibility fix, Vite started, backend health was reachable, production build passed, Vite served `/`, `/login`, `/register`, and `/admin`, and forbidden frontend database-access search returned no matches.
+- Recorded that the user, not Codex browser automation, manually confirmed all requested UI checklist items passed.
+- Did not modify task checkboxes, batch status, sibling tasks, runtime code, credentials, or secrets.
+
+## Files Created or Modified
+- docs/reports/report_1_execute_agent.md
+
+## Tests or Validations Run
+- command/check: prior 05C `cd frontend && npm install`
+- result: passed
+- evidence or reason: prior 05C report recorded that install completed successfully after aligning React package ranges with Astryx React 19 peer requirements.
+
+- command/check: prior 05C `cd frontend && npm run dev -- --host 127.0.0.1`
+- result: passed
+- evidence or reason: prior 05C report recorded Vite v5.4.21 ready and serving `http://127.0.0.1:5173/`.
+
+- command/check: prior 05C backend availability check at `http://localhost:5000/api/health`
+- result: passed
+- evidence or reason: prior 05C report recorded HTTP 200 with the standard success response.
+
+- command/check: prior 05C `cd frontend && npm run build`
+- result: passed
+- evidence or reason: prior 05C report recorded successful Vite production build with 494 modules transformed.
+
+- command/check: prior 05C route HTTP checks for `/`, `/login`, `/register`, and `/admin`
+- result: passed
+- evidence or reason: prior 05C report recorded HTTP 200 responses from the Vite dev server for all four routes.
+
+- command/check: prior 05C forbidden frontend database-access search
+- result: passed
+- evidence or reason: prior 05C report recorded no Prisma, Supabase, DATABASE_URL, DIRECT_URL, or PostgreSQL connection string matches in `frontend/src` or `frontend/.env.example`.
+
+- command/check: user-provided manual UI smoke confirmation for 05C
+- result: passed
+- evidence or reason: user confirmed PASS for home route, login validation/error states, customer login/logout, register validation/success states, admin guard while logged out, admin guard as customer, admin dashboard as admin, and no fatal console errors.
+
+## Acceptance Check
+- condition: Frontend starts on Vite.
+- status: satisfied
+- evidence: prior 05C report recorded Vite startup and localhost route HTTP checks passing.
+
+- condition: Login and register views display loading, success, and error states.
+- status: satisfied
+- evidence: user manually confirmed login validation/error states and register validation/success states passed; this was user-provided evidence, not Codex browser automation.
+
+- condition: Views call backend APIs and do not access the database.
+- status: satisfied
+- evidence: prior 05C source inspection and forbidden database-access search passed; user manually confirmed live customer login/logout and register states passed through the UI.
+
+- condition: Verify live login/register success/error states when backend is available.
+- status: satisfied
+- evidence: user manually confirmed customer login/logout and register validation/success states passed with backend-backed UI behavior.
+
+- condition: Verify admin route guard behavior.
+- status: satisfied
+- evidence: user manually confirmed admin guard logged out, admin guard as customer, and admin dashboard as admin all passed.
+
+## Progress Update
+- task checkbox updated: no
+- batch status updated: no
+- reason: Orchestrated same-task repair mode requires A1 not to modify task checkboxes or batch status.
+
+## Key Implementation Decisions
+- Treated the user's manual UI confirmation as the required manual smoke-test evidence for the previously blocked browser/manual validation.
+- Kept evidence wording explicit that Codex did not perform browser automation for these UI checks.
+
+## Risks or Open Issues
+- The manual UI smoke checks were confirmed by the user rather than Codex-controlled browser automation.
+- Existing npm audit warnings from prior 05C remain outside this task's requested repair scope.
+
+## Minor In-Scope Issues Fixed
+- Cleared the prior 05C evidence gap by recording user-provided manual UI PASS confirmation.
+
+## Workflow Integrity Check
+- None
+
+## Notes for Review Agent
+- changed files: docs/reports/report_1_execute_agent.md; prior 05C also changed frontend/package.json and frontend/package-lock.json for the React 19/Astryx install fix.
+- validations to rerun: `cd frontend && npm install`, `cd frontend && npm run dev -- --host 127.0.0.1`, route checks for `/`, `/login`, `/register`, `/admin`, forbidden frontend database-access search, and manual UI smoke checks if independent reviewer confirmation is required.
+- risk areas: manual UI evidence is user-provided; do not print passwords, JWTs, database URLs, or real secrets while reviewing live auth flows.
+- next task readiness: can_review
+
+---
+
+# Task Execution Report - 05D
+
+## Source Task File
+docs/tasks/task_1.md
+
+## Report File
+docs/reports/report_1_execute_agent.md
+
+## Mode
+orchestrated
+
+## Batch
+Batch05 - Verification, Security Audit, and Phase 2 Handoff
+
+## Task
+05D - Audit security, MVC boundaries, and anti-duplication rules
+
+## Status
+complete
+
+## Source of Truth Used
+- docs/plans/Plan_1.md > ## 9. Verification & Testing Plan
+- docs/plans/Master_Plan.md > ## 24. Risk Management
+- root AGENTS.md project guidance plus prompt-provided Smart Code Reuse & Anti-Redundancy rules
+
+## Supplemental Documents Used
+- None
+
+## Selected Scope
+- Batch: Batch05 - Verification, Security Audit, and Phase 2 Handoff
+- Task ID: 05D
+- Task title: Audit security, MVC boundaries, and anti-duplication rules
+- Files allowed: execution report; changed files only if fixes are needed
+- Repair scope if any: validated and kept the existing dirty layout icon refactor from the failed 05D worker, with in-scope token cleanup
+
+## Dependency and User Action Check
+- dependencies: Batch01 through Batch04 are checked complete in docs/tasks/task_1.md
+- user action: None
+- status: satisfied
+
+## Files Inspected Before Editing
+- AGENTS.md: project-specific guidance
+- docs/tasks/task_1.md: selected 05D task, dependencies, source requirements, and progress rules
+- docs/plans/Plan_1.md: verification/security requirements and Phase 2 hard rules
+- docs/plans/Master_Plan.md: MVC, frontend database boundary, and credential exposure risks
+- frontend/src/layouts/AdminLayout.jsx: inspected failed-worker icon extraction diff
+- frontend/src/layouts/MainLayout.jsx: inspected failed-worker icon extraction diff and layout styling
+- frontend/src/components/common/LayoutIcons.jsx: inspected new shared icon module before keeping it
+- frontend/src/api/apiClient.js: confirmed API helper uses backend API client path
+- backend/src/config/database.js: confirmed single runtime Prisma client export
+- backend/src/utils/response.js: confirmed single shared response helper
+- backend/src/utils/generateToken.js: confirmed single token generation helper
+- backend/src/controllers/auth.controller.js: inspected controller HTTP responsibilities
+- backend/src/controllers/user.controller.js: inspected controller HTTP responsibilities
+- backend/src/models/*.js: inspected model focus and absence of HTTP req/res handling
+
+## Completed Work
+- Searched git-tracked env files and verified no real `.env` files are tracked.
+- Verified local real env files exist only as ignored local files and did not print their values.
+- Searched frontend source for backend-only database variables, Prisma imports, PostgreSQL URLs, and Supabase database references; no matches were found.
+- Searched backend for duplicate Prisma clients, response helpers, JWT helpers, and direct JWT signing.
+- Manually inspected MVC boundaries: controllers own HTTP request/response handling, models own Prisma data operations, and frontend views/layouts call API helpers rather than database code.
+- Validated the failed-worker layout icon refactor as an in-scope anti-duplication/SRP fix because duplicated inline SVG components were extracted from AdminLayout/MainLayout into frontend/src/components/common/LayoutIcons.jsx.
+- Cleaned the kept layout/icon refactor by replacing raw icon sizes and touched layout offset/min-height literals with Astryx token expressions.
+
+## Files Created or Modified
+- frontend/src/components/common/LayoutIcons.jsx
+- frontend/src/layouts/AdminLayout.jsx
+- frontend/src/layouts/MainLayout.jsx
+- docs/reports/report_1_execute_agent.md
+
+## Tests or Validations Run
+- command/check: `git ls-files backend/.env frontend/.env .env .env.local backend/.env.local frontend/.env.local`
+- result: passed
+- evidence or reason: no tracked real env files returned
+- command/check: `rg --files -g '.env*' -g '!**/node_modules/**'`
+- result: passed
+- evidence or reason: found local backend/frontend `.env` plus `.env.example` files; local real env files were summarized without printing values
+- command/check: `git check-ignore -v backend/.env frontend/.env`
+- result: passed
+- evidence or reason: backend/.env ignored by backend/.gitignore; frontend/.env ignored by root .gitignore
+- command/check: safe credential-string filename search excluding node_modules, lockfiles, plan docs, and prior reports
+- result: passed
+- evidence or reason: matches were limited to documentation placeholders, env examples, Prisma env-variable references, and JWT helper/middleware env reads
+- command/check: `rg -n "DATABASE_URL|DIRECT_URL|@prisma/client|PrismaClient|postgresql://|supabase|SUPABASE" frontend/src frontend/.env.example`
+- result: passed
+- evidence or reason: no forbidden frontend database access or Supabase credential references found
+- command/check: `rg -n "new PrismaClient|PrismaClient|successResponse|errorResponse|generateToken|jwt\\.sign|jsonwebtoken" backend/src backend/prisma`
+- result: passed
+- evidence or reason: single runtime Prisma client in backend/src/config/database.js; seed script has its own standalone Prisma client; response and token helpers are centralized and reused
+- command/check: `rg -n "PrismaClient|@prisma/client|req\\.|res\\.|next\\(" backend/src/models backend/src/controllers`
+- result: passed
+- evidence or reason: HTTP req/res/next appears in controllers only; models do not instantiate Prisma clients or handle HTTP objects
+- command/check: focused file line-count inspection for controllers, models, layouts, and common icon module
+- result: passed
+- evidence or reason: inspected files remain under 300 lines; largest touched file is MainLayout.jsx at 224 lines and LayoutIcons.jsx is 76 lines
+- command/check: `npm run build` from frontend
+- result: passed
+- evidence or reason: Vite build completed successfully with 495 transformed modules and generated dist assets
+
+## Acceptance Check
+- condition: `.env` files are not committed
+- status: satisfied
+- evidence: no real env files tracked; local env files are ignored
+- condition: frontend uses `VITE_API_BASE_URL` and does not expose Supabase database credentials
+- status: satisfied
+- evidence: frontend forbidden database-access search returned no matches; API client uses shared backend API configuration
+- condition: MVC folder responsibilities remain clear
+- status: satisfied
+- evidence: controllers contain HTTP handling, models contain Prisma data access, and frontend views/layouts do not contain database access
+- condition: no second database client, response helper, or JWT helper is created
+- status: satisfied
+- evidence: one runtime Prisma client export, one response helper module, and one token helper module are reused; standalone seed Prisma client is not part of runtime app helpers
+
+## Progress Update
+- task checkbox updated: no
+- batch status updated: no
+- reason: orchestrated A1 mode forbids checkbox and batch status updates
+
+## Key Implementation Decisions
+- Kept the previous failed-worker layout icon refactor because it removes duplicated inline SVG component definitions from two layout files and places them in a focused common module.
+- Treated the seed script's standalone PrismaClient as acceptable because it is isolated to database seeding and is not a second runtime database helper.
+- Did not print real env values or credential-like strings; only filenames and safe summaries were recorded.
+
+## Risks or Open Issues
+- Existing local backend/frontend `.env` files are present but ignored; their contents were intentionally not inspected or printed.
+- A focused styling scan still finds existing `1px` border literals in frontend UI files, but these are not security, MVC, direct-database-access, or duplicated-helper blockers for 05D.
+
+## Minor In-Scope Issues Fixed
+- Converted shared layout icon sizes to Astryx spacing tokens.
+- Converted touched MainLayout badge offsets and shell min-height calculation to existing Astryx spacing tokens.
+
+## Workflow Integrity Check
+- No sibling task executed.
+- No 05E handoff docs were updated.
+- No task checkbox, batch status, staging, or commit was performed.
+
+## Notes for Review Agent
+- changed files: frontend/src/components/common/LayoutIcons.jsx; frontend/src/layouts/AdminLayout.jsx; frontend/src/layouts/MainLayout.jsx; docs/reports/report_1_execute_agent.md
+- validations to rerun: the `rg` searches above and `cd frontend && npm run build`
+- risk areas: ensure review does not print local `.env` values; distinguish the runtime Prisma client from the standalone seed script Prisma client
+- next task readiness: can_review
+
+---
+
+# Task Execution Report - 05E
+
+## Source Task File
+docs/tasks/task_1.md
+
+## Report File
+docs/reports/report_1_execute_agent.md
+
+## Mode
+orchestrated
+
+## Batch
+Batch05 - Verification, Security Audit, and Phase 2 Handoff
+
+## Task
+05E - Update demo checklist and Phase 2 handoff notes
+
+## Status
+complete
+
+## Source of Truth Used
+- docs/plans/Plan_1.md > ## 10. Handoff Notes for Phase 2
+- docs/plans/Master_Plan.md > ## 26. Final Submission Checklist
+
+## Supplemental Documents Used
+- None
+
+## Selected Scope
+- Batch: Batch05 - Verification, Security Audit, and Phase 2 Handoff
+- Task ID: 05E
+- Task title: Update demo checklist and Phase 2 handoff notes
+- Files allowed: docs/demo-checklist.md, README.md
+- Repair scope if any: None
+
+## Dependency and User Action Check
+- dependencies: 05A, 05B, 05C, and 05D are checked complete in docs/tasks/task_1.md and accepted in docs/review/review_1_review_agent.md
+- user action: Supabase Table Editor visual table confirmation remains user-side because the agent did not inspect the Supabase dashboard UI
+- status: satisfied for documentation update; user-side Supabase visual check is recorded as pending confirmation, not claimed complete
+
+## Files Inspected Before Editing
+- AGENTS.md: project-specific agent guidance and Astryx rules.
+- docs/tasks/task_1.md: selected 05E task block, dependencies, source requirements, acceptance, and progress rules.
+- docs/plans/Plan_1.md: Phase 2 handoff artifact list and hard rules.
+- docs/plans/Master_Plan.md: final submission checklist items to reflect in demo documentation.
+- README.md: existing setup and endpoint documentation before handoff additions.
+- docs/demo-checklist.md: existing placeholder before replacing it with actual Plan 1 validation state.
+- docs/reports/report_1_execute_agent.md: 05A-05D execution evidence and append location.
+- docs/review/review_1_review_agent.md: 05A-05D acceptance evidence and user-provided 05C manual UI confirmation.
+
+## Completed Work
+- Replaced the placeholder demo checklist with a Plan 1 verification table showing actual 05A backend, 05B API, 05C frontend/UI, and 05D audit states.
+- Recorded the Supabase Table Editor visual table check as user-side confirmation needed because the agent did not inspect the Supabase dashboard UI.
+- Added a Plan 1 demo flow that uses backend/frontend local commands and preserves the frontend-via-API boundary.
+- Listed Phase 2 artifacts that must be reused: Prisma client export, schema, response helper, auth/admin middleware, AuthContext, frontend API helpers, and Astryx setup.
+- Added README handoff notes that summarize the verified Plan 1 state and Phase 2 constraints without claiming product/category/cart features are implemented.
+
+## Files Created or Modified
+- README.md
+- docs/demo-checklist.md
+- docs/reports/report_1_execute_agent.md
+
+## Tests or Validations Run
+- command/check: manual doc review against Plan 1 handoff section and Master Plan final submission checklist
+- result: passed
+- evidence or reason: README.md and docs/demo-checklist.md now name the required Phase 2 reuse artifacts, forbid Supabase Auth/direct frontend PostgreSQL/duplicate helpers, and distinguish user-side Supabase Table Editor visual confirmation from passed agent checks.
+
+- command/check: `git diff -- README.md docs/demo-checklist.md`
+- result: passed
+- evidence or reason: Diff shows only the intended demo checklist replacement and README Plan 1/Phase 2 handoff additions.
+
+- command/check: `rg -n "Supabase Auth|directly to Supabase PostgreSQL|single runtime Prisma client|05A backend checks passed|Supabase Table Editor|Phase 2 Handoff" README.md docs/demo-checklist.md`
+- result: passed
+- evidence or reason: Search found the expected handoff constraints, actual validation status, and Supabase Table Editor user-side confirmation note.
+
+## Acceptance Check
+- condition: Update docs/demo-checklist.md with actual Plan 1 demo checks and status.
+- status: satisfied
+- evidence: docs/demo-checklist.md now records backend, API, frontend, user-provided UI, audit, and Supabase Table Editor states.
+
+- condition: Add Phase 2 handoff notes without claiming unimplemented features.
+- status: satisfied
+- evidence: README.md and docs/demo-checklist.md list reuse artifacts and state Phase 2 should build product/category/cart behavior on top of the foundation.
+
+- condition: Mark live checks blocked by missing user setup instead of complete.
+- status: satisfied
+- evidence: Supabase Table Editor visual confirmation is marked user-side confirmation needed rather than passed.
+
+- condition: List artifacts Phase 2 must reuse.
+- status: satisfied
+- evidence: Both docs list the Prisma client export, Prisma schema, response helper, auth/admin middleware, AuthContext, API helper pattern, and Astryx setup.
+
+## Progress Update
+- task checkbox updated: no
+- batch status updated: no
+- reason: orchestrated A1 mode forbids checkbox and batch status updates.
+
+## Key Implementation Decisions
+- Kept the handoff documentation concise and path-based so future agents can start Phase 2 without rereading all of Plan 1.
+- Used "user-side confirmation needed" for Supabase dashboard inspection because no direct dashboard visual inspection was performed by the agent.
+
+## Risks or Open Issues
+- Supabase Table Editor visual confirmation remains dependent on the user or a future agent with dashboard access.
+- The docs summarize existing validation reports; they do not rerun backend, frontend, API, or UI smoke checks.
+
+## Minor In-Scope Issues Fixed
+- Replaced the stale placeholder in docs/demo-checklist.md with real Plan 1 evidence.
+
+## Workflow Integrity Check
+- No sibling task executed.
+- No task checkbox, batch status, staging, or commit was performed.
+- No secrets, database URLs, passwords, or JWT tokens were printed or documented.
+
+## Notes for Review Agent
+- changed files: README.md; docs/demo-checklist.md; docs/reports/report_1_execute_agent.md
+- validations to rerun: manual doc review against docs/plans/Plan_1.md > ## 10 and docs/plans/Master_Plan.md > ## 26; inspect `git diff -- README.md docs/demo-checklist.md`
+- risk areas: ensure Supabase Table Editor visual confirmation remains user-side unless independently inspected; ensure docs do not imply Phase 2 product/category/cart behavior is implemented
+- next task readiness: can_review

@@ -839,7 +839,7 @@ The foundation is only useful if backend, frontend, database, auth, and handoff 
 
 ### Tasks
 
-- [ ] (05A): Run backend install, Prisma, migration, seed, and startup validations
+- [x] (05A): Run backend install, Prisma, migration, seed, and startup validations
   - Source of Truth: `docs/plans/Plan_1.md` > `## 9. Verification & Testing Plan`; `docs/plans/Master_Plan.md` > `## 20. Recommended Commands`
   - Source Requirements:
     - Run backend install.
@@ -861,7 +861,7 @@ The foundation is only useful if backend, frontend, database, auth, and handoff 
   - Blocked Condition: `BLOCKED_BY_USER_ACTION` if live env values or Supabase project are missing.
   - Files: Execution report, no required code file unless fixes are needed.
 
-- [ ] (05B): Run auth and user API smoke tests
+- [x] (05B): Run auth and user API smoke tests
   - Source of Truth: `docs/plans/Plan_1.md` > `## 9. Verification & Testing Plan`; `docs/plans/Plan_1.md` > `### 7.5 Auth API Contract`
   - Source Requirements:
     - Smoke test register, login, auth me, profile read/update, and admin users.
@@ -885,7 +885,7 @@ The foundation is only useful if backend, frontend, database, auth, and handoff 
   - Blocked Condition: `BLOCKED_BY_USER_ACTION` if backend env/database/admin setup is missing.
   - Files: Execution report, optional `docs/demo-checklist.md`
 
-- [ ] (05C): Run frontend install/start and auth UI smoke tests
+- [x] (05C): Run frontend install/start and auth UI smoke tests
   - Source of Truth: `docs/plans/Plan_1.md` > `## 9. Verification & Testing Plan`; `docs/design/design.md` > `# 9. Authentication Components`; `docs/design/design.md` > `# 21. Common Feedback Components`
   - Source Requirements:
     - Frontend starts on Vite.
@@ -908,7 +908,7 @@ The foundation is only useful if backend, frontend, database, auth, and handoff 
   - Blocked Condition: `BLOCKED_BY_USER_ACTION` if backend live setup is missing for API-backed UI checks.
   - Files: Execution report, optional `docs/demo-checklist.md`
 
-- [ ] (05D): Audit security, MVC boundaries, and anti-duplication rules
+- [x] (05D): Audit security, MVC boundaries, and anti-duplication rules
   - Source of Truth: `docs/plans/Plan_1.md` > `## 9. Verification & Testing Plan`; `docs/plans/Master_Plan.md` > `## 24. Risk Management`; root `AGENTS.md` > `## 1. Smart Code Reuse & Anti-Redundancy`
   - Source Requirements:
     - `.env` files are not committed.
@@ -931,7 +931,7 @@ The foundation is only useful if backend, frontend, database, auth, and handoff 
   - Blocked Condition: None
   - Files: Execution report, changed files only if fixes are needed.
 
-- [ ] (05E): Update demo checklist and Phase 2 handoff notes
+- [x] (05E): Update demo checklist and Phase 2 handoff notes
   - Source of Truth: `docs/plans/Plan_1.md` > `## 10. Handoff Notes for Phase 2`; `docs/plans/Master_Plan.md` > `## 26. Final Submission Checklist`
   - Source Requirements:
     - Phase 2 must consume the Prisma client export, schema, response helper, auth/admin middleware, AuthContext, API helper pattern, and Astryx setup.
@@ -1078,11 +1078,11 @@ Batch04 can prepare static UI shell work after Batch01, but live auth validation
 - [x] (04F): Wire `App.jsx` and route table
 
 #### Batch05
-- [ ] (05A): Run backend install, Prisma, migration, seed, and startup validations
-- [ ] (05B): Run auth and user API smoke tests
-- [ ] (05C): Run frontend install/start and auth UI smoke tests
-- [ ] (05D): Audit security, MVC boundaries, and anti-duplication rules
-- [ ] (05E): Update demo checklist and Phase 2 handoff notes
+- [x] (05A): Run backend install, Prisma, migration, seed, and startup validations
+- [x] (05B): Run auth and user API smoke tests
+- [x] (05C): Run frontend install/start and auth UI smoke tests
+- [x] (05D): Audit security, MVC boundaries, and anti-duplication rules
+- [x] (05E): Update demo checklist and Phase 2 handoff notes
 
 ## Completion Reporting Rules for Future Execution Agents
 

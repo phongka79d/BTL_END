@@ -78,3 +78,27 @@ cd frontend
 npm install
 npm run dev
 ```
+
+## Plan 1 Verification State
+
+Plan 1 foundation checks are recorded in `docs/demo-checklist.md` and the Batch05 execution/review reports.
+
+- 05A backend checks passed: install, Prisma validate, migration, seed, backend startup, and health check.
+- 05B API smoke checks passed: register, login, current user, profile read/update, and admin user authorization.
+- 05C frontend command checks passed, and the required auth UI smoke checks have user-provided manual PASS evidence.
+- 05D security, MVC boundary, and duplication audit passed.
+- Supabase Table Editor visual confirmation is still user-side unless the user has manually confirmed the dashboard view.
+
+## Phase 2 Handoff Contract
+
+Phase 2 should build product, category, and cart behavior on top of the existing foundation. It must consume these Plan 1 artifacts instead of redefining them:
+
+- `backend/src/config/database.js` - the single runtime Prisma client export.
+- `backend/prisma/schema.prisma` - model names, field names, relationships, and enum values.
+- `backend/src/utils/response.js` - shared JSON success/error response helpers.
+- `backend/src/middlewares/auth.middleware.js` and `backend/src/middlewares/admin.middleware.js` - auth/admin route protection.
+- `frontend/src/contexts/AuthContext.jsx` - frontend auth state and auth actions.
+- `frontend/src/api/apiClient.js`, `frontend/src/api/authApi.js`, and `frontend/src/api/userApi.js` - frontend API helper pattern using `VITE_API_BASE_URL`.
+- `frontend/src/main.jsx` and installed `@astryxdesign/core` - Astryx reset/style setup.
+
+Phase 2 must not rename database fields or enum values without a documented migration, create second database/response/JWT helpers, use Supabase Auth, or let React connect directly to Supabase PostgreSQL.
