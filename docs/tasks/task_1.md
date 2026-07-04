@@ -436,7 +436,7 @@ The frontend and later phases depend on stable backend conventions and authentic
 
 ### Tasks
 
-- [ ] (03A): Create the single Prisma client export and model modules
+- [x] (03A): Create the single Prisma client export and model modules
   - Source of Truth: `docs/plans/Plan_1.md` > `## 6. Target Directory Structure`; `docs/plans/Plan_1.md` > `## 8. Implementation Steps`; `docs/plans/Master_Plan.md` > `### 9.2 Model Layer Rules`
   - Source Requirements:
     - Create Prisma client export in `backend/src/config/database.js`.
@@ -458,7 +458,7 @@ The frontend and later phases depend on stable backend conventions and authentic
   - Blocked Condition: `BLOCKED_BY_USER_ACTION` only for live DB startup if real env values are missing.
   - Files: `backend/src/config/database.js`, `backend/src/models/*.model.js`
 
-- [ ] (03B): Add shared response helper and error/validation middleware
+- [x] (03B): Add shared response helper and error/validation middleware
   - Source of Truth: `docs/plans/Plan_1.md` > `### 7.4 Shared API Response Shape`; `docs/plans/Plan_1.md` > `## 8. Implementation Steps`; `docs/plans/Master_Plan.md` > `### 9.1 Controller Layer Rules`
   - Source Requirements:
     - Controllers must return consistent JSON success/failure shapes.
@@ -480,7 +480,7 @@ The frontend and later phases depend on stable backend conventions and authentic
   - Blocked Condition: None
   - Files: `backend/src/utils/response.js`, `backend/src/middlewares/error.middleware.js`, `backend/src/middlewares/validation.middleware.js`
 
-- [ ] (03C): Implement JWT token helper and auth/admin middleware
+- [x] (03C): Implement JWT token helper and auth/admin middleware
   - Source of Truth: `docs/plans/Plan_1.md` > `### 7.1 Architecture Decisions`; `docs/plans/Plan_1.md` > `## 4. Scope`; `docs/plans/Master_Plan.md` > `## 13. Controller Design` > `### 12.1 AuthController`
   - Source Requirements:
     - Use JWT plus bcrypt for authentication.
@@ -502,7 +502,7 @@ The frontend and later phases depend on stable backend conventions and authentic
   - Blocked Condition: `BLOCKED_BY_USER_ACTION` if `JWT_SECRET` is missing for live validation.
   - Files: `backend/src/utils/generateToken.js`, `backend/src/middlewares/auth.middleware.js`, `backend/src/middlewares/admin.middleware.js`
 
-- [ ] (03D): Implement auth controller and routes
+- [x] (03D): Implement auth controller and routes
   - Source of Truth: `docs/plans/Plan_1.md` > `### 7.5 Auth API Contract`; `docs/plans/Master_Plan.md` > `## 13. Controller Design` > `### 12.1 AuthController`
   - Source Requirements:
     - Implement `POST /api/auth/register`.
@@ -526,7 +526,7 @@ The frontend and later phases depend on stable backend conventions and authentic
   - Blocked Condition: `BLOCKED_BY_USER_ACTION` if live database or JWT env values are missing.
   - Files: `backend/src/controllers/auth.controller.js`, `backend/src/routes/auth.routes.js`
 
-- [ ] (03E): Implement user profile/admin controller and routes
+- [x] (03E): Implement user profile/admin controller and routes
   - Source of Truth: `docs/plans/Plan_1.md` > `## 4. Scope`; `docs/plans/Master_Plan.md` > `## 13. Controller Design` > `### 12.2 UserController`
   - Source Requirements:
     - Implement `GET /api/users/profile`.
@@ -549,7 +549,7 @@ The frontend and later phases depend on stable backend conventions and authentic
   - Blocked Condition: `BLOCKED_BY_USER_ACTION` if live database, JWT env, or admin user setup is missing.
   - Files: `backend/src/controllers/user.controller.js`, `backend/src/routes/user.routes.js`
 
-- [ ] (03F): Wire Express app, route mounting, CORS, JSON parsing, and error handling
+- [x] (03F): Wire Express app, route mounting, CORS, JSON parsing, and error handling
   - Source of Truth: `docs/plans/Plan_1.md` > `## 4. Scope`; `docs/plans/Plan_1.md` > `## 8. Implementation Steps`; `docs/plans/Master_Plan.md` > `## 15. API Design Summary`
   - Source Requirements:
     - Auth and user routes must be mounted under `/api`.
@@ -1042,7 +1042,7 @@ Batch04 can prepare static UI shell work after Batch01, but live auth validation
 
 - [x] Batch01 - Repository Shell and Environment Contract
 - [x] Batch02 - Supabase Prisma Data Model and Seed
-- [ ] Batch03 - Backend MVC Utilities and Auth APIs
+- [x] Batch03 - Backend MVC Utilities and Auth APIs
 - [ ] Batch04 - Frontend Astryx Shell and Auth Views
 - [ ] Batch05 - Verification, Security Audit, and Phase 2 Handoff
 
@@ -1062,12 +1062,12 @@ Batch04 can prepare static UI shell work after Batch01, but live auth validation
 - [x] (02E): Document the database contract and Phase 2 stability rule
 
 #### Batch03
-- [ ] (03A): Create the single Prisma client export and model modules
-- [ ] (03B): Add shared response helper and error/validation middleware
-- [ ] (03C): Implement JWT token helper and auth/admin middleware
-- [ ] (03D): Implement auth controller and routes
-- [ ] (03E): Implement user profile/admin controller and routes
-- [ ] (03F): Wire Express app, route mounting, CORS, JSON parsing, and error handling
+- [x] (03A): Create the single Prisma client export and model modules
+- [x] (03B): Add shared response helper and error/validation middleware
+- [x] (03C): Implement JWT token helper and auth/admin middleware
+- [x] (03D): Implement auth controller and routes
+- [x] (03E): Implement user profile/admin controller and routes
+- [x] (03F): Wire Express app, route mounting, CORS, JSON parsing, and error handling
 
 #### Batch04
 - [ ] (04A): Install Astryx and configure frontend entry/environment

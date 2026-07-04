@@ -16,6 +16,32 @@ This is a course-project MVC web application for an electronics e-commerce store
 3. Setup the frontend dependencies and environment variables.
 4. Start both development servers.
 
+## Configuration & Environment Variables
+
+### Backend (`backend/.env`)
+
+Create a `backend/.env` file with the following variables:
+- `PORT`: Server port (default `5000`)
+- `DATABASE_URL`: Supabase transaction connection string
+- `DIRECT_URL`: Supabase direct connection string for migrations
+- `JWT_SECRET`: Secret key for signing JWT tokens
+- `JWT_EXPIRES_IN`: JWT expiration time (e.g., `7d`)
+- `NODE_ENV`: Application environment (`development` or `production`)
+
+## Implemented API Endpoints (Auth & Users)
+
+All API endpoints are mounted under `/api`:
+
+### Auth APIs
+- `POST /api/auth/register` - Register a new user
+- `POST /api/auth/login` - Authenticate a user and receive JWT
+- `GET /api/auth/me` - Get current authenticated user profile (requires JWT)
+
+### User APIs
+- `GET /api/users/profile` - Get current user profile (requires JWT)
+- `PUT /api/users/profile` - Update current user profile details (requires JWT)
+- `GET /api/admin/users` - List all users (requires admin JWT)
+
 ## Local Commands
 
 ### Backend
