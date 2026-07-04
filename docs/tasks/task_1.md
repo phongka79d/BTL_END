@@ -273,7 +273,7 @@ Plan 1 intentionally finalizes the database schema early so later phases can add
 
 ### Tasks
 
-- [ ] (02A): Configure Prisma datasource and client generation
+- [x] (02A): Configure Prisma datasource and client generation
   - Source of Truth: `docs/plans/Plan_1.md` > `### 7.1 Architecture Decisions`; `docs/plans/Master_Plan.md` > `### 19.3 Configure Prisma for Supabase PostgreSQL`
   - Source Requirements:
     - Use Prisma, not Sequelize.
@@ -295,7 +295,7 @@ Plan 1 intentionally finalizes the database schema early so later phases can add
   - Blocked Condition: `BLOCKED_BY_USER_ACTION` only for live Supabase connection if real env values are missing.
   - Files: `backend/prisma/schema.prisma`, `backend/package.json`
 
-- [ ] (02B): Implement the complete Prisma schema contract
+- [x] (02B): Implement the complete Prisma schema contract
   - Source of Truth: `docs/plans/Plan_1.md` > `### 7.3 Prisma Schema Contract`; `docs/plans/Master_Plan.md` > `## 11. Database Design`; `docs/plans/Master_Plan.md` > `## 12. Model Relationships`
   - Source Requirements:
     - Define `User`, `Category`, `Product`, `Cart`, `CartItem`, `Order`, `OrderDetail`, `Payment`, and `Review`.
@@ -317,7 +317,7 @@ Plan 1 intentionally finalizes the database schema early so later phases can add
   - Blocked Condition: None for local schema validation after dependencies are installed.
   - Files: `backend/prisma/schema.prisma`
 
-- [ ] (02C): Create initial migration workflow against Supabase
+- [x] (02C): Create initial migration workflow against Supabase
   - Source of Truth: `docs/plans/Plan_1.md` > `## 9. Verification & Testing Plan`; `docs/plans/Master_Plan.md` > `## 19. Supabase Setup Checklist`; `docs/plans/Master_Plan.md` > `## 20. Recommended Commands`
   - Source Requirements:
     - Run the first Prisma migration against Supabase PostgreSQL.
@@ -339,7 +339,7 @@ Plan 1 intentionally finalizes the database schema early so later phases can add
   - Blocked Condition: `BLOCKED_BY_USER_ACTION` if Supabase project or real `.env` values are missing.
   - Files: `backend/prisma/migrations/`, `backend/prisma/schema.prisma`
 
-- [ ] (02D): Add seed data for demo categories, products, customer, and admin
+- [x] (02D): Add seed data for demo categories, products, customer, and admin
   - Source of Truth: `docs/plans/Plan_1.md` > `## 4. Scope`; `docs/plans/Plan_1.md` > `## 8. Implementation Steps`; `docs/plans/Master_Plan.md` > `## 22. MVC Acceptance Criteria`
   - Source Requirements:
     - Seed demo categories, products, one customer, and one admin user.
@@ -361,7 +361,7 @@ Plan 1 intentionally finalizes the database schema early so later phases can add
   - Blocked Condition: `BLOCKED_BY_USER_ACTION` if real database env values are missing.
   - Files: `backend/prisma/seed.js`, `backend/package.json`
 
-- [ ] (02E): Document the database contract and Phase 2 stability rule
+- [x] (02E): Document the database contract and Phase 2 stability rule
   - Source of Truth: `docs/plans/Plan_1.md` > `## 1. Objective`; `docs/plans/Plan_1.md` > `## 10. Handoff Notes for Phase 2`
   - Source Requirements:
     - Database schema is finalized early.
@@ -1040,8 +1040,8 @@ Batch04 can prepare static UI shell work after Batch01, but live auth validation
 
 ### Batches
 
-- [ ] Batch01 - Repository Shell and Environment Contract
-- [ ] Batch02 - Supabase Prisma Data Model and Seed
+- [x] Batch01 - Repository Shell and Environment Contract
+- [x] Batch02 - Supabase Prisma Data Model and Seed
 - [ ] Batch03 - Backend MVC Utilities and Auth APIs
 - [ ] Batch04 - Frontend Astryx Shell and Auth Views
 - [ ] Batch05 - Verification, Security Audit, and Phase 2 Handoff
@@ -1055,11 +1055,11 @@ Batch04 can prepare static UI shell work after Batch01, but live auth validation
 - [x] (01D): Add environment examples and secret boundaries
 
 #### Batch02
-- [ ] (02A): Configure Prisma datasource and client generation
-- [ ] (02B): Implement the complete Prisma schema contract
-- [ ] (02C): Create initial migration workflow against Supabase
-- [ ] (02D): Add seed data for demo categories, products, customer, and admin
-- [ ] (02E): Document the database contract and Phase 2 stability rule
+- [x] (02A): Configure Prisma datasource and client generation
+- [x] (02B): Implement the complete Prisma schema contract
+- [x] (02C): Create initial migration workflow against Supabase
+- [x] (02D): Add seed data for demo categories, products, customer, and admin
+- [x] (02E): Document the database contract and Phase 2 stability rule
 
 #### Batch03
 - [ ] (03A): Create the single Prisma client export and model modules

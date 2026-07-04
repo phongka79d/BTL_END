@@ -1,13 +1,151 @@
 // This is your Prisma schema file,
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
-// Get a free hosted Postgres database in seconds: `npx create-db`
-
 generator client {
-  provider = "prisma-client"
-  output   = "../src/generated/prisma"
+  provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "postgresql"
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+enum Role {
+  customer
+  admin
+}
+
+enum OrderStatus {
+  pending
+  confirmed
+  shipping
+  completed
+  cancelled
+}
+
+enum PaymentMethod {
+  COD
+}
+
+enum PaymentStatus {
+  unpaid
+  paid
+  failed
+}
+
+enum ReviewStatus {
+  visible
+  hidden
+}
+
+model User {
+  id           String   @id @default(uuid())
+  username     String
+  email        String   @unique
+  passwordHash String   @map("password_hash")
+  fullName     String?  @map("full_name")
+  phone        String?
+  address      String?
+  role         Role     @default(customer)
+  cart         Cart?
+  orders       Order[]
+  reviews      Review[]
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+}
+
+model Category {
+  id          String    @id @default(uuid())
+  name        String    @unique
+  description String?
+  products    Product[]
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+}
+
+model Product {
+  id           String        @id @default(uuid())
+  name         String
+  brand        String
+  description  String?
+  price        Decimal       @db.Decimal(10, 2)
+  quantity     Int
+  imageUrl     String?       @map("image_url")
+  categoryId   String        @map("category_id")
+  category     Category      @relation(fields: [categoryId], references: [id])
+  cartItems    CartItem[]
+  orderDetails OrderDetail[]
+  reviews      Review[]
+  createdAt    DateTime      @default(now()) @map("created_at")
+  updatedAt    DateTime      @updatedAt @map("updated_at")
+}
+
+model Cart {
+  id        String     @id @default(uuid())
+  userId    String     @unique @map("user_id")
+  user      User       @relation(fields: [userId], references: [id])
+  items     CartItem[]
+  createdAt DateTime   @default(now()) @map("created_at")
+  updatedAt DateTime   @updatedAt @map("updated_at")
+}
+
+model CartItem {
+  id        String   @id @default(uuid())
+  cartId    String   @map("cart_id")
+  productId String   @map("product_id")
+  quantity  Int
+  unitPrice Decimal  @map("unit_price") @db.Decimal(10, 2)
+  cart      Cart     @relation(fields: [cartId], references: [id], onDelete: Cascade)
+  product   Product  @relation(fields: [productId], references: [id])
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@unique([cartId, productId])
+}
+
+model Order {
+  id              String        @id @default(uuid())
+  userId          String        @map("user_id")
+  user            User          @relation(fields: [userId], references: [id])
+  totalAmount     Decimal       @map("total_amount") @db.Decimal(10, 2)
+  status          OrderStatus   @default(pending)
+  shippingAddress String        @map("shipping_address")
+  details         OrderDetail[]
+  payment         Payment?
+  createdAt       DateTime      @default(now()) @map("created_at")
+  updatedAt       DateTime      @updatedAt @map("updated_at")
+}
+
+model OrderDetail {
+  id        String   @id @default(uuid())
+  orderId   String   @map("order_id")
+  productId String   @map("product_id")
+  quantity  Int
+  price     Decimal  @db.Decimal(10, 2)
+  order     Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product   Product  @relation(fields: [productId], references: [id])
+}
+
+model Payment {
+  id            String        @id @default(uuid())
+  orderId       String        @unique @map("order_id")
+  order         Order         @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  paymentMethod PaymentMethod @default(COD) @map("payment_method")
+  paymentStatus PaymentStatus @default(unpaid) @map("payment_status")
+  amount        Decimal       @db.Decimal(10, 2)
+  paymentDate   DateTime?     @map("payment_date")
+}
+
+model Review {
+  id        String       @id @default(uuid())
+  userId    String       @map("user_id")
+  productId String       @map("product_id")
+  rating    Int
+  comment   String?
+  status    ReviewStatus @default(visible)
+  user      User         @relation(fields: [userId], references: [id])
+  product   Product      @relation(fields: [productId], references: [id], onDelete: Cascade)
+  createdAt DateTime     @default(now()) @map("created_at")
+  updatedAt DateTime     @updatedAt @map("updated_at")
 }
