@@ -47,6 +47,19 @@ All API endpoints are mounted under `/api`:
 - `PUT /api/users/profile` - Update current user profile details (requires JWT)
 - `GET /api/admin/users` - List all users (requires admin JWT)
 
+### Product Catalog APIs
+- `GET /api/products` - List products with search/filters (keyword, categoryId, minPrice, maxPrice) and pagination
+- `GET /api/products/:id` - Get product details by ID
+- `POST /api/admin/products` - Create a new product (requires admin JWT)
+- `PUT /api/admin/products/:id` - Update a product (requires admin JWT)
+- `DELETE /api/admin/products/:id` - Delete a product (requires admin JWT)
+
+### Category Catalog APIs
+- `GET /api/categories` - List all categories
+- `POST /api/admin/categories` - Create a new category (requires admin JWT)
+- `PUT /api/admin/categories/:id` - Update a category (requires admin JWT)
+- `DELETE /api/admin/categories/:id` - Delete a category (requires admin JWT, blocked if referenced by products)
+
 ## Implemented Frontend Views & Layouts
 
 The application implements a multi-role web interface utilizing the Astryx Design System:

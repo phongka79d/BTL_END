@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const authRoutes = require('./routes/auth.routes');
 const userRoutes = require('./routes/user.routes');
+const apiRoutes = require('./routes');
 const errorMiddleware = require('./middlewares/error.middleware');
 const { successResponse } = require('./utils/response');
 
@@ -23,6 +24,7 @@ app.get('/api/health', (req, res) => {
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/admin/users', userRoutes);
+app.use('/api', apiRoutes);
 
 // Register not-found middleware
 app.use((req, res, next) => {
