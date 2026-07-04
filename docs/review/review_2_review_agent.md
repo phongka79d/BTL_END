@@ -1466,3 +1466,761 @@ ACCEPTED
 
 ## Repair Instructions
 - None
+
+---
+
+# Task Review Report - 04A
+
+## Review Metadata
+- Agent: A2 task-review-agent
+- Mode: orchestrated
+- Source task file: docs/tasks/task_2.md
+- Execution report reviewed: docs/reports/report_2_execute_agent.md
+- Review report file: docs/review/review_2_review_agent.md
+- Batch: Batch04 - Customer Catalog and Cart UI
+- Task ID: 04A
+- Task title: Run Astryx discovery and establish reusable customer UI component choices
+- Outcome: ACCEPTED
+
+## Evidence Reviewed
+- Selected task block for 04A in docs/tasks/task_2.md.
+- Latest 04A execution report entry in docs/reports/report_2_execute_agent.md.
+- Git evidence: `git status --short`, `git diff --stat`, and `git diff`.
+- Source-of-truth sections: docs/plans/Plan_2.md `### 7.4 Frontend UI Contract`; docs/design/design.md customer product, search/filter, and cart component sections; AGENTS.md Astryx workflow block.
+- Installed Astryx evidence under frontend/node_modules/@astryxdesign/core, including component directory inventory, README, and component docs files.
+- Frontend source inventory and duplicate-component search.
+
+## Scope Review
+- Changed files reviewed: docs/reports/report_2_execute_agent.md.
+- In-scope changes: yes. A1 changed only the execution report, which is the expected artifact for this discovery task.
+- Out-of-scope changes: none found.
+- Implementation files modified by reviewer: no.
+
+## Source Requirement Review
+- Use design page/component map before building views: satisfied by the execution report mapping customer product cards/grid/detail, search/filter controls, cart surfaces, and states from docs/design/design.md.
+- Use Astryx components for shell/navigation/cards/forms/badges/loading/empty states: satisfied for this planning task through installed Astryx docs evidence and the chosen component set.
+- Follow root Astryx rules: satisfied as far as applicable before UI implementation; the report keeps future UI work tied to Astryx primitives and installed docs.
+- Search existing frontend components before creating new product/cart/common components: satisfied by `rg --files frontend/src` and the duplicate-component search.
+- Decide Phase 2 versus out-of-scope design areas: satisfied; reviews, checkout/payment, and admin table/dialog flows are explicitly excluded.
+
+## Validation Review
+- Command/check: `npx astryx build "customer product browsing and cart"`
+- Reported result: blocked with npm `ENOTCACHED`.
+- Rerun result: blocked with npm `ENOTCACHED`; npm could not resolve `astryx` from cache.
+- Status: blocked
+- Notes: This is an allowed blocked condition for 04A because the task explicitly permits recording Astryx tooling failure and continuing with existing installed component evidence.
+
+- Command/check: installed Astryx package and component docs evidence
+- Reported result: passed.
+- Rerun result: passed; `frontend/node_modules/@astryxdesign/core` exists and includes AppShell, TopNav, SideNav, Card, Grid, Badge, EmptyState, Skeleton, TextInput, NumberInput, Selector, Breadcrumbs, Button, IconButton, DropdownMenu, and Avatar component directories/docs.
+- Status: passed
+- Notes: The fallback evidence is sufficient for the task's discovery output.
+
+- Command/check: frontend source inventory and duplicate component search
+- Reported result: passed.
+- Rerun result: passed; current frontend source contains shared layout/common primitives and placeholder customer views, with no existing dedicated product/cart component set to duplicate.
+- Status: passed
+- Notes: Existing `MainLayout`, `PlaceholderView`, API helpers, and cart/auth contexts remain the reusable surfaces for later Batch04 work.
+
+## Architecture Alignment
+- Passed: 04A is a discovery/reporting task and does not introduce implementation architecture changes. The chosen component set aligns with the Plan 2 frontend contract, design component references, and root Astryx workflow.
+- Failed: None.
+- Uncertain: None.
+
+## Implementation Reality
+- Real implementation: not applicable; this task required discovery notes and chosen component set, not source implementation.
+- Stub or fake logic found: no.
+- Evidence: The only changed file is the execution report, and its claims are backed by rerun CLI output, local package evidence, source document sections, and frontend inventory searches.
+
+## Hardcoding Review
+- Hardcoding found: no.
+- Evidence: No implementation files were changed, and the report does not propose fake data or hardcoded runtime behavior.
+
+## Progress Tracking
+- Selected task checkbox before review: unchecked.
+- Checkbox updated by reviewer: yes.
+- Batch status updated by reviewer: no.
+- Execution report entry: complete for 04A.
+- Review report entry: ACCEPTED.
+- Other: Only the selected 04A task entry was checked. The progress tracker entry and sibling task checkboxes were not changed.
+
+## Report Accuracy
+- Accurate.
+- Mismatches: None material. A1 reported the Astryx CLI failure honestly and used installed component docs as the fallback allowed by the task's blocked condition.
+
+## Issues
+
+### Blocking
+- None.
+
+### Major
+- None.
+
+### Minor
+- None.
+
+### Warnings
+- Astryx CLI discovery remains unavailable in this workspace due to npm cache/network constraints; later UI tasks should continue from installed package docs unless the CLI becomes available.
+
+### Observations
+- The execution report appropriately limits 04A to customer catalog/cart discovery and leaves actual UI implementation to later Batch04 tasks.
+
+## Decision
+- Accept selected task: yes.
+- Repair required: no.
+- Can next task proceed: yes.
+- Batch can be marked complete by A2: no.
+
+## Repair Instructions
+- None.
+
+---
+
+# Task Review Report - 04D
+
+## Source Task File
+docs/tasks/task_2.md
+
+## Execution Report Reviewed
+docs/reports/report_2_execute_agent.md
+
+## Review Report File
+docs/review/review_2_review_agent.md
+
+## Mode
+orchestrated
+
+## Final Outcome
+ACCEPTED
+
+## Reviewed Scope
+- Batch: Batch04 - Customer Catalog and Cart UI
+- Task ID: 04D
+- Task title: Build cart view, item controls, removal, subtotal, and checkout placeholder
+- Executor status reported: complete
+- Source of Truth: docs/plans/Plan_2.md > ## 4. Scope; docs/plans/Plan_2.md > ### 7.3 Cart API; docs/plans/Plan_2.md > ### 7.4 Frontend UI Contract; docs/design/design.md > # 10. Cart Components; docs/design/design.md > ## 24.6 Cart Page; docs/design/design.md > ## 25.2 Cart Page States
+- Supplemental documents: None
+
+## Latest Report Selection
+- Latest report entry found: yes
+- Requested task ID, if any: 04D
+- Reviewed task ID: 04D
+- Correct selection: yes
+- Notes: Reviewed the latest `# Task Execution Report - 04D (Correction)` entry.
+
+## Git Diff Evidence
+- git status reviewed: yes
+- git diff stat reviewed: yes
+- git diff reviewed: yes
+- recent commits reviewed: not needed
+- changed files from git: docs/reports/report_2_execute_agent.md; docs/review/review_2_review_agent.md; docs/tasks/task_2.md; frontend/src/views/CartView.jsx; frontend/src/views/HomeView.jsx; frontend/src/views/ProductDetailView.jsx; frontend/src/views/ProductListView.jsx; frontend/src/components/cart/CartItem.jsx; frontend/src/components/cart/CartItemList.jsx; frontend/src/components/cart/CartSummary.jsx; frontend/src/components/common/Alert.jsx; frontend/src/components/common/Loading.jsx; frontend/src/components/common/Pagination.jsx; frontend/src/components/product/
+- untracked files: frontend/src/components/cart/; frontend/src/components/common/Alert.jsx; frontend/src/components/common/Loading.jsx; frontend/src/components/common/Pagination.jsx; frontend/src/components/product/
+
+## Files Reviewed
+- `docs/tasks/task_2.md`: in scope - selected 04D task entry and checkbox state reviewed.
+- `docs/reports/report_2_execute_agent.md`: in scope - latest 04D correction entry reviewed.
+- `docs/plans/Plan_2.md`: in scope - cart scope, out-of-scope checkout/order creation, cart API, and frontend UI contract reviewed.
+- `docs/design/design.md`: in scope - cart component and cart page state requirements reviewed.
+- `frontend/src/views/CartView.jsx`: in scope - replaces placeholder with cart page using CartContext, item list, summary, feedback, and empty actions.
+- `frontend/src/components/cart/CartItem.jsx`: in scope - renders product data, quantity input, update action, remove action, stock label, unit price, and line subtotal.
+- `frontend/src/components/cart/CartItemList.jsx`: in scope - handles loading, empty, error, and success item list states.
+- `frontend/src/components/cart/CartSummary.jsx`: in scope - renders item count, backend subtotal value, and checkout placeholder button.
+- `frontend/src/contexts/CartContext.jsx`: in scope - existing dependency reviewed for backend-backed get/update/remove behavior and subtotal state.
+- `frontend/src/api/cartApi.js`: in scope - existing dependency reviewed for cart API helper endpoints.
+- `frontend/src/routes/AppRoutes.jsx`: in scope - existing dependency reviewed for authenticated `/cart` route guard.
+- `frontend/src/App.jsx`: in scope - existing dependency reviewed for CartProvider wiring.
+- `frontend/src/views/HomeView.jsx`: out of scope for this task - accepted prior 04B dirty file not reopened.
+- `frontend/src/views/ProductListView.jsx`: out of scope for this task - accepted prior 04B dirty file not reopened.
+- `frontend/src/views/ProductDetailView.jsx`: out of scope for this task - accepted prior 04C dirty file not reopened.
+- `frontend/src/components/common/Alert.jsx`: dependency/inherited scope - used by cart UI but introduced by prior accepted Batch04 work.
+- `frontend/src/components/common/Loading.jsx`: out of scope for this task - prior accepted Batch04 file not reopened.
+- `frontend/src/components/common/Pagination.jsx`: out of scope for this task - prior accepted Batch04 file not reopened.
+- `frontend/src/components/product/`: out of scope for this task except `productUtils` helper reuse by cart components.
+
+## Reported Files Cross-Check
+- file from execution report: docs/reports/report_2_execute_agent.md
+- present in git/repo: yes
+- matches task scope: yes
+- notes: Latest correction report appends handoff/status evidence only.
+- file from execution report: frontend/src/views/CartView.jsx
+- present in git/repo: yes
+- matches task scope: yes
+- notes: Present and implements selected task UI.
+- file from execution report: frontend/src/components/cart/CartItem.jsx
+- present in git/repo: yes
+- matches task scope: yes
+- notes: Present and implements item controls/removal.
+- file from execution report: frontend/src/components/cart/CartItemList.jsx
+- present in git/repo: yes
+- matches task scope: yes
+- notes: Present and implements item list states.
+- file from execution report: frontend/src/components/cart/CartSummary.jsx
+- present in git/repo: yes
+- matches task scope: yes
+- notes: Present and implements subtotal/checkout placeholder summary.
+- file from execution report: frontend/src/contexts/CartContext.jsx
+- present in git/repo: yes
+- matches task scope: yes
+- notes: Existing dependency was used; it was not changed by 04D.
+
+## Dependency Review
+- Required dependencies: (04A), (04C), Batch03
+- Dependency status: satisfied
+- Missing or invalid dependency: None found. Current task state shows 04A, 04B, 04C checked in the main block and Batch03 artifacts are present.
+
+## Architecture Alignment
+- Passed: CartView uses CartContext rather than calling cart APIs directly; update/remove flow goes through backend-backed context mutations; subtotal is passed from CartContext/backend response into CartSummary; `/cart` remains authenticated via PrivateRoute; checkout/order creation is not implemented.
+- Failed: None.
+- Uncertain: Live browser smoke remains environment-dependent and was not rerun.
+
+## Implementation Reality
+- Real implementation: yes
+- Stub or fake logic found: no
+- Evidence: CartView renders real stateful UI; CartItem wires NumberInput update and removal callbacks; CartItemList renders loading/empty/error/success states; CartSummary displays subtotal; CartContext performs backend get/update/remove via cartApi and refreshes cart state after mutations.
+
+## Hardcoding Review
+- Hardcoding found: no
+- Evidence: Item data, quantities, unit prices, subtotal, and item count are sourced from CartContext/cart item data rather than fixture values.
+
+## Validations Reviewed
+- Command/check: `cd frontend && npm run build`
+- Reported result: passed
+- Rerun result: passed
+- Status: passed
+- Notes: Reran as `npm run build` from `frontend`; Vite production build completed successfully with 516 modules transformed.
+- Command/check: `npx astryx build "cart page"`
+- Reported result: not_run
+- Rerun result: not_run
+- Status: not_run
+- Notes: A1 reported the CLI executable was unavailable in this checkout; source/design docs and existing Astryx usage were reviewed instead.
+- Command/check: live browser/manual cart add/update/remove/subtotal smoke
+- Reported result: not_run
+- Rerun result: not_run
+- Status: not_run
+- Notes: Live backend/auth/browser setup was unavailable; selected task explicitly allows this as `BLOCKED_BY_USER_ACTION` for live smoke only.
+
+## Acceptance Review
+- Task acceptance: Customer can view, update, and remove cart items; subtotal updates from backend responses; checkout remains a placeholder.
+- Status: satisfied
+- Evidence: CartView consumes CartContext items/subtotal/loading/error/update/remove; CartItemList renders loading, empty, error, and success states; CartItem wires quantity update and remove actions; CartSummary renders the CartContext subtotal and a checkout button without checkout/order creation behavior; AppRoutes protects `/cart` with PrivateRoute.
+
+## Progress Tracking
+- Selected task checkbox before review: unchecked
+- Checkbox updated by reviewer: yes
+- Batch status updated by reviewer: no
+- Execution report entry: latest 04D correction found and reviewed
+- Review report entry: appended at physical EOF
+- Other: Progress Tracker and Batch04 batch status were intentionally not updated.
+
+## Report Accuracy
+- Partial
+- Mismatches: A1 says the checkout button is disabled, but the code disables it only while a cart mutation is active. This is not material to acceptance because the button has no checkout/order creation handler and remains a placeholder.
+
+## Issues
+
+### Blocking
+- None.
+
+### Major
+- None.
+
+### Minor
+- None.
+
+### Warnings
+- Live authenticated cart smoke remains unverified until backend/auth/browser services are available.
+- The checkout placeholder button has no action handler and is only disabled during cart mutations; this satisfies the out-of-scope checkout boundary but the execution report overstated the disabled behavior.
+
+### Observations
+- Accepted prior 04A/04B/04C dirty files remain in the same working tree and were not reopened for this 04D review.
+
+## Decision
+- Accept selected task: yes
+- Repair required: no
+- Can next task proceed: yes
+- Batch can be marked complete by A2: no
+
+## Repair Instructions
+- None.
+
+---
+
+# Task Review Report - 04B
+
+## Source Task File
+docs/tasks/task_2.md
+
+## Execution Report Reviewed
+docs/reports/report_2_execute_agent.md
+
+## Review Report File
+docs/review/review_2_review_agent.md
+
+## Mode
+orchestrated
+
+## Final Outcome
+ACCEPTED
+
+## Reviewed Scope
+- Batch: Batch04 - Customer Catalog and Cart UI
+- Task ID: 04B
+- Task title: Build Home and product list search/filter experience
+- Executor status reported: complete
+- Source of Truth: docs/plans/Plan_2.md > ## 4. Scope; docs/plans/Plan_2.md > ### 7.1 Product API; docs/plans/Plan_2.md > ### 7.4 Frontend UI Contract; docs/design/design.md > ## 24.1 Home Page; docs/design/design.md > ## 24.2 Product List Page; docs/design/design.md > ## 25.1 Product List Page States; docs/design/design.md > # 26. Responsive Rules
+- Supplemental documents: None
+
+## Latest Report Selection
+- Latest report entry found: yes
+- Requested task ID, if any: 04B
+- Reviewed task ID: 04B Continuation
+- Correct selection: yes
+- Notes: The earlier 04B entry reported partial status. The latest matching `04B Continuation` entry reports complete status and is the reviewed entry.
+
+## Git Diff Evidence
+- git status reviewed: yes
+- git diff stat reviewed: yes
+- git diff reviewed: yes
+- recent commits reviewed: not needed
+- changed files from git: docs/reports/report_2_execute_agent.md; docs/review/review_2_review_agent.md; docs/tasks/task_2.md; frontend/src/views/HomeView.jsx; frontend/src/views/ProductListView.jsx
+- untracked files: frontend/src/components/common/Alert.jsx; frontend/src/components/common/Loading.jsx; frontend/src/components/common/Pagination.jsx; frontend/src/components/product/ProductCard.jsx; frontend/src/components/product/ProductFilter.jsx; frontend/src/components/product/ProductList.jsx; frontend/src/components/product/SearchBar.jsx; frontend/src/components/product/productUtils.js
+
+## Files Reviewed
+- `docs/tasks/task_2.md`: in scope - selected 04B task entry and progress tracker checked.
+- `docs/reports/report_2_execute_agent.md`: in scope - latest 04B continuation entry reviewed.
+- `docs/review/review_2_review_agent.md`: in scope - inspected tail before appending.
+- `frontend/src/views/HomeView.jsx`: in scope - fetches featured products from product API, shows loading/error/empty/product states, and links to `/products`.
+- `frontend/src/views/ProductListView.jsx`: in scope - fetches products/categories and wires keyword, categoryId, minPrice, maxPrice, page, and limit query params.
+- `frontend/src/components/product/productUtils.js`: in scope - local product display formatting helpers only.
+- `frontend/src/components/product/SearchBar.jsx`: in scope - Astryx TextInput search control.
+- `frontend/src/components/product/ProductFilter.jsx`: in scope - category and price filter form using Astryx inputs.
+- `frontend/src/components/product/ProductCard.jsx`: in scope - product tile navigates to product detail and displays API product fields.
+- `frontend/src/components/product/ProductList.jsx`: in scope - grid/list composition plus loading, empty, error, and pagination states.
+- `frontend/src/components/common/Loading.jsx`: in scope - product-grid skeleton state.
+- `frontend/src/components/common/Alert.jsx`: in scope - retryable error banner/card.
+- `frontend/src/components/common/Pagination.jsx`: in scope - simple previous/next pagination.
+- `frontend/src/api/productApi.js`: in scope - confirmed existing query helper is reused.
+- `frontend/src/api/categoryApi.js`: in scope - confirmed existing category helper is reused.
+- `frontend/src/api/apiClient.js`: in scope - confirmed existing shared API client envelope handling.
+- `backend/src/controllers/product.controller.js`: in scope - confirmed product API response data shape.
+- `backend/src/controllers/category.controller.js`: in scope - confirmed category API response data shape.
+- `backend/src/utils/response.js`: in scope - confirmed response envelope uses `data`.
+- `docs/plans/Plan_2.md`: in scope - cited product API and frontend UI contract reviewed.
+- `docs/design/design.md`: in scope - cited page/state/responsive requirements reviewed.
+
+## Reported Files Cross-Check
+- file from execution report: `frontend/src/components/product/productUtils.js`; present in git/repo: yes; matches task scope: yes; notes: supports product card display formatting.
+- file from execution report: `frontend/src/components/product/SearchBar.jsx`; present in git/repo: yes; matches task scope: yes; notes: reusable search control.
+- file from execution report: `frontend/src/components/product/ProductFilter.jsx`; present in git/repo: yes; matches task scope: yes; notes: category and price filters.
+- file from execution report: `frontend/src/components/product/ProductCard.jsx`; present in git/repo: yes; matches task scope: yes; notes: product grid card.
+- file from execution report: `frontend/src/components/product/ProductList.jsx`; present in git/repo: yes; matches task scope: yes; notes: product grid/states/pagination composition.
+- file from execution report: `frontend/src/components/common/Loading.jsx`; present in git/repo: yes; matches task scope: yes; notes: product grid skeletons.
+- file from execution report: `frontend/src/components/common/Alert.jsx`; present in git/repo: yes; matches task scope: yes; notes: error/retry state.
+- file from execution report: `frontend/src/components/common/Pagination.jsx`; present in git/repo: yes; matches task scope: yes; notes: simple pagination.
+- file from execution report: `frontend/src/views/HomeView.jsx`; present in git/repo: yes; matches task scope: yes; notes: backend-backed featured products.
+- file from execution report: `frontend/src/views/ProductListView.jsx`; present in git/repo: yes; matches task scope: yes; notes: backend-backed search/filter product list.
+- file from execution report: `docs/reports/report_2_execute_agent.md`; present in git/repo: yes; matches task scope: yes; notes: execution report append.
+
+## Dependency Review
+- Required dependencies: 04A and Batch03.
+- Dependency status: satisfied according to orchestrator handoff; repo evidence shows 04A task entry is already checked and existing product/category API helpers are present.
+- Missing or invalid dependency: None found for this review scope.
+
+## Architecture Alignment
+- Passed: UI uses existing `productApi`, `categoryApi`, and `apiClient`; frontend remains backend-backed and has no direct database access in touched files; product components are split into focused files; Astryx controls/cards/grids/skeletons/empty states are used.
+- Failed: None.
+- Uncertain: Live browser/API-backed interaction could not be manually smoked in this session because backend/database/browser setup was unavailable.
+
+## Implementation Reality
+- Real implementation: yes
+- Stub or fake logic found: no
+- Evidence: `HomeView` calls `productApi.getProducts({ page: 1, limit: 4 })`; `ProductListView` calls `categoryApi.getCategories()` and `productApi.getProducts(toProductQuery(...))`; product grid, search/filter, loading, empty, error, and pagination components render real API state.
+
+## Hardcoding Review
+- Hardcoding found: no material task-blocking hardcoding
+- Evidence: The home page uses latest four catalog items as featured products because Phase 2 has no featured flag. This is an acceptable simplification noted by A1 and still backend-backed.
+
+## Validations Reviewed
+- Command/check: `cd frontend && npm run build`
+- Reported result: passed
+- Rerun result: passed; Vite production build completed successfully with 513 modules transformed.
+- Status: passed
+- Notes: Confirms imports, JSX, and production bundling.
+
+- Command/check: `cd frontend && npm run dev -- --host localhost --port 5173`
+- Reported result: passed startup
+- Rerun result: not_run
+- Status: not_run
+- Notes: Build was rerun instead; dev-server startup claim is plausible but not required to re-run after a passing production build for this A2 review.
+
+- Command/check: forbidden frontend database pattern search
+- Reported result: passed
+- Rerun result: passed; no matches for `DATABASE_URL|DIRECT_URL|PrismaClient|@prisma|supabase|localStorage` in the 04B-touched frontend files.
+- Status: passed
+- Notes: Existing `apiClient` still uses localStorage for auth token, but that file was not changed by 04B and is the established API helper pattern.
+
+- Command/check: Browser/manual product list search/filter smoke
+- Reported result: blocked as `BLOCKED_BY_USER_ACTION`
+- Rerun result: blocked
+- Status: blocked
+- Notes: The selected task explicitly allows `BLOCKED_BY_USER_ACTION` when live backend/database setup is unavailable for API-backed UI validation. This does not block acceptance because repository evidence and frontend build validate implementation shape.
+
+## Acceptance Review
+- Task acceptance: Product list displays backend products, applies search/filter requests, and handles loading/empty/error states.
+- Status: satisfied
+- Evidence: `ProductListView` maps `keyword`, `categoryId`, `minPrice`, `maxPrice`, `page`, and `limit` into the product API query; category options come from `categoryApi.getCategories`; `ProductList` handles loading, error, empty, success, and pagination states; `HomeView` fetches products and links to `/products`.
+
+## Progress Tracking
+- Selected task checkbox before review: unchecked in main Batch04 task block.
+- Checkbox updated by reviewer: yes
+- Batch status updated by reviewer: no
+- Execution report entry: latest matching 04B continuation entry reports complete.
+- Review report entry: appended at EOF.
+- Other: The Batch04 progress tracker entry and sibling tasks were not intentionally updated.
+
+## Report Accuracy
+- Accurate
+- Mismatches: None material. Live browser/manual smoke remains blocked and was not treated as proof of correctness.
+
+## Issues
+
+### Blocking
+- None.
+
+### Major
+- None.
+
+### Minor
+- None.
+
+### Warnings
+- Live backend/browser smoke remains unavailable and should be performed later when the backend/database/browser setup is available.
+- Some styling uses existing/token-adjacent Astryx patterns with numeric Grid `minWidth` values per Astryx docs; this was not treated as a blocker because the implementation uses Astryx components and the documented responsive Grid API.
+
+### Observations
+- Sort behavior remains omitted, which is allowed by the selected task because sort is optional unless already simple/existing.
+
+## Decision
+- Accept selected task: yes
+- Repair required: no
+- Can next task proceed: yes
+- Batch can be marked complete by A2: no
+
+## Repair Instructions
+- None.
+
+---
+
+# Task Review Report - 04C
+
+## Source Task File
+docs/tasks/task_2.md
+
+## Execution Report Reviewed
+docs/reports/report_2_execute_agent.md
+
+## Review Report File
+docs/review/review_2_review_agent.md
+
+## Mode
+same_task_repair
+
+## Final Outcome
+ACCEPTED
+
+## Reviewed Scope
+- Batch: Batch04 - Customer Catalog and Cart UI
+- Task ID: 04C
+- Task title: Build product detail and add-to-cart flow
+- Executor status reported: complete
+- Source of Truth: docs/plans/Plan_2.md > ## 4. Scope; docs/plans/Plan_2.md > ### 7.1 Product API; docs/plans/Plan_2.md > ### 7.3 Cart API; docs/plans/Plan_2.md > ### 7.4 Frontend UI Contract; docs/design/design.md > ## 24.3 Product Detail Page; docs/design/design.md > ## 23.1 Stock Status
+- Supplemental documents: None
+
+## Latest Report Selection
+- Latest report entry found: yes
+- Requested task ID, if any: 04C
+- Reviewed task ID: 04C
+- Correct selection: yes
+- Notes: Reviewed the latest 04C continuation entry reporting same-task repair mode and complete status.
+
+## Git Diff Evidence
+- git status reviewed: yes
+- git diff stat reviewed: yes
+- git diff reviewed: yes
+- recent commits reviewed: not needed
+- changed files from git: docs/reports/report_2_execute_agent.md; docs/review/review_2_review_agent.md; docs/tasks/task_2.md; frontend/src/views/ProductDetailView.jsx; frontend/src/components/product/; accepted prior 04A/04B files also remain dirty in the working tree
+- untracked files: frontend/src/components/product/ and previously accepted common/product components from Batch04
+
+## Files Reviewed
+- `docs/tasks/task_2.md`: in scope - selected 04C task entry and dependency/progress state reviewed
+- `docs/reports/report_2_execute_agent.md`: in scope - latest 04C continuation report reviewed
+- `docs/plans/Plan_2.md`: in scope - Phase 2 scope, product API, cart API, and frontend UI contract reviewed
+- `docs/design/design.md`: in scope - stock status and product detail component guidance reviewed, with review UI treated as out of Phase 2 per task/plan scope
+- `frontend/src/views/ProductDetailView.jsx`: in scope - implemented product detail fetch, UI states, stock display, quantity selector, and cart action reviewed
+- `frontend/src/components/product/productUtils.js`: in scope - reused price, stock, and fallback image helpers reviewed
+- `frontend/src/components/product/ProductCard.jsx`: in scope - shared image/stock helper reuse reviewed
+- `frontend/src/contexts/CartContext.jsx`: in scope - addItem delegation to backend cart API reviewed
+- `frontend/src/api/productApi.js`: in scope - getProductById helper reviewed
+
+## Reported Files Cross-Check
+- file from execution report: frontend/src/views/ProductDetailView.jsx
+- present in git/repo: yes
+- matches task scope: yes
+- notes: Contains the real 04C implementation.
+- file from execution report: frontend/src/components/product/productUtils.js
+- present in git/repo: yes
+- matches task scope: yes
+- notes: Shared helper refactor is in scope for product components.
+- file from execution report: frontend/src/components/product/ProductCard.jsx
+- present in git/repo: yes
+- matches task scope: yes
+- notes: Reviewed only the 04C-relevant reuse of shared image/stock helpers.
+- file from execution report: docs/reports/report_2_execute_agent.md
+- present in git/repo: yes
+- matches task scope: yes
+- notes: Latest continuation report accurately records status and blocked live smoke.
+
+## Dependency Review
+- Required dependencies: (04A), (04B), Batch03
+- Dependency status: satisfied based on selected task file progress state and orchestrator-provided current state
+- Missing or invalid dependency: None
+
+## Architecture Alignment
+- Passed: Product detail uses `productApi.getProductById(id)` for backend data and `useCart().addItem(product.id, quantity)` for cart mutation; final stock validation remains in backend cart API/CartContext flow.
+- Failed: None.
+- Uncertain: Live authenticated browser smoke could not be performed in this review environment.
+
+## Implementation Reality
+- Real implementation: yes
+- Stub or fake logic found: no
+- Evidence: `ProductDetailView` loads by route param, renders product image URL/name/brand/category/price/description/quantity/stock, handles loading/not-found/error states, constrains quantity for UX, and calls the cart context add action.
+
+## Hardcoding Review
+- Hardcoding found: no
+- Evidence: Product data and cart mutations are driven by route params, API responses, and context methods; fallback image and labels are generic UI defaults, not fake success paths.
+
+## Validations Reviewed
+- Command/check: cd frontend && npm run build
+- Reported result: passed
+- Rerun result: passed; Vite built 513 modules and completed successfully
+- Status: passed
+- Notes: Safe validation rerun confirmed the reported build status.
+- Command/check: live browser/manual product-detail and add-to-cart smoke
+- Reported result: not run / BLOCKED_BY_USER_ACTION
+- Rerun result: not run
+- Status: not_run
+- Notes: Backend/auth/browser setup was unavailable; this is consistent with the task blocked condition and was not counted as proof of live behavior.
+
+## Acceptance Review
+- Task acceptance: Customer can open a product detail page and add valid quantities to cart when authenticated.
+- Status: satisfied
+- Evidence: Route-param fetch uses `productApi.getProductById`; the UI renders the required product fields and stock status; quantity is UX-constrained without bypassing backend validation; add-to-cart uses `CartContext.addItem`, which calls the backend cart API and handles unauthenticated/error/success outcomes.
+
+## Progress Tracking
+- Selected task checkbox before review: unchecked
+- Checkbox updated by reviewer: yes
+- Batch status updated by reviewer: no
+- Execution report entry: latest 04C continuation found and reviewed
+- Review report entry: appended at physical EOF
+- Other: Progress Tracker 04C entry and batch status were intentionally not updated.
+
+## Report Accuracy
+- Accurate
+- Mismatches: None material. The initial 04C report listed implementation files; the latest continuation correctly listed only the execution report as modified in that pass while relying on the already-present implementation.
+
+## Issues
+
+### Blocking
+- None.
+
+### Major
+- None.
+
+### Minor
+- None.
+
+### Warnings
+- Live authenticated add-to-cart smoke remains unverified until backend/auth/browser services are available.
+- The broader design page references review components, but Plan 2 and the selected task explicitly keep product reviews and forms out of Phase 2.
+
+### Observations
+- Accepted prior 04A/04B changes remain dirty in the same working tree; they were not reopened for this 04C review.
+
+## Decision
+- Accept selected task: yes
+- Repair required: no
+- Can next task proceed: yes
+- Batch can be marked complete by A2: no
+
+## Repair Instructions
+- None.
+
+---
+
+# Task Review Report - 04D
+
+## Source Task File
+docs/tasks/task_2.md
+
+## Execution Report Reviewed
+docs/reports/report_2_execute_agent.md
+
+## Review Report File
+docs/review/review_2_review_agent.md
+
+## Mode
+orchestrated
+
+## Final Outcome
+ACCEPTED
+
+## Reviewed Scope
+- Batch: Batch04 - Customer Catalog and Cart UI
+- Task ID: 04D
+- Task title: Build cart view, item controls, removal, subtotal, and checkout placeholder
+- Executor status reported: complete
+- Source of Truth: docs/plans/Plan_2.md > ## 4. Scope; docs/plans/Plan_2.md > ### 7.3 Cart API; docs/plans/Plan_2.md > ### 7.4 Frontend UI Contract; docs/design/design.md > # 10. Cart Components; docs/design/design.md > ## 24.6 Cart Page; docs/design/design.md > ## 25.2 Cart Page States
+- Supplemental documents: None
+
+## Latest Report Selection
+- Latest report entry found: yes
+- Requested task ID, if any: 04D
+- Reviewed task ID: 04D
+- Correct selection: yes
+- Notes: Reviewed the latest `# Task Execution Report - 04D (Correction)` entry.
+
+## Git Diff Evidence
+- git status reviewed: yes
+- git diff stat reviewed: yes
+- git diff reviewed: yes
+- recent commits reviewed: not needed
+- changed files from git: docs/reports/report_2_execute_agent.md; docs/review/review_2_review_agent.md; docs/tasks/task_2.md; frontend/src/views/CartView.jsx; frontend/src/views/HomeView.jsx; frontend/src/views/ProductDetailView.jsx; frontend/src/views/ProductListView.jsx; frontend/src/components/cart/CartItem.jsx; frontend/src/components/cart/CartItemList.jsx; frontend/src/components/cart/CartSummary.jsx; frontend/src/components/common/Alert.jsx; frontend/src/components/common/Loading.jsx; frontend/src/components/common/Pagination.jsx; frontend/src/components/product/
+- untracked files: frontend/src/components/cart/; frontend/src/components/common/Alert.jsx; frontend/src/components/common/Loading.jsx; frontend/src/components/common/Pagination.jsx; frontend/src/components/product/
+
+## Files Reviewed
+- `docs/tasks/task_2.md`: in scope - selected 04D task entry and checkbox state reviewed.
+- `docs/reports/report_2_execute_agent.md`: in scope - latest 04D correction entry reviewed.
+- `docs/plans/Plan_2.md`: in scope - cart scope, out-of-scope checkout/order creation, cart API, and frontend UI contract reviewed.
+- `docs/design/design.md`: in scope - cart component and cart page state requirements reviewed.
+- `frontend/src/views/CartView.jsx`: in scope - replaces placeholder with cart page using CartContext, item list, summary, feedback, and empty actions.
+- `frontend/src/components/cart/CartItem.jsx`: in scope - renders product data, quantity input, update action, remove action, stock label, unit price, and line subtotal.
+- `frontend/src/components/cart/CartItemList.jsx`: in scope - handles loading, empty, error, and success item list states.
+- `frontend/src/components/cart/CartSummary.jsx`: in scope - renders item count, backend subtotal value, and checkout placeholder button.
+- `frontend/src/contexts/CartContext.jsx`: in scope - existing dependency reviewed for backend-backed get/update/remove behavior and subtotal state.
+- `frontend/src/api/cartApi.js`: in scope - existing dependency reviewed for cart API helper endpoints.
+- `frontend/src/routes/AppRoutes.jsx`: in scope - existing dependency reviewed for authenticated `/cart` route guard.
+- `frontend/src/App.jsx`: in scope - existing dependency reviewed for CartProvider wiring.
+- `frontend/src/views/HomeView.jsx`: out of scope for this task - accepted prior 04B dirty file not reopened.
+- `frontend/src/views/ProductListView.jsx`: out of scope for this task - accepted prior 04B dirty file not reopened.
+- `frontend/src/views/ProductDetailView.jsx`: out of scope for this task - accepted prior 04C dirty file not reopened.
+- `frontend/src/components/common/Alert.jsx`: dependency/inherited scope - used by cart UI but introduced by prior accepted Batch04 work.
+- `frontend/src/components/common/Loading.jsx`: out of scope for this task - prior accepted Batch04 file not reopened.
+- `frontend/src/components/common/Pagination.jsx`: out of scope for this task - prior accepted Batch04 file not reopened.
+- `frontend/src/components/product/`: out of scope for this task except `productUtils` helper reuse by cart components.
+
+## Reported Files Cross-Check
+- file from execution report: docs/reports/report_2_execute_agent.md
+- present in git/repo: yes
+- matches task scope: yes
+- notes: Latest correction report appends handoff/status evidence only.
+- file from execution report: frontend/src/views/CartView.jsx
+- present in git/repo: yes
+- matches task scope: yes
+- notes: Present and implements selected task UI.
+- file from execution report: frontend/src/components/cart/CartItem.jsx
+- present in git/repo: yes
+- matches task scope: yes
+- notes: Present and implements item controls/removal.
+- file from execution report: frontend/src/components/cart/CartItemList.jsx
+- present in git/repo: yes
+- matches task scope: yes
+- notes: Present and implements item list states.
+- file from execution report: frontend/src/components/cart/CartSummary.jsx
+- present in git/repo: yes
+- matches task scope: yes
+- notes: Present and implements subtotal/checkout placeholder summary.
+- file from execution report: frontend/src/contexts/CartContext.jsx
+- present in git/repo: yes
+- matches task scope: yes
+- notes: Existing dependency was used; it was not changed by 04D.
+
+## Dependency Review
+- Required dependencies: (04A), (04C), Batch03
+- Dependency status: satisfied
+- Missing or invalid dependency: None found. Current task state shows 04A, 04B, 04C checked in the main block and Batch03 artifacts are present.
+
+## Architecture Alignment
+- Passed: CartView uses CartContext rather than calling cart APIs directly; update/remove flow goes through backend-backed context mutations; subtotal is passed from CartContext/backend response into CartSummary; `/cart` remains authenticated via PrivateRoute; checkout/order creation is not implemented.
+- Failed: None.
+- Uncertain: Live browser smoke remains environment-dependent and was not rerun.
+
+## Implementation Reality
+- Real implementation: yes
+- Stub or fake logic found: no
+- Evidence: CartView renders real stateful UI; CartItem wires NumberInput update and removal callbacks; CartItemList renders loading/empty/error/success states; CartSummary displays subtotal; CartContext performs backend get/update/remove via cartApi and refreshes cart state after mutations.
+
+## Hardcoding Review
+- Hardcoding found: no
+- Evidence: Item data, quantities, unit prices, subtotal, and item count are sourced from CartContext/cart item data rather than fixture values.
+
+## Validations Reviewed
+- Command/check: `cd frontend && npm run build`
+- Reported result: passed
+- Rerun result: passed
+- Status: passed
+- Notes: Reran as `npm run build` from `frontend`; Vite production build completed successfully with 516 modules transformed.
+- Command/check: `npx astryx build "cart page"`
+- Reported result: not_run
+- Rerun result: not_run
+- Status: not_run
+- Notes: A1 reported the CLI executable was unavailable in this checkout; source/design docs and existing Astryx usage were reviewed instead.
+- Command/check: live browser/manual cart add/update/remove/subtotal smoke
+- Reported result: not_run
+- Rerun result: not_run
+- Status: not_run
+- Notes: Live backend/auth/browser setup was unavailable; selected task explicitly allows this as `BLOCKED_BY_USER_ACTION` for live smoke only.
+
+## Acceptance Review
+- Task acceptance: Customer can view, update, and remove cart items; subtotal updates from backend responses; checkout remains a placeholder.
+- Status: satisfied
+- Evidence: CartView consumes CartContext items/subtotal/loading/error/update/remove; CartItemList renders loading, empty, error, and success states; CartItem wires quantity update and remove actions; CartSummary renders the CartContext subtotal and a checkout button without checkout/order creation behavior; AppRoutes protects `/cart` with PrivateRoute.
+
+## Progress Tracking
+- Selected task checkbox before review: unchecked
+- Checkbox updated by reviewer: yes
+- Batch status updated by reviewer: no
+- Execution report entry: latest 04D correction found and reviewed
+- Review report entry: appended at physical EOF
+- Other: Progress Tracker and Batch04 batch status were intentionally not updated.
+
+## Report Accuracy
+- Partial
+- Mismatches: A1 says the checkout button is disabled, but the code disables it only while a cart mutation is active. This is not material to acceptance because the button has no checkout/order creation handler and remains a placeholder.
+
+## Issues
+
+### Blocking
+- None.
+
+### Major
+- None.
+
+### Minor
+- None.
+
+### Warnings
+- Live authenticated cart smoke remains unverified until backend/auth/browser services are available.
+- The checkout placeholder button has no action handler and is only disabled during cart mutations; this satisfies the out-of-scope checkout boundary but the execution report overstated the disabled behavior.
+- A duplicate 04D review block was inserted earlier in this file during report append correction; this final 04D block is the EOF entry used for the orchestrated handoff.
+
+### Observations
+- Accepted prior 04A/04B/04C dirty files remain in the same working tree and were not reopened for this 04D review.
+
+## Decision
+- Accept selected task: yes
+- Repair required: no
+- Can next task proceed: yes
+- Batch can be marked complete by A2: no
+
+## Repair Instructions
+- None.

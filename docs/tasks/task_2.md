@@ -558,7 +558,7 @@ The Phase 2 demo needs customers to browse products, search/filter, view details
 
 ### Tasks
 
-- [ ] (04A): Run Astryx discovery and establish reusable customer UI component choices
+- [x] (04A): Run Astryx discovery and establish reusable customer UI component choices
   - Source of Truth: `docs/plans/Plan_2.md` > `### 7.4 Frontend UI Contract`; `docs/design/design.md` > `# 7. Customer Product Components`; `docs/design/design.md` > `# 8. Product Search and Filter Components`; `docs/design/design.md` > `# 10. Cart Components`; root `AGENTS.md` > `<!-- ASTRYX:START -->`
   - Source Requirements:
     - Use `docs/design/design.md` page-to-component map before building views.
@@ -580,7 +580,7 @@ The Phase 2 demo needs customers to browse products, search/filter, view details
   - Blocked Condition: None unless `@astryxdesign/core` or the Astryx CLI is unavailable, in which case record the tooling failure and continue only with existing installed component evidence.
   - Files: Execution report; no required source changes unless component placeholders are adjusted.
 
-- [ ] (04B): Build Home and product list search/filter experience
+- [x] (04B): Build Home and product list search/filter experience
   - Source of Truth: `docs/plans/Plan_2.md` > `## 4. Scope`; `docs/plans/Plan_2.md` > `### 7.1 Product API`; `docs/plans/Plan_2.md` > `### 7.4 Frontend UI Contract`; `docs/design/design.md` > `## 24.1 Home Page`; `docs/design/design.md` > `## 24.2 Product List Page`; `docs/design/design.md` > `## 25.1 Product List Page States`; `docs/design/design.md` > `# 26. Responsive Rules`
   - Source Requirements:
     - `HomeView` shows featured products and links to product listing.
@@ -604,7 +604,7 @@ The Phase 2 demo needs customers to browse products, search/filter, view details
   - Blocked Condition: `BLOCKED_BY_USER_ACTION` only if live backend/database setup is unavailable for API-backed UI validation.
   - Files: `frontend/src/views/HomeView.jsx`, `frontend/src/views/ProductListView.jsx`, `frontend/src/components/product/ProductCard.jsx`, `frontend/src/components/product/ProductList.jsx`, `frontend/src/components/product/ProductFilter.jsx`, `frontend/src/components/product/SearchBar.jsx`, `frontend/src/components/common/Loading.jsx`, `frontend/src/components/common/Alert.jsx`, `frontend/src/components/common/Pagination.jsx`
 
-- [ ] (04C): Build product detail and add-to-cart flow
+- [x] (04C): Build product detail and add-to-cart flow
   - Source of Truth: `docs/plans/Plan_2.md` > `## 4. Scope`; `docs/plans/Plan_2.md` > `### 7.1 Product API`; `docs/plans/Plan_2.md` > `### 7.3 Cart API`; `docs/plans/Plan_2.md` > `### 7.4 Frontend UI Contract`; `docs/design/design.md` > `## 24.3 Product Detail Page`; `docs/design/design.md` > `## 23.1 Stock Status`
   - Source Requirements:
     - `ProductDetailView` shows product image, info, stock status, and add-to-cart action.
@@ -627,7 +627,7 @@ The Phase 2 demo needs customers to browse products, search/filter, view details
   - Blocked Condition: `BLOCKED_BY_USER_ACTION` only if live backend/auth setup is unavailable.
   - Files: `frontend/src/views/ProductDetailView.jsx`, `frontend/src/components/product/`, `frontend/src/contexts/CartContext.jsx`
 
-- [ ] (04D): Build cart view, item controls, removal, subtotal, and checkout placeholder
+- [x] (04D): Build cart view, item controls, removal, subtotal, and checkout placeholder
   - Source of Truth: `docs/plans/Plan_2.md` > `## 4. Scope`; `docs/plans/Plan_2.md` > `### 7.3 Cart API`; `docs/plans/Plan_2.md` > `### 7.4 Frontend UI Contract`; `docs/design/design.md` > `# 10. Cart Components`; `docs/design/design.md` > `## 24.6 Cart Page`; `docs/design/design.md` > `## 25.2 Cart Page States`
   - Source Requirements:
     - `CartView` shows cart items, quantity controls, removal action, subtotal, and checkout navigation placeholder.
@@ -1071,9 +1071,9 @@ Batch04 customer UI and Batch05 admin UI can be implemented in parallel after Ba
 
 ### Batches
 
-- [ ] Batch01 - Backend Catalog APIs
-- [ ] Batch02 - Backend Cart APIs
-- [ ] Batch03 - Frontend API, Cart State, and Routing
+- [x] Batch01 - Backend Catalog APIs
+- [x] Batch02 - Backend Cart APIs
+- [x] Batch03 - Frontend API, Cart State, and Routing
 - [ ] Batch04 - Customer Catalog and Cart UI
 - [ ] Batch05 - Admin Product and Category UI
 - [ ] Batch06 - Verification, Security Audit, and Phase 3 Handoff
@@ -1081,26 +1081,26 @@ Batch04 customer UI and Batch05 admin UI can be implemented in parallel after Ba
 ### Task IDs
 
 #### Batch01
-- [ ] (01A): Inspect Phase 1 backend patterns and catalog model placeholders
-- [ ] (01B): Implement product model functions for list, detail, create, update, and delete
-- [ ] (01C): Implement category model functions for list, create, update, delete, and product checks
-- [ ] (01D): Implement product/category controllers, routes, admin protection, and API mounting
+- [x] (01A): Inspect Phase 1 backend patterns and catalog model placeholders
+- [x] (01B): Implement product model functions for list, detail, create, update, and delete
+- [x] (01C): Implement category model functions for list, create, update, delete, and product checks
+- [x] (01D): Implement product/category controllers, routes, admin protection, and API mounting
 
 #### Batch02
-- [ ] (02A): Implement cart model functions for get/create, add, update, remove, and subtotal
-- [ ] (02B): Enforce cart quantity and stock validation at the backend source of truth
+- [x] (02A): Implement cart model functions for get/create, add, update, remove, and subtotal
+- [x] (02B): Enforce cart quantity and stock validation at the backend source of truth
 - [x] (02C): Implement cart controller, authenticated routes, and route mounting
 
 #### Batch03
-- [ ] (03A): Add product, category, and cart API helpers using the existing API client pattern
-- [ ] (03B): Build `CartContext` using auth state and backend cart APIs
-- [ ] (03C): Wire Phase 2 routes, navigation entries, and route guards
+- [x] (03A): Add product, category, and cart API helpers using the existing API client pattern
+- [x] (03B): Build `CartContext` using auth state and backend cart APIs
+- [x] (03C): Wire Phase 2 routes, navigation entries, and route guards
 
 #### Batch04
-- [ ] (04A): Run Astryx discovery and establish reusable customer UI component choices
-- [ ] (04B): Build Home and product list search/filter experience
-- [ ] (04C): Build product detail and add-to-cart flow
-- [ ] (04D): Build cart view, item controls, removal, subtotal, and checkout placeholder
+- [x] (04A): Run Astryx discovery and establish reusable customer UI component choices
+- [x] (04B): Build Home and product list search/filter experience
+- [x] (04C): Build product detail and add-to-cart flow
+- [x] (04D): Build cart view, item controls, removal, subtotal, and checkout placeholder
 
 #### Batch05
 - [ ] (05A): Run Astryx discovery and establish admin table/form/dialog component choices
