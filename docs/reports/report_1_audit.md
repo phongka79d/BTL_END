@@ -46,3 +46,20 @@
 - Checkboxes in the main tasks section and Progress Tracker section of task_1.md for Batch03 are checked [x].
 - Uncommitted changes (backend/) align with the expected Batch03 scope. No files outside Batch03 or related to later batches (e.g. frontend views, dashboard components) were modified.
 - Configuration and API documentation have been successfully appended to the root `README.md`.
+
+---
+
+# Batch Scope Audit Report - Batch04
+
+## Status
+- Outcome: PASS
+- Batch Can Commit: true
+- README Updated: true
+
+## Evidence
+- git diff reviewed: true
+- README read: true
+- All tasks in Batch04 (04A, 04B, 04C, 04D, 04E, 04F) are reported as complete by A1 and ACCEPTED by A2.
+- Checkboxes in the main tasks section and Progress Tracker section of task_1.md for Batch04 are checked [x].
+- Uncommitted changes (frontend/) align with the expected Batch04 scope. No files outside Batch04 or related to later batches (e.g. Batch05 verification files) were modified.
+- Configuration and Frontend Views/Layouts documentation have been successfully appended to the root `README.md`.

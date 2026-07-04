@@ -1,0 +1,138 @@
+import React from 'react';
+import { Routes, Route, Navigate, Outlet } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
+import MainLayout from '../layouts/MainLayout';
+import AuthLayout from '../layouts/AuthLayout';
+import AdminLayout from '../layouts/AdminLayout';
+
+// View Imports
+import HomeView from '../views/HomeView';
+import LoginView from '../views/LoginView';
+import RegisterView from '../views/RegisterView';
+import AdminDashboardView from '../views/AdminDashboardView';
+
+/**
+ * Route guard for authenticated users (Customer/Admin).
+ * Redirects to /login if the user is not authenticated.
+ */
+export const PrivateRoute = () => {
+  const { isAuthenticated, loading } = useAuth();
+
+  if (loading) {
+    return (
+      <div style={{
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        height: '100vh',
+        fontFamily: 'system-ui, -apple-system, sans-serif',
+        color: 'var(--color-text-secondary, #666)'
+      }}>
+        Loading...
+      </div>
+    );
+  }
+
+  return isAuthenticated ? <Outlet /> : <Navigate to="/login" replace />;
+};
+
+/**
+ * Route guard for admin users only.
+ * Redirects to /login if not authenticated, or /unauthorized if authenticated but not an admin.
+ */
+export const AdminRoute = () => {
+  const { isAuthenticated, isAdmin, loading } = useAuth();
+
+  if (loading) {
+    return (
+      <div style={{
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        height: '100vh',
+        fontFamily: 'system-ui, -apple-system, sans-serif',
+        color: 'var(--color-text-secondary, #666)'
+      }}>
+        Loading...
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return <Navigate to="/login" replace />;
+  }
+
+  return isAdmin ? <Outlet /> : <Navigate to="/unauthorized" replace />;
+};
+
+/**
+ * Route guard for unauthenticated users only (e.g. login, register pages).
+ * Redirects authenticated users to their home/dashboard path.
+ */
+export const PublicOnlyRoute = () => {
+  const { isAuthenticated, isAdmin, loading } = useAuth();
+
+  if (loading) {
+    return (
+      <div style={{
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        height: '100vh',
+        fontFamily: 'system-ui, -apple-system, sans-serif',
+        color: 'var(--color-text-secondary, #666)'
+      }}>
+        Loading...
+      </div>
+    );
+  }
+
+  if (isAuthenticated) {
+    return <Navigate to={isAdmin ? "/admin" : "/"} replace />;
+  }
+
+  return <Outlet />;
+};
+
+/**
+ * AppRoutes Component
+ * Sets up the routing tree using React Router v6.
+ * Note: Actual views are mapped dynamically. Sibling tasks will import real views.
+ */
+export const AppRoutes = () => {
+  return (
+    <Routes>
+      {/* Customer Area: Wrapped in MainLayout */}
+      <Route element={<MainLayout />}>
+        <Route path="/" element={<HomeView />} />
+        <Route path="/unauthorized" element={<div>Unauthorized Access (Placeholder)</div>} />
+
+        {/* Protected Customer Routes inside MainLayout */}
+        <Route element={<PrivateRoute />}>
+          <Route path="/profile" element={<div>Profile Page (Placeholder)</div>} />
+        </Route>
+
+        {/* Fallback inside MainLayout */}
+        <Route path="*" element={<div>Page Not Found (Placeholder)</div>} />
+      </Route>
+
+      {/* Guest Only Routes: Wrapped in AuthLayout */}
+      <Route element={<PublicOnlyRoute />}>
+        <Route element={<AuthLayout />}>
+          <Route path="/login" element={<LoginView />} />
+          <Route path="/register" element={<RegisterView />} />
+        </Route>
+      </Route>
+
+      {/* Admin Only Area: Wrapped in AdminLayout */}
+      <Route element={<AdminRoute />}>
+        <Route element={<AdminLayout />}>
+          <Route path="/admin" element={<AdminDashboardView />} />
+        </Route>
+      </Route>
+    </Routes>
+  );
+};
+
+export default AppRoutes;
+

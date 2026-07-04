@@ -28,6 +28,11 @@ Create a `backend/.env` file with the following variables:
 - `JWT_EXPIRES_IN`: JWT expiration time (e.g., `7d`)
 - `NODE_ENV`: Application environment (`development` or `production`)
 
+### Frontend (`frontend/.env`)
+
+Create a `frontend/.env` file with the following variables:
+- `VITE_API_BASE_URL`: Express REST API endpoint URL (default `http://localhost:5000/api`)
+
 ## Implemented API Endpoints (Auth & Users)
 
 All API endpoints are mounted under `/api`:
@@ -41,6 +46,19 @@ All API endpoints are mounted under `/api`:
 - `GET /api/users/profile` - Get current user profile (requires JWT)
 - `PUT /api/users/profile` - Update current user profile details (requires JWT)
 - `GET /api/admin/users` - List all users (requires admin JWT)
+
+## Implemented Frontend Views & Layouts
+
+The application implements a multi-role web interface utilizing the Astryx Design System:
+
+- **Main Layout (Customer Layout):** Provides main user shell with top navigation bar, TechMart logo, search placeholder, cart badge, and dynamic user dropdown.
+- **Auth Layout (Centered Card):** Center-aligned card shell wrapping login and registration panels.
+- **Admin Layout (Console Layout):** Collapsible dashboard sidebar layout mapping management sections (Dashboard, Products, Categories, Users, Orders, Reviews, Reports).
+- **Views:**
+  - `HomeView`: Main customer landing page featuring a welcome hero panel and categories layout.
+  - `LoginView`: Auth login form with email/password validation, inline errors, and loading states.
+  - `RegisterView`: Detailed profile signup form supporting field validation and shipping address text area.
+  - `AdminDashboardView`: Administrative statistics panels for sales and inventory tracking.
 
 ## Local Commands
 

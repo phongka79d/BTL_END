@@ -641,7 +641,7 @@ Plan 1 requires frontend auth and layout foundations so later phases can add cus
 
 ### Tasks
 
-- [ ] (04A): Install Astryx and configure frontend entry/environment
+- [x] (04A): Install Astryx and configure frontend entry/environment
   - Source of Truth: `docs/plans/Plan_1.md` > `### 7.6 Frontend Foundation Contract`; `docs/design/design.md` > `## 2. Design System`
   - Source Requirements:
     - `main.jsx` must import Astryx reset and core CSS.
@@ -663,7 +663,7 @@ Plan 1 requires frontend auth and layout foundations so later phases can add cus
   - Blocked Condition: None
   - Files: `frontend/package.json`, `frontend/src/main.jsx`, `frontend/.env.example`
 
-- [ ] (04B): Add auth/user API helpers
+- [x] (04B): Add auth/user API helpers
   - Source of Truth: `docs/plans/Plan_1.md` > `## 6. Target Directory Structure`; `docs/plans/Plan_1.md` > `### 7.5 Auth API Contract`
   - Source Requirements:
     - Add `authApi.js` and `userApi.js`.
@@ -685,7 +685,7 @@ Plan 1 requires frontend auth and layout foundations so later phases can add cus
   - Blocked Condition: None
   - Files: `frontend/src/api/authApi.js`, `frontend/src/api/userApi.js`, optional shared API helper
 
-- [ ] (04C): Build AuthContext and route guards
+- [x] (04C): Build AuthContext and route guards
   - Source of Truth: `docs/plans/Plan_1.md` > `## 6. Target Directory Structure`; `docs/plans/Plan_1.md` > `## 8. Implementation Steps`; `docs/design/design.md` > `# 6. Navigation Components`
   - Source Requirements:
     - Build `AuthContext.jsx`.
@@ -707,7 +707,7 @@ Plan 1 requires frontend auth and layout foundations so later phases can add cus
   - Blocked Condition: None
   - Files: `frontend/src/contexts/AuthContext.jsx`, `frontend/src/routes/AppRoutes.jsx`
 
-- [ ] (04D): Build Astryx-based layouts and navigation shell
+- [x] (04D): Build Astryx-based layouts and navigation shell
   - Source of Truth: `docs/plans/Plan_1.md` > `### 7.6 Frontend Foundation Contract`; `docs/design/design.md` > `## 5. Main Layouts`; `docs/design/design.md` > `# 6. Navigation Components`
   - Source Requirements:
     - Add basic customer and admin layout shells.
@@ -729,7 +729,7 @@ Plan 1 requires frontend auth and layout foundations so later phases can add cus
   - Blocked Condition: None
   - Files: `frontend/src/layouts/MainLayout.jsx`, `frontend/src/layouts/AuthLayout.jsx`, `frontend/src/layouts/AdminLayout.jsx`, `frontend/src/components/common/`
 
-- [ ] (04E): Build Home, Login, Register, and AdminDashboard placeholder views
+- [x] (04E): Build Home, Login, Register, and AdminDashboard placeholder views
   - Source of Truth: `docs/plans/Plan_1.md` > `## 4. Scope`; `docs/plans/Plan_1.md` > `### 7.5 Auth API Contract`; `docs/design/design.md` > `# 9. Authentication Components`; `docs/design/design.md` > `# 21. Common Feedback Components`
   - Source Requirements:
     - Create minimal `HomeView`, `LoginView`, `RegisterView`, and placeholder `AdminDashboardView`.
@@ -751,7 +751,7 @@ Plan 1 requires frontend auth and layout foundations so later phases can add cus
   - Blocked Condition: `BLOCKED_BY_USER_ACTION` only for live auth API validation if backend env/database setup is missing.
   - Files: `frontend/src/views/HomeView.jsx`, `frontend/src/views/LoginView.jsx`, `frontend/src/views/RegisterView.jsx`, `frontend/src/views/admin/AdminDashboardView.jsx`
 
-- [ ] (04F): Wire `App.jsx` and route table
+- [x] (04F): Wire `App.jsx` and route table
   - Source of Truth: `docs/plans/Plan_1.md` > `## 6. Target Directory Structure`; `docs/plans/Plan_1.md` > `## 8. Implementation Steps`
   - Source Requirements:
     - Add `frontend/src/routes/AppRoutes.jsx`.
@@ -1043,7 +1043,7 @@ Batch04 can prepare static UI shell work after Batch01, but live auth validation
 - [x] Batch01 - Repository Shell and Environment Contract
 - [x] Batch02 - Supabase Prisma Data Model and Seed
 - [x] Batch03 - Backend MVC Utilities and Auth APIs
-- [ ] Batch04 - Frontend Astryx Shell and Auth Views
+- [x] Batch04 - Frontend Astryx Shell and Auth Views
 - [ ] Batch05 - Verification, Security Audit, and Phase 2 Handoff
 
 ### Task IDs
@@ -1070,12 +1070,12 @@ Batch04 can prepare static UI shell work after Batch01, but live auth validation
 - [x] (03F): Wire Express app, route mounting, CORS, JSON parsing, and error handling
 
 #### Batch04
-- [ ] (04A): Install Astryx and configure frontend entry/environment
-- [ ] (04B): Add auth/user API helpers
-- [ ] (04C): Build AuthContext and route guards
-- [ ] (04D): Build Astryx-based layouts and navigation shell
-- [ ] (04E): Build Home, Login, Register, and AdminDashboard placeholder views
-- [ ] (04F): Wire `App.jsx` and route table
+- [x] (04A): Install Astryx and configure frontend entry/environment
+- [x] (04B): Add auth/user API helpers
+- [x] (04C): Build AuthContext and route guards
+- [x] (04D): Build Astryx-based layouts and navigation shell
+- [x] (04E): Build Home, Login, Register, and AdminDashboard placeholder views
+- [x] (04F): Wire `App.jsx` and route table
 
 #### Batch05
 - [ ] (05A): Run backend install, Prisma, migration, seed, and startup validations
