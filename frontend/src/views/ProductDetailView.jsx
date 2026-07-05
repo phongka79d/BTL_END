@@ -20,7 +20,10 @@ import {
 import { useAuth } from '../contexts/AuthContext';
 import { useCart } from '../contexts/CartContext';
 import { productApi } from '../api/productApi';
+import { reviewApi } from '../api/reviewApi';
 import Alert from '../components/common/Alert';
+import ProductReviewForm from '../components/product/ProductReviewForm';
+import ProductReviewList from '../components/product/ProductReviewList';
 import {
   formatPrice,
   getProductImageSrc,
@@ -86,7 +89,7 @@ const DetailSkeleton = () => {
 export const ProductDetailView = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user } = useAuth();
   const { addItem, actionLoading } = useCart();
   const [product, setProduct] = useState(null);
   const [quantity, setQuantity] = useState(1);
@@ -94,7 +97,12 @@ export const ProductDetailView = () => {
   const [error, setError] = useState(null);
   const [isNotFound, setIsNotFound] = useState(false);
   const [feedback, setFeedback] = useState(null);
+  const [reviews, setReviews] = useState([]);
+  const [isReviewsLoading, setIsReviewsLoading] = useState(false);
+  const [reviewsError, setReviewsError] = useState(null);
+  const [isReviewSubmitting, setIsReviewSubmitting] = useState(false);
   const requestIdRef = useRef(0);
+  const reviewRequestIdRef = useRef(0);
 
   const loadProduct = useCallback(async () => {
     if (!id) {
@@ -155,6 +163,50 @@ export const ProductDetailView = () => {
     };
   }, [loadProduct]);
 
+  const loadReviews = useCallback(async () => {
+    if (!id) {
+      setReviews([]);
+      setReviewsError(null);
+      setIsReviewsLoading(false);
+      return;
+    }
+
+    const requestId = reviewRequestIdRef.current + 1;
+    reviewRequestIdRef.current = requestId;
+
+    setIsReviewsLoading(true);
+    setReviewsError(null);
+
+    try {
+      const response = await reviewApi.getProductReviews(id);
+
+      if (requestId !== reviewRequestIdRef.current) {
+        return;
+      }
+
+      setReviews(response?.data || []);
+    } catch (err) {
+      if (requestId !== reviewRequestIdRef.current) {
+        return;
+      }
+
+      setReviews([]);
+      setReviewsError(err?.message || 'Unable to load customer reviews.');
+    } finally {
+      if (requestId === reviewRequestIdRef.current) {
+        setIsReviewsLoading(false);
+      }
+    }
+  }, [id]);
+
+  useEffect(() => {
+    loadReviews().catch(() => {});
+
+    return () => {
+      reviewRequestIdRef.current += 1;
+    };
+  }, [loadReviews]);
+
   const availableQuantity = Number(product?.quantity ?? 0);
   const stockLabel = getStockLabel(availableQuantity);
   const stockVariant = getStockVariant(availableQuantity);
@@ -209,6 +261,22 @@ export const ProductDetailView = () => {
       actionLabel: signInRequired ? 'Sign in' : undefined,
       onAction: signInRequired ? () => navigate('/login') : undefined
     });
+  };
+
+  const canWriteReview = isAuthenticated && user?.role !== 'admin';
+
+  const handleReviewSubmit = async (payload) => {
+    if (!product) {
+      throw new Error('Product details are not available yet.');
+    }
+
+    setIsReviewSubmitting(true);
+    try {
+      await reviewApi.createProductReview(product.id, payload);
+      await loadReviews();
+    } finally {
+      setIsReviewSubmitting(false);
+    }
   };
 
   if (isLoading) {
@@ -409,6 +477,38 @@ export const ProductDetailView = () => {
           Sign in to complete cart actions and keep your cart synchronized across sessions.
         </Text>
       )}
+
+      <Grid columns={{ minWidth: 360, max: 2 }} gap={5}>
+        <ProductReviewList
+          reviews={reviews}
+          isLoading={isReviewsLoading}
+          error={reviewsError}
+          onRetry={loadReviews}
+        />
+
+        {canWriteReview ? (
+          <ProductReviewForm
+            onSubmit={handleReviewSubmit}
+            isSubmitting={isReviewSubmitting}
+          />
+        ) : (
+          <Card padding={4}>
+            <VStack gap={3}>
+              <VStack gap={1}>
+                <Text weight="semibold">Sign in to write a review</Text>
+                <Text size="supporting" color="secondary">
+                  Customer accounts can submit ratings and optional comments for this product.
+                </Text>
+              </VStack>
+              <Button
+                label={isAuthenticated ? 'Use a customer account' : 'Sign in'}
+                variant="secondary"
+                onClick={() => navigate('/login')}
+              />
+            </VStack>
+          </Card>
+        )}
+      </Grid>
     </VStack>
   );
 };

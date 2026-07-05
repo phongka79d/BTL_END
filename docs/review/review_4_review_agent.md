@@ -130,6 +130,7 @@ ACCEPTED
 
 ## Repair Instructions
 - None
+
 ---
 
 # Task Review Report - 01B
@@ -270,7 +271,6 @@ ACCEPTED
 
 ## Repair Instructions
 - None
----
 
 # Task Review Report - 01C
 
@@ -617,3 +617,668 @@ ACCEPTED
 
 ## Repair Instructions
 - None
+
+---
+
+# Task Review Report - 02A
+
+## Source Task File
+docs/tasks/task_4.md
+
+## Execution Report Reviewed
+docs/reports/report_4_execute_agent.md
+
+## Review Report File
+docs/review/review_4_review_agent.md
+
+## Mode
+orchestrated
+
+## Final Outcome
+ACCEPTED
+
+## Reviewed Scope
+- Batch: Batch02 - Customer Review UI
+- Task ID: 02A
+- Task title: Add review API helper using existing API client pattern
+- Executor status reported: complete
+- Source of Truth: docs/plans/Plan_4.md > ## 6. Target Directory Structure; docs/plans/Plan_4.md > ### 7.1 Review API; README.md > ## Phase 4 Handoff Notes
+- Supplemental documents: None
+
+## Latest Report Selection
+- Latest report entry found: yes
+- Requested task ID, if any: 02A
+- Reviewed task ID: 02A
+- Correct selection: yes
+- Notes: Reviewed only the latest 02A execution report entry appended after Batch01 completion.
+
+## Git Diff Evidence
+- git status reviewed: yes
+- git diff stat reviewed: yes
+- git diff reviewed: yes
+- recent commits reviewed: not needed
+- changed files from git: docs/reports/report_4_execute_agent.md; frontend/src/api/reviewApi.js; frontend/src/api/reviewApi.test.js
+- untracked files: frontend/src/api/reviewApi.js; frontend/src/api/reviewApi.test.js
+
+## Files Reviewed
+- `docs/tasks/task_4.md`: in scope - selected 02A task and progress tracker were read before the checkbox update.
+- `docs/reports/report_4_execute_agent.md`: in scope - latest 02A execution report entry was reviewed.
+- `frontend/src/api/reviewApi.js`: in scope - customer review API helper uses the shared apiClient pattern.
+- `frontend/src/api/reviewApi.test.js`: in scope - focused structural test validates the helper without requiring Vite runtime config.
+- `frontend/src/api/apiClient.js`: in scope - existing shared request helper pattern was checked.
+- `frontend/src/api/productApi.js`: in scope - existing object-export API helper style was checked.
+- `docs/plans/Plan_4.md`: in scope - target structure and review endpoint contracts were checked.
+- `README.md`: in scope - Phase 4 backend review API handoff notes were checked.
+
+## Reported Files Cross-Check
+- file from execution report: frontend/src/api/reviewApi.js
+- present in git/repo: yes
+- matches task scope: yes
+- notes: Helper exists and calls `/products/${productId}/reviews` through apiClient get/post.
+- file from execution report: frontend/src/api/reviewApi.test.js
+- present in git/repo: yes
+- matches task scope: yes
+- notes: Test is a narrow validation artifact for 02A and does not implement later UI tasks.
+- file from execution report: docs/reports/report_4_execute_agent.md
+- present in git/repo: yes
+- matches task scope: yes
+- notes: Contains the latest 02A execution report.
+
+## Dependency Review
+- Required dependencies: Batch01 backend review APIs; existing frontend API client pattern; Plan 4 review endpoint contract.
+- Dependency status: satisfied
+- Missing or invalid dependency: None
+
+## Architecture Alignment
+- Passed: Helper reuses `frontend/src/api/apiClient.js`, matches existing API module style, and keeps backend-only config/database access out of frontend review helper code.
+- Failed: None
+- Uncertain: None
+
+## Implementation Reality
+- Real implementation: yes
+- Stub or fake logic found: no
+- Evidence: `reviewApi.getProductReviews(productId)` and `reviewApi.createProductReview(productId, payload)` call `apiClient.get` and `apiClient.post` with the Plan 4 product review endpoint.
+
+## Hardcoding Review
+- Hardcoding found: no
+- Evidence: Endpoint templates use the passed productId; no fixed product, user, review, token, database, or sample fixture IDs were found.
+
+## Validations Reviewed
+- Command/check: node --test frontend/src/api/reviewApi.test.js before adding frontend/src/api/reviewApi.js
+- Reported result: passed
+- Rerun result: not_run
+- Status: passed
+- Notes: This RED check cannot be rerun after the helper exists without modifying files; the reported missing-module result is credible and not required for final acceptance.
+- Command/check: node --test frontend/src/api/reviewApi.test.js after adding the helper
+- Reported result: passed
+- Rerun result: passed
+- Status: passed
+- Notes: Rerun passed with 1 test, confirming apiClient import, reviewApi export, customer list/create paths, and no admin path.
+- Command/check: rg no direct DB/backend-only config references in reviewApi.js
+- Reported result: passed
+- Rerun result: passed
+- Status: passed
+- Notes: Rerun found no Supabase, Prisma, database URL, direct fetch, localStorage, or API base URL references in the production helper.
+- Command/check: rg optional admin helper/path in reviewApi.js/test
+- Reported result: passed
+- Rerun result: passed
+- Status: passed
+- Notes: Rerun found `/admin/reviews` only in the test assertion that verifies the admin path is absent from production helper code.
+- Command/check: git status --short
+- Reported result: passed
+- Rerun result: passed
+- Status: passed
+- Notes: Rerun showed the execution report modified and reviewApi.js/reviewApi.test.js untracked before A2 edits.
+
+## Acceptance Review
+- Task acceptance: Helper uses existing API client and does not expose backend-only config or database details.
+- Status: satisfied
+- Evidence: Inspected helper, test, existing apiClient/productApi pattern, Plan 4 Review API paths, and README Phase 4 handoff notes.
+
+## Progress Tracking
+- Selected task checkbox before review: unchecked in task entry and Progress Tracker.
+- Checkbox updated by reviewer: yes
+- Batch status updated by reviewer: no
+- Execution report entry: present for 02A
+- Review report entry: appended at physical EOF
+- Other: Only the selected 02A task checkbox and matching 02A Progress Tracker line were updated; Batch02 and sibling tasks remain unchecked.
+
+## Report Accuracy
+- Accurate / partial / inaccurate: accurate
+- Mismatches: none blocking.
+
+## Issues
+
+### Blocking
+- None
+
+### Major
+- None
+
+### Minor
+- None
+
+### Warnings
+- frontend/src/api/reviewApi.test.js is a structural source test because importing the helper directly would load existing Vite import.meta.env config through apiClient.
+- git diff emitted an existing LF-to-CRLF warning for docs/reports/report_4_execute_agent.md.
+
+### Observations
+- Full customer review UI smoke validation remains deferred to 02D as the task specifies.
+
+## Decision
+- Accept selected task: yes
+- Repair required: no
+- Can next task proceed: yes
+- Batch can be marked complete by A2: no
+
+## Repair Instructions
+- None
+
+---
+
+# Task Review Report - 02B
+
+## Source Task File
+docs/tasks/task_4.md
+
+## Execution Report Reviewed
+docs/reports/report_4_execute_agent.md
+
+## Review Report File
+docs/review/review_4_review_agent.md
+
+## Mode
+orchestrated
+
+## Final Outcome
+ACCEPTED
+
+## Reviewed Scope
+- Batch: Batch02 - Customer Review UI
+- Task ID: 02B
+- Task title: Build customer review list and form components
+- Executor status reported: complete
+- Source of Truth: docs/plans/Plan_4.md > ## 4. Scope; docs/design/design.md > ## 7.6 ProductReviewList; docs/design/design.md > ## 7.7 ProductReviewForm; docs/design/design.md > # 21. Common Feedback Components; docs/tasks/task_4.md > (02B)
+- Supplemental documents: None
+
+## Latest Report Selection
+- Latest report entry found: yes
+- Requested task ID, if any: 02B
+- Reviewed task ID: 02B
+- Correct selection: yes
+- Notes: Reviewed only the latest 02B execution report entry appended after the accepted 02A review.
+
+## Git Diff Evidence
+- git status reviewed: yes
+- git diff stat reviewed: yes
+- git diff reviewed: yes
+- recent commits reviewed: not needed
+- changed files from git: docs/reports/report_4_execute_agent.md; docs/review/review_4_review_agent.md; docs/tasks/task_4.md; frontend/src/api/reviewApi.js; frontend/src/api/reviewApi.test.js; frontend/src/components/product/ProductReviewForm.jsx; frontend/src/components/product/ProductReviewForm.structure.test.js; frontend/src/components/product/ProductReviewList.jsx; frontend/src/components/product/ProductReviewList.structure.test.js
+- untracked files: frontend/src/api/reviewApi.js; frontend/src/api/reviewApi.test.js; frontend/src/components/product/ProductReviewForm.jsx; frontend/src/components/product/ProductReviewForm.structure.test.js; frontend/src/components/product/ProductReviewList.jsx; frontend/src/components/product/ProductReviewList.structure.test.js
+
+## Files Reviewed
+- `docs/tasks/task_4.md`: in scope - selected 02B task, dependencies, acceptance, hard scope, and progress tracker were read.
+- `docs/reports/report_4_execute_agent.md`: in scope - latest 02B execution report entry was reviewed.
+- `docs/review/review_4_review_agent.md`: in scope - EOF was inspected before appending this review.
+- `frontend/src/components/product/ProductReviewList.jsx`: in scope - focused review presentation component with loading, error, empty, and review list states.
+- `frontend/src/components/product/ProductReviewForm.jsx`: in scope - focused review form component with rating validation, optional comment, submit loading, error, and success states.
+- `frontend/src/components/product/ProductReviewList.structure.test.js`: in scope - narrow structural validation for list behavior and data-access boundary.
+- `frontend/src/components/product/ProductReviewForm.structure.test.js`: in scope - narrow structural validation for form behavior and data-access boundary.
+- `docs/plans/Plan_4.md`: in scope - Phase 4 customer review UI scope was checked.
+- `docs/design/design.md`: in scope - ProductReviewList, ProductReviewForm, and common feedback guidance were checked.
+- `frontend/src/components/product/ProductList.jsx`: in scope - existing loading/error/empty component conventions were checked.
+- `frontend/src/components/admin/ProductForm.jsx`: in scope - existing Astryx form conventions were checked.
+- `frontend/src/components/checkout/CheckoutForm.jsx`: in scope - existing form layout and field-status conventions were checked.
+
+## Reported Files Cross-Check
+- file from execution report: frontend/src/components/product/ProductReviewList.jsx
+- present in git/repo: yes
+- matches task scope: yes
+- notes: Component renders customer name, rating, comment, date, loading, empty, and error states without owning API calls.
+- file from execution report: frontend/src/components/product/ProductReviewForm.jsx
+- present in git/repo: yes
+- matches task scope: yes
+- notes: Component captures rating/comment, validates whole-number rating 1-5, trims optional comment, and delegates submission to parent onSubmit.
+- file from execution report: frontend/src/components/product/ProductReviewList.structure.test.js
+- present in git/repo: yes
+- matches task scope: yes
+- notes: Focused source-structure test covers presentation states and data-access boundary.
+- file from execution report: frontend/src/components/product/ProductReviewForm.structure.test.js
+- present in git/repo: yes
+- matches task scope: yes
+- notes: Focused source-structure test covers form validation/feedback and data-access boundary.
+- file from execution report: docs/reports/report_4_execute_agent.md
+- present in git/repo: yes
+- matches task scope: yes
+- notes: Contains the latest 02B execution report.
+
+## Dependency Review
+- Required dependencies: accepted 02A review API helper; existing ProductDetailView for later integration; existing Astryx setup and component conventions.
+- Dependency status: satisfied
+- Missing or invalid dependency: None
+
+## Architecture Alignment
+- Passed: Components are presentation/form units only, do not import reviewApi/apiClient, do not integrate ProductDetailView early, and use local Astryx component conventions.
+- Failed: None
+- Uncertain: None
+
+## Implementation Reality
+- Real implementation: yes
+- Stub or fake logic found: no
+- Evidence: ProductReviewList maps review data into visible UI states; ProductReviewForm implements real local state, validation, submit delegation, and feedback state.
+
+## Hardcoding Review
+- Hardcoding found: no
+- Evidence: No fixed product, review, user, token, API URL, or database identifiers were found in the production components.
+
+## Validations Reviewed
+- Command/check: Astryx discovery workflow with npx astryx build and fallback installed-component inspection
+- Reported result: passed
+- Rerun result: not_run
+- Status: passed
+- Notes: A2 did not rerun npx because package execution can alter environment/cache and A1 reported the CLI was unavailable; A2 verified installed Astryx usage by reading local component declarations indirectly through implementation and nearby Astryx component conventions.
+- Command/check: node --test component structure tests before component files
+- Reported result: passed
+- Rerun result: not_run
+- Status: passed
+- Notes: The RED missing-file check cannot be rerun after implementation without modifying files; A1's report is credible and not required for final acceptance.
+- Command/check: node --test frontend/src/components/product/ProductReviewList.structure.test.js frontend/src/components/product/ProductReviewForm.structure.test.js
+- Reported result: passed
+- Rerun result: passed
+- Status: passed
+- Notes: Rerun passed 4 tests covering list states, form validation/feedback structure, and no data-access logic.
+- Command/check: rg forbidden API/database references in ProductReviewList.jsx and ProductReviewForm.jsx
+- Reported result: passed
+- Rerun result: passed
+- Status: passed
+- Notes: Rerun found no reviewApi, apiClient, fetch, localStorage, database URL, Prisma, Supabase, SQL, or API path references; exit 1 is expected for no matches.
+- Command/check: rg raw styling and direct div checks in ProductReviewList.jsx and ProductReviewForm.jsx
+- Reported result: passed
+- Rerun result: passed
+- Status: passed
+- Notes: Rerun found no raw hex colors, raw px values, direct div markup, or className styling; exit 1 is expected for no matches.
+- Command/check: Optional focused ESLint availability check
+- Reported result: not_run
+- Rerun result: not_run
+- Status: not_run
+- Notes: A1 reported ESLint lacks project configuration; A2 accepted syntax and focused structure checks instead.
+- Command/check: node -e esbuild.transformSync JSX parse check for ProductReviewList.jsx and ProductReviewForm.jsx
+- Reported result: passed
+- Rerun result: passed
+- Status: passed
+- Notes: Rerun parsed both JSX files successfully from the frontend workdir.
+
+## Acceptance Review
+- Task acceptance: Components are focused, reusable, Astryx-aligned, accessible enough for this component-scope task, and do not contain API base URL or database logic.
+- Status: satisfied
+- Evidence: Inspected task entry, latest execution report, component source, structure tests, local Astryx component conventions, Plan 4 scope, and design sections 7.6, 7.7, and 21.
+
+## Progress Tracking
+- Selected task checkbox before review: unchecked in task entry and Progress Tracker.
+- Checkbox updated by reviewer: yes
+- Batch status updated by reviewer: no
+- Execution report entry: present for 02B
+- Review report entry: appended at physical EOF
+- Other: Only the selected 02B task checkbox and matching 02B Progress Tracker line were updated; Batch02 and sibling tasks remain unchecked.
+
+## Report Accuracy
+- Accurate / partial / inaccurate: accurate
+- Mismatches: none blocking.
+
+## Issues
+
+### Blocking
+- None
+
+### Major
+- None
+
+### Minor
+- None
+
+### Warnings
+- A2 did not rerun the Astryx npx discovery command because A1 already reported local CLI unavailability and rerunning package execution was not necessary for acceptance.
+- Component tests are structural source tests because the frontend does not have a configured component test renderer in this task scope.
+- git diff emitted existing LF-to-CRLF warnings for task, report, and review markdown files.
+
+### Observations
+- ProductDetailView integration and browser/route smoke validation remain deferred to 02C and 02D by task boundary.
+
+## Decision
+- Accept selected task: yes
+- Repair required: no
+- Can next task proceed: yes
+- Batch can be marked complete by A2: no
+
+## Repair Instructions
+- None
+---
+
+# Task Review Report - 02C
+
+## Source Task File
+docs/tasks/task_4.md
+
+## Execution Report Reviewed
+docs/reports/report_4_execute_agent.md
+
+## Review Report File
+docs/review/review_4_review_agent.md
+
+## Mode
+orchestrated
+
+## Final Outcome
+ACCEPTED
+
+## Reviewed Scope
+- Batch: Batch02 - Customer Review UI
+- Task ID: 02C
+- Task title: Integrate review UI into product detail
+- Executor status reported: complete
+- Source of Truth: docs/plans/Plan_4.md > ## 4. Scope; docs/design/design.md > # 24. Page-to-Component Map > ## 24.3 Product Detail Page; docs/plans/Master_Plan.md > ## 21. Minimum Viable Demo Flow > ### 21.1 Customer Demo Flow; docs/tasks/task_4.md > (02C)
+- Supplemental documents: None
+
+## Latest Report Selection
+- Latest report entry found: yes
+- Requested task ID, if any: 02C
+- Reviewed task ID: 02C
+- Correct selection: yes
+- Notes: Reviewed only the latest 02C execution report entry. Browser/manual product detail smoke remains 02D scope.
+
+## Git Diff Evidence
+- git status reviewed: yes
+- git diff stat reviewed: yes
+- git diff reviewed: yes
+- recent commits reviewed: not needed
+- changed files from git: docs/reports/report_4_execute_agent.md; docs/review/review_4_review_agent.md; docs/tasks/task_4.md; frontend/src/views/ProductDetailView.jsx; frontend/src/api/reviewApi.js; frontend/src/api/reviewApi.test.js; frontend/src/components/product/ProductReviewForm.jsx; frontend/src/components/product/ProductReviewForm.structure.test.js; frontend/src/components/product/ProductReviewList.jsx; frontend/src/components/product/ProductReviewList.structure.test.js; frontend/src/views/ProductDetailView.reviewIntegration.test.js
+- untracked files: frontend/src/api/reviewApi.js; frontend/src/api/reviewApi.test.js; frontend/src/components/product/ProductReviewForm.jsx; frontend/src/components/product/ProductReviewForm.structure.test.js; frontend/src/components/product/ProductReviewList.jsx; frontend/src/components/product/ProductReviewList.structure.test.js; frontend/src/views/ProductDetailView.reviewIntegration.test.js
+
+## Files Reviewed
+- `docs/tasks/task_4.md`: in scope - selected 02C task, dependencies, acceptance, and Progress Tracker were reviewed.
+- `docs/reports/report_4_execute_agent.md`: in scope - latest 02C execution report was reviewed.
+- `docs/review/review_4_review_agent.md`: in scope - invalid current-turn duplicate 02C blocks inserted before 01B were removed, then this valid 02C report was appended at EOF.
+- `frontend/src/views/ProductDetailView.jsx`: in scope - review API loading, stale-request guard, review list rendering, auth-aware form/prompt, submit, refresh, and existing product/cart behavior were reviewed.
+- `frontend/src/views/ProductDetailView.reviewIntegration.test.js`: in scope - focused structural checks for review integration were reviewed.
+- `frontend/src/api/reviewApi.js`: in scope - accepted 02A dependency used for list/create calls.
+- `frontend/src/components/product/ProductReviewList.jsx`: in scope - accepted 02B dependency receiving reviews/loading/error/retry props.
+- `frontend/src/components/product/ProductReviewForm.jsx`: in scope - accepted 02B dependency delegating review submission to ProductDetailView.
+- `docs/plans/Plan_4.md`: in scope - Phase 4 review UI/API scope was checked.
+- `docs/design/design.md`: in scope - product detail page map and review component expectations were checked.
+- `docs/plans/Master_Plan.md`: in scope - customer demo flow requiring product detail review creation was checked.
+
+## Reported Files Cross-Check
+- file from execution report: frontend/src/views/ProductDetailView.jsx
+- present in git/repo: yes
+- matches task scope: yes
+- notes: Integrates reviewApi, ProductReviewList, ProductReviewForm, loading/error state, auth-aware form/prompt, submit, and refresh after create.
+- file from execution report: frontend/src/views/ProductDetailView.reviewIntegration.test.js
+- present in git/repo: yes
+- matches task scope: yes
+- notes: Focused structural test covers review API/component wiring, state rendering, refresh call, and forbidden direct data access.
+- file from execution report: docs/reports/report_4_execute_agent.md
+- present in git/repo: yes
+- matches task scope: yes
+- notes: Contains the latest 02C execution report entry.
+
+## Dependency Review
+- Required dependencies: 02A review API helper; 02B review list/form components; Batch01 review API endpoints; existing ProductDetailView and auth state.
+- Dependency status: satisfied
+- Missing or invalid dependency: None
+
+## Architecture Alignment
+- Passed: ProductDetailView uses the existing reviewApi helper, keeps ProductReviewList/ProductReviewForm as focused children, does not add direct fetch/database/config access, and preserves existing product/cart paths.
+- Failed: None
+- Uncertain: None
+
+## Implementation Reality
+- Real implementation: yes
+- Stub or fake logic found: no
+- Evidence: ProductDetailView calls `reviewApi.getProductReviews(id)`, stores `response.data` reviews, renders ProductReviewList, calls `reviewApi.createProductReview(product.id, payload)`, and awaits `loadReviews()` after successful creation.
+
+## Hardcoding Review
+- Hardcoding found: no
+- Evidence: No fixed product, user, review, token, database, or fixture identifiers were found in ProductDetailView review integration.
+
+## Validations Reviewed
+- Command/check: node --test frontend/src/views/ProductDetailView.reviewIntegration.test.js after implementation
+- Reported result: passed
+- Rerun result: passed as part of focused combined node:test run
+- Status: passed
+- Notes: Focused ProductDetailView review integration checks passed.
+- Command/check: node --test frontend/src/api/reviewApi.test.js frontend/src/components/product/ProductReviewList.structure.test.js frontend/src/components/product/ProductReviewForm.structure.test.js frontend/src/views/ProductDetailView.reviewIntegration.test.js
+- Reported result: passed
+- Rerun result: passed
+- Status: passed
+- Notes: Rerun passed 8 tests for review API helper, review components, and ProductDetailView integration.
+- Command/check: rg forbidden frontend database/direct fetch references in ProductDetailView.jsx
+- Reported result: passed
+- Rerun result: passed
+- Status: passed
+- Notes: No matches for Prisma, database URLs, Supabase, SQL, direct fetch, localStorage, or API_BASE_URL; rg exit 1 was expected.
+- Command/check: rg raw styling/direct div checks in ProductDetailView.jsx
+- Reported result: passed
+- Rerun result: passed
+- Status: passed
+- Notes: No matches for raw hex, raw px, direct div markup, or className styling; rg exit 1 was expected.
+- Command/check: node -e JSX esbuild parse check for frontend/src/views/ProductDetailView.jsx
+- Reported result: passed
+- Rerun result: passed
+- Status: passed
+- Notes: Rerun with frontend/node_modules/esbuild parsed ProductDetailView.jsx successfully after a root-workdir attempt could not resolve esbuild.
+- Command/check: cd frontend && npm run build
+- Reported result: passed
+- Rerun result: passed
+- Status: passed
+- Notes: Vite production build passed with 540 modules transformed and the existing chunk-size warning.
+- Command/check: git status --short
+- Reported result: passed
+- Rerun result: passed
+- Status: passed
+- Notes: Worktree contains expected Batch02 report/task/review changes and review UI/API/test files; no staging or commit was performed.
+
+## Acceptance Review
+- Task acceptance: Product detail can display existing visible reviews and create a new review without breaking product or cart interactions.
+- Status: satisfied
+- Evidence: Source requirements were checked against ProductDetailView implementation, reviewApi helper, review components, focused tests, no-match architecture searches, JSX parse, and frontend production build. Browser/manual product detail review smoke remains intentionally deferred to 02D.
+
+## Progress Tracking
+- Selected task checkbox before review: already checked by the interrupted A2 attempt in both task entry and Progress Tracker.
+- Checkbox updated by reviewer: yes
+- Batch status updated by reviewer: no
+- Execution report entry: present for 02C
+- Review report entry: appended at physical EOF
+- Other: The selected 02C task checkbox and matching 02C Progress Tracker line are checked; Batch02 and 02D remain unchecked.
+
+## Report Accuracy
+- Accurate / partial / inaccurate: accurate
+- Mismatches: none blocking.
+
+## Issues
+
+### Blocking
+- None
+
+### Major
+- None
+
+### Minor
+- None
+
+### Warnings
+- An interrupted A2 subagent attempt checked the selected 02C boxes before failing; this recovery review verified the evidence and restored the review log to chronological EOF append order.
+- The first A2 esbuild parse rerun from the repository root could not resolve `esbuild`; the corrected rerun using `frontend/node_modules/esbuild` passed.
+- git diff emitted existing LF-to-CRLF warnings for task, report, review, and ProductDetailView files.
+
+### Observations
+- Browser/manual product detail review validation remains deferred to 02D by task boundary.
+
+## Decision
+- Accept selected task: yes
+- Repair required: no
+- Can next task proceed: yes
+- Batch can be marked complete by A2: no
+
+## Repair Instructions
+- None
+
+---
+
+# Task Review Report - 02D
+
+## Source Task File
+docs/tasks/task_4.md
+
+## Execution Report Reviewed
+docs/reports/report_4_execute_agent.md
+
+## Review Report File
+docs/review/review_4_review_agent.md
+
+## Mode
+orchestrated
+
+## Final Outcome
+ACCEPTED
+
+## Reviewed Scope
+- Batch: Batch02 - Customer Review UI
+- Task ID: 02D
+- Task title: Validate customer review UI states and access behavior
+- Executor status reported: complete
+- Source of Truth: docs/tasks/task_4.md > (02D); docs/plans/Plan_4.md > ## 9. Verification & Testing Plan; docs/design/design.md > # 25. UI States and # 26. Responsive Design
+- Supplemental documents: Latest prior 02D execution reports; user-provided customer UI manual PASS evidence except missing admin UI.
+
+## Latest Report Selection
+- Latest report entry found: yes
+- Requested task ID, if any: 02D
+- Reviewed task ID: 02D
+- Correct selection: yes
+- Notes: Reviewed the latest 02D same-task repair report appended after the admin product-selector regression was found and fixed.
+
+## Git Diff Evidence
+- git status reviewed: yes
+- git diff stat reviewed: yes
+- git diff reviewed: yes
+- recent commits reviewed: not needed
+- changed files from git: docs/reports/report_4_execute_agent.md; docs/review/review_4_review_agent.md; docs/tasks/task_4.md; frontend/src/routes/AppRoutes.jsx; frontend/src/views/ProductDetailView.jsx
+- untracked files: frontend/src/api/reviewApi.js; frontend/src/api/reviewApi.test.js; frontend/src/components/product/ProductReviewForm.jsx; frontend/src/components/product/ProductReviewForm.structure.test.js; frontend/src/components/product/ProductReviewList.jsx; frontend/src/components/product/ProductReviewList.structure.test.js; frontend/src/views/ProductDetailView.reviewIntegration.test.js; frontend/src/views/admin/AdminReviewView.jsx; frontend/src/views/admin/AdminReviewView.structure.test.js
+
+## Files Reviewed
+- `docs/tasks/task_4.md`: in scope - 02D source requirements and selected checkbox reviewed.
+- `docs/reports/report_4_execute_agent.md`: in scope - latest 02D execution report selected and checked against repo evidence.
+- `docs/review/review_4_review_agent.md`: in scope - prior review log inspected before EOF append.
+- `frontend/src/api/reviewApi.js`: in scope - uses existing apiClient for list/create/hide review APIs.
+- `frontend/src/api/reviewApi.test.js`: in scope - focused API helper structure tests.
+- `frontend/src/routes/AppRoutes.jsx`: in scope - registers `/admin/reviews` under existing admin routing.
+- `frontend/src/views/ProductDetailView.jsx`: in scope - prior 02C customer review integration needed by 02D validation.
+- `frontend/src/components/product/ProductReviewList.jsx`: in scope - customer review list UI states.
+- `frontend/src/components/product/ProductReviewForm.jsx`: in scope - customer review form validation and feedback states.
+- `frontend/src/views/admin/AdminReviewView.jsx`: in scope - requested admin hide UI, state handling, and selector repair.
+- `frontend/src/views/admin/AdminReviewView.structure.test.js`: in scope - focused admin review UI structure and regression coverage.
+
+## Reported Files Cross-Check
+- file from execution report: frontend/src/views/admin/AdminReviewView.jsx
+- present in git/repo: yes
+- matches task scope: yes
+- notes: Implements the user-requested admin review hide action using existing APIs.
+- file from execution report: frontend/src/views/admin/AdminReviewView.structure.test.js
+- present in git/repo: yes
+- matches task scope: yes
+- notes: Covers admin route/action states and product-selector callback regression.
+- file from execution report: docs/reports/report_4_execute_agent.md
+- present in git/repo: yes
+- matches task scope: yes
+- notes: Latest 02D report is complete and materially accurate.
+
+## Dependency Review
+- Required dependencies: 02C and 01D accepted; backend review endpoints from Batch01; user manual evidence for live customer checks.
+- Dependency status: satisfied
+- Missing or invalid dependency: none
+
+## Architecture Alignment
+- Passed: Frontend review calls use `apiClient`; no direct database/Supabase/direct fetch references were found; admin UI is behind the existing admin route/layout; Astryx components are used without raw styling matches.
+- Failed: None
+- Uncertain: None blocking. Admin review listing is product-by-product because Batch02 did not define an all-reviews admin endpoint.
+
+## Implementation Reality
+- Real implementation: yes
+- Stub or fake logic found: no
+- Evidence: Admin view loads products, loads visible reviews for the selected product, calls `reviewApi.hideReview`, removes hidden rows from local state, and keeps product selection stable. Customer review UI was implemented in 02A-02C and validated by user/manual plus focused tests.
+
+## Hardcoding Review
+- Hardcoding found: no
+- Evidence: No smoke-only IDs or fixture-specific runtime logic found. The admin page works from product/review API responses.
+
+## Validations Reviewed
+- Command/check: `node --test frontend/src/api/reviewApi.test.js frontend/src/components/product/ProductReviewList.structure.test.js frontend/src/components/product/ProductReviewForm.structure.test.js frontend/src/views/ProductDetailView.reviewIntegration.test.js frontend/src/views/admin/AdminReviewView.structure.test.js`
+- Reported result: passed
+- Rerun result: passed, 12 tests passed
+- Status: passed
+- Notes: Rerun after the admin selector repair passed all focused review UI checks.
+- Command/check: `cd frontend && npm run build`
+- Reported result: passed
+- Rerun result: passed
+- Status: passed
+- Notes: Vite production build passed with 541 modules transformed and only the existing chunk-size warning.
+- Command/check: forbidden frontend database/direct-fetch/raw styling search over `frontend/src/views/admin/AdminReviewView.jsx` and `frontend/src/api/reviewApi.js`
+- Reported result: passed
+- Rerun result: passed
+- Status: passed
+- Notes: rg exit 1 indicated no matches for raw hex, raw px, direct div markup, className, Prisma, database URLs, Supabase, SQL, direct fetch, localStorage, or API_BASE_URL.
+- Command/check: prior System Chrome admin review moderation smoke
+- Reported result: passed
+- Rerun result: not rerun
+- Status: passed
+- Notes: A1 evidence showed `/admin/reviews` loaded, exact temporary review was hidden, removed from admin table, and absent from public product detail; the later repair was limited to product-selection callback stability and hide loading state.
+- Command/check: customer review UI manual rerun
+- Reported result: passed
+- Rerun result: user-provided PASS evidence accepted
+- Status: passed
+- Notes: User stated all customer-facing tests passed except the missing admin UI; admin UI was then implemented and validated.
+
+## Acceptance Review
+- Task acceptance: Validate customer review UI states and access behavior.
+- Status: satisfied
+- Evidence: The user-provided customer UI PASS evidence covers customer submit/state behavior; admin UI was added so admins can hide visible reviews; browser smoke verified hidden reviews are absent from public product detail; focused tests, build, and architecture searches passed.
+
+## Progress Tracking
+- Selected task checkbox before review: unchecked in task entry and Progress Tracker
+- Checkbox updated by reviewer: yes
+- Batch status updated by reviewer: no
+- Execution report entry: latest 02D complete report reviewed
+- Review report entry: appended at physical EOF
+- Other: Only 02D checkboxes were changed; Batch02 remains not marked complete by A2.
+
+## Report Accuracy
+- Accurate / partial / inaccurate: accurate
+- Mismatches: none blocking.
+
+## Issues
+
+### Blocking
+- None
+
+### Major
+- None
+
+### Minor
+- None
+
+### Warnings
+- The admin review page lists visible reviews product-by-product because Batch02 does not provide a backend all-reviews moderation endpoint.
+- Browser console recorded a non-blocking 404 resource message during A1 smoke, but the route and moderation workflow passed.
+- git diff emitted existing LF-to-CRLF warnings for modified text files.
+
+### Observations
+- The user asked to rerun "03D"; task evidence shows the relevant failed item was 02D, and the execution report correctly did not run separate Batch03 backend report API work.
+
+## Decision
+- Accept selected task: yes
+- Repair required: no
+- Can next task proceed: yes
+- Batch can be marked complete by A2: no
+
+## Repair Instructions
+- None
+

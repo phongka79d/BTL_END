@@ -78,19 +78,20 @@ The application implements a multi-role web interface utilizing the Astryx Desig
 - **Main Layout (Customer Layout):** Provides main user shell with top navigation bar, TechMart logo, search placeholder, cart badge, and dynamic user dropdown.
 - **Auth Layout (Centered Card):** Center-aligned card shell wrapping login and registration panels.
 - **Admin Layout (Console Layout):** Collapsible dashboard sidebar layout mapping management sections (Dashboard, Products, Categories, Users, Orders, Reviews, Reports).
-- **Frontend API Helpers:** `productApi.js`, `categoryApi.js`, and `cartApi.js` wrap the Express REST endpoints through the shared `apiClient.js`.
+- **Frontend API Helpers:** `productApi.js`, `categoryApi.js`, `cartApi.js`, and `reviewApi.js` wrap the Express REST endpoints through the shared `apiClient.js`.
 - **Cart State:** `CartProvider` and `useCart` load authenticated cart state from the backend, expose cart actions, and provide the navigation badge item count.
 - **Phase 2 Routes:** `/products`, `/products/:id`, `/cart`, `/admin/products`, and `/admin/categories` are registered with the existing customer, private, and admin route guards. These views are fully implemented with the customer and admin UI components.
 - **Views:**
   - `HomeView`: Main customer landing page featuring a welcome hero panel and categories layout.
   - `ProductListView`: Functional customer product catalog search and filtering view.
-  - `ProductDetailView`: Functional customer product detail and cart addition view.
+  - `ProductDetailView`: Functional customer product detail, cart addition, and product review view.
   - `CartView`: Functional customer cart management view with subtotal and stock validations.
   - `LoginView`: Auth login form with email/password validation, inline errors, and loading states.
   - `RegisterView`: Detailed profile signup form supporting field validation and shipping address text area.
   - `AdminDashboardView`: Administrative statistics panels for sales and inventory tracking.
   - `AdminProductView`: Functional administrative product CRUD management view with form validation.
   - `AdminCategoryView`: Functional administrative category CRUD management view with unique-name and deletion checks.
+  - `AdminReviewView`: Administrative review moderation view for hiding visible product reviews.
 
 ## Local Commands
 
@@ -249,3 +250,10 @@ Phase 4 constraints:
   - Review creation requires authentication, validates integer ratings from 1 to 5, trims optional comments, and reuses existing product lookup, response, auth, admin, and Prisma patterns.
   - Backend smoke validation passed for public listing, unauthenticated creation rejection, invalid rating rejection, authenticated creation, customer moderation denial, admin hide behavior, and hidden-review exclusion from public results.
   - The validation smoke created one review row and hid it through the admin API, leaving a hidden validation review row in the connected database.
+
+- **Batch02 (P4B2): Customer Review UI** - Complete
+  - Frontend review API helper `frontend/src/api/reviewApi.js` wraps product review list/create calls and the admin hide endpoint through the shared API client.
+  - Product detail now loads visible product reviews, shows loading/error/empty/data states, and lets authenticated customer accounts submit ratings with optional comments.
+  - Review list and form UI live in focused product components and avoid direct database access or frontend API base URL duplication.
+  - Admin Reviews UI is available at `/admin/reviews` behind the existing admin route/layout, lets admins choose a product, view visible reviews, and hide a review from public product detail.
+  - Focused review UI tests and the frontend production build passed; user-provided manual evidence confirmed customer review UI checks passed, and browser smoke verified admin hide removes the review from public product detail.

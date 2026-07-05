@@ -305,7 +305,7 @@ The minimum demo flow requires a customer to open product detail and add a produ
 
 ### Tasks
 
-- [ ] (02A): Add review API helper using existing API client pattern
+- [x] (02A): Add review API helper using existing API client pattern
   - Source of Truth: `docs/plans/Plan_4.md` > `## 6. Target Directory Structure`; `docs/plans/Plan_4.md` > `### 7.1 Review API`; `README.md` > `## Phase 4 Handoff Notes`
   - Source Requirements:
     - Frontend must call Express REST APIs through the existing API helper pattern.
@@ -327,7 +327,7 @@ The minimum demo flow requires a customer to open product detail and add a produ
   - Blocked Condition: None
   - Files: `frontend/src/api/reviewApi.js`
 
-- [ ] (02B): Build customer review list and form components
+- [x] (02B): Build customer review list and form components
   - Source of Truth: `docs/plans/Plan_4.md` > `## 4. Scope`; `docs/design/design.md` > `## 7.6 ProductReviewList`; `docs/design/design.md` > `## 7.7 ProductReviewForm`; `docs/design/design.md` > `# 21. Common Feedback Components`
   - Source Requirements:
     - Product detail must show review list and review form.
@@ -350,7 +350,7 @@ The minimum demo flow requires a customer to open product detail and add a produ
   - Blocked Condition: None
   - Files: `frontend/src/components/product/ProductReviewList.jsx`, `frontend/src/components/product/ProductReviewForm.jsx`
 
-- [ ] (02C): Integrate review UI into product detail
+- [x] (02C): Integrate review UI into product detail
   - Source of Truth: `docs/plans/Plan_4.md` > `## 4. Scope`; `docs/design/design.md` > `# 24. Page-to-Component Map` > `## 24.3 Product Detail Page`; `docs/plans/Master_Plan.md` > `## 21. Minimum Viable Demo Flow` > `### 21.1 Customer Demo Flow`
   - Source Requirements:
     - Customer can open product detail and add product review.
@@ -373,7 +373,7 @@ The minimum demo flow requires a customer to open product detail and add a produ
   - Blocked Condition: `BLOCKED_BY_USER_ACTION` if live submit validation needs missing customer credentials, seeded product, backend server, or database access.
   - Files: `frontend/src/views/ProductDetailView.jsx`
 
-- [ ] (02D): Validate customer review UI states and access behavior
+- [x] (02D): Validate customer review UI states and access behavior
   - Source of Truth: `docs/plans/Plan_4.md` > `## 9. Verification & Testing Plan`; `docs/design/design.md` > `# 25. UI States`; `docs/design/design.md` > `# 26. Responsive Design`
   - Source Requirements:
     - Final UI has loading, success, empty, and error states for key pages.
@@ -1115,10 +1115,10 @@ Batch01 and Batch03 can be implemented in parallel if they do not edit shared ro
 - [x] (01D): Validate backend review API behavior
 
 #### Batch02
-- [ ] (02A): Add review API helper using existing API client pattern
-- [ ] (02B): Build customer review list and form components
-- [ ] (02C): Integrate review UI into product detail
-- [ ] (02D): Validate customer review UI states and access behavior
+- [x] (02A): Add review API helper using existing API client pattern
+- [x] (02B): Build customer review list and form components
+- [x] (02C): Integrate review UI into product detail
+- [x] (02D): Validate customer review UI states and access behavior
 
 #### Batch03
 - [ ] (03A): Inspect order, payment, and report prerequisites
