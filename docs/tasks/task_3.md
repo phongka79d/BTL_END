@@ -289,7 +289,7 @@ Frontend checkout and admin order UI need a stable REST contract before view wor
 
 ### Tasks
 
-- [ ] (02A): Implement order controller request handling
+- [x] (02A): Implement order controller request handling
   - Source of Truth: `docs/plans/Plan_3.md` > `## 4. Scope`; `docs/plans/Plan_3.md` > `### 7.1 Order Creation API`; `docs/plans/Plan_3.md` > `### 7.2 Order Read APIs`; `docs/plans/Master_Plan.md` > `## 13. Controller Design` > `### 12.6 OrderController`
   - Source Requirements:
     - Implement `POST /api/orders`.
@@ -315,7 +315,7 @@ Frontend checkout and admin order UI need a stable REST contract before view wor
   - Blocked Condition: `BLOCKED_BY_USER_ACTION` only if live API validation needs missing backend `.env`, seeded data, or credentials.
   - Files: `backend/src/controllers/order.controller.js`, optionally `backend/src/controllers/index.js`
 
-- [ ] (02B): Implement admin order status controller behavior
+- [x] (02B): Implement admin order status controller behavior
   - Source of Truth: `docs/plans/Plan_3.md` > `### 7.2 Order Read APIs`; `docs/plans/Plan_3.md` > `### 7.3 Order Status API`
   - Source Requirements:
     - Implement `GET /api/admin/orders`.
@@ -339,7 +339,7 @@ Frontend checkout and admin order UI need a stable REST contract before view wor
   - Blocked Condition: `BLOCKED_BY_USER_ACTION` only if live admin validation needs missing credentials or orders.
   - Files: `backend/src/controllers/order.controller.js`
 
-- [ ] (02C): Implement explicit COD payment controller behavior
+- [x] (02C): Implement explicit COD payment controller behavior
   - Source of Truth: `docs/plans/Plan_3.md` > `## 4. Scope`; `docs/plans/Plan_3.md` > `### 7.4 Payment API`; `docs/plans/Master_Plan.md` > `## 13. Controller Design` > `### 12.7 PaymentController`
   - Source Requirements:
     - Implement `POST /api/payments/cod`.
@@ -363,7 +363,7 @@ Frontend checkout and admin order UI need a stable REST contract before view wor
   - Blocked Condition: `BLOCKED_BY_USER_ACTION` only if live validation needs missing order data or credentials.
   - Files: `backend/src/controllers/payment.controller.js`, optionally `backend/src/controllers/index.js`
 
-- [ ] (02D): Add order/payment routes and mount them under `/api`
+- [x] (02D): Add order/payment routes and mount them under `/api`
   - Source of Truth: `docs/plans/Plan_3.md` > `## 4. Scope`; `docs/plans/Plan_3.md` > `## 6. Target Directory Structure`; `docs/plans/Plan_3.md` > `## 8. Implementation Steps`; `docs/plans/Master_Plan.md` > `## 15. API Design Summary`
   - Source Requirements:
     - Add order and payment routes.
@@ -1101,8 +1101,8 @@ Batch04 customer UI and Batch05 admin UI can be implemented in parallel after Ba
 
 ### Batches
 
-- [ ] Batch01 - Backend Checkout Transaction Models
-- [ ] Batch02 - Backend Order and Payment APIs
+- [x] Batch01 - Backend Checkout Transaction Models
+- [x] Batch02 - Backend Order and Payment APIs
 - [ ] Batch03 - Frontend API, Routing, and Cart Refresh
 - [ ] Batch04 - Customer Checkout and Order UI
 - [ ] Batch05 - Admin Order Management UI
@@ -1111,16 +1111,16 @@ Batch04 customer UI and Batch05 admin UI can be implemented in parallel after Ba
 ### Task IDs
 
 #### Batch01
-- [ ] (01A): Inspect prior backend patterns and checkout prerequisites
-- [ ] (01B): Implement order checkout transaction helper
-- [ ] (01C): Implement order read and access-filter helpers
+- [x] (01A): Inspect prior backend patterns and checkout prerequisites
+- [x] (01B): Implement order checkout transaction helper
+- [x] (01C): Implement order read and access-filter helpers
 - [x] (01D): Implement order status and payment update helpers
 
 #### Batch02
-- [ ] (02A): Implement order controller request handling
-- [ ] (02B): Implement admin order status controller behavior
-- [ ] (02C): Implement explicit COD payment controller behavior
-- [ ] (02D): Add order/payment routes and mount them under `/api`
+- [x] (02A): Implement order controller request handling
+- [x] (02B): Implement admin order status controller behavior
+- [x] (02C): Implement explicit COD payment controller behavior
+- [x] (02D): Add order/payment routes and mount them under `/api`
 
 #### Batch03
 - [ ] (03A): Add order and payment API helpers using the existing API client pattern

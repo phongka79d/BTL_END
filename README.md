@@ -160,3 +160,28 @@ Phase 3 constraints:
 - Do not create separate checkout-only product queries when existing product model helpers can be reused.
 - Do not alter the Phase 1 schema without an explicit migration section and verification of affected Plan 2 APIs.
 - Record credential-dependent or user-side live checks as `BLOCKED_BY_USER_ACTION` instead of claiming completion when local `.env`, database, seeded data, credentials, or browser tooling are unavailable.
+
+## Phase 3 Implementation Status
+
+### Completed Batches
+
+- **Batch01 (P3B1): Backend Checkout Transaction Models** — Complete
+  - Order checkout transaction helper with atomic Prisma transaction (cart loading, stock validation, backend total calculation, order/detail/payment creation, stock reduction, cart clearing)
+  - Customer order read helpers (`listByUser`, `findOwnedOrAdminVisible`) with query-level access filtering
+  - Admin order list helper (`listForAdmin`) with optional status filter
+  - Order status update helper (`updateStatus`) with completed→paid COD side effects
+  - COD payment helper (`createOrGetCODPayment`) with idempotent find-or-create
+  - Files: `backend/src/models/order.model.js`, `backend/src/models/payment.model.js`
+
+- **Batch02 (P3B2): Backend Order and Payment APIs** — Complete
+  - Order controller: `POST /api/orders` (checkout), `GET /api/orders/my-orders`, `GET /api/orders/:id`
+  - Admin order controller: `GET /api/admin/orders`, `PUT /api/admin/orders/:id/status`
+  - COD payment controller: `POST /api/payments/cod` (idempotent, owner/admin scoped)
+  - Route mounting with auth/admin middleware matching Plan 2 multi-mount patterns
+  - Files: `backend/src/controllers/order.controller.js`, `backend/src/controllers/payment.controller.js`, `backend/src/routes/order.routes.js`, `backend/src/routes/payment.routes.js`, `backend/src/routes/index.js`
+
+### Pending Batches
+- Batch03: Frontend API, Routing, and Cart Refresh
+- Batch04: Customer Checkout and Order UI
+- Batch05: Admin Order Management UI
+- Batch06: Verification, Security Audit, and Phase 4 Handoff

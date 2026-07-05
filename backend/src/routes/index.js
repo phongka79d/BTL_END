@@ -4,6 +4,8 @@ const router = express.Router();
 const productRoutes = require('./product.routes');
 const categoryRoutes = require('./category.routes');
 const cartRoutes = require('./cart.routes');
+const orderRoutes = require('./order.routes');
+const paymentRoutes = require('./payment.routes');
 
 // Mount routes under their path prefixes
 // Public product/category endpoints will match e.g. GET /api/products, GET /api/categories
@@ -13,5 +15,15 @@ router.use('/admin/products', productRoutes);
 router.use('/categories', categoryRoutes);
 router.use('/admin/categories', categoryRoutes);
 router.use('/cart', cartRoutes);
+
+// Order routes: customer and admin order paths share the same router (auth/admin enforced at route level)
+// e.g. POST /api/orders, GET /api/orders/my-orders, GET /api/orders/:id
+// e.g. GET /api/admin/orders, PUT /api/admin/orders/:id/status
+router.use('/orders', orderRoutes);
+router.use('/admin/orders', orderRoutes);
+
+// Payment routes: COD-only endpoint
+// e.g. POST /api/payments/cod
+router.use('/payments', paymentRoutes);
 
 module.exports = router;
