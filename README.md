@@ -180,8 +180,15 @@ Phase 3 constraints:
   - Route mounting with auth/admin middleware matching Plan 2 multi-mount patterns
   - Files: `backend/src/controllers/order.controller.js`, `backend/src/controllers/payment.controller.js`, `backend/src/routes/order.routes.js`, `backend/src/routes/payment.routes.js`, `backend/src/routes/index.js`
 
+- **Batch03 (P3B3): Frontend API, Routing, and Cart Refresh** — Complete
+  - Frontend order API helpers (`orderApi.js`): checkout, customer reads, admin reads, admin status updates
+  - Frontend payment API helper (`paymentApi.js`): explicit COD endpoint
+  - Protected routes: `/checkout`, `/orders`, `/orders/:id` (PrivateRoute), `/admin/orders` (AdminRoute)
+  - Placeholder views: `CheckoutView`, `OrderHistoryView`, `OrderDetailView`, `AdminOrderView`
+  - Shared order/payment status constants (`orderConstants.js`) matching backend Prisma enums
+  - Files: `frontend/src/api/orderApi.js`, `frontend/src/api/paymentApi.js`, `frontend/src/routes/AppRoutes.jsx`, `frontend/src/constants/orderConstants.js`, `frontend/src/views/CheckoutView.jsx`, `frontend/src/views/OrderHistoryView.jsx`, `frontend/src/views/OrderDetailView.jsx`, `frontend/src/views/admin/AdminOrderView.jsx`
+
 ### Pending Batches
-- Batch03: Frontend API, Routing, and Cart Refresh
 - Batch04: Customer Checkout and Order UI
 - Batch05: Admin Order Management UI
 - Batch06: Verification, Security Audit, and Phase 4 Handoff

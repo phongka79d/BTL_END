@@ -445,7 +445,7 @@ Views should be built on stable API helpers and routes. This batch prevents cust
 
 ### Tasks
 
-- [ ] (03A): Add order and payment API helpers using the existing API client pattern
+- [x] (03A): Add order and payment API helpers using the existing API client pattern
   - Source of Truth: `docs/plans/Plan_3.md` > `## 6. Target Directory Structure`; `docs/plans/Plan_3.md` > `### 7.5 Frontend UI Contract`; `README.md` > `## Phase 3 Handoff Contract`
   - Source Requirements:
     - Add `orderApi.js` and `paymentApi.js`.
@@ -467,7 +467,7 @@ Views should be built on stable API helpers and routes. This batch prevents cust
   - Blocked Condition: None for helper creation; live API validation can be blocked later by missing backend setup.
   - Files: `frontend/src/api/orderApi.js`, `frontend/src/api/paymentApi.js`, `frontend/src/api/apiClient.js` only if a small existing-client extension is required
 
-- [ ] (03B): Wire protected customer and admin order routes
+- [x] (03B): Wire protected customer and admin order routes
   - Source of Truth: `docs/plans/Plan_3.md` > `## 4. Scope`; `docs/plans/Plan_3.md` > `## 6. Target Directory Structure`; `docs/design/design.md` > `# 24. Page-to-Component Map`
   - Source Requirements:
     - Build `CheckoutView`, `OrderHistoryView`, `OrderDetailView`, and `AdminOrderView`.
@@ -490,7 +490,7 @@ Views should be built on stable API helpers and routes. This batch prevents cust
   - Blocked Condition: None
   - Files: `frontend/src/routes/AppRoutes.jsx`, `frontend/src/layouts/MainLayout.jsx`, `frontend/src/layouts/AdminLayout.jsx`, placeholder view files only if required by imports
 
-- [ ] (03C): Define post-checkout cart refresh and order status constants
+- [x] (03C): Define post-checkout cart refresh and order status constants
   - Source of Truth: `docs/plans/Plan_3.md` > `### 7.1 Order Creation API`; `docs/plans/Plan_3.md` > `### 7.3 Order Status API`; `docs/plans/Plan_3.md` > `### 7.5 Frontend UI Contract`; `README.md` > `## Phase 3 Handoff Contract`
   - Source Requirements:
     - Cart items are cleared after successful checkout.
@@ -1103,7 +1103,7 @@ Batch04 customer UI and Batch05 admin UI can be implemented in parallel after Ba
 
 - [x] Batch01 - Backend Checkout Transaction Models
 - [x] Batch02 - Backend Order and Payment APIs
-- [ ] Batch03 - Frontend API, Routing, and Cart Refresh
+- [x] Batch03 - Frontend API, Routing, and Cart Refresh
 - [ ] Batch04 - Customer Checkout and Order UI
 - [ ] Batch05 - Admin Order Management UI
 - [ ] Batch06 - Verification, Security Audit, and Phase 4 Handoff
@@ -1123,9 +1123,9 @@ Batch04 customer UI and Batch05 admin UI can be implemented in parallel after Ba
 - [x] (02D): Add order/payment routes and mount them under `/api`
 
 #### Batch03
-- [ ] (03A): Add order and payment API helpers using the existing API client pattern
-- [ ] (03B): Wire protected customer and admin order routes
-- [ ] (03C): Define post-checkout cart refresh and order status constants
+- [x] (03A): Add order and payment API helpers using the existing API client pattern
+- [x] (03B): Wire protected customer and admin order routes
+- [x] (03C): Define post-checkout cart refresh and order status constants
 
 #### Batch04
 - [ ] (04A): Run Astryx discovery and establish customer order component choices

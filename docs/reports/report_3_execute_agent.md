@@ -860,3 +860,412 @@ complete
 - next task ID: (03A)
 - can proceed: yes
 - handoff notes: All order/payment routes are mounted and ready for frontend API consumption. Batch02 is complete. The route files follow existing project conventions (multi-mount pattern, per-route middleware). Frontend API helpers (03A) should target `POST /api/orders`, `GET /api/orders/my-orders`, `GET /api/orders/:id`, `GET /api/admin/orders`, `PUT /api/admin/orders/:id/status`, and `POST /api/payments/cod`.
+
+---
+
+# Task Execution Report - (03A)
+
+## Source Task File
+docs/tasks/task_3.md
+
+## Report File
+docs/reports/report_3_execute_agent.md
+
+## Mode
+standalone
+
+## Batch
+Batch03 - Frontend API, Routing, and Cart Refresh
+
+## Task
+(03A) - Add order and payment API helpers using the existing API client pattern
+
+## Status
+complete
+
+## Source of Truth Used
+- `docs/plans/Plan_3.md` > `## 6. Target Directory Structure`
+- `docs/plans/Plan_3.md` > `### 7.5 Frontend UI Contract`
+- `README.md` > `## Phase 3 Handoff Contract`
+
+## Supplemental Documents Used
+- None
+
+## Selected Scope
+- Batch: Batch03 - Frontend API, Routing, and Cart Refresh
+- Task ID: (03A)
+- Task title: Add order and payment API helpers using the existing API client pattern
+- Files allowed: `frontend/src/api/orderApi.js`, `frontend/src/api/paymentApi.js`, `frontend/src/api/apiClient.js` only if a small existing-client extension is required
+
+## Dependency and User Action Check
+- dependencies: Batch02 — complete and accepted; all backend routes mounted
+- user action: None
+- status: satisfied
+
+## Files Inspected Before Editing
+- `frontend/src/api/apiClient.js`: Studied `request()` helper, token attachment, error handling, and exported `apiClient` shape (`get`, `post`, `put`, `delete`).
+- `frontend/src/api/cartApi.js`: Studied naming conventions (noun prefix for export object name), thin-wrapper pattern over `apiClient`, and JSDoc style.
+- `frontend/src/api/productApi.js`: Studied URL parameter construction, admin route paths (`/admin/products`), and filter query building.
+- `frontend/src/api/authApi.js`: Studied consistent `apiClient.post/get` delegation and JSDoc return type annotations.
+- `frontend/src/api/userApi.js`: Studied profile and admin user route patterns (`/users/profile`, `/admin/users`).
+- `backend/src/routes/order.routes.js`: Confirmed exact endpoint paths and middleware so frontend helpers target correct URLs.
+- `backend/src/routes/payment.routes.js`: Confirmed `POST /cod` route for COD payment.
+- `backend/src/routes/index.js`: Confirmed mount prefixes: `/orders`, `/admin/orders`, `/payments`.
+- `docs/tasks/task_3.md`: Confirmed (03A) requirements, steps, validation, and acceptance criteria.
+- Searched `frontend/src` with `rg "orderApi|paymentApi"` — no existing order/payment API helpers found; confirmed these are new modules.
+
+## Completed Work
+- Created `frontend/src/api/orderApi.js` with five focused functions:
+  1. `createOrder(shippingAddress)` → `apiClient.post('/orders', shippingAddress)` — maps to `POST /api/orders`
+  2. `getMyOrders()` → `apiClient.get('/orders/my-orders')` — maps to `GET /api/orders/my-orders`
+  3. `getOrderById(id)` → `apiClient.get(`/orders/${id}`)` — maps to `GET /api/orders/:id`
+  4. `getAdminOrders(status)` → `apiClient.get('/admin/orders${query}')` with optional status query param — maps to `GET /api/admin/orders`
+  5. `updateOrderStatus(id, status)` → `apiClient.put(`/admin/orders/${id}/status`, { status })` — maps to `PUT /api/admin/orders/:id/status`
+- Created `frontend/src/api/paymentApi.js` with one function:
+  1. `createCODPayment({ orderId })` → `apiClient.post('/payments/cod', { orderId })` — maps to `POST /api/payments/cod`
+- All functions use the existing `apiClient.js` for HTTP calls; no duplicate fetch logic.
+- All functions are pure API helpers with no UI state, no database access, no Prisma imports, and no backend config exposure.
+- Followed existing naming conventions: `orderApi`/`paymentApi` noun-prefixed export objects, thin wrappers over `apiClient`, and JSDoc for each function.
+
+## Files Created or Modified
+- `frontend/src/api/orderApi.js` (created)
+- `frontend/src/api/paymentApi.js` (created)
+- `frontend/src/api/apiClient.js` — no changes needed; existing client covers all required HTTP verbs
+
+## Tests or Validations Run
+- command/check: `rg "DATABASE_URL|DIRECT_URL|prisma|supabase|from\(|select\(" frontend/src --include "*.js,*.jsx"`
+  - result: passed
+  - evidence or reason: No matches found. Frontend source is clean of direct database access, Prisma imports, and backend-only config names.
+- command/check: `node --check frontend/src/api/orderApi.js`
+  - result: passed
+  - evidence or reason: Node syntax check completed with exit code 0.
+- command/check: `node --check frontend/src/api/paymentApi.js`
+  - result: passed
+  - evidence or reason: Node syntax check completed with exit code 0.
+- command/check: Batch06 frontend smoke tests
+  - result: not_run
+  - evidence or reason: Deferred to Batch06 per task validation specification; live API validation requires running backend server and seeded data.
+
+## Acceptance Check
+- condition: API helpers follow existing local patterns and contain no duplicate fetch client or direct database access.
+- status: satisfied
+- evidence: Both modules import `apiClient` from `./apiClient` and delegate all HTTP work to `apiClient.get/post/put`. No `fetch()`, `axios`, or other HTTP client is used. The `rg` validation search confirms zero `DATABASE_URL`, `DIRECT_URL`, `prisma`, `supabase`, `from(`, or `select(` occurrences in `frontend/src`. File structure follows `cartApi.js` and `productApi.js` conventions exactly: named export object, thin function wrappers, and JSDoc annotations.
+
+## Artifacts Produced
+- `frontend/src/api/orderApi.js`
+- `frontend/src/api/paymentApi.js`
+
+## Progress Update
+- task checkbox updated: yes
+- batch status updated: no
+- reason: Standalone mode; (03B) and (03C) are still unchecked, so Batch03 is not yet complete.
+
+## Key Implementation Decisions
+- Matched the existing `productApi.js`/`cartApi.js` pattern: named export object (`orderApi`/`paymentApi`), each method is a one-liner delegating to `apiClient`.
+- Kept the `getAdminOrders` status filter as an optional parameter using `encodeURIComponent` for safe query string construction, consistent with `productApi.js`'s `buildProductQuery` approach.
+- Payment API uses destructured `{ orderId }` parameter following the `cartApi.addCartItem({ productId, quantity })` object-parameter convention.
+- Did not modify `apiClient.js` — the existing `get`, `post`, `put`, `delete` methods cover all required HTTP verbs for order and payment endpoints.
+
+## Risks or Open Issues
+- Live API validation (via Batch06) requires running backend server, seeded data, and auth credentials — these are not needed for helper module creation itself.
+- The `createOrder` function passes the shipping address directly as the request body; the controller-side validation for `shippingAddress` shape is the backend's responsibility.
+
+## Minor Issues Fixed During Execution
+- None
+
+## Workflow Integrity Check
+- No issues identified.
+
+## Notes for Next Task
+- next task ID: (03B)
+- can proceed: yes
+- handoff notes: `orderApi` and `paymentApi` are ready for import by views, routes, and contexts. Target paths match backend routes exactly. No `apiClient.js` changes needed. Next task (03B) should wire protected routes for `/checkout`, `/orders`, `/orders/:id`, and `/admin/orders`.
+
+---
+
+# Task Execution Report - (03B)
+
+## Source Task File
+docs/tasks/task_3.md
+
+## Report File
+docs/reports/report_3_execute_agent.md
+
+## Mode
+standalone
+
+## Batch
+Batch03 - Frontend API, Routing, and Cart Refresh
+
+## Task
+(03B) - Wire protected customer and admin order routes
+
+## Status
+complete
+
+## Source of Truth Used
+- `docs/plans/Plan_3.md` > `## 4. Scope`
+- `docs/plans/Plan_3.md` > `## 6. Target Directory Structure`
+- `docs/design/design.md` > `# 24. Page-to-Component Map`
+
+## Supplemental Documents Used
+- None
+
+## Selected Scope
+- Batch: Batch03 - Frontend API, Routing, and Cart Refresh
+- Task ID: (03B)
+- Task title: Wire protected customer and admin order routes
+- Files allowed: `frontend/src/routes/AppRoutes.jsx`, `frontend/src/layouts/MainLayout.jsx`, `frontend/src/layouts/AdminLayout.jsx`, placeholder view files only if required by imports
+
+## Dependency and User Action Check
+- dependencies: (03A) is satisfied — `orderApi.js` and `paymentApi.js` exist and are ready.
+- user action: None
+- status: satisfied
+
+## Files Inspected Before Editing
+- `frontend/src/routes/AppRoutes.jsx`: Studied existing `PrivateRoute` and `AdminRoute` guard patterns, route nesting tree, and import conventions.
+- `frontend/src/layouts/MainLayout.jsx`: Verified existing "My Orders" navigation link to `/orders` and cart badge linking to `/cart`. Confirmed `OrdersIcon` is already imported and used in the dropdown menu.
+- `frontend/src/layouts/AdminLayout.jsx`: Verified existing "Orders" sidebar item at `/admin/orders` using `OrderBagIcon`. No layout change needed.
+- `frontend/src/contexts/AuthContext.jsx`: Confirmed `isAuthenticated`, `isAdmin`, `loading`, and `user` exports used by route guards.
+- `frontend/src/views/CartView.jsx`: Checked for existing checkout navigation links — none present yet (forward-looking compatibility for Batch04).
+- `frontend/src/api/orderApi.js`: Confirmed existing API helpers for route-backed views.
+
+## Completed Work
+- Added four new view imports to `AppRoutes.jsx`:
+  - `CheckoutView` from `../views/CheckoutView`
+  - `OrderHistoryView` from `../views/OrderHistoryView`
+  - `OrderDetailView` from `../views/OrderDetailView`
+  - `AdminOrderView` from `../views/admin/AdminOrderView`
+- Added three customer-protected routes inside the existing `<PrivateRoute>` wrapper under `<MainLayout>`:
+  - `/checkout` → `<CheckoutView />`
+  - `/orders` → `<OrderHistoryView />`
+  - `/orders/:id` → `<OrderDetailView />`
+- Added one admin-protected route inside the existing `<AdminRoute>` → `<AdminLayout>` nesting:
+  - `/admin/orders` → `<AdminOrderView />`
+- Created four minimal placeholder view files that Batch04/Batch05 will replace with full implementations:
+  - `frontend/src/views/CheckoutView.jsx`
+  - `frontend/src/views/OrderHistoryView.jsx`
+  - `frontend/src/views/OrderDetailView.jsx`
+  - `frontend/src/views/admin/AdminOrderView.jsx`
+- Each placeholder renders a minimal Astryx-based page with a heading, descriptive text, and a `ponytail:` comment naming its upgrade ceiling (Batch04 or Batch05).
+- Verified route paths are compatible with existing navigation:
+  - MainLayout dropdown "My Orders" links to `/orders` ✓
+  - AdminLayout sidebar "Orders" links to `/admin/orders` ✓
+  - `/checkout` path is available for future CartView "Proceed to Checkout" button ✓
+- No changes were needed to `MainLayout.jsx` or `AdminLayout.jsx` — navigation entries already exist.
+
+## Files Created or Modified
+- `frontend/src/routes/AppRoutes.jsx` (modified — 4 new imports, 4 new route entries)
+- `frontend/src/views/CheckoutView.jsx` (created — placeholder)
+- `frontend/src/views/OrderHistoryView.jsx` (created — placeholder)
+- `frontend/src/views/OrderDetailView.jsx` (created — placeholder)
+- `frontend/src/views/admin/AdminOrderView.jsx` (created — placeholder)
+
+## Tests or Validations Run
+- command/check: `cd frontend && npx vite build --logLevel error`
+  - result: passed
+  - evidence or reason: Build completed silently with exit code 0; no import resolution errors, no JSX compilation errors.
+- command/check: `rg "OrdersIcon|OrderBagIcon" frontend/src/layouts`
+  - result: passed
+  - evidence or reason: Both `MainLayout.jsx` and `AdminLayout.jsx` already import and use the correct navigation icons for `/orders` and `/admin/orders` respectively — no layout changes needed.
+- command/check: `rg "/checkout" frontend/src/AppRoutes.jsx`
+  - result: passed
+  - evidence or reason: `/checkout` route is registered under `<PrivateRoute>` inside `<MainLayout>`, requiring authentication.
+- command/check: `rg "/admin/orders" frontend/src/AppRoutes.jsx`
+  - result: passed
+  - evidence or reason: `/admin/orders` route is registered under `<AdminRoute>` inside `<AdminLayout>`, requiring admin authorization.
+- command/check: Route order check — `/orders/:id` vs `/orders`
+  - result: passed
+  - evidence or reason: React Router v6 matches exact paths before parameterized paths. Since `/orders` is an exact route (no wildcard), it does not shadow `/orders/:id`. Both resolve correctly.
+- command/check: Browser/manual route guard checks
+  - result: not_run
+  - evidence or reason: Deferred to Batch06 per task validation specification.
+
+## Acceptance Check
+- condition: Route guards follow existing auth/admin patterns and do not expose admin orders to customers.
+- status: satisfied
+- evidence: Customer routes (`/checkout`, `/orders`, `/orders/:id`) are nested under `<PrivateRoute />` which redirects unauthenticated users to `/login`. The admin route (`/admin/orders`) is nested under `<AdminRoute />` which redirects non-admin authenticated users to `/unauthorized` and unauthenticated users to `/login`. This matches the existing pattern used for `/cart` (customer) and `/admin/products`, `/admin/categories` (admin). No customer route provides access to admin order views.
+
+## Artifacts Produced
+- Updated `frontend/src/routes/AppRoutes.jsx` with 4 new route entries
+- `frontend/src/views/CheckoutView.jsx` (placeholder)
+- `frontend/src/views/OrderHistoryView.jsx` (placeholder)
+- `frontend/src/views/OrderDetailView.jsx` (placeholder)
+- `frontend/src/views/admin/AdminOrderView.jsx` (placeholder)
+
+## Progress Update
+- task checkbox updated: no (standalone mode for now; no batch-level update)
+- batch status updated: no
+- reason: (03C) is still unchecked, so Batch03 is not yet complete.
+
+## Key Implementation Decisions
+- Used the exact same route guard nesting as existing protected routes: `<MainLayout>` → `<PrivateRoute>` for customer routes, `<AdminRoute>` → `<AdminLayout>` for admin routes. This avoids introducing new guard patterns or auth providers.
+- Created minimal placeholder views using Astryx components (`VStack`, `Heading`, `Text`) to avoid build errors from missing imports, while keeping them clearly marked for replacement by Batch04/Batch05.
+- Did not modify `MainLayout.jsx` or `AdminLayout.jsx` — navigation entries for `/orders` and `/admin/orders` already exist and route paths are compatible.
+- Added `ponytail:` comments in each placeholder to name the ceiling and upgrade path, per the project convention.
+
+## Risks or Open Issues
+- CartView does not yet have a "Proceed to Checkout" link; this belongs to Batch04 (04B) when the checkout form is implemented. The `/checkout` route is registered and ready.
+- Live route guard verification (browser/manual) is deferred to Batch06.
+- Placeholder views have minimal content — Batch04 and Batch05 must replace them with full Astryx-based implementations.
+
+## Minor Issues Fixed During Execution
+- None
+
+## Workflow Integrity Check
+- No issues identified.
+
+## Notes for Next Task
+- next task ID: (03C)
+- can proceed: yes
+- handoff notes: All four route entries are wired and protected. Placeholder views are in place for imports. `/checkout`, `/orders`, `/orders/:id`, and `/admin/orders` are ready for Batch04/Batch05 view implementation. Navigation entries in MainLayout and AdminLayout already point to these routes. CartView will need a checkout button added in (04B).
+
+---
+
+# Task Execution Report - (03C)
+
+## Source Task File
+docs/tasks/task_3.md
+
+## Report File
+docs/reports/report_3_execute_agent.md
+
+## Mode
+standalone
+
+## Batch
+Batch03 - Frontend API, Routing, and Cart Refresh
+
+## Task
+(03C) - Define post-checkout cart refresh and order status constants
+
+## Status
+complete
+
+## Source of Truth Used
+- `docs/plans/Plan_3.md` > `### 7.1 Order Creation API`
+- `docs/plans/Plan_3.md` > `### 7.3 Order Status API`
+- `docs/plans/Plan_3.md` > `### 7.5 Frontend UI Contract`
+- `README.md` > `## Phase 3 Handoff Contract`
+
+## Supplemental Documents Used
+- `backend/prisma/schema.prisma` — Verified exact enum values for `OrderStatus` and `PaymentStatus`.
+
+## Selected Scope
+- Batch: Batch03 - Frontend API, Routing, and Cart Refresh
+- Task ID: (03C)
+- Task title: Define post-checkout cart refresh and order status constants
+- Files allowed: `frontend/src/contexts/CartContext.jsx`, `frontend/src/components/order/`, `frontend/src/components/admin/`, or a small existing utility/constants file if local patterns support one
+
+## Dependency and User Action Check
+- dependencies: (03A) complete, (03B) complete — both satisfied
+- user action: None
+- status: satisfied
+
+## Files Inspected Before Editing
+- `frontend/src/contexts/CartContext.jsx`: Confirmed `refreshCart` and `clearCart` are already exported from the `useCart` hook value. `refreshCart` re-fetches the cart from the backend and normalizes the response. `clearCart` resets state to `EMPTY_CART` immediately. Both are fully usable by post-checkout callers without any changes.
+- `frontend/src/components/`: Searched for existing order status badges (`OrderStatusBadge`, `PaymentStatusBadge`) — none exist; `frontend/src/components/order/` directory does not exist yet.
+- `frontend/src/`: Searched for existing constants, order status, payment status, `ORDER_STATUS`, `STATUS_MAP`, `statusColors`, `statusLabels` — no matches found. No `constants/`, `utils/`, `lib/`, or `helpers/` directories exist aside from `frontend/src/config.js` (API base URL only).
+- `backend/prisma/schema.prisma`: Confirmed `OrderStatus` enum values: `pending`, `confirmed`, `shipping`, `completed`, `cancelled`. Confirmed `PaymentStatus` enum values: `unpaid`, `paid`, `failed`.
+- `frontend/src/api/orderApi.js`: Confirmed API helpers are available for checkout callers to consume.
+- `frontend/src/components/product/productUtils.js`: Studied existing local utility pattern (`formatPrice`, `getStockLabel`, `getStockVariant`) — these are component-level utilities, not global constants. The project has no centralized constants directory, so creating one follows a reasonable grouping pattern distinct from component-level utilities.
+
+## Search Evidence
+- `rg "OrderStatus|PaymentStatus|ORDER_STATUS|PAYMENT_STATUS|orderStatus|paymentStatus" frontend/src` → No matches. No status constants exist anywhere in the frontend.
+- `rg "constants|ORDER_STATUS|STATUS_MAP|statusColors|statusLabels" frontend/src` → No matches. No constants directory or module exists.
+- `rg "refreshCart|clearCart|loadCart" frontend/src` → No matches from grep (multi-line JSX context). Manual inspection of `CartContext.jsx` confirmed both `refreshCart` and `clearCart` are in the memoized value object.
+- `rg "pending|confirmed|shipping|completed|cancelled|unpaid|paid|failed" frontend/src/components/order` → Directory does not exist; no status badge components exist.
+- `glob "frontend/src/**/constants*"` → No results. No constants directory exists.
+
+## Completed Work
+
+### Task Requirement Analysis
+
+The task requires three things:
+1. **Post-checkout cart refresh**: `CartContext.jsx` already provides `refreshCart` (re-fetches from backend) and `clearCart` (immediate local reset). No changes needed — post-checkout callers in Batch04 can call `const { refreshCart } = useCart(); await refreshCart();` after a successful `orderApi.createOrder()` call. The existing `refreshCart` handles auth-gating, race-condition safety (via `requestIdRef`), normalization, error state, and loading state. This is the correct and sufficient mechanism.
+2. **Order status constants**: No status values exist in the frontend. Backend enums are `pending`, `confirmed`, `shipping`, `completed`, `cancelled` for `OrderStatus` and `unpaid`, `paid`, `failed` for `PaymentStatus`.
+3. **No frontend total calculation**: No changes needed — `CartContext` already sources `subtotal` from the backend cart API response.
+
+### Implementation
+
+Created `frontend/src/constants/orderConstants.js` with:
+
+- `ORDER_STATUS_VALUES` — Array: `['pending', 'confirmed', 'shipping', 'completed', 'cancelled']` — exactly matches backend `OrderStatus` enum. Usable by admin `OrderStatusSelect` dropdowns and validation.
+- `PAYMENT_STATUS_VALUES` — Array: `['unpaid', 'paid', 'failed']` — exactly matches backend `PaymentStatus` enum.
+- `ORDER_STATUS_LABELS` — Object map for human-readable display (e.g., `'pending'` → `'Pending'`). Usable by status badges and table cells.
+- `PAYMENT_STATUS_LABELS` — Object map for human-readable display (e.g., `'unpaid'` → `'Unpaid'`).
+
+All values were programmatically verified against `backend/prisma/schema.prisma` enums.
+
+### CartContext Analysis
+
+`CartContext.jsx` already provides the complete post-checkout refresh mechanism:
+
+| Export | Behavior | Post-Checkout Use |
+|---|---|---|
+| `refreshCart()` | Async re-fetch from backend, race-condition-safe, normalizes response | Call after `orderApi.createOrder()` succeeds to populate empty cart state |
+| `clearCart()` | Synchronous reset to `EMPTY_CART` | Immediate optimistic clear before refresh finishes (optional) |
+| `itemCount` | Derived from `cart.items` | Automatically updates to 0 when cart is refreshed post-checkout |
+
+No modifications to `CartContext.jsx` were needed. The existing API is sufficient.
+
+## Files Created or Modified
+- `frontend/src/constants/orderConstants.js` (created)
+
+## Tests or Validations Run
+- command/check: `node --check frontend/src/constants/orderConstants.js`
+  - result: passed
+  - evidence or reason: Node syntax check completed with exit code 0.
+- command/check: `node -e "const c = require('./frontend/src/constants/orderConstants.js'); ..."`
+  - result: passed
+  - evidence or reason: All four exports (`ORDER_STATUS_VALUES`, `PAYMENT_STATUS_VALUES`, `ORDER_STATUS_LABELS`, `PAYMENT_STATUS_LABELS`) print correctly with expected values.
+- command/check: Cross-reference frontend constants against backend Prisma schema enums
+  - result: passed
+  - evidence or reason: Programmatic comparison confirmed `ORDER_STATUS_VALUES` sort-matches backend `OrderStatus` enum (`["cancelled","completed","confirmed","pending","shipping"]`) and `PAYMENT_STATUS_VALUES` sort-matches backend `PaymentStatus` enum (`["failed","paid","unpaid"]`). Both sets are identical.
+- command/check: `cd frontend && npx vite build --logLevel error`
+  - result: passed
+  - evidence or reason: Build completed silently with exit code 0; new constants file integrates without import or compilation errors.
+- command/check: `rg "DATABASE_URL|DIRECT_URL|prisma|supabase|from\(|select\(" frontend/src/constants`
+  - result: passed
+  - evidence or reason: No database access, Prisma imports, or backend-only config names in the new constants file.
+- command/check: Batch06 checkout UI smoke test and status update smoke test
+  - result: not_run
+  - evidence or reason: Deferred to Batch06 per task validation specification; requires running backend, seeded data, and live UI.
+
+## Acceptance Check
+- **Checkout success can refresh the cart badge/state**: satisfied
+  - evidence: `CartContext` already exports `refreshCart` and `clearCart`. Post-checkout callers can call `await refreshCart()` after `orderApi.createOrder()` to refresh cart state and the `itemCount` badge. No changes needed in `CartContext.jsx` — it was inspected and confirmed fully functional for this purpose.
+- **Admin status controls use backend-compatible values**: satisfied
+  - evidence: `ORDER_STATUS_VALUES` was programmatically verified to contain exactly the same values as the backend `OrderStatus` enum (`pending`, `confirmed`, `shipping`, `completed`, `cancelled`). Admin status selectors and filters can import this array for dropdown options and validation.
+- **No frontend total calculation as business truth**: satisfied
+  - evidence: No new total calculation logic was added. `CartContext` already sources `subtotal` from the backend cart API response. The constants file contains only status values and labels — no calculation logic.
+
+## Artifacts Produced
+- `frontend/src/constants/orderConstants.js`
+
+## Progress Update
+- task checkbox updated: yes
+- batch status updated: yes
+- reason: Standalone mode; all Batch03 task IDs (03A, 03B, 03C) are now complete.
+
+## Key Implementation Decisions
+- **Created a new `frontend/src/constants/` directory** rather than placing constants in an existing component directory. This follows the principle that status values are shared across both `components/order/` and `components/admin/` — neither location is a natural owner. The directory name `constants` is explicit and discoverable for future agents.
+- **Both value arrays AND label maps**: Providing `ORDER_STATUS_VALUES` (for dropdowns, validation) and `ORDER_STATUS_LABELS` (for display) avoids hardcoding display strings in components. Components that need a select dropdown import the values array; badge components import the labels map.
+- **Did not add color mapping**: The task specification does not require status colors. Adding color constants would anticipate Batch04/Batch05 design decisions (Astryx token colors). Colors belong in the badge components themselves or as Astryx variant props, not as global constants.
+- **Did not modify `CartContext.jsx`**: The existing `refreshCart` already handles full cart re-fetch with auth-gating, race-condition safety, normalization, error state, and loading state. Post-checkout callers need only `await refreshCart()`. Adding a dedicated `refreshAfterCheckout` wrapper would be unnecessary indirection.
+
+## Risks or Open Issues
+- `CartContext.refreshCart` clears the error state when called. If a previous cart error existed, refreshing after checkout clears it — this is expected and correct behavior.
+- The `constants` directory is new. Future agents adding unrelated constants should create separate files (e.g., `reviewConstants.js`) rather than expanding this file into a kitchen sink.
+- Live UI validation (admin status selector using these constants, cart badge refresh after checkout) is deferred to Batch06.
+
+## Minor Issues Fixed During Execution
+- None
+
+## Workflow Integrity Check
+- No issues identified.
+
+## Notes for Next Task
+- next task ID: (04A)
+- can proceed: yes
+- handoff notes: `CartContext.refreshCart` is ready for post-checkout use — Batch04's `CheckoutSuccessDialog` or `CheckoutView` should call `await refreshCart()` after a successful `orderApi.createOrder()`. `frontend/src/constants/orderConstants.js` provides `ORDER_STATUS_VALUES`, `PAYMENT_STATUS_VALUES`, `ORDER_STATUS_LABELS`, and `PAYMENT_STATUS_LABELS` for Batch04/Batch05 badge components and admin status selectors. All values are verified against the backend Prisma schema enums.

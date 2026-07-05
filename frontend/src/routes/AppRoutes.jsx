@@ -15,6 +15,10 @@ import CartView from '../views/CartView';
 import AdminDashboardView from '../views/AdminDashboardView';
 import AdminProductView from '../views/admin/AdminProductView';
 import AdminCategoryView from '../views/admin/AdminCategoryView';
+import AdminOrderView from '../views/admin/AdminOrderView';
+import CheckoutView from '../views/CheckoutView';
+import OrderHistoryView from '../views/OrderHistoryView';
+import OrderDetailView from '../views/OrderDetailView';
 
 /**
  * Route guard for authenticated users (Customer/Admin).
@@ -117,6 +121,9 @@ export const AppRoutes = () => {
         {/* Protected Customer Routes inside MainLayout */}
         <Route element={<PrivateRoute />}>
           <Route path="/cart" element={<CartView />} />
+          <Route path="/checkout" element={<CheckoutView />} />
+          <Route path="/orders" element={<OrderHistoryView />} />
+          <Route path="/orders/:id" element={<OrderDetailView />} />
           <Route path="/profile" element={<div>Profile Page (Placeholder)</div>} />
         </Route>
 
@@ -138,6 +145,7 @@ export const AppRoutes = () => {
           <Route path="/admin" element={<AdminDashboardView />} />
           <Route path="/admin/products" element={<AdminProductView />} />
           <Route path="/admin/categories" element={<AdminCategoryView />} />
+          <Route path="/admin/orders" element={<AdminOrderView />} />
         </Route>
       </Route>
     </Routes>
