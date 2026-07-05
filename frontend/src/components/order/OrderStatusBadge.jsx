@@ -10,7 +10,7 @@ import { ORDER_STATUS_LABELS } from '../../constants/orderConstants';
  *   confirmed → info      (positive progression)
  *   shipping  → warning   (in transit)
  *   completed → success   (terminal success)
- *   cancelled → danger    (terminal failure)
+ *   cancelled → error     (terminal failure)
  *
  * Labels are sourced from the shared ORDER_STATUS_LABELS constant
  * (frontend/src/constants/orderConstants.js), keeping the UI
@@ -24,7 +24,7 @@ const ORDER_STATUS_VARIANT_MAP = {
   confirmed: 'info',
   shipping: 'warning',
   completed: 'success',
-  cancelled: 'danger',
+  cancelled: 'error',
 };
 
 export const OrderStatusBadge = ({ status }) => {

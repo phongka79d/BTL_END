@@ -1922,3 +1922,1118 @@ ACCEPTED
 
 ## Repair Instructions
 - None
+
+---
+
+# Task Review Report - 04A
+
+## Source Task File
+docs/tasks/task_4.md
+
+## Execution Report Reviewed
+docs/reports/report_4_execute_agent.md
+
+## Review Report File
+docs/review/review_4_review_agent.md
+
+## Mode
+orchestrated
+
+## Final Outcome
+ACCEPTED
+
+## Reviewed Scope
+- Batch: Batch04 - Admin Dashboard and Report UI
+- Task ID: 04A
+- Task title: Run Astryx discovery and map admin report components
+- Executor status reported: complete
+- Source of Truth: Plan 4 section 7.3, design sections 13 and 19, and `AGENTS.md`
+- Supplemental documents: None
+
+## Latest Report Selection
+- Latest report entry found: yes
+- Requested task ID, if any: 04A
+- Reviewed task ID: 04A
+- Correct selection: yes
+- Notes: Latest matching entry is at execution-report EOF.
+
+## Git Diff Evidence
+- git status reviewed: yes
+- git diff stat reviewed: yes
+- git diff reviewed: yes
+- recent commits reviewed: not needed
+- changed files from git: `docs/reports/report_4_execute_agent.md`
+- untracked files: None
+
+## Files Reviewed
+- `docs/tasks/task_4.md`: in scope - full 04A contract and both checkboxes.
+- `docs/reports/report_4_execute_agent.md`: in scope - sole A1 artifact.
+- `docs/plans/Plan_4.md`, `docs/design/design.md`, `AGENTS.md`: in scope - source requirements.
+- `frontend/src/views/AdminDashboardView.jsx`, `frontend/src/components/admin/AdminTable.jsx`, `frontend/src/layouts/AdminLayout.jsx`, `frontend/src/routes/AppRoutes.jsx`, `frontend/src/views/admin/AdminOrderView.jsx`: in scope - admin composition and route patterns.
+- `frontend/src/components/admin/ProductTable.jsx`, `CategoryTable.jsx`, `frontend/src/components/order/OrderStatusBadge.jsx`, `PaymentStatusBadge.jsx`, `frontend/src/components/common/Alert.jsx`, `Loading.jsx`: in scope - table, status, error, and loading patterns.
+- Installed Astryx Card, Table, Badge, Skeleton, EmptyState, Banner, Grid, Heading, and Text sources: in scope - exports and prop/type declarations.
+
+## Reported Files Cross-Check
+- file from execution report: `docs/reports/report_4_execute_agent.md`
+- present in git/repo: yes
+- matches task scope: yes
+- notes: Exactly matches the execution-report-only file boundary.
+
+## Dependency Review
+- Required dependencies: Batch03
+- Dependency status: satisfied; 03A-03D are checked in both locations.
+- Missing or invalid dependency: None
+
+## Architecture Alignment
+- Passed: Mapping reuses the admin shell/components, installed Astryx exports, semantic badges, and backend report data; 04B-04D remain unimplemented.
+- Failed: None
+- Uncertain: CLI templates/examples are unavailable due to executable resolution.
+
+## Implementation Reality
+- Real implementation: yes
+- Stub or fake logic found: no
+- Evidence: This discovery task records a concrete evidence-based mapping and claims no runtime implementation.
+
+## Hardcoding Review
+- Hardcoding found: no
+- Evidence: Mapping requires API-backed values and identifies current dashboard values as later-replacement placeholders.
+
+## Validations Reviewed
+- Command/check: `npx astryx build "admin reports dashboard metrics table"`
+- Reported result: exit 1, `npm error could not determine executable to run`
+- Rerun result: exact same exit and error; no template named
+- Status: passed
+- Notes: Task accepts documented tooling failure.
+- Command/check: `npx astryx component` for Card, Table, Badge, Skeleton, EmptyState, and Banner
+- Reported result: all exit 1 with the same executable-resolution error
+- Rerun result: all six reproduced exactly
+- Status: passed
+- Notes: CLI prop/template evidence was not invented.
+- Command/check: installed exports/props and local patterns
+- Reported result: all mapped exports and conventions found
+- Rerun result: component barrels/prop declarations and reported local usages verified
+- Status: passed
+- Notes: Mapping is repository-grounded.
+- Command/check: pre-review git scope
+- Reported result: execution report only
+- Rerun result: only `docs/reports/report_4_execute_agent.md`
+- Status: passed
+- Notes: No 04B-04D implementation artifact.
+
+## Acceptance Review
+- Task acceptance: Future UI edits are grounded in Astryx discovery and existing local admin patterns.
+- Status: satisfied
+- Evidence: Required CLI attempts and exact failure were verified; installed exports/props and local patterns support the recorded mapping.
+
+## Progress Tracking
+- Selected task checkbox before review: unchecked in task and Progress Tracker
+- Checkbox updated by reviewer: yes
+- Batch status updated by reviewer: no
+- Execution report entry: latest matching 04A entry
+- Review report entry: appended at physical EOF
+- Other: Only both 04A checkboxes updated; Batch04 remains unchecked.
+
+## Report Accuracy
+- Accurate / partial / inaccurate: accurate
+- Mismatches: None material.
+
+## Issues
+
+### Blocking
+- None
+
+### Major
+- None
+
+### Minor
+- None
+
+### Warnings
+- Astryx CLI remains unavailable; future UI tasks should continue using verified installed exports/local patterns unless it becomes available.
+
+### Observations
+- No template command was applicable because build returned no template name.
+- Banner is installed, but no local Banner convention was claimed.
+
+## Decision
+- Accept selected task: yes
+- Repair required: no
+- Can next task proceed: yes
+- Batch can be marked complete by A2: no
+
+## Repair Instructions
+- None
+
+---
+
+# Task Review Report - 04B
+
+## Source Task File
+docs/tasks/task_4.md
+
+## Execution Report Reviewed
+docs/reports/report_4_execute_agent.md
+
+## Review Report File
+docs/review/review_4_review_agent.md
+
+## Mode
+orchestrated
+
+## Final Outcome
+ACCEPTED
+
+## Reviewed Scope
+- Batch: Batch04 - Admin Dashboard and Report UI
+- Task ID: 04B
+- Task title: Add report API helper and admin route wiring
+- Executor status reported: complete
+- Source of Truth: `docs/plans/Plan_4.md` sections 6 and 7.2; `docs/design/design.md` section 24.17
+- Supplemental documents: None
+
+## Latest Report Selection
+- Latest report entry found: yes
+- Requested task ID, if any: 04B
+- Reviewed task ID: 04B
+- Correct selection: yes
+- Notes: The latest matching 04B execution entry is at physical EOF.
+
+## Git Diff Evidence
+- git status reviewed: yes
+- git diff stat reviewed: yes
+- git diff reviewed: yes
+- recent commits reviewed: yes
+- changed files from git: `docs/reports/report_4_execute_agent.md`, `docs/review/review_4_review_agent.md`, `docs/tasks/task_4.md`, `frontend/src/routes/AppRoutes.jsx`, plus untracked focused 04B files
+- untracked files: `frontend/src/api/reportApi.js`, `frontend/src/api/reportApi.test.js`, `frontend/src/views/admin/ReportView.jsx`, `frontend/src/views/admin/ReportView.structure.test.js`
+
+## Files Reviewed
+- `docs/tasks/task_4.md`: in scope - complete 04B contract, dependency, and both task checkboxes.
+- `docs/reports/report_4_execute_agent.md`: in scope - latest matching A1 report.
+- `docs/review/review_4_review_agent.md`: in scope - prior accepted 04A evidence and append target.
+- `docs/plans/Plan_4.md`: in scope - target structure and exact report endpoint contract.
+- `docs/design/design.md`: in scope - admin report page placement and future 04C component map.
+- `frontend/src/api/reportApi.js`: in scope - three focused report getters through shared `apiClient`.
+- `frontend/src/api/reportApi.test.js`: in scope - endpoint and no-direct-data-access assertions.
+- `frontend/src/views/admin/ReportView.jsx`: in scope - minimal route surface reserved for 04C composition.
+- `frontend/src/views/admin/ReportView.structure.test.js`: in scope - route, guard/layout, view, and nav assertions.
+- `frontend/src/routes/AppRoutes.jsx`: in scope - report route nested under existing `AdminRoute` and `AdminLayout`.
+- `frontend/src/layouts/AdminLayout.jsx`: in scope - existing Reports navigation preserved unchanged.
+- `frontend/src/api/apiClient.js`, `frontend/src/api/reviewApi.js`, `frontend/src/config.js`: in scope - shared client and local helper pattern.
+- `backend/src/routes/index.js`, `backend/src/routes/report.routes.js`: in scope - endpoint mount and suffix verification.
+
+## Reported Files Cross-Check
+- file from execution report: six reported 04B implementation/test/report files
+- present in git/repo: yes
+- matches task scope: yes
+- notes: All reported files exist and match the task. `AdminLayout.jsx` correctly remained unchanged because its existing Reports nav item already satisfies 04B.
+
+## Dependency Review
+- Required dependencies: accepted 04A and completed Batch03.
+- Dependency status: satisfied; both 04A checkboxes and all 03A-03D checkboxes are checked, and commit `d692990` records Batch03 completion.
+- Missing or invalid dependency: None
+
+## Architecture Alignment
+- Passed: Exact backend endpoint suffixes are wrapped by the existing authenticated `apiClient`; the route is inside the existing admin guard/layout; existing navigation remains intact; no duplicate base URL or data client was added.
+- Failed: None
+- Uncertain: None
+
+## Implementation Reality
+- Real implementation: yes
+- Stub or fake logic found: no
+- Evidence: The helper delegates real GET requests through `apiClient`, and the production route renders a real Astryx view under the established admin tree. Data rendering is intentionally deferred to 04C.
+
+## Hardcoding Review
+- Hardcoding found: no
+- Evidence: Only contract-defined endpoint paths and static route-surface copy are present; no report values, fixture IDs, or frontend calculations exist.
+
+## Validations Reviewed
+- Command/check: `node --test src/api/reportApi.test.js src/views/admin/ReportView.structure.test.js`
+- Reported result: 4 passed, 0 failed after implementation
+- Rerun result: 4 passed, 0 failed
+- Status: passed
+- Notes: Exact endpoints, shared client use, protected nesting, minimal view, and retained navigation passed.
+- Command/check: `node --test "src/**/*.test.js"`
+- Reported result: 24 passed, 0 failed
+- Rerun result: 24 passed, 0 failed
+- Status: passed
+- Notes: Full frontend node suite passed.
+- Command/check: `npm run build`
+- Reported result: 542 modules transformed; build succeeded with a non-fatal chunk-size warning
+- Rerun result: 542 modules transformed; build succeeded with the same non-fatal warning
+- Status: passed
+- Notes: Production compilation validates imports and route/view integration.
+- Command/check: endpoint, duplication, and post-build scope searches
+- Reported result: exact paths and no direct fetch/Supabase/base duplication
+- Rerun result: backend mounts `/admin/reports`; all three suffixes match; only shared `apiClient` owns fetch/base configuration; post-build git scope is unchanged
+- Status: passed
+- Notes: No 04C component/data-loading implementation was found.
+- Command/check: `git diff --check` on focused 04B files
+- Reported result: passed with only an LF-to-CRLF notice
+- Rerun result: passed with only the same notice
+- Status: passed
+- Notes: No whitespace errors.
+
+## Acceptance Review
+- Task acceptance: Admin report route is protected and uses existing API client behavior.
+- Status: satisfied
+- Evidence: Three exact report helpers use `apiClient.get`; `/admin/reports` is nested under `AdminRoute` and `AdminLayout`; Reports nav remains selected by the existing pathname rule; focused/full tests and build pass.
+
+## Progress Tracking
+- Selected task checkbox before review: unchecked in task and Progress Tracker
+- Checkbox updated by reviewer: yes
+- Batch status updated by reviewer: no
+- Execution report entry: latest matching 04B entry
+- Review report entry: appended at physical EOF
+- Other: Only both 04B checkboxes were updated; 04C, 04D, and Batch04 remain unchecked.
+
+## Report Accuracy
+- Accurate / partial / inaccurate: accurate
+- Mismatches: The pre-implementation RED check is labeled `result: passed` as a successful TDD step while its evidence correctly states two expected failures; this wording does not misstate the final validation state.
+
+## Issues
+
+### Blocking
+- None
+
+### Major
+- None
+
+### Minor
+- None
+
+### Warnings
+- Frontend lint remains unavailable because the repository has no ESLint configuration; lint is not required by 04B and focused/full tests plus the production build pass.
+
+### Observations
+- `ReportView` deliberately contains only a heading and description; report fetching, state handling, and report components remain for 04C.
+- Existing prior-task 04A report/review/tracker changes remain in the uncommitted batch worktree and are not new 04B scope.
+
+## Decision
+- Accept selected task: yes
+- Repair required: no
+- Can next task proceed: yes
+- Batch can be marked complete by A2: no
+
+## Repair Instructions
+- None
+
+---
+
+# Task Review Report - 04C
+
+## Source Task File
+docs/tasks/task_4.md
+
+## Execution Report Reviewed
+docs/reports/report_4_execute_agent.md
+
+## Review Report File
+docs/review/review_4_review_agent.md
+
+## Mode
+orchestrated
+
+## Final Outcome
+REJECTED_WITH_WARNINGS
+
+## Reviewed Scope
+- Batch: Batch04 - Admin Dashboard and Report UI
+- Task ID: 04C
+- Task title: Build report components and ReportView
+- Executor status reported: complete
+- Source of Truth: `docs/plans/Plan_4.md` section 7.3; `docs/design/design.md` sections 19, 25, and 27; accepted 04A mapping
+- Supplemental documents: None
+
+## Latest Report Selection
+- Latest report entry found: yes
+- Requested task ID, if any: 04C
+- Reviewed task ID: 04C
+- Correct selection: yes
+- Notes: The latest matching 04C execution entry is at physical EOF.
+
+## Git Diff Evidence
+- git status reviewed: yes
+- git diff stat reviewed: yes
+- git diff reviewed: yes
+- recent commits reviewed: not needed
+- changed files from git: cumulative Batch04 changes in `docs/reports/report_4_execute_agent.md`, `docs/review/review_4_review_agent.md`, `docs/tasks/task_4.md`, and `frontend/src/routes/AppRoutes.jsx`, plus untracked 04B/04C API, component, view, and test files
+- untracked files: `frontend/src/api/reportApi.js`, `frontend/src/api/reportApi.test.js`, `frontend/src/components/report/BestSellingProductsTable.jsx`, `frontend/src/components/report/OrderSummaryCards.jsx`, `frontend/src/components/report/ReportComponents.structure.test.js`, `frontend/src/components/report/RevenueSummaryCard.jsx`, `frontend/src/views/admin/ReportView.jsx`, `frontend/src/views/admin/ReportView.structure.test.js`
+
+## Files Reviewed
+- `docs/tasks/task_4.md`: in scope - complete 04C contract, dependencies, and both 04C checkbox locations.
+- `docs/reports/report_4_execute_agent.md`: in scope - latest matching A1 report and accepted 04A mapping.
+- `docs/review/review_4_review_agent.md`: in scope - prior Batch04 review evidence and append target.
+- `docs/plans/Plan_4.md`, `docs/design/design.md`: in scope - report states, surfaces, Astryx, semantic-status, and accessibility requirements.
+- `frontend/src/components/report/RevenueSummaryCard.jsx`: in scope - revenue success/loading surface.
+- `frontend/src/components/report/BestSellingProductsTable.jsx`: in scope - best-selling success/empty/loading surface and accessible columns.
+- `frontend/src/components/report/OrderSummaryCards.jsx`: in scope - five backend status counts, loading state, and shared badges.
+- `frontend/src/views/admin/ReportView.jsx`: in scope - three API calls, response mapping, common error/permission state, retry, and composition.
+- `frontend/src/components/report/ReportComponents.structure.test.js`, `frontend/src/views/admin/ReportView.structure.test.js`: in scope - focused structural coverage.
+- `frontend/src/api/reportApi.js`, `frontend/src/api/apiClient.js`: in scope - shared authenticated request and response/error shape.
+- `backend/src/controllers/report.controller.js`, `backend/src/models/report.model.js`: in scope - exact response fields and backend source of truth.
+- `frontend/src/components/admin/AdminTable.jsx`, `frontend/src/components/common/Alert.jsx`: in scope - reused loading/empty/error/retry behavior.
+- `frontend/src/components/order/OrderStatusBadge.jsx`, `frontend/src/constants/orderConstants.js`: in scope - reused status labels and Astryx variants.
+- `frontend/src/components/product/productUtils.js`: in scope - reused currency formatter.
+- Installed Astryx Card, Grid, Stack, Text, Skeleton, Badge, and Table sources: in scope - actual supported props and semantic variants.
+- `frontend/src/views/AdminDashboardView.jsx`: in scope - verified 04D remained untouched.
+
+## Reported Files Cross-Check
+- file from execution report: seven reported 04C implementation/test/report files
+- present in git/repo: yes
+- matches task scope: yes
+- notes: All reported files exist and are scoped to 04C. `AdminDashboardView` is unchanged, preserving the 04D boundary.
+
+## Dependency Review
+- Required dependencies: accepted 04B and completed 03D.
+- Dependency status: satisfied; both dependency checkboxes are checked and their implementation/report evidence is present.
+- Missing or invalid dependency: None.
+
+## Architecture Alignment
+- Passed: ReportView uses the existing reportApi/apiClient boundary, consumes all three backend response shapes, reuses AdminTable/Alert/currency/status modules, keeps report truth in the backend, uses token-only report styling, and does not touch 04D.
+- Failed: The reused cancelled-order badge passes unsupported Astryx variant `danger`; installed Badge variants include `error`, not `danger`.
+- Uncertain: None.
+
+## Implementation Reality
+- Real implementation: yes
+- Stub or fake logic found: no
+- Evidence: The production view performs all three real report API requests and renders backend values through focused components; no fixture values or direct data access were found.
+
+## Hardcoding Review
+- Hardcoding found: no
+- Evidence: Static copy, status ordering, endpoint contract paths, and zero-value defaults are legitimate UI/contract values; revenue, products, and counts come from backend responses.
+
+## Validations Reviewed
+- Command/check: `node --test src/components/report/ReportComponents.structure.test.js src/views/admin/ReportView.structure.test.js`
+- Reported result: 6 passed, 0 failed
+- Rerun result: 6 passed, 0 failed
+- Status: passed
+- Notes: Focused structure, composition, retry, route, navigation, shared formatter, and column checks pass, but the tests do not validate installed Badge variant compatibility.
+- Command/check: `node --test "src/**/*.test.js"`
+- Reported result: 27 passed, 0 failed
+- Rerun result: 27 passed, 0 failed
+- Status: passed
+- Notes: All frontend node tests pass.
+- Command/check: `npm run build`
+- Reported result: 546 modules transformed; build passed with a non-fatal chunk-size warning
+- Rerun result: 546 modules transformed; build passed with the same warning
+- Status: passed
+- Notes: JSX syntax, imports, and production compilation are valid.
+- Command/check: forbidden-pattern search over 04C production files
+- Reported result: no raw divs, raw hex/px, utility-class/xstyle usage, direct database/fetch, or base configuration
+- Rerun result: no forbidden matches
+- Status: passed
+- Notes: Report styling uses Astryx props and tokens only.
+- Command/check: focused file-size and whitespace checks
+- Reported result: 41, 75, 45, and 90 nonblank lines; no trailing whitespace
+- Rerun result: 41, 75, 45, and 90 nonblank lines; all files under 300 lines; `git diff --check` passed
+- Status: passed
+- Notes: The execution report's counts are nonblank-line counts and are accurate.
+- Command/check: UTF-8/mojibake inspection
+- Reported result: not explicitly reported
+- Rerun result: source decoded as UTF-8 with no replacement or common mojibake sequences; brand fallback is the intended U+2014 em dash
+- Status: passed
+- Notes: PowerShell `Get-Content` console rendering was not treated as source corruption.
+- Command/check: installed Astryx Badge variant compatibility
+- Reported result: semantic shared status badges claimed valid
+- Rerun result: failed for cancelled status; `OrderStatusBadge` maps `cancelled` to `danger`, while installed Badge supports `error` and no `danger` augmentation exists
+- Status: failed
+- Notes: The cancelled order-summary card does not receive a supported semantic error variant.
+- Command/check: formal browser/manual admin report smoke
+- Reported result: not run; deferred to 04D/06B
+- Rerun result: not run
+- Status: not_run
+- Notes: Formal live browser validation is outside 04C and is not required for this review.
+
+## Acceptance Review
+- Task acceptance: Admin can view all three backend-driven report surfaces with clear states and valid semantic status badges.
+- Status: partially satisfied
+- Evidence: Loading, explicit zero/empty, common error/permission, retry, and success paths are implemented; API response mapping and accessible headers/labels are correct. The unsupported cancelled Badge variant violates the semantic-status requirement.
+
+## Progress Tracking
+- Selected task checkbox before review: unchecked in task and Progress Tracker
+- Checkbox updated by reviewer: no
+- Batch status updated by reviewer: no
+- Execution report entry: latest matching 04C entry
+- Review report entry: appended at physical EOF
+- Other: Both 04C checkboxes remain unchecked; 04D and Batch04 remain unchecked.
+
+## Report Accuracy
+- Accurate / partial / inaccurate: partial
+- Mismatches: A1 states semantic statuses were validated, but installed Astryx evidence shows `danger` is unsupported for the reused cancelled badge. Other implementation and validation claims are materially accurate.
+
+## Issues
+
+### Blocking
+- None.
+
+### Major
+- None.
+
+### Minor
+- `frontend/src/components/order/OrderStatusBadge.jsx` maps `cancelled` to unsupported Badge variant `danger`; use the installed semantic `error` variant so the 04C cancelled summary card has valid Astryx status styling.
+
+### Warnings
+- Focused tests assert that OrderStatusBadge is reused but do not guard its variant map against installed Astryx variants.
+- The existing production bundle remains above Vite's advisory 500 kB chunk threshold; this is non-blocking and unrelated to 04C correctness.
+
+### Observations
+- All three report calls share one all-or-nothing request boundary, which is consistent with the existing common authorization/error surface.
+- Zero revenue/count values remain visible, while an empty product dataset uses AdminTable's explanatory EmptyState.
+- Backend response fields exactly match the frontend mapping: `totalRevenue`, `completedOrderCount`, product `productId/name/brand/soldQuantity/revenue`, and five status keys.
+
+## Decision
+- Accept selected task: no
+- Repair required: yes
+- Can next task proceed: no
+- Batch can be marked complete by A2: no
+
+## Repair Instructions
+- target: `frontend/src/components/order/OrderStatusBadge.jsx` and focused status/report tests.
+- change: Replace the unsupported cancelled status Badge variant `danger` with installed Astryx semantic variant `error`; keep the shared component as the single status mapping source.
+- validation: Add or extend a focused assertion that guards the cancelled-to-`error` mapping, then rerun the focused report tests, all frontend tests, the production build, and forbidden-pattern checks.
+- blocks next task: yes
+
+---
+
+# Task Review Report - 04C
+
+## Source Task File
+docs/tasks/task_4.md
+
+## Execution Report Reviewed
+docs/reports/report_4_execute_agent.md
+
+## Review Report File
+docs/review/review_4_review_agent.md
+
+## Mode
+same_task_repair
+
+## Final Outcome
+ACCEPTED
+
+## Reviewed Scope
+- Batch: Batch04 - Admin Dashboard and Report UI
+- Task ID: 04C
+- Task title: Build report components and ReportView
+- Executor status reported: complete
+- Source of Truth: prior A2 04C repair instructions, 04C semantic-status requirement, and installed Astryx Badge contract
+- Supplemental documents: None
+
+## Latest Report Selection
+- Latest report entry found: yes
+- Requested task ID, if any: 04C
+- Reviewed task ID: 04C
+- Correct selection: yes
+- Notes: Selected the latest matching 04C entry, which is the same-task repair report at execution-report EOF.
+
+## Git Diff Evidence
+- git status reviewed: yes
+- git diff stat reviewed: yes
+- git diff reviewed: yes
+- recent commits reviewed: not needed
+- changed files from git: cumulative Batch04 report/review/task/route changes plus the focused `OrderStatusBadge.jsx` repair and untracked Batch04 files
+- untracked files: `frontend/src/api/reportApi.js`, `frontend/src/api/reportApi.test.js`, `frontend/src/components/order/OrderStatusBadge.structure.test.js`, report components/tests, and ReportView/tests
+
+## Files Reviewed
+- `docs/tasks/task_4.md`: in scope - 04C repair acceptance and both selected checkbox locations.
+- `docs/reports/report_4_execute_agent.md`: in scope - latest matching same-task repair report.
+- `docs/review/review_4_review_agent.md`: in scope - prior rejection instructions and append target.
+- `frontend/src/components/order/OrderStatusBadge.jsx`: in scope - repaired shared cancelled-status mapping and intent comment.
+- `frontend/src/components/order/OrderStatusBadge.structure.test.js`: in scope - focused regression coverage.
+- Installed `@astryxdesign/core/src/Badge/Badge.tsx`: in scope - authoritative supported semantic variants.
+- `frontend/src/components/report/OrderSummaryCards.jsx`: in scope - 04C caller of the shared status badge.
+- `frontend/src/views/OrderHistoryView.jsx`, `frontend/src/components/order/OrderDetailPanel.jsx`: in scope - other shared callers checked for API compatibility.
+- Original 04C report components, ReportView, and focused tests: in scope - rerun validation context.
+
+## Reported Files Cross-Check
+- file from execution report: `frontend/src/components/order/OrderStatusBadge.jsx`, `frontend/src/components/order/OrderStatusBadge.structure.test.js`, `docs/reports/report_4_execute_agent.md`
+- present in git/repo: yes
+- matches task scope: yes
+- notes: Exactly matches the prior A2 repair scope; no 04D implementation changed.
+
+## Dependency Review
+- Required dependencies: original 04C implementation and prior A2 repair instructions.
+- Dependency status: satisfied.
+- Missing or invalid dependency: None.
+
+## Architecture Alignment
+- Passed: The shared root mapping now uses installed Astryx semantic variant `error`, all existing callers keep the same component API, and no duplicate report-specific status logic was introduced.
+- Failed: None.
+- Uncertain: None.
+
+## Implementation Reality
+- Real implementation: yes
+- Stub or fake logic found: no
+- Evidence: Production mapping changed from unsupported `danger` to supported `error`, and the report surface continues to use the shared component.
+
+## Hardcoding Review
+- Hardcoding found: no
+- Evidence: Status-to-semantic-variant mapping is legitimate shared UI configuration and matches installed component variants.
+
+## Validations Reviewed
+- Command/check: `node --test src/components/order/OrderStatusBadge.structure.test.js src/components/report/ReportComponents.structure.test.js src/views/admin/ReportView.structure.test.js`
+- Reported result: 7 passed, 0 failed
+- Rerun result: 7 passed, 0 failed
+- Status: passed
+- Notes: Regression and focused report/status coverage pass.
+- Command/check: `node --test "src/**/*.test.js"`
+- Reported result: 28 passed, 0 failed
+- Rerun result: 28 passed, 0 failed
+- Status: passed
+- Notes: Full frontend node suite passes.
+- Command/check: `npm run build`
+- Reported result: 546 modules transformed; passed with non-fatal chunk-size warning
+- Rerun result: 546 modules transformed; passed with the same advisory warning
+- Status: passed
+- Notes: Production build confirms valid imports and syntax.
+- Command/check: forbidden and stale-mapping search
+- Reported result: passed
+- Rerun result: passed; no forbidden report patterns, `cancelled: 'danger'`, or stale cancelled-to-danger comment found
+- Status: passed
+- Notes: Repair is clean and token/component compliant.
+- Command/check: installed Astryx compatibility
+- Reported result: `error` supported and `danger` unsupported
+- Rerun result: verified in Badge styles and BadgeVariantMap; repaired mapping uses `error`
+- Status: passed
+- Notes: Prior acceptance defect is resolved.
+- Command/check: focused whitespace and UTF-8 checks
+- Reported result: passed
+- Rerun result: `git diff --check` passed apart from line-ending notice; UTF-8 inspection passed
+- Status: passed
+- Notes: No source mojibake or whitespace defect found.
+
+## Acceptance Review
+- Task acceptance: Cancelled order summary uses an installed semantic Astryx Badge variant and focused coverage prevents regression.
+- Status: satisfied
+- Evidence: Shared mapping and comment use `error`; installed Badge supports it; regression, focused/full tests, build, forbidden, encoding, and diff checks pass.
+
+## Progress Tracking
+- Selected task checkbox before review: unchecked in task and Progress Tracker
+- Checkbox updated by reviewer: yes
+- Batch status updated by reviewer: no
+- Execution report entry: latest matching 04C same-task repair entry
+- Review report entry: appended at physical EOF
+- Other: Only both 04C checkboxes were checked; 04D and Batch04 remain unchecked.
+
+## Report Accuracy
+- Accurate / partial / inaccurate: accurate
+- Mismatches: The pre-repair RED test is labeled `result: passed` as a successful TDD step while its evidence correctly records the expected failure; final repair validation claims are accurate.
+
+## Issues
+
+### Blocking
+- None.
+
+### Major
+- None.
+
+### Minor
+- None.
+
+### Warnings
+- The existing production bundle remains above Vite's advisory 500 kB chunk threshold; unrelated to this repair.
+
+### Observations
+- The focused test guards both the required `error` mapping and absence of the stale `danger` mapping.
+- OrderHistoryView, OrderDetailPanel, and OrderSummaryCards all continue to reuse the repaired shared component.
+
+## Decision
+- Accept selected task: yes
+- Repair required: no
+- Can next task proceed: yes
+- Batch can be marked complete by A2: no
+
+## Repair Instructions
+- None.
+
+---
+
+# Task Review Report - 04D
+
+## Source Task File
+docs/tasks/task_4.md
+
+## Execution Report Reviewed
+docs/reports/report_4_execute_agent.md
+
+## Review Report File
+docs/review/review_4_review_agent.md
+
+## Mode
+orchestrated
+
+## Final Outcome
+REJECTED_WITH_WARNINGS
+
+## Reviewed Scope
+- Batch: Batch04 - Admin Dashboard and Report UI
+- Task ID: 04D
+- Task title: Update admin dashboard with simple report-backed metrics
+- Executor status reported: complete
+- Source of Truth: `docs/tasks/task_4.md` 04D contract; `docs/plans/Plan_4.md` 7.3; `docs/design/design.md` 13; `docs/plans/Master_Plan.md` 21.2; `AGENTS.md` Astryx rules
+- Supplemental documents: User-provided manual PASS evidence dated 2026-07-06
+
+## Latest Report Selection
+- Latest report entry found: yes
+- Requested task ID, if any: 04D
+- Reviewed task ID: 04D
+- Correct selection: yes
+- Notes: Selected the latest matching `04D Manual Evidence Completion` report after reading the earlier blocked 04D report. The manual evidence source remains explicitly user-provided, not automated browser evidence.
+
+## Git Diff Evidence
+- git status reviewed: yes
+- git diff stat reviewed: yes
+- git diff reviewed: yes
+- recent commits reviewed: not needed
+- changed files from git: cumulative Batch04 report/review/task changes; `frontend/src/components/order/OrderStatusBadge.jsx`; `frontend/src/routes/AppRoutes.jsx`; `frontend/src/views/AdminDashboardView.jsx`; untracked report API, report components/tests, dashboard test, and ReportView/tests
+- untracked files: `frontend/src/api/reportApi.js`, `frontend/src/api/reportApi.test.js`, `frontend/src/components/order/OrderStatusBadge.structure.test.js`, `frontend/src/components/report/*`, `frontend/src/views/AdminDashboardView.structure.test.js`, `frontend/src/views/admin/ReportView.jsx`, `frontend/src/views/admin/ReportView.structure.test.js`
+
+## Files Reviewed
+- `docs/tasks/task_4.md`: in scope - complete 04D contract, batch acceptance, and both unchecked 04D checkbox locations.
+- `docs/reports/report_4_execute_agent.md`: in scope - original blocked 04D entry and latest manual-evidence completion entry.
+- `docs/review/review_4_review_agent.md`: in scope - prior accepted 04C state and append target.
+- `docs/plans/Plan_4.md`: in scope - dashboard/report UI contract.
+- `docs/design/design.md`: in scope - admin dashboard component contract.
+- `docs/plans/Master_Plan.md`: in scope - admin demo flow.
+- `AGENTS.md`: in scope - Astryx component-props-first and styling rules.
+- `frontend/src/views/AdminDashboardView.jsx`: in scope - live report-backed dashboard implementation; inline layout styles violate available Astryx props.
+- `frontend/src/views/AdminDashboardView.structure.test.js`: in scope - focused dashboard architecture/forbidden-pattern coverage.
+- `frontend/src/views/admin/ReportView.jsx`: in scope - linked revenue, best-seller, and order-summary surface.
+- `frontend/src/views/admin/ReportView.structure.test.js`: in scope - report composition, route, navigation, and protection coverage.
+- `frontend/src/api/reportApi.js`: in scope - centralized report endpoint calls through `apiClient`.
+- `frontend/src/api/reportApi.test.js`: in scope - no direct fetch/Supabase helper coverage.
+- `frontend/src/components/report/RevenueSummaryCard.jsx`: in scope - reused revenue display and loading state.
+- `frontend/src/components/report/BestSellingProductsTable.jsx`: in scope - backend-provided best-seller rows and accessible AdminTable columns.
+- `frontend/src/components/report/OrderSummaryCards.jsx`: in scope - backend-provided order counts and responsive Astryx Grid.
+- `frontend/src/components/report/ReportComponents.structure.test.js`: in scope - focused component checks.
+- `frontend/src/routes/AppRoutes.jsx`: in scope - dashboard/report routes inside the existing AdminRoute and AdminLayout.
+- `frontend/src/layouts/AdminLayout.jsx`: in scope - report navigation and admin shell.
+- `frontend/src/api/apiClient.js`: in scope - shared authenticated request implementation.
+- Installed `@astryxdesign/core` HStack/Stack sources: in scope - confirms `align`, `justify`, `wrap`, and `width` props exist.
+
+## Reported Files Cross-Check
+- file from execution report: `docs/reports/report_4_execute_agent.md`
+- present in git/repo: yes
+- matches task scope: yes
+- notes: The latest completion entry correctly reports an evidence-only update. The original 04D implementation files remain present from the preserved blocked entry and were reviewed as the production scope.
+
+## Dependency Review
+- Required dependencies: accepted 04C report API helper/components and accepted Batch03 backend report APIs.
+- Dependency status: satisfied.
+- Missing or invalid dependency: None.
+
+## Architecture Alignment
+- Passed: Dashboard and ReportView reuse centralized report API helpers and shared report components; protected routes reuse AdminRoute/AdminLayout; no direct Supabase/API base duplication, client-side accounting, chart library, or duplicate report business logic exists.
+- Failed: `AdminDashboardView.jsx` uses inline `style` for alignment, wrapping, justification, and width even though HStack exposes `align`, `wrap`, `justify`, and `width` props, contrary to `AGENTS.md` component-props-first guidance and the explicit no-raw-styling review gate.
+- Uncertain: None.
+
+## Implementation Reality
+- Real implementation: yes
+- Stub or fake logic found: no
+- Evidence: Dashboard loads revenue and order-summary endpoints, exposes live refresh and report navigation, handles loading/error/success states, and delegates presentation to shared report components.
+
+## Hardcoding Review
+- Hardcoding found: no
+- Evidence: Placeholder metric values and mocked refresh were removed; report values come from backend responses. Zero defaults are safe UI state, not fake report values.
+
+## Validations Reviewed
+- Command/check: `node --test src/views/AdminDashboardView.structure.test.js src/api/reportApi.test.js src/components/report/ReportComponents.structure.test.js src/views/admin/ReportView.structure.test.js`
+- Reported result: 9 passed, 0 failed
+- Rerun result: 9 passed, 0 failed
+- Status: passed
+- Notes: Dashboard/report helper, component, route, navigation, and forbidden-pattern assertions pass.
+- Command/check: `node --test "src/**/*.test.js"`
+- Reported result: 30 passed, 0 failed
+- Rerun result: 30 passed, 0 failed
+- Status: passed
+- Notes: Full frontend node suite passes.
+- Command/check: `npm run build`
+- Reported result: 546 modules transformed; passed with non-fatal chunk-size warning
+- Rerun result: 546 modules transformed; passed with the same advisory warning
+- Status: passed
+- Notes: Production build succeeds.
+- Command/check: production dashboard/report forbidden-pattern search
+- Reported result: no raw div, direct fetch/Supabase/API base access, raw hex/px, Tailwind/xstyle, reduce accounting, or chart pattern
+- Rerun result: passed for those patterns; no forbidden business/data-access/chart patterns found
+- Status: passed
+- Notes: Test-source negative assertions were excluded from the production finding.
+- Command/check: Astryx component-props-first styling inspection
+- Reported result: reported as passed by the executor's broader forbidden scan
+- Rerun result: failed; dashboard HStacks use inline layout styles despite equivalent installed component props
+- Status: failed
+- Notes: Replace style-owned `alignItems`, `justifyContent`, `flexWrap`, and `width` with `align`, `justify`, `wrap`, and `width`.
+- Command/check: `git diff --check`
+- Reported result: passed with line-ending notices only
+- Rerun result: passed with line-ending notices only
+- Status: passed
+- Notes: No whitespace errors.
+- Command/check: admin dashboard/report visual, responsive, navigation, and access smoke
+- Reported result: passed from user-provided manual evidence dated 2026-07-06
+- Rerun result: accepted as user-provided manual PASS; not rerun as automated browser evidence
+- Status: passed
+- Notes: Covers `/admin` live revenue/order metrics, refresh, report link; `/admin/reports` revenue, best sellers, order summary; desktop/mobile layouts; anonymous/customer denial.
+- Command/check: prior live API and authorization evidence alignment
+- Reported result: admin report endpoints 200; anonymous 401; customer 403; database-to-API values matched
+- Rerun result: repository report evidence aligns with the user-provided UI/access PASS
+- Status: passed
+- Notes: Prior 03D/04D live evidence records three successful admin report endpoints, three best-seller rows, and expected 401/403 denial.
+
+## Acceptance Review
+- Task acceptance: Dashboard supports the admin demo flow without unsupported charts or duplicate frontend report calculations.
+- Status: partially satisfied
+- Evidence: Runtime behavior, tests, build, live API evidence, and user-provided manual UI/access evidence satisfy the functional contract. The remaining component-props-first styling defect is narrow but violates an explicit project and review constraint.
+
+## Progress Tracking
+- Selected task checkbox before review: unchecked in both the detailed task and Progress Tracker
+- Checkbox updated by reviewer: no
+- Batch status updated by reviewer: no
+- Execution report entry: latest matching 04D manual-evidence completion entry
+- Review report entry: appended at physical EOF
+- Other: 04D remains unchecked in both locations; Batch04 remains unchecked.
+
+## Report Accuracy
+- Accurate / partial / inaccurate: partial
+- Mismatches: Functional, automated, live, and manual evidence claims are accurate. The claim that the forbidden/static styling check fully passed misses dashboard inline layout styles that duplicate available Astryx component props.
+
+## Issues
+
+### Blocking
+- None.
+
+### Major
+- None.
+
+### Minor
+- `frontend/src/views/AdminDashboardView.jsx` bypasses available HStack layout props with inline styles at the page header and action row.
+
+### Warnings
+- The focused dashboard test checks raw div, data-access, accounting, and chart patterns but does not enforce the Astryx component-props-first rule.
+- The existing production bundle remains above Vite's advisory 500 kB chunk threshold; unrelated to 04D correctness.
+
+### Observations
+- User-provided manual PASS evidence dated 2026-07-06 fully covers the previously blocked visual, navigation, responsive, and access contract and is correctly distinguished from automated browser evidence.
+- The dashboard removal was limited to stale Phase 1 placeholder/mock content and replaced it with the requested simple report-backed metrics; no unrelated functional redesign was found.
+
+## Decision
+- Accept selected task: no
+- Repair required: yes
+- Can next task proceed: no
+- Batch can be marked complete by A2: no
+
+## Repair Instructions
+- target: `frontend/src/views/AdminDashboardView.jsx` and `frontend/src/views/AdminDashboardView.structure.test.js`.
+- change: Replace the header HStack inline `alignItems`, `justifyContent`, `flexWrap`, and `width` styles with `align="center"`, `justify="between"`, `wrap="wrap"`, and `width="100%"`; replace the action-row inline `flexWrap` with `wrap="wrap"`. Add a focused assertion preventing these duplicate inline layout styles while preserving the existing report-backed behavior.
+- validation: Rerun the 9 focused dashboard/report tests, all frontend tests, `npm run build`, production forbidden/component-prop scans, and `git diff --check`. The dated user-provided manual PASS does not need repetition unless behavior changes.
+- blocks next task: yes
+
+---
+
+# Task Review Report - 04D
+
+## Source Task File
+docs/tasks/task_4.md
+
+## Execution Report Reviewed
+docs/reports/report_4_execute_agent.md
+
+## Review Report File
+docs/review/review_4_review_agent.md
+
+## Mode
+same_task_repair
+
+## Final Outcome
+ACCEPTED
+
+## Reviewed Scope
+- Batch: Batch04 - Admin Dashboard and Report UI
+- Task ID: 04D
+- Task title: Update admin dashboard with simple report-backed metrics
+- Executor status reported: complete
+- Source of Truth: prior A2 04D repair instructions; `AGENTS.md` Astryx component-props-first rule; installed HStack/Stack prop contracts
+- Supplemental documents: User-provided manual PASS evidence dated 2026-07-06
+
+## Latest Report Selection
+- Latest report entry found: yes
+- Requested task ID, if any: 04D
+- Reviewed task ID: 04D
+- Correct selection: yes
+- Notes: Selected the latest matching `04D Astryx Props Repair` report at execution-report EOF and reviewed it against the immediately preceding A2 repair instructions.
+
+## Git Diff Evidence
+- git status reviewed: yes
+- git diff stat reviewed: yes
+- git diff reviewed: yes
+- recent commits reviewed: not needed
+- changed files from git: cumulative Batch04 report/review/task changes; `frontend/src/components/order/OrderStatusBadge.jsx`; `frontend/src/routes/AppRoutes.jsx`; `frontend/src/views/AdminDashboardView.jsx`; untracked report API/components/tests, dashboard test, and ReportView/tests
+- untracked files: `frontend/src/api/reportApi.js`, `frontend/src/api/reportApi.test.js`, `frontend/src/components/order/OrderStatusBadge.structure.test.js`, `frontend/src/components/report/*`, `frontend/src/views/AdminDashboardView.structure.test.js`, `frontend/src/views/admin/ReportView.jsx`, `frontend/src/views/admin/ReportView.structure.test.js`
+
+## Files Reviewed
+- `docs/tasks/task_4.md`: in scope - 04D contract and both selected checkbox locations.
+- `docs/reports/report_4_execute_agent.md`: in scope - latest same-task props repair report and preserved manual evidence attribution.
+- `docs/review/review_4_review_agent.md`: in scope - prior 04D rejection instructions and append target.
+- `AGENTS.md`: in scope - Astryx component-props-first rule.
+- `frontend/src/views/AdminDashboardView.jsx`: in scope - repaired HStack props and unchanged report-backed behavior.
+- `frontend/src/views/AdminDashboardView.structure.test.js`: in scope - new props-first regression coverage plus existing behavior checks.
+- Installed `@astryxdesign/core/src/HStack/HStack.tsx`: in scope - confirms `align` and `justify` aliases.
+- Installed `@astryxdesign/core/src/Stack/Stack.tsx`: in scope - confirms inherited `wrap` and `width` props.
+- Existing report helper/components, ReportView, route, layout, and focused tests: in scope - regression validation context.
+
+## Reported Files Cross-Check
+- file from execution report: `frontend/src/views/AdminDashboardView.jsx`, `frontend/src/views/AdminDashboardView.structure.test.js`, `docs/reports/report_4_execute_agent.md`
+- present in git/repo: yes
+- matches task scope: yes
+- notes: Exactly matches the prior A2 repair scope; no report behavior, sibling task, or future batch implementation changed.
+
+## Dependency Review
+- Required dependencies: existing 04D report-backed implementation, accepted 04C helper/components, and prior A2 repair instructions.
+- Dependency status: satisfied.
+- Missing or invalid dependency: None.
+
+## Architecture Alignment
+- Passed: Header HStack now uses `align="center"`, `justify="between"`, `wrap="wrap"`, and `width="100%"`; action HStack uses `wrap="wrap"`. These props are supported by installed HStack/Stack, and no duplicate inline layout style remains.
+- Failed: None.
+- Uncertain: None.
+
+## Implementation Reality
+- Real implementation: yes
+- Stub or fake logic found: no
+- Evidence: Report fetching, loading, error, retry, refresh, navigation, and shared component rendering remain intact after the props-only repair.
+
+## Hardcoding Review
+- Hardcoding found: no
+- Evidence: Dashboard values still come from report API responses; the repair changes layout expression only.
+
+## Validations Reviewed
+- Command/check: `node --test src/views/AdminDashboardView.structure.test.js src/api/reportApi.test.js src/components/report/ReportComponents.structure.test.js src/views/admin/ReportView.structure.test.js`
+- Reported result: 10 passed, 0 failed
+- Rerun result: 10 passed, 0 failed
+- Status: passed
+- Notes: Includes the new props-first regression and all focused dashboard/report contracts.
+- Command/check: `node --test "src/**/*.test.js"`
+- Reported result: 31 passed, 0 failed
+- Rerun result: 31 passed, 0 failed
+- Status: passed
+- Notes: Full frontend node suite passes.
+- Command/check: `npm run build`
+- Reported result: 546 modules transformed; passed with non-fatal chunk-size warning
+- Rerun result: 546 modules transformed; passed with the same advisory warning
+- Status: passed
+- Notes: Production build confirms prop/import compatibility.
+- Command/check: installed HStack/Stack prop compatibility
+- Reported result: `align`, `justify`, inherited `wrap`, and inherited `width` supported
+- Rerun result: verified directly in installed HStackProps and StackProps/implementation
+- Status: passed
+- Notes: Values `center`, `between`, `wrap`, and `100%` are supported.
+- Command/check: dashboard static/forbidden scan
+- Reported result: no inline style object or forbidden UI/data-access/accounting/chart pattern
+- Rerun result: passed; no `style={{`, raw div, direct fetch/Supabase/API base access, raw hex/px, Tailwind/xstyle, reduce accounting, or chart pattern found
+- Status: passed
+- Notes: Prior styling defect is resolved.
+- Command/check: dashboard behavior-preservation search
+- Reported result: report fetching, loading, error, retry, refresh, navigation, and shared components preserved
+- Rerun result: verified in current source and focused tests
+- Status: passed
+- Notes: Repair is layout-expression only.
+- Command/check: `git diff --check`
+- Reported result: passed with line-ending notices only
+- Rerun result: passed with line-ending notices only
+- Status: passed
+- Notes: No whitespace errors.
+- Command/check: 2026-07-06 dashboard/report UI, responsive, navigation, and access validation
+- Reported result: passed from user-provided manual evidence
+- Rerun result: attribution preserved; not represented as automated browser evidence
+- Status: passed
+- Notes: Props-only repair does not change behavior requiring repetition of the user's manual checks.
+
+## Acceptance Review
+- Task acceptance: Prior A2 component-props-first repair instructions are fully resolved while the report-backed dashboard contract remains satisfied.
+- Status: satisfied
+- Evidence: Installed prop contracts, focused/full tests, build, static/forbidden checks, behavior inspection, diff check, and preserved manual evidence attribution all pass.
+
+## Progress Tracking
+- Selected task checkbox before review: unchecked in both detailed task and Progress Tracker
+- Checkbox updated by reviewer: yes
+- Batch status updated by reviewer: no
+- Execution report entry: latest matching 04D Astryx props repair entry
+- Review report entry: appended at physical EOF
+- Other: Only both 04D checkboxes were checked; Batch04 remains unchecked.
+
+## Report Accuracy
+- Accurate / partial / inaccurate: accurate
+- Mismatches: The pre-repair RED test is labeled `result: passed` as a successful TDD step while its evidence correctly records the expected assertion failure; all final repair claims are accurate.
+
+## Issues
+
+### Blocking
+- None.
+
+### Major
+- None.
+
+### Minor
+- None.
+
+### Warnings
+- The existing production bundle remains above Vite's advisory 500 kB chunk threshold; unrelated to 04D correctness.
+
+### Observations
+- The regression test prevents reintroducing inline style objects anywhere in AdminDashboardView.
+- User-provided manual PASS evidence remains dated, explicit, and correctly distinguished from automated browser evidence.
+
+## Decision
+- Accept selected task: yes
+- Repair required: no
+- Can next task proceed: yes
+- Batch can be marked complete by A2: no
+
+## Repair Instructions
+- None.
+
+---
+
+# Task Review Report - Batch04 Scope Repair
+
+## Source Task File
+docs/tasks/task_4.md
+
+## Execution Report Reviewed
+docs/reports/report_4_execute_agent.md
+
+## Review Report File
+docs/review/review_4_review_agent.md
+
+## Mode
+batch_scope_repair
+
+## Final Outcome
+ACCEPTED
+
+## Reviewed Scope
+- Batch: Batch04 - Admin Dashboard and Report UI
+- Task ID: batch_scope
+- Task title: Remove historical review separator outside Batch04 scope
+- Executor status reported: complete
+- Source of Truth: A3 Batch04 scope finding and orchestrator repair requirements
+- Supplemental documents: None
+
+## Latest Report Selection
+- Latest report entry found: yes
+- Requested task ID, if any: batch_scope
+- Reviewed task ID: batch_scope
+- Correct selection: yes
+- Notes: Selected the final `Task Execution Report - Batch04 Scope Repair` entry at execution-report EOF.
+
+## Git Diff Evidence
+- git status reviewed: yes
+- git diff stat reviewed: yes
+- git diff reviewed: yes
+- recent commits reviewed: not needed
+- changed files from git: cumulative Batch04 task, execution-report, review-report, frontend implementation, and focused-test files
+- untracked files: cumulative Batch04 report API, report components, dashboard/report tests, and ReportView files
+
+## Files Reviewed
+- `docs/review/review_4_review_agent.md`: in scope - historical boundary, Batch04 chronology, accepted outcomes, manual-evidence attribution, and append target.
+- `docs/reports/report_4_execute_agent.md`: in scope - final batch-scope repair entry and physical EOF placement.
+- `docs/tasks/task_4.md`: in scope - both 04A-04D checkbox locations and unchanged Batch04 status.
+
+## Reported Files Cross-Check
+- file from execution report: `docs/review/review_4_review_agent.md`; `docs/reports/report_4_execute_agent.md`
+- present in git/repo: yes
+- matches task scope: yes
+- notes: The historical separator artifact is absent, and the required repair report is the final execution-report entry.
+
+## Dependency Review
+- Required dependencies: accepted 04A-04D outcomes and A3's precise scope finding.
+- Dependency status: satisfied.
+- Missing or invalid dependency: None.
+
+## Architecture Alignment
+- Passed: Repair is documentation-only and does not alter implementation, accepted progress, or batch status.
+- Failed: None.
+- Uncertain: None.
+
+## Implementation Reality
+- Real implementation: yes
+- Stub or fake logic found: no
+- Evidence: The exact historical separator plus blank line was removed; no runtime claim is involved.
+
+## Hardcoding Review
+- Hardcoding found: no
+- Evidence: Not applicable to this documentation-only scope repair.
+
+## Validations Reviewed
+- Command/check: historical 01B-to-01C boundary and focused review-file diff
+- Reported result: separator artifact absent
+- Rerun result: line 273 is `- None` and line 275 begins `# Task Review Report - 01C`; the review-file diff starts at prior EOF with 04A
+- Status: passed
+- Notes: The A3-listed historical hunk is gone.
+- Command/check: Batch04 review chronology and outcomes
+- Reported result: 04A accepted, 04B accepted, 04C rejected then accepted, 04D rejected then accepted
+- Rerun result: headings and final outcomes occur in exactly that order from lines 1928 through 2747
+- Status: passed
+- Notes: Batch04 additions still begin at the prior review-report EOF.
+- Command/check: both 04A-04D checkbox locations and Batch04 status
+- Reported result: all task checkboxes remain checked and Batch04 status remains unchanged
+- Rerun result: detailed tasks at lines 606, 628, 650, and 673 and tracker entries at lines 1130-1133 are checked; Batch04 remains unchecked at line 1105
+- Status: passed
+- Notes: A1 did not alter accepted progress or batch status.
+- Command/check: manual PASS attribution
+- Reported result: preserved as explicitly user-provided, not automated browser evidence
+- Rerun result: execution and review reports retain explicit dated user-provided manual PASS attribution and automated-browser distinction
+- Status: passed
+- Notes: Evidence provenance remains accurate.
+- Command/check: execution-report EOF placement
+- Reported result: batch-scope repair report appended at physical EOF
+- Rerun result: `Task Execution Report - Batch04 Scope Repair` is the final execution-report entry
+- Status: passed
+- Notes: No later or misplaced entry exists.
+- Command/check: `git diff --check -- docs/review/review_4_review_agent.md docs/reports/report_4_execute_agent.md`
+- Reported result: passed
+- Rerun result: passed with line-ending notices only
+- Status: passed
+- Notes: No whitespace errors.
+
+## Acceptance Review
+- Task acceptance: Remove only the historical separator artifact while preserving Batch04 chronology, progress, status, and evidence attribution.
+- Status: satisfied
+- Evidence: All focused content, chronology, progress, attribution, EOF, and diff checks pass.
+
+## Progress Tracking
+- Selected task checkbox before review: not applicable; `batch_scope` has no checkbox
+- Checkbox updated by reviewer: no
+- Batch status updated by reviewer: no
+- Execution report entry: final Batch04 scope repair entry
+- Review report entry: appended at physical EOF
+- Other: Existing accepted 04A-04D checkboxes remain unchanged.
+
+## Report Accuracy
+- Accurate / partial / inaccurate: accurate
+- Mismatches: None.
+
+## Issues
+
+### Blocking
+- None.
+
+### Major
+- None.
+
+### Minor
+- None.
+
+### Warnings
+- None.
+
+### Observations
+- The cumulative Batch04 implementation diff remains for A3 to assess; this review addresses only the listed historical-scope repair.
+
+## Decision
+- Accept selected task: yes
+- Repair required: no
+- Can next task proceed: yes
+- Batch can be marked complete by A2: no
+
+## Repair Instructions
+- None.

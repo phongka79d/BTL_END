@@ -83,7 +83,7 @@ The application implements a multi-role web interface utilizing the Astryx Desig
 - **Main Layout (Customer Layout):** Provides main user shell with top navigation bar, TechMart logo, search placeholder, cart badge, and dynamic user dropdown.
 - **Auth Layout (Centered Card):** Center-aligned card shell wrapping login and registration panels.
 - **Admin Layout (Console Layout):** Collapsible dashboard sidebar layout mapping management sections (Dashboard, Products, Categories, Users, Orders, Reviews, Reports).
-- **Frontend API Helpers:** `productApi.js`, `categoryApi.js`, `cartApi.js`, and `reviewApi.js` wrap the Express REST endpoints through the shared `apiClient.js`.
+- **Frontend API Helpers:** `productApi.js`, `categoryApi.js`, `cartApi.js`, `reviewApi.js`, and `reportApi.js` wrap the Express REST endpoints through the shared `apiClient.js`.
 - **Cart State:** `CartProvider` and `useCart` load authenticated cart state from the backend, expose cart actions, and provide the navigation badge item count.
 - **Phase 2 Routes:** `/products`, `/products/:id`, `/cart`, `/admin/products`, and `/admin/categories` are registered with the existing customer, private, and admin route guards. These views are fully implemented with the customer and admin UI components.
 - **Views:**
@@ -93,7 +93,8 @@ The application implements a multi-role web interface utilizing the Astryx Desig
   - `CartView`: Functional customer cart management view with subtotal and stock validations.
   - `LoginView`: Auth login form with email/password validation, inline errors, and loading states.
   - `RegisterView`: Detailed profile signup form supporting field validation and shipping address text area.
-  - `AdminDashboardView`: Administrative statistics panels for sales and inventory tracking.
+  - `AdminDashboardView`: Report-backed revenue and order-status metrics with refresh and report navigation.
+  - `ReportView`: Admin-only revenue, best-selling-product, and order-summary reports.
   - `AdminProductView`: Functional administrative product CRUD management view with form validation.
   - `AdminCategoryView`: Functional administrative category CRUD management view with unique-name and deletion checks.
   - `AdminReviewView`: Administrative review moderation view for hiding visible product reviews.
@@ -268,3 +269,9 @@ Phase 4 constraints:
   - Report calculations use existing Prisma order, order-detail, payment, and product data; revenue and product sales are filtered to completed orders with paid COD payments.
   - Revenue uses API-safe decimal strings, best-selling products are limited to five, and missing order statuses return zero counts.
   - Prisma validation, focused report tests, live admin/customer/anonymous authorization checks, and independent database-to-API comparisons passed.
+
+- **Batch04 (P4B4): Admin Dashboard and Report UI** - Complete
+  - `frontend/src/api/reportApi.js` consumes all three admin report endpoints through the shared authenticated API client.
+  - `/admin/reports` is mounted inside the existing admin guard and layout and displays revenue, best-selling products, and order counts with loading, empty, error, retry, and success states.
+  - `AdminDashboardView` uses backend report data for revenue and order metrics, supports refresh, and links to the full report page without frontend accounting calculations or charts.
+  - Focused and full frontend tests and the production build passed. User-provided manual evidence dated 2026-07-06 confirmed desktop/mobile layouts, live dashboard/report behavior, navigation, and anonymous/customer access denial.

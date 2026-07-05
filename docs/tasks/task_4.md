@@ -603,7 +603,7 @@ The admin demo flow requires opening the dashboard and viewing revenue and best-
 
 ### Tasks
 
-- [ ] (04A): Run Astryx discovery and map admin report components
+- [x] (04A): Run Astryx discovery and map admin report components
   - Source of Truth: `docs/plans/Plan_4.md` > `### 7.3 Admin Dashboard UI Contract`; `docs/design/design.md` > `# 13. Admin Dashboard Components`; `docs/design/design.md` > `# 19. Report Components`; `AGENTS.md` > `# AGENTS`
   - Source Requirements:
     - Report cards/tables must use Astryx components and semantic status badges.
@@ -625,7 +625,7 @@ The admin demo flow requires opening the dashboard and viewing revenue and best-
   - Blocked Condition: None
   - Files: Execution report only unless a local UI mapping doc already exists.
 
-- [ ] (04B): Add report API helper and admin route wiring
+- [x] (04B): Add report API helper and admin route wiring
   - Source of Truth: `docs/plans/Plan_4.md` > `## 6. Target Directory Structure`; `docs/plans/Plan_4.md` > `### 7.2 Report API`; `docs/design/design.md` > `# 24. Page-to-Component Map` > `## 24.17 Admin Reports Page`
   - Source Requirements:
     - Frontend report views must consume backend report endpoints.
@@ -647,7 +647,7 @@ The admin demo flow requires opening the dashboard and viewing revenue and best-
   - Blocked Condition: None
   - Files: `frontend/src/api/reportApi.js`, `frontend/src/views/admin/ReportView.jsx`, `frontend/src/routes/AppRoutes.jsx`, `frontend/src/layouts/AdminLayout.jsx`
 
-- [ ] (04C): Build report components and ReportView
+- [x] (04C): Build report components and ReportView
   - Source of Truth: `docs/plans/Plan_4.md` > `### 7.3 Admin Dashboard UI Contract`; `docs/design/design.md` > `# 19. Report Components`; `docs/design/design.md` > `# 25. UI States`; `docs/design/design.md` > `# 27. Accessibility Checklist`
   - Source Requirements:
     - Reports display loading, empty, error, and success states.
@@ -670,7 +670,7 @@ The admin demo flow requires opening the dashboard and viewing revenue and best-
   - Blocked Condition: `BLOCKED_BY_USER_ACTION` if live validation needs missing admin credentials, backend server, report data, or browser tooling.
   - Files: `frontend/src/components/report/RevenueSummaryCard.jsx`, `frontend/src/components/report/BestSellingProductsTable.jsx`, `frontend/src/components/report/OrderSummaryCards.jsx`, `frontend/src/views/admin/ReportView.jsx`
 
-- [ ] (04D): Update admin dashboard with simple report-backed metrics
+- [x] (04D): Update admin dashboard with simple report-backed metrics
   - Source of Truth: `docs/plans/Plan_4.md` > `## 4. Scope`; `docs/plans/Plan_4.md` > `### 7.3 Admin Dashboard UI Contract`; `docs/design/design.md` > `# 13. Admin Dashboard Components`; `docs/plans/Master_Plan.md` > `## 21. Minimum Viable Demo Flow` > `### 21.2 Admin Demo Flow`
   - Source Requirements:
     - Dashboard metric cards may use report endpoints.
@@ -1127,10 +1127,10 @@ Batch01 and Batch03 can be implemented in parallel if they do not edit shared ro
 - [x] (03D): Validate backend report API behavior
 
 #### Batch04
-- [ ] (04A): Run Astryx discovery and map admin report components
-- [ ] (04B): Add report API helper and admin route wiring
-- [ ] (04C): Build report components and ReportView
-- [ ] (04D): Update admin dashboard with simple report-backed metrics
+- [x] (04A): Run Astryx discovery and map admin report components
+- [x] (04B): Add report API helper and admin route wiring
+- [x] (04C): Build report components and ReportView
+- [x] (04D): Update admin dashboard with simple report-backed metrics
 
 #### Batch05
 - [ ] (05A): Polish responsive customer and admin demo routes
