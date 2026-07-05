@@ -134,7 +134,7 @@ Checkout correctness depends on one backend transaction and backend-owned totals
 
 ### Tasks
 
-- [ ] (01A): Inspect prior backend patterns and checkout prerequisites
+- [x] (01A): Inspect prior backend patterns and checkout prerequisites
   - Source of Truth: `docs/plans/Plan_3.md` > `## 3. Prerequisites from Prior Phases`; `docs/plans/Plan_3.md` > `## 8. Implementation Steps`; `README.md` > `## Phase 3 Handoff Contract`
   - Source Requirements:
     - Phase 3 must reuse Phase 1 and Phase 2 backend, auth, admin, response, product, and cart artifacts.
@@ -156,7 +156,7 @@ Checkout correctness depends on one backend transaction and backend-owned totals
   - Blocked Condition: None
   - Files: No required code changes unless stale placeholders must be aligned before implementation.
 
-- [ ] (01B): Implement order checkout transaction helper
+- [x] (01B): Implement order checkout transaction helper
   - Source of Truth: `docs/plans/Plan_3.md` > `## 4. Scope`; `docs/plans/Plan_3.md` > `### 7.1 Order Creation API`; `docs/plans/Master_Plan.md` > `## 13. Controller Design` > `### 12.6 OrderController`
   - Source Requirements:
     - `POST /api/orders` uses the authenticated user's cart.
@@ -186,7 +186,7 @@ Checkout correctness depends on one backend transaction and backend-owned totals
   - Blocked Condition: `BLOCKED_BY_USER_ACTION` only if live transaction validation needs missing real `backend/.env`, seeded data, or credentials.
   - Files: `backend/src/models/order.model.js`, optionally `backend/src/models/orderDetail.model.js`, `backend/src/models/payment.model.js`
 
-- [ ] (01C): Implement order read and access-filter helpers
+- [x] (01C): Implement order read and access-filter helpers
   - Source of Truth: `docs/plans/Plan_3.md` > `### 7.2 Order Read APIs`; `docs/plans/Master_Plan.md` > `## 13. Controller Design` > `### 12.6 OrderController`
   - Source Requirements:
     - `GET /api/orders/my-orders` returns only orders for the authenticated customer and sorts newest first.
@@ -209,7 +209,7 @@ Checkout correctness depends on one backend transaction and backend-owned totals
   - Blocked Condition: `BLOCKED_BY_USER_ACTION` only if live validation needs missing test users/orders/admin credentials.
   - Files: `backend/src/models/order.model.js`
 
-- [ ] (01D): Implement order status and payment update helpers
+- [x] (01D): Implement order status and payment update helpers
   - Source of Truth: `docs/plans/Plan_3.md` > `### 7.3 Order Status API`; `docs/plans/Plan_3.md` > `### 7.4 Payment API`; `docs/plans/Master_Plan.md` > `## 13. Controller Design` > `### 12.7 PaymentController`
   - Source Requirements:
     - Admin status updates accept only `pending`, `confirmed`, `shipping`, `completed`, and `cancelled`.
@@ -1114,7 +1114,7 @@ Batch04 customer UI and Batch05 admin UI can be implemented in parallel after Ba
 - [ ] (01A): Inspect prior backend patterns and checkout prerequisites
 - [ ] (01B): Implement order checkout transaction helper
 - [ ] (01C): Implement order read and access-filter helpers
-- [ ] (01D): Implement order status and payment update helpers
+- [x] (01D): Implement order status and payment update helpers
 
 #### Batch02
 - [ ] (02A): Implement order controller request handling
