@@ -573,7 +573,7 @@ Customers need to complete the demo flow from cart to checkout success and then 
 
 ### Tasks
 
-- [ ] (04A): Run Astryx discovery and establish customer order component choices
+- [x] (04A): Run Astryx discovery and establish customer order component choices
   - Source of Truth: `docs/plans/Plan_3.md` > `### 7.5 Frontend UI Contract`; `docs/design/design.md` > `# 11. Checkout Components`; `docs/design/design.md` > `# 12. Order Components`; `AGENTS.md` > `# ASTRYX`
   - Source Requirements:
     - Use `docs/design/design.md` checkout/order component maps.
@@ -595,7 +595,7 @@ Customers need to complete the demo flow from cart to checkout success and then 
   - Blocked Condition: None unless Astryx package is missing and cannot be installed without user action; then record `BLOCKED_BY_USER_ACTION` for live Astryx validation only.
   - Files: No required code changes unless the implementation records notes in the execution report.
 
-- [ ] (04B): Build checkout form, order summary, and success flow
+- [x] (04B): Build checkout form, order summary, and success flow
   - Source of Truth: `docs/plans/Plan_3.md` > `### 7.1 Order Creation API`; `docs/plans/Plan_3.md` > `### 7.5 Frontend UI Contract`; `docs/design/design.md` > `# 11. Checkout Components`; `docs/design/design.md` > `## 24.7 Checkout Page`; `docs/design/design.md` > `## 25.3 Checkout Page States`
   - Source Requirements:
     - `CheckoutView` shows shipping address form, cart-derived order summary, COD-only payment method, submit button, loading state, validation error state, and success dialog.
@@ -621,7 +621,7 @@ Customers need to complete the demo flow from cart to checkout success and then 
   - Blocked Condition: `BLOCKED_BY_USER_ACTION` if live checkout validation needs missing backend server, database, seeded data, or authenticated customer credentials.
   - Files: `frontend/src/views/CheckoutView.jsx`, `frontend/src/components/checkout/CheckoutForm.jsx`, `frontend/src/components/checkout/CheckoutOrderSummary.jsx`, `frontend/src/components/checkout/CheckoutSuccessDialog.jsx`, reusable existing cart/common components if reused
 
-- [ ] (04C): Build order history view
+- [x] (04C): Build order history view
   - Source of Truth: `docs/plans/Plan_3.md` > `### 7.2 Order Read APIs`; `docs/plans/Plan_3.md` > `### 7.5 Frontend UI Contract`; `docs/design/design.md` > `# 12. Order Components`; `docs/design/design.md` > `## 24.8 Order History Page`; `docs/design/design.md` > `# 23. Status Components`
   - Source Requirements:
     - `OrderHistoryView` shows order list/table with status badge, payment badge, total, created date, and detail link.
@@ -644,7 +644,7 @@ Customers need to complete the demo flow from cart to checkout success and then 
   - Blocked Condition: `BLOCKED_BY_USER_ACTION` if live validation needs missing backend server, data, or customer credentials.
   - Files: `frontend/src/views/OrderHistoryView.jsx`, `frontend/src/components/order/OrderStatusBadge.jsx`, `frontend/src/components/order/PaymentStatusBadge.jsx`, `frontend/src/components/order/OrderItem.jsx` or equivalent table/list component
 
-- [ ] (04D): Build order detail view
+- [x] (04D): Build order detail view
   - Source of Truth: `docs/plans/Plan_3.md` > `### 7.2 Order Read APIs`; `docs/plans/Plan_3.md` > `### 7.5 Frontend UI Contract`; `docs/design/design.md` > `## 12.2 OrderDetailPanel`; `docs/design/design.md` > `## 24.9 Order Detail Page`
   - Source Requirements:
     - `OrderDetailView` shows shipping address, order items, order status, payment status, and total.
@@ -1104,7 +1104,7 @@ Batch04 customer UI and Batch05 admin UI can be implemented in parallel after Ba
 - [x] Batch01 - Backend Checkout Transaction Models
 - [x] Batch02 - Backend Order and Payment APIs
 - [x] Batch03 - Frontend API, Routing, and Cart Refresh
-- [ ] Batch04 - Customer Checkout and Order UI
+- [x] Batch04 - Customer Checkout and Order UI
 - [ ] Batch05 - Admin Order Management UI
 - [ ] Batch06 - Verification, Security Audit, and Phase 4 Handoff
 
@@ -1128,10 +1128,10 @@ Batch04 customer UI and Batch05 admin UI can be implemented in parallel after Ba
 - [x] (03C): Define post-checkout cart refresh and order status constants
 
 #### Batch04
-- [ ] (04A): Run Astryx discovery and establish customer order component choices
-- [ ] (04B): Build checkout form, order summary, and success flow
-- [ ] (04C): Build order history view
-- [ ] (04D): Build order detail view
+- [x] (04A): Run Astryx discovery and establish customer order component choices
+- [x] (04B): Build checkout form, order summary, and success flow
+- [x] (04C): Build order history view
+- [x] (04D): Build order detail view
 
 #### Batch05
 - [ ] (05A): Run Astryx discovery and establish admin order component choices

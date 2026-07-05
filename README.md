@@ -188,7 +188,15 @@ Phase 3 constraints:
   - Shared order/payment status constants (`orderConstants.js`) matching backend Prisma enums
   - Files: `frontend/src/api/orderApi.js`, `frontend/src/api/paymentApi.js`, `frontend/src/routes/AppRoutes.jsx`, `frontend/src/constants/orderConstants.js`, `frontend/src/views/CheckoutView.jsx`, `frontend/src/views/OrderHistoryView.jsx`, `frontend/src/views/OrderDetailView.jsx`, `frontend/src/views/admin/AdminOrderView.jsx`
 
+- **Batch04 (P3B4): Customer Checkout and Order UI** — Complete
+  - Astryx component discovery and choice mapping for checkout/order views
+  - Checkout flow: shipping form, COD payment badge, cart-derived order summary, success dialog with navigation
+  - Order history view: paginated table with status badges (order + payment), date/total columns, detail links
+  - Order detail view: full order panel with info, shipping, payment, items table, and total sections
+  - Reusable `OrderStatusBadge` and `PaymentStatusBadge` components (shared with admin Batch05)
+  - Four-state pattern (loading/error/empty/data) on all three customer views
+  - Files: `frontend/src/views/CheckoutView.jsx`, `frontend/src/views/OrderHistoryView.jsx`, `frontend/src/views/OrderDetailView.jsx`, `frontend/src/components/checkout/CheckoutForm.jsx`, `frontend/src/components/checkout/CheckoutOrderSummary.jsx`, `frontend/src/components/checkout/CheckoutSuccessDialog.jsx`, `frontend/src/components/order/OrderStatusBadge.jsx`, `frontend/src/components/order/PaymentStatusBadge.jsx`, `frontend/src/components/order/OrderDetailPanel.jsx`
+
 ### Pending Batches
-- Batch04: Customer Checkout and Order UI
 - Batch05: Admin Order Management UI
 - Batch06: Verification, Security Audit, and Phase 4 Handoff
