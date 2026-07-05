@@ -3415,3 +3415,752 @@ The response includes the updated payment object with `paymentStatus: 'paid'` an
   - Completed orders show "Status updated. Payment marked as paid." feedback and the payment badge changes from unpaid (neutral) to paid (success).
   - All shared components (`OrderStatusSelect`, `AdminOrderDetailDialog`, `OrderStatusBadge`, `PaymentStatusBadge`, `OrderDetailPanel`, `AdminTable`, `Alert`, `Pagination`, `formatDate`, `formatPrice`) are stable.
   - Batch06 should verify: inline status update via browser, completed→paid payment transition, error state on invalid status, permission denied for non-admin users.
+
+---
+
+# Task Execution Report - (06A)
+
+## Source Task File
+docs/tasks/task_3.md
+
+## Report File
+docs/reports/report_3_execute_agent.md
+
+## Mode
+orchestrated
+
+## Batch
+Batch06 - Verification, Security Audit, and Phase 4 Handoff
+
+## Task
+(06A) - Run backend command checks and order/payment API smoke tests
+
+## Status
+complete
+
+## Source of Truth Used
+- docs/plans/Plan_3.md > ## 9. Verification & Testing Plan
+- docs/plans/Plan_3.md > ### 7.1 Order Creation API
+- docs/plans/Plan_3.md > ### 7.2 Order Read APIs
+- docs/plans/Plan_3.md > ### 7.3 Order Status API
+- docs/plans/Plan_3.md > ### 7.4 Payment API
+- docs/plans/Master_Plan.md > ### 12.6 OrderController
+- docs/plans/Master_Plan.md > ### 12.7 PaymentController
+
+## Supplemental Documents Used
+- docs/plans/Plan_3.md
+- docs/plans/Master_Plan.md
+- README.md
+
+## Selected Scope
+- Batch: Batch06 - Verification, Security Audit, and Phase 4 Handoff
+- Task ID: (06A)
+- Task title: Run backend command checks and order/payment API smoke tests
+- Files allowed: Execution report, optional docs/demo-checklist.md
+- Repair scope if any: None
+
+## Dependency and User Action Check
+- dependencies: Batch01 and Batch02 were already marked complete in docs/tasks/task_3.md and backend order/payment model, controller, and route files exist.
+- user action: backend/.env existed locally, the configured database was reachable through the running backend, and seed-account login worked without printing tokens or passwords.
+- status: satisfied
+
+## Files Inspected Before Editing
+- AGENTS.md: current custom workflow and Astryx instructions were provided in the prompt.
+- docs/tasks/task_3.md: selected task block, dependencies, blocked condition, and output requirements.
+- docs/plans/Plan_3.md: cited order/payment API and verification requirements.
+- docs/plans/Master_Plan.md: cited OrderController and PaymentController endpoint responsibilities.
+- README.md: Phase 3 handoff and credential-dependent validation rules.
+- backend/package.json: backend validation/startup scripts.
+- backend/src/server.js: local port/startup behavior.
+- backend/src/app.js: health endpoint and route mounting.
+- backend/src/routes/index.js: order/admin-order/payment route mounts.
+- backend/src/controllers/order.controller.js: order endpoint behavior and access checks.
+- backend/src/controllers/payment.controller.js: COD endpoint behavior.
+- backend/src/models/order.model.js: checkout, read, admin-list, and status-update behavior.
+- backend/src/models/payment.model.js: COD payment idempotency behavior.
+- backend/src/models/cart.model.js: cart fixture and cart-clear behavior.
+- backend/src/models/cartItem.model.js: cart cleanup behavior.
+- backend/src/controllers/auth.controller.js: token response shape for local login smoke checks.
+- backend/src/controllers/cart.controller.js: cart item API request and response shape.
+- backend/src/controllers/product.controller.js: product list/detail/admin update API behavior.
+- backend/src/utils/response.js: consistent success/error response shape.
+- backend/prisma/seed.js: local seed account pattern; secrets were not copied into this report.
+- docs/reports/report_3_execute_agent.md: existing EOF inspected before appending this report.
+
+## Completed Work
+- Ran backend Prisma schema validation.
+- Started the backend with npm run dev and verified /api/health on localhost:5000.
+- Logged in with local seed customer/admin accounts while keeping JWTs and passwords out of output.
+- Smoke tested successful checkout from a non-empty cart.
+- Verified the created order included an order detail and COD payment.
+- Verified product stock decreased after checkout.
+- Verified the cart was cleared after checkout.
+- Verified empty-cart checkout failed with HTTP 400.
+- Verified insufficient-stock checkout failed with HTTP 400 by temporarily lowering product stock through the admin API, then restoring the product quantity and clearing the temporary cart item.
+- Verified customer order history and own order detail.
+- Verified another customer was denied access to the created order detail with HTTP 403.
+- Verified admin order detail access through the admin-mounted route.
+- Verified admin order listing and pending-status filter.
+- Verified invalid status update failed with HTTP 400.
+- Verified updating status to completed marked the COD payment as paid.
+- Verified POST /api/payments/cod returned the same existing payment record on repeated calls.
+- Stopped the backend dev processes started from this workspace.
+
+## Files Created or Modified
+- docs/reports/report_3_execute_agent.md
+
+## Tests or Validations Run
+- command/check: cd backend && npx prisma validate
+- result: passed
+- evidence or reason: Prisma schema loaded from prisma/schema.prisma and reported valid; Prisma 7 deprecation warnings only.
+
+- command/check: cd backend && npm run dev
+- result: passed
+- evidence or reason: nodemon started src/server.js and logged Server is running on port 5000.
+
+- command/check: GET http://localhost:5000/api/health
+- result: passed
+- evidence or reason: HTTP 200 with success true.
+
+- command/check: Seed customer/admin login
+- result: passed
+- evidence or reason: both local seed accounts authenticated; tokens were captured only inside the script and not printed.
+
+- command/check: POST http://localhost:5000/api/orders
+- result: passed
+- evidence or reason: non-empty cart checkout created order 9c8a6f41-46f5-4111-9c00-357d5d6933dd with 1 detail row and unpaid COD payment.
+
+- command/check: Product stock after checkout
+- result: passed
+- evidence or reason: selected product stock decreased from 35 to 34.
+
+- command/check: Cart after checkout
+- result: passed
+- evidence or reason: authenticated customer cart had 0 items after checkout.
+
+- command/check: Empty-cart checkout failure
+- result: passed
+- evidence or reason: POST /api/orders with an empty cart returned HTTP 400.
+
+- command/check: Insufficient-stock checkout failure
+- result: passed
+- evidence or reason: checkout returned HTTP 400 after product stock was lowered below cart quantity; product quantity was restored to 34 and temporary cart item was removed.
+
+- command/check: GET http://localhost:5000/api/orders/my-orders
+- result: passed
+- evidence or reason: customer order history returned 2 orders including the created order.
+
+- command/check: GET http://localhost:5000/api/orders/:id
+- result: passed
+- evidence or reason: customer could view own order detail; a different customer received HTTP 403 for the same order.
+
+- command/check: GET http://localhost:5000/api/admin/orders/:id
+- result: passed
+- evidence or reason: admin could view the created order detail through the admin-mounted route.
+
+- command/check: GET http://localhost:5000/api/admin/orders
+- result: passed
+- evidence or reason: admin list returned 3 orders.
+
+- command/check: GET http://localhost:5000/api/admin/orders?status=pending
+- result: passed
+- evidence or reason: admin filtered list returned 3 pending orders.
+
+- command/check: PUT http://localhost:5000/api/admin/orders/:id/status with invalid status
+- result: passed
+- evidence or reason: invalid status returned HTTP 400.
+
+- command/check: PUT http://localhost:5000/api/admin/orders/:id/status with completed
+- result: passed
+- evidence or reason: order status became completed and COD payment status became paid.
+
+- command/check: POST http://localhost:5000/api/payments/cod
+- result: passed
+- evidence or reason: repeated COD endpoint calls returned the same existing payment record.
+
+## Acceptance Check
+- condition: Commands and smoke checks pass or are explicitly marked BLOCKED_BY_USER_ACTION with safe reasons.
+- status: satisfied
+- evidence: backend validation/startup and all required order/payment HTTP smoke checks passed locally; no JWTs, passwords, database URLs, or connection strings were printed in this report.
+
+## Progress Update
+- task checkbox updated: no
+- batch status updated: no
+- reason: orchestrated mode forbids checkbox and batch status updates by A1.
+
+## Key Implementation Decisions
+- Used existing seed account pattern and local backend/.env without printing credentials.
+- Used API-level setup and cleanup for smoke fixtures instead of direct database writes.
+- Restored product quantity after the insufficient-stock test to avoid leaving the product at zero stock.
+
+## Risks or Open Issues
+- The smoke run created one completed order and one temporary second customer account in the configured local database.
+- Prior order data already existed, so admin list and order history counts are environment-specific.
+
+## Minor In-Scope Issues Fixed
+- None.
+
+## Workflow Integrity Check
+- Exactly one selected task, (06A), was executed.
+- No sibling Batch06 task was executed.
+- No source files, task checkboxes, batch status, staging, or commits were changed.
+- Sensitive values were not printed.
+
+## Notes for Review Agent
+- changed files: docs/reports/report_3_execute_agent.md
+- validations to rerun: cd backend && npx prisma validate; cd backend && npm run dev; order/payment smoke script or equivalent HTTP checks against localhost:5000.
+- risk areas: smoke test mutates local database by adding one order and one temporary customer; counts may differ on rerun.
+- next task readiness: can_review
+
+---
+
+# Task Execution Report - (06B)
+
+## Source Task File
+docs/tasks/task_3.md
+
+## Report File
+docs/reports/report_3_execute_agent.md
+
+## Mode
+orchestrated
+
+## Batch
+Batch06 - Verification, Security Audit, and Phase 4 Handoff
+
+## Task
+(06B) - Run frontend command checks and customer/admin UI smoke tests
+
+## Status
+blocked
+
+## Source of Truth Used
+- docs/plans/Plan_3.md > ## 9. Verification & Testing Plan
+- docs/plans/Plan_3.md > ### 7.5 Frontend UI Contract
+- docs/design/design.md > # 25. UI States
+- docs/design/design.md > # 26. Responsive Design
+
+## Supplemental Documents Used
+- docs/plans/Plan_3.md
+- docs/design/design.md
+
+## Selected Scope
+- Batch: Batch06 - Verification, Security Audit, and Phase 4 Handoff
+- Task ID: (06B)
+- Task title: Run frontend command checks and customer/admin UI smoke tests
+- Files allowed: docs/reports/report_3_execute_agent.md, optional docs/demo-checklist.md
+- Repair scope if any: None
+
+## Dependency and User Action Check
+- dependencies: Batch03, Batch04, Batch05, and (06A) are marked complete/accepted in docs/tasks/task_3.md and prior A2 handoff.
+- user action: full live UI validation requires browser tooling and credentialed manual interaction; backend/frontend were available locally, but in-app browser discovery returned no browser instances.
+- status: BLOCKED_BY_USER_ACTION for browser/manual UI smoke checks and screenshot evidence.
+
+## Files Inspected Before Editing
+- AGENTS.md instructions provided in prompt: project rules, Astryx workflow, and orchestrated-scope constraints.
+- docs/tasks/task_3.md: selected task, dependencies, source requirements, and progress state.
+- docs/plans/Plan_3.md: frontend UI contract and verification requirements.
+- docs/design/design.md: UI state and responsive requirements.
+- frontend/package.json: frontend dev command.
+- frontend/src/routes/AppRoutes.jsx: customer/admin route guards and protected checkout/order/admin paths.
+- frontend/src/config.js: API base URL.
+- frontend/src/api/apiClient.js: shared API client/token behavior.
+- frontend/src/views/ProductDetailView.jsx: product detail to cart route behavior.
+- frontend/src/views/CartView.jsx: cart to checkout route behavior.
+- frontend/src/views/CheckoutView.jsx: checkout validation/loading/error/success behavior.
+- frontend/src/views/OrderHistoryView.jsx: order history loading/success/empty/error display.
+- frontend/src/views/OrderDetailView.jsx: order detail loading/error/permission/success display.
+- frontend/src/views/admin/AdminOrderView.jsx: admin order list/detail/status behavior.
+- frontend/src/views/LoginView.jsx: login form behavior for credentialed UI checks.
+- frontend/src/constants/orderConstants.js: frontend order/payment status values.
+- frontend/src/components/admin/OrderStatusSelect.jsx: admin status selector update behavior.
+- backend/prisma/schema.prisma: backend OrderStatus enum comparison.
+- backend/prisma/seed.js: local seeded account pattern inspected without reporting credentials.
+- docs/reports/report_3_execute_agent.md: append target and physical EOF context.
+
+## Completed Work
+- Ran local backend and frontend dev servers long enough to confirm `localhost:5000` and `localhost:5173` were reachable.
+- Confirmed backend health endpoint returned success.
+- Confirmed frontend Vite app served the root HTML with `#root` and Vite client script.
+- Confirmed customer checkout/order routes are inside `PrivateRoute` and admin orders route is inside `AdminRoute`.
+- Confirmed checkout, order history, order detail, and admin order components implement the required loading, empty, error, permission, success, dialog, and status-update UI states in source.
+- Confirmed frontend order status values `pending`, `confirmed`, `shipping`, `completed`, and `cancelled` match the backend Prisma enum.
+- Attempted in-app browser setup for visual/manual UI smoke checks; browser tooling was unavailable (`agent.browsers.list()` returned `[]`).
+
+## Files Created or Modified
+- docs/reports/report_3_execute_agent.md
+
+## Tests or Validations Run
+- command/check: cd frontend && npm run dev
+- result: passed
+- evidence or reason: Vite dev server process was running for this repo and `http://localhost:5173/` returned HTTP 200 with the React root and Vite client.
+
+- command/check: GET http://localhost:5000/api/health
+- result: passed
+- evidence or reason: backend returned success true with message "Backend is healthy".
+
+- command/check: Frontend route guard source inspection
+- result: passed
+- evidence or reason: `/checkout`, `/orders`, and `/orders/:id` are nested under `PrivateRoute`; `/admin/orders` is nested under `AdminRoute`.
+
+- command/check: Admin status value source inspection
+- result: passed
+- evidence or reason: frontend `ORDER_STATUS_VALUES` exactly match backend Prisma `OrderStatus` values: pending, confirmed, shipping, completed, cancelled.
+
+- command/check: Checkout/order/admin UI state source inspection
+- result: passed
+- evidence or reason: relevant view/component files contain loading, empty, validation/error, permission, success dialog, admin detail dialog, and status update feedback paths.
+
+- command/check: Browser/manual customer checkout smoke from product detail to checkout success
+- result: blocked
+- evidence or reason: BLOCKED_BY_USER_ACTION; in-app browser was unavailable in this session and Playwright was not installed, so visual credentialed checkout could not be performed or screenshotted.
+
+- command/check: Browser/manual customer order history and detail smoke checks
+- result: blocked
+- evidence or reason: BLOCKED_BY_USER_ACTION; browser tooling unavailable, so loading/success/empty/error states could be inspected only in source, not visually exercised.
+
+- command/check: Browser/manual admin orders list, detail dialog, status update, and route guards
+- result: blocked
+- evidence or reason: BLOCKED_BY_USER_ACTION; browser tooling unavailable, so credentialed admin UI interaction and screenshots could not be performed.
+
+- command/check: Desktop, tablet, and mobile visual usability
+- result: blocked
+- evidence or reason: BLOCKED_BY_USER_ACTION; no browser surface was available for viewport testing or screenshots.
+
+- command/check: Backend/frontend dev process cleanup
+- result: passed
+- evidence or reason: stopped five BTL_END backend/frontend dev processes; no repo-specific node/cmd processes remained.
+
+## Acceptance Check
+- condition: UI smoke checks pass or are explicitly marked BLOCKED_BY_USER_ACTION with safe reasons.
+- status: blocked
+- evidence: frontend command and objective source/server checks passed, but browser/manual UI smoke checks and screenshot evidence were blocked by unavailable browser tooling.
+
+## Progress Update
+- task checkbox updated: no
+- batch status updated: no
+- reason: orchestrated mode forbids checkbox and batch status updates by A1.
+
+## Key Implementation Decisions
+- Did not modify runtime source because this task is validation/reporting scope and no source defect was proven by the available checks.
+- Kept credential-derived facts out of the report; seed credentials were inspected only to understand possible local login setup.
+- Treated unavailable browser tooling as a blocked live-validation condition instead of claiming manual UI pass from static inspection.
+
+## Risks or Open Issues
+- Customer checkout success, cart badge refresh, order history/detail visual states, admin status update feedback, route guard behavior, and responsive usability still need browser/manual verification.
+- Screenshot evidence is unavailable for this task attempt.
+
+## Minor In-Scope Issues Fixed
+- None.
+
+## Workflow Integrity Check
+- Exactly one selected task, (06B), was executed.
+- No sibling Batch06 task was executed.
+- No task checkboxes, batch status, staging, or commits were changed.
+- The unrelated `.commandcode/taste/taste.md` deletion was not touched.
+
+## Notes for Review Agent
+- changed files: docs/reports/report_3_execute_agent.md
+- validations to rerun: cd frontend && npm run dev; open localhost:5173 with available browser tooling; credentialed customer/admin UI smoke checks; responsive screenshots.
+- risk areas: browser/manual coverage is blocked; source/server checks are not a substitute for visual checkout/admin interaction.
+- next task readiness: can_review
+
+---
+
+# Task Execution Report - (06B)
+
+## Source Task File
+docs/tasks/task_3.md
+
+## Report File
+docs/reports/report_3_execute_agent.md
+
+## Mode
+same_task_repair
+
+## Batch
+Batch06 - Verification, Security Audit, and Phase 4 Handoff
+
+## Task
+(06B) - Run frontend command checks and customer/admin UI smoke tests
+
+## Status
+complete
+
+## Source of Truth Used
+- docs/plans/Plan_3.md > ## 9. Verification & Testing Plan
+- docs/plans/Plan_3.md > ### 7.5 Frontend UI Contract
+- docs/design/design.md > # 25. UI States
+- docs/design/design.md > # 26. Responsive Design
+
+## Supplemental Documents Used
+- docs/plans/Plan_3.md
+- docs/design/design.md
+
+## Selected Scope
+- Batch: Batch06 - Verification, Security Audit, and Phase 4 Handoff
+- Task ID: (06B)
+- Task title: Run frontend command checks and customer/admin UI smoke tests
+- Files allowed: docs/reports/report_3_execute_agent.md, frontend/src/components/cart/CartSummary.jsx, frontend/src/views/CartView.jsx
+- Repair scope if any: Record the checkout navigation fix, frontend build result, and user-provided manual UI PASS evidence after the previous blocked validation.
+
+## Dependency and User Action Check
+- dependencies: Batch03, Batch04, Batch05, and (06A) are complete/accepted before this repair scope.
+- user action: user manually retested the customer/admin UI after the checkout navigation fix and reported, "After that fix, all the test PASS."
+- status: satisfied for this repair scope.
+
+## Files Inspected Before Editing
+- AGENTS.md instructions provided in prompt: project rules and same-task repair constraints.
+- docs/tasks/task_3.md: selected (06B) task requirements, dependencies, and validation expectations.
+- docs/plans/Plan_3.md: frontend UI contract and verification requirements.
+- docs/design/design.md: required UI states and responsive checks.
+- frontend/package.json: frontend build command.
+- frontend/src/components/cart/CartSummary.jsx: verified Checkout button now receives `onClick={onCheckout}`.
+- frontend/src/views/CartView.jsx: verified cart summary now passes `onCheckout={() => navigate('/checkout')}`.
+- docs/reports/report_3_execute_agent.md: existing EOF inspected before appending this repair report.
+
+## Completed Work
+- Verified the checkout navigation repair is present in the current workspace.
+- Verified `CartSummary` accepts the `onCheckout` prop and wires it to the Checkout button.
+- Verified `CartView` passes `navigate('/checkout')` to `CartSummary`.
+- Ran the frontend production build successfully after the repair.
+- Recorded user-provided manual UI PASS evidence for (06B), explicitly noting it came from the user after the checkout navigation fix.
+- Did not update checkboxes, batch status, staging, or commits.
+- Did not touch the unrelated `.commandcode/taste/taste.md` deletion.
+
+## Files Created or Modified
+- docs/reports/report_3_execute_agent.md
+- frontend/src/components/cart/CartSummary.jsx
+- frontend/src/views/CartView.jsx
+
+## Tests or Validations Run
+- command/check: Checkout navigation fix source inspection
+- result: passed
+- evidence or reason: `frontend/src/components/cart/CartSummary.jsx` wires `onCheckout` to the Checkout button `onClick`, and `frontend/src/views/CartView.jsx` passes `onCheckout={() => navigate('/checkout')}`.
+
+- command/check: cd frontend && npm run build
+- result: passed
+- evidence or reason: Vite transformed 537 modules and completed the production build; only the standard chunk-size warning was emitted.
+
+- command/check: User-provided manual customer checkout smoke from product detail/cart to checkout success
+- result: passed
+- evidence or reason: user reported after the checkout navigation fix: "After that fix, all the test PASS."
+
+- command/check: User-provided manual customer order history and detail smoke checks
+- result: passed
+- evidence or reason: user reported after the checkout navigation fix: "After that fix, all the test PASS."
+
+- command/check: User-provided manual admin orders list, detail dialog, status update, and route guards
+- result: passed
+- evidence or reason: user reported after the checkout navigation fix: "After that fix, all the test PASS."
+
+- command/check: User-provided manual desktop, tablet, and mobile usability
+- result: passed
+- evidence or reason: user reported after the checkout navigation fix: "After that fix, all the test PASS."
+
+## Acceptance Check
+- condition: UI smoke checks pass or are explicitly marked BLOCKED_BY_USER_ACTION with safe reasons.
+- status: satisfied
+- evidence: the checkout navigation defect was fixed and build validation passed; the remaining browser/manual UI smoke coverage is user-provided manual PASS evidence after that fix.
+
+## Progress Update
+- task checkbox updated: no
+- batch status updated: no
+- reason: orchestrated same-task repair mode forbids A1 checkbox and batch status updates.
+
+## Key Implementation Decisions
+- Treated the manual UI evidence as user-provided evidence rather than agent browser evidence.
+- Kept the repair scoped to (06B) validation evidence and the checkout navigation defect already fixed in this workspace.
+- Did not broaden into (06C), (06D), or batch-level acceptance work.
+
+## Risks or Open Issues
+- Screenshot evidence remains unavailable from the agent environment.
+- Manual UI PASS evidence was provided by the user, not generated by agent-controlled browser automation.
+
+## Minor In-Scope Issues Fixed
+- Checkout button navigation from cart to `/checkout` was fixed by wiring the button click handler through `CartSummary` and `CartView`.
+
+## Workflow Integrity Check
+- Exactly one selected task, (06B), was repaired.
+- No sibling Batch06 task was executed.
+- No task checkboxes, batch status, staging, or commits were changed.
+- The unrelated `.commandcode/taste/taste.md` deletion was not touched.
+
+## Notes for Review Agent
+- changed files: docs/reports/report_3_execute_agent.md, frontend/src/components/cart/CartSummary.jsx, frontend/src/views/CartView.jsx
+- validations to rerun: cd frontend && npm run build; optionally repeat customer/admin browser UI smoke checks with available browser tooling.
+- risk areas: manual UI PASS evidence is user-provided; screenshot evidence remains unavailable from this agent environment.
+- next task readiness: can_review
+
+---
+
+# Task Execution Report - (06C)
+
+## Source Task File
+docs/tasks/task_3.md
+
+## Report File
+docs/reports/report_3_execute_agent.md
+
+## Mode
+orchestrated
+
+## Batch
+Batch06 - Verification, Security Audit, and Phase 4 Handoff
+
+## Task
+(06C) - Audit security, MVC boundaries, anti-duplication, and Astryx compliance
+
+## Status
+complete
+
+## Source of Truth Used
+- docs/plans/Plan_3.md > ## 3. Prerequisites from Prior Phases
+- docs/plans/Plan_3.md > ## 5. Out of Scope
+- docs/plans/Plan_3.md > ### 7.5 Frontend UI Contract
+- AGENTS.md > # Custom Rules & Workflows
+- README.md > ## Phase 3 Handoff Contract
+
+## Supplemental Documents Used
+- docs/plans/Plan_3.md
+- docs/design/design.md
+- README.md
+
+## Selected Scope
+- Batch: Batch06 - Verification, Security Audit, and Phase 4 Handoff
+- Task ID: (06C)
+- Task title: Audit security, MVC boundaries, anti-duplication, and Astryx compliance
+- Files allowed: Execution report; changed source files only if fixes are needed.
+- Repair scope if any: None
+
+## Dependency and User Action Check
+- dependencies: Batch01 through Batch05 are complete in docs/tasks/task_3.md; (06A) and (06B) are accepted before this audit.
+- user action: None required.
+- status: satisfied.
+
+## Files Inspected Before Editing
+- AGENTS.md: confirmed Astryx and custom workflow requirements.
+- docs/tasks/task_3.md: selected exact (06C) task and dependency/scope rules.
+- docs/plans/Plan_3.md: read prerequisite, out-of-scope, and frontend UI contract sections.
+- README.md: read Phase 3 handoff contract.
+- docs/reports/report_3_execute_agent.md: inspected EOF before appending this report.
+- backend/src/controllers/order.controller.js: inspected HTTP/request/response handling boundary.
+- backend/src/controllers/payment.controller.js: inspected HTTP/request/response handling boundary.
+- backend/src/models/order.model.js: inspected Prisma transaction, reads, status update, and data-access boundary.
+- backend/src/models/payment.model.js: inspected idempotent COD payment data-access boundary.
+- frontend/src/views/CheckoutView.jsx: inspected customer checkout UI and frontend API usage.
+- frontend/src/views/OrderHistoryView.jsx: inspected customer order history UI patterns.
+- frontend/src/views/OrderDetailView.jsx: inspected customer order detail UI patterns.
+- frontend/src/views/admin/AdminOrderView.jsx: inspected admin order list/filter/status UI patterns.
+- frontend/src/components/checkout/*.jsx: inspected checkout components for database access and Astryx/token usage.
+- frontend/src/components/order/*.jsx: inspected order display components for database access and Astryx/token usage.
+- frontend/src/components/admin/AdminOrderDetailDialog.jsx: inspected admin detail UI for database access and Astryx/token usage.
+- frontend/src/components/admin/OrderStatusSelect.jsx: inspected admin status update UI for enum/API reuse and Astryx/token usage.
+- frontend/src/components/cart/CartSummary.jsx: inspected previously repaired checkout navigation surface.
+- frontend/src/views/CartView.jsx: inspected previously repaired checkout navigation caller.
+
+## Completed Work
+- Audited tracked env/secret exposure and confirmed local backend/.env and frontend/.env exist but are not tracked.
+- Searched frontend source for backend-only config names, Prisma imports, Supabase/PostgreSQL URLs, and SQL/direct database access.
+- Searched backend source for Prisma client duplication, response helper duplication, JWT helper/signing paths, and API-client-like logic.
+- Inspected order/payment controllers and models for MVC separation.
+- Inspected Phase 3 UI files for direct database calls and Astryx/token compliance.
+- Searched for out-of-scope online payment, shipping, email, refund, review, report, upload, and schema-redesign implementation in runtime source.
+- Checked key Phase 3 file sizes and responsibility boundaries.
+
+## Files Created or Modified
+- docs/reports/report_3_execute_agent.md
+
+## Tests or Validations Run
+- command/check: `git ls-files backend/.env frontend/.env`
+- result: passed
+- evidence or reason: no tracked .env files were returned.
+
+- command/check: `Get-ChildItem -Force -Recurse -File -Filter *.env`
+- result: passed
+- evidence or reason: backend/.env and frontend/.env exist locally, but they are untracked and were not printed.
+
+- command/check: credential-like tracked-file search excluding local .env and dependency folders
+- result: passed
+- evidence or reason: matches were placeholder env examples, docs/plans placeholders, and prior report/review command text; no committed real connection string, JWT secret, private key, or real password value was identified.
+
+- command/check: frontend forbidden database access search
+- result: passed
+- evidence or reason: precise frontend/src search for `@prisma/client`, `PrismaClient`, `DATABASE_URL`, `DIRECT_URL`, PostgreSQL URLs, Supabase client/database calls, and SQL-like calls found only benign API helper method names (`apiClient.delete`) and `Array.from`, not direct database access.
+
+- command/check: backend Prisma client/helper duplication search
+- result: passed
+- evidence or reason: only `backend/src/config/database.js` creates `new PrismaClient`; model files import that shared client. `order.model.js` imports Prisma Decimal from `@prisma/client`, not a second client.
+
+- command/check: backend response/JWT helper search
+- result: passed
+- evidence or reason: response helpers remain in `backend/src/utils/response.js`; token signing remains in `backend/src/utils/generateToken.js`; auth middleware verifies JWTs. No duplicate response or JWT helper family was found.
+
+- command/check: MVC boundary manual inspection
+- result: passed
+- evidence or reason: `order.controller.js` and `payment.controller.js` handle HTTP validation, auth context, response mapping, and errors; `order.model.js` and `payment.model.js` own Prisma queries, transactions, status/payment side effects, and data-return shapes.
+
+- command/check: Astryx/token/raw styling search
+- result: passed
+- evidence or reason: no `<div>` elements were found in frontend views/components; Phase 3 UI uses Astryx components. Style usage is component-scoped and token-based where custom spacing/border values are needed. Raw pixel findings are width props or existing non-Phase-3 SVG/fallback values, not new raw CSS layout violations.
+
+- command/check: out-of-scope runtime implementation search
+- result: passed
+- evidence or reason: runtime source search for online payment/shipping/email/refund/invoice/coupon/upload/report/review-controller implementation names returned no in-scope Phase 3 runtime implementation. Existing admin nav labels and docs/comments are not functional out-of-scope behavior.
+
+- command/check: focused file responsibility/size review
+- result: passed
+- evidence or reason: `order.model.js` (376 lines) and `AdminOrderView.jsx` (434 lines) exceed the 300-line guideline but remain single-domain modules and already rely on split components/helpers; no mixed-responsibility defect was found that justified churn during this audit.
+
+## Acceptance Check
+- condition: No secrets, direct frontend database access, duplicate core helpers, or out-of-scope behavior are present.
+- status: satisfied
+- evidence: focused searches and manual inspection found no committed real secret exposure, no frontend direct database access, one Prisma client export path, existing response/JWT helpers only, clear controller/model boundaries, Astryx component/token-aligned UI, and no out-of-scope runtime implementation.
+
+## Progress Update
+- task checkbox updated: no
+- batch status updated: no
+- reason: orchestrated mode forbids A1 checkbox and batch status updates.
+
+## Key Implementation Decisions
+- Did not split `order.model.js` or `AdminOrderView.jsx` because both are focused single-domain files, and splitting them during an audit would add unnecessary churn without fixing an actual security/MVC/duplication/scope defect.
+- Treated local `.env` presence as safe only after confirming the files are not tracked and without printing their contents.
+
+## Risks or Open Issues
+- Local `.env` files contain environment-specific secrets and must remain untracked and unprinted.
+- `order.model.js` and `AdminOrderView.jsx` exceed the preferred 300-line guideline; future feature work should consider extracting additional focused helpers/components if those files grow further.
+
+## Minor In-Scope Issues Fixed
+- None.
+
+## Workflow Integrity Check
+- Exactly one selected task, (06C), was executed.
+- No sibling Batch06 task was executed.
+- No source files were modified because no in-scope defect requiring repair was found.
+- No task checkboxes, batch status, staging, or commits were changed.
+- The unrelated `.commandcode/taste/taste.md` deletion was not touched.
+
+## Notes for Review Agent
+- changed files: docs/reports/report_3_execute_agent.md
+- validations to rerun: focused `rg` searches listed above; optional manual inspection of Phase 3 controllers/models/UI files.
+- risk areas: local `.env` files are intentionally untracked; raw-pixel findings include width props and existing fallback SVG strings; two focused modules exceed the preferred line-count guideline.
+- next task readiness: can_review
+
+---
+
+# Task Execution Report - (06D)
+
+## Source Task File
+docs/tasks/task_3.md
+
+## Report File
+docs/reports/report_3_execute_agent.md
+
+## Mode
+orchestrated
+
+## Batch
+Batch06 - Verification, Security Audit, and Phase 4 Handoff
+
+## Task
+(06D) - Update demo checklist, execution report, and Phase 4 handoff notes
+
+## Status
+complete
+
+## Source of Truth Used
+- docs/plans/Plan_3.md > ## 9. Verification & Testing Plan
+- docs/plans/Plan_3.md > ## 10. Handoff Notes for Phase 4
+- docs/plans/Master_Plan.md > ## 26. Final Submission Checklist
+
+## Supplemental Documents Used
+- docs/plans/Plan_3.md
+- docs/plans/Master_Plan.md
+- README.md
+- docs/demo-checklist.md
+- docs/reports/report_3_execute_agent.md
+
+## Selected Scope
+- Batch: Batch06 - Verification, Security Audit, and Phase 4 Handoff
+- Task ID: (06D)
+- Task title: Update demo checklist, execution report, and Phase 4 handoff notes
+- Files allowed: docs/demo-checklist.md, README.md, docs/reports/report_3_execute_agent.md, docs/tasks/task_3.md
+- Repair scope if any: None
+
+## Dependency and User Action Check
+- dependencies: (06A), (06B), and (06C) are accepted.
+- user action: user provided manual UI PASS evidence after the checkout navigation fix; Supabase dashboard row visual confirmation was not provided and remains credential-dependent.
+- status: satisfied for this documentation task; credential-dependent Supabase dashboard visual check is recorded as `BLOCKED_BY_USER_ACTION`.
+
+## Files Inspected Before Editing
+- docs/tasks/task_3.md: selected task, dependency, progress, and checkbox rules.
+- docs/plans/Plan_3.md: verification requirements and Phase 4 handoff constraints.
+- docs/plans/Master_Plan.md: final submission checklist.
+- docs/demo-checklist.md: existing Plan 1/2 demo evidence and handoff checklist structure.
+- README.md: current Phase 3 implementation and handoff status.
+- docs/reports/report_3_execute_agent.md: prior Batch06 execution reports and physical EOF append location.
+
+## Completed Work
+- Added Plan 3 verification status to docs/demo-checklist.md with backend/API, frontend/UI, admin, route guard, responsive, security/MVC, and handoff evidence from accepted 06A/06B/06C work.
+- Added a Plan 3 demo flow to docs/demo-checklist.md for customer checkout, order history/detail, route guards, admin order management, and optional Supabase dashboard confirmation.
+- Added a Phase 4 handoff checklist to docs/demo-checklist.md naming the order/payment/product/auth/admin/UI artifacts Phase 4 must reuse.
+- Updated README.md with Batch06 verification and handoff status without claiming unimplemented Phase 4 features.
+- Added README.md Phase 4 handoff notes and constraints: backend/database revenue source, no duplicate order/payment reporting models, no online payment behavior, and no checkout transaction changes without full customer/admin coverage.
+- Recorded the Supabase Table Editor `Order`, `OrderDetail`, and `Payment` visual row check as `BLOCKED_BY_USER_ACTION` because the agent did not inspect the dashboard UI.
+
+## Files Created or Modified
+- docs/demo-checklist.md
+- README.md
+- docs/reports/report_3_execute_agent.md
+
+## Tests or Validations Run
+- command/check: `rg -n "Plan 3 Verification Status|BLOCKED_BY_USER_ACTION|Phase 4 Handoff Checklist|Demo Flow for Plan 3" docs/demo-checklist.md`
+- result: passed
+- evidence or reason: found the new Plan 3 verification section, explicit `BLOCKED_BY_USER_ACTION` row/check, Plan 3 demo flow, and Phase 4 handoff checklist.
+
+- command/check: `rg -n "Verification and Handoff Status|Phase 4 Handoff Notes|Do not recalculate revenue|Do not add online payment|BLOCKED_BY_USER_ACTION" README.md`
+- result: passed
+- evidence or reason: found README verification/handoff status, Phase 4 notes, revenue/online-payment constraints, and blocked credential-dependent dashboard guidance.
+
+- command/check: `rg -n "\[ \] \(06D\)|\[x\] \(06D\)|Batch06 - Verification" docs/tasks/task_3.md`
+- result: passed
+- evidence or reason: confirmed (06D) remains unchecked in both selected task and progress tracker, and Batch06 remains unchecked.
+
+- command/check: manual doc review against Plan 3 verification and handoff sections
+- result: passed
+- evidence or reason: demo checklist and README preserve accepted 06A/06B/06C evidence, name Phase 4 reuse artifacts, and include the Plan 3 hard rules without claiming Phase 4 implementation.
+
+## Acceptance Check
+- condition: Future Phase 4 agents can start review/report/testing work from verified Phase 3 artifacts and constraints.
+- status: satisfied
+- evidence: docs/demo-checklist.md and README.md now list verified Phase 3 backend/API/UI/admin/security evidence, identify credential-dependent blocked dashboard checks, and name the exact order/payment/product/auth/admin/UI artifacts and hard constraints for Phase 4.
+
+## Progress Update
+- task checkbox updated: no
+- batch status updated: no
+- reason: orchestrated mode reserves selected task checkbox updates for A2 and batch gate updates for A3.
+
+## Key Implementation Decisions
+- Used `docs/demo-checklist.md` for detailed demo/test status and README.md for concise Phase 4 handoff orientation.
+- Marked Supabase dashboard visual row confirmation as `BLOCKED_BY_USER_ACTION` because API evidence exists, but the agent did not inspect the dashboard UI.
+- Did not edit docs/tasks/task_3.md because A1 was instructed not to update checkboxes or Batch06 status in orchestrated mode.
+
+## Risks or Open Issues
+- Supabase dashboard visual confirmation for `Order`, `OrderDetail`, and `Payment` still requires a user with dashboard access.
+- 06B browser/manual UI evidence is user-provided rather than generated by agent-controlled browser automation.
+
+## Minor In-Scope Issues Fixed
+- None.
+
+## Workflow Integrity Check
+- Exactly one selected task, (06D), was executed.
+- No sibling task or future Phase 4 implementation was executed.
+- Only allowed documentation/report files were modified.
+- No task checkbox, Batch06 status, staging, or commit was performed.
+- The unrelated `.commandcode/taste/taste.md` deletion was not touched.
+
+## Notes for Review Agent
+- changed files: docs/demo-checklist.md, README.md, docs/reports/report_3_execute_agent.md
+- validations to rerun: focused `rg` checks above and manual doc review against Plan_3 verification/handoff plus Master_Plan final checklist.
+- risk areas: Supabase dashboard visual check is blocked by user-side credentials/UI access; 06B UI evidence is user-provided.
+- next task readiness: can_review

@@ -16,7 +16,8 @@ const SummaryRow = ({ label, value }) => (
 export const CartSummary = ({
   subtotal,
   itemCount = 0,
-  isDisabled = false
+  isDisabled = false,
+  onCheckout
 }) => {
   return (
     <Card padding={4}>
@@ -41,6 +42,7 @@ export const CartSummary = ({
           label="Checkout"
           variant="primary"
           isDisabled={isDisabled}
+          onClick={onCheckout}
         />
       </VStack>
     </Card>

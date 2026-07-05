@@ -107,6 +107,7 @@ export const CartView = () => {
             subtotal={subtotal}
             itemCount={itemCount}
             isDisabled={actionLoading}
+            onCheckout={() => navigate('/checkout')}
           />
         )}
       </Grid>

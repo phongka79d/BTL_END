@@ -884,7 +884,7 @@ Phase 4 reviews/reports/testing/documentation depend on verified order/payment r
 
 ### Tasks
 
-- [ ] (06A): Run backend command checks and order/payment API smoke tests
+- [x] (06A): Run backend command checks and order/payment API smoke tests
   - Source of Truth: `docs/plans/Plan_3.md` > `## 9. Verification & Testing Plan`; `docs/plans/Plan_3.md` > `### 7.1 Order Creation API`; `docs/plans/Plan_3.md` > `### 7.2 Order Read APIs`; `docs/plans/Plan_3.md` > `### 7.3 Order Status API`; `docs/plans/Plan_3.md` > `### 7.4 Payment API`
   - Source Requirements:
     - Run backend validation/startup commands.
@@ -920,7 +920,7 @@ Phase 4 reviews/reports/testing/documentation depend on verified order/payment r
   - Blocked Condition: `BLOCKED_BY_USER_ACTION` if real env values, live database, backend server, seeded data, or test credentials are unavailable.
   - Files: Execution report, optional `docs/demo-checklist.md`
 
-- [ ] (06B): Run frontend command checks and customer/admin UI smoke tests
+- [x] (06B): Run frontend command checks and customer/admin UI smoke tests
   - Source of Truth: `docs/plans/Plan_3.md` > `## 9. Verification & Testing Plan`; `docs/plans/Plan_3.md` > `### 7.5 Frontend UI Contract`; `docs/design/design.md` > `# 25. UI States`; `docs/design/design.md` > `# 26. Responsive Design`
   - Source Requirements:
     - Run frontend dev command.
@@ -948,7 +948,7 @@ Phase 4 reviews/reports/testing/documentation depend on verified order/payment r
   - Blocked Condition: `BLOCKED_BY_USER_ACTION` if backend, seeded data, login credentials, or browser tooling is unavailable.
   - Files: Execution report, optional `docs/demo-checklist.md`
 
-- [ ] (06C): Audit security, MVC boundaries, anti-duplication, and Astryx compliance
+- [x] (06C): Audit security, MVC boundaries, anti-duplication, and Astryx compliance
   - Source of Truth: `docs/plans/Plan_3.md` > `## 3. Prerequisites from Prior Phases`; `docs/plans/Plan_3.md` > `## 5. Out of Scope`; `docs/plans/Plan_3.md` > `### 7.5 Frontend UI Contract`; `AGENTS.md` > `# Custom Rules & Workflows`; `README.md` > `## Phase 3 Handoff Contract`
   - Source Requirements:
     - Phase 3 must reuse existing foundation and Phase 2 artifacts.
@@ -973,7 +973,7 @@ Phase 4 reviews/reports/testing/documentation depend on verified order/payment r
   - Blocked Condition: None
   - Files: Execution report; changed source files only if fixes are needed.
 
-- [ ] (06D): Update demo checklist, execution report, and Phase 4 handoff notes
+- [x] (06D): Update demo checklist, execution report, and Phase 4 handoff notes
   - Source of Truth: `docs/plans/Plan_3.md` > `## 9. Verification & Testing Plan`; `docs/plans/Plan_3.md` > `## 10. Handoff Notes for Phase 4`; `docs/plans/Master_Plan.md` > `## 26. Final Submission Checklist`
   - Source Requirements:
     - Phase 4 must consume completed order and payment records, product/order relationships, auth/admin middleware, order/payment status enums, customer product detail view, and admin layout/table/dialog patterns.
@@ -1140,10 +1140,10 @@ Batch04 customer UI and Batch05 admin UI can be implemented in parallel after Ba
 - [x] (05D): Build admin order status selector and refresh behavior
 
 #### Batch06
-- [ ] (06A): Run backend command checks and order/payment API smoke tests
-- [ ] (06B): Run frontend command checks and customer/admin UI smoke tests
-- [ ] (06C): Audit security, MVC boundaries, anti-duplication, and Astryx compliance
-- [ ] (06D): Update demo checklist, execution report, and Phase 4 handoff notes
+- [x] (06A): Run backend command checks and order/payment API smoke tests
+- [x] (06B): Run frontend command checks and customer/admin UI smoke tests
+- [x] (06C): Audit security, MVC boundaries, anti-duplication, and Astryx compliance
+- [x] (06D): Update demo checklist, execution report, and Phase 4 handoff notes
 
 ## Completion Reporting Rules for Future Execution Agents
 

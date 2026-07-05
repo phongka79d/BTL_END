@@ -45,6 +45,31 @@ This checklist records the verified Plan 1 foundation state and Phase 2 product/
 | In-app browser surface | Not required after fallback | 06B recorded the in-app browser unavailable, but system Chrome automation was available and all required UI smoke checks passed there. |
 | Remaining Phase 2 blocked checks | None | Earlier live-smoke blocked items were superseded by 06A/06B local backend, API, and browser evidence. User-side credential-dependent reruns should be marked `BLOCKED_BY_USER_ACTION` if the local `.env`, database, seeded data, credentials, or browser tooling are unavailable in a future session. |
 
+## Plan 3 Verification Status
+
+| Check | Status | Evidence |
+|---|---|---|
+| Backend Prisma schema validation | Passed | 06A recorded `cd backend && npx prisma validate` passing. |
+| Backend startup and health endpoint | Passed | 06A recorded `cd backend && npm run dev` starting the backend on port 5000 and `GET /api/health` returning HTTP 200. |
+| Customer checkout API | Passed | 06A recorded `POST /api/orders` creating order `9c8a6f41-46f5-4111-9c00-357d5d6933dd` with one detail row and an unpaid COD payment. |
+| Checkout stock and cart side effects | Passed | 06A recorded selected product stock decreasing from 35 to 34 and the authenticated cart clearing after checkout. |
+| Empty-cart checkout failure | Passed | 06A recorded empty-cart checkout returning HTTP 400. |
+| Insufficient-stock checkout failure | Passed | 06A recorded checkout returning HTTP 400 when requested quantity exceeded stock, then restored the test product/cart state. |
+| Customer order history | Passed | 06A recorded `GET /api/orders/my-orders` returning customer order history including the created order. |
+| Customer/admin order detail access control | Passed | 06A recorded the customer viewing their own order, another customer receiving HTTP 403, and admin viewing the order through the admin route. |
+| Admin order list and status filter | Passed | 06A recorded `GET /api/admin/orders` and `GET /api/admin/orders?status=pending` returning order lists. |
+| Admin order status update | Passed | 06A recorded invalid status returning HTTP 400 and `completed` updating the order status. |
+| Completed COD payment side effect | Passed | 06A recorded status `completed` marking the COD payment as `paid`. |
+| COD payment endpoint idempotency | Passed | 06A recorded repeated `POST /api/payments/cod` calls returning the same existing payment record. |
+| Frontend production build | Passed | 06B repair recorded `cd frontend && npm run build` passing with only the existing Vite chunk-size warning. |
+| Customer checkout UI flow | Passed - user provided | After the checkout navigation fix, the user reported all manual UI tests PASS, including product/cart to checkout success. |
+| Customer order history and detail UI | Passed - user provided | After the checkout navigation fix, the user reported all manual UI tests PASS, including order history and detail checks. |
+| Customer/admin/anonymous route guards | Passed - user provided | After the checkout navigation fix, the user reported all manual UI tests PASS, including route guard checks. |
+| Admin orders UI | Passed - user provided | After the checkout navigation fix, the user reported all manual UI tests PASS, including admin list, detail dialog, status update, and completed payment status behavior. |
+| Desktop/tablet/mobile usability | Passed - user provided | After the checkout navigation fix, the user reported all manual UI tests PASS, including responsive usability checks. |
+| Security, MVC, anti-duplication, and Astryx audit | Passed | 06C recorded no committed real `.env` files, no frontend direct database access, one runtime Prisma client export path, centralized response/JWT helpers, focused controller/model boundaries, Astryx-aligned UI, and no out-of-scope runtime behavior. |
+| Supabase Table Editor visual row check for `Order`, `OrderDetail`, and `Payment` | BLOCKED_BY_USER_ACTION | API and database-backed smoke checks proved created order/payment behavior, but the agent did not inspect the Supabase dashboard UI. User-side dashboard confirmation remains credential-dependent. |
+
 ## Demo Flow for Plan 1
 
 1. Start the backend with `cd backend && npm run dev`.
@@ -66,6 +91,22 @@ This checklist records the verified Plan 1 foundation state and Phase 2 product/
 7. Log in as an admin and confirm `/admin/products` and `/admin/categories` render Astryx-backed tables and form dialogs.
 8. Confirm non-admin users cannot access admin product/category routes.
 
+## Demo Flow for Plan 3
+
+1. Start the backend with `cd backend && npm run dev`.
+2. Start the frontend with `cd frontend && npm run dev`.
+3. Log in as a customer and open a product detail page.
+4. Add an in-stock product to the cart, open `/cart`, and confirm the subtotal comes from the backend cart response.
+5. Click Checkout, confirm the shipping form validates required input, and confirm COD is the only payment method.
+6. Submit checkout with a valid shipping address and confirm the success dialog appears.
+7. Confirm the cart refreshes after checkout and the order appears in `/orders`.
+8. Open the order detail page and confirm shipping, item rows, order status, payment status, and total display.
+9. Log out and confirm anonymous access to `/checkout`, `/orders`, and `/orders/:id` redirects to login.
+10. Log in as an admin and open `/admin/orders`.
+11. Confirm the admin order table, status filter, detail dialog, and inline status selector work.
+12. Update an order to `completed` and confirm the UI reflects the COD payment as `paid`.
+13. If credentials are available, visually confirm the created rows in Supabase Table Editor for `Order`, `OrderDetail`, and `Payment`; otherwise record this as `BLOCKED_BY_USER_ACTION`.
+
 ## Phase 3 Handoff Checklist
 
 - Reuse `backend/src/config/database.js` as the single runtime Prisma client export.
@@ -84,3 +125,15 @@ This checklist records the verified Plan 1 foundation state and Phase 2 product/
 - Do not duplicate cart subtotal logic in the frontend as the source of truth; use backend cart/order responses.
 - Do not create separate checkout-only product queries when existing product model helpers can be reused.
 - Do not alter the Phase 1 schema without an explicit migration section and verification of affected Phase 2 APIs.
+
+## Phase 4 Handoff Checklist
+
+- Reuse completed order and payment records from `backend/src/models/order.model.js` and `backend/src/models/payment.model.js` for reports and moderation-adjacent workflows.
+- Reuse product/order relationships in `backend/prisma/schema.prisma`; do not create reporting-only order/payment schema copies.
+- Reuse `backend/src/middlewares/auth.middleware.js` and `backend/src/middlewares/admin.middleware.js` for review moderation and report access control.
+- Reuse backend order and payment status enum values through `frontend/src/constants/orderConstants.js` and the Prisma schema.
+- Reuse `frontend/src/views/ProductDetailView.jsx` for review display/form integration.
+- Reuse admin layout/table/dialog patterns from `frontend/src/layouts/AdminLayout.jsx`, `frontend/src/views/admin/AdminOrderView.jsx`, `frontend/src/components/admin/AdminOrderDetailDialog.jsx`, and `frontend/src/components/admin/OrderStatusSelect.jsx`.
+- Reports must calculate revenue from backend/database order/payment data, not frontend state.
+- Phase 4 must not add online payment behavior.
+- Phase 4 must not change checkout transaction behavior unless tests cover the full customer/admin order flow.

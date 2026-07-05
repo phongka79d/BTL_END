@@ -206,5 +206,30 @@ Phase 3 constraints:
   - Five UI states: loading, empty, error, permission denied, success
   - Files: `frontend/src/views/admin/AdminOrderView.jsx`, `frontend/src/components/admin/AdminOrderDetailDialog.jsx`, `frontend/src/components/admin/OrderStatusSelect.jsx`, `frontend/src/components/common/formatDate.js`
 
-### Pending Batches
-- Batch06: Verification, Security Audit, and Phase 4 Handoff
+### Verification and Handoff Status
+
+- Batch06 06A backend/API verification passed: Prisma validation, backend startup/health, checkout success, empty-cart failure, insufficient-stock failure, customer order reads, cross-customer denial, admin order reads, admin status updates, completed-to-paid COD behavior, and COD payment idempotency.
+- Batch06 06B frontend/UI verification passed with user-provided browser evidence after the checkout navigation fix: customer product/cart/checkout success, order history/detail, route guards, admin order list/detail/status update, completed payment status, and desktop/tablet/mobile usability.
+- Batch06 06C security/MVC/scope audit passed: no committed real env files, no frontend direct database access, no duplicate runtime Prisma client/response/JWT helpers, focused order/payment MVC boundaries, Astryx-aligned UI, and no online payment, shipping, review, report, upload, or schema-redesign runtime behavior added in Phase 3.
+- Supabase dashboard visual row confirmation for `Order`, `OrderDetail`, and `Payment` remains `BLOCKED_BY_USER_ACTION` unless a user with dashboard access confirms it. API smoke checks already verified database-backed order, detail, and payment creation.
+
+### Phase 4 Handoff Notes
+
+Phase 4 review, moderation, reporting, documentation, and final-demo work must reuse these verified Phase 3 artifacts:
+
+- Order/payment models and records: `backend/src/models/order.model.js`, `backend/src/models/payment.model.js`
+- Product/order/payment relationships and enum values: `backend/prisma/schema.prisma`
+- Auth and admin access control: `backend/src/middlewares/auth.middleware.js`, `backend/src/middlewares/admin.middleware.js`
+- Order/payment APIs and route patterns: `backend/src/controllers/order.controller.js`, `backend/src/controllers/payment.controller.js`, `backend/src/routes/order.routes.js`, `backend/src/routes/payment.routes.js`
+- Customer product/review integration surface: `frontend/src/views/ProductDetailView.jsx`
+- Customer order UI patterns: `frontend/src/views/CheckoutView.jsx`, `frontend/src/views/OrderHistoryView.jsx`, `frontend/src/views/OrderDetailView.jsx`, `frontend/src/components/order/OrderDetailPanel.jsx`
+- Admin layout/table/dialog patterns: `frontend/src/layouts/AdminLayout.jsx`, `frontend/src/views/admin/AdminOrderView.jsx`, `frontend/src/components/admin/AdminOrderDetailDialog.jsx`, `frontend/src/components/admin/OrderStatusSelect.jsx`
+- Shared status constants: `frontend/src/constants/orderConstants.js`
+
+Phase 4 constraints:
+
+- Do not recalculate revenue from frontend state; reports must use backend/database order and payment data.
+- Do not create duplicate order/payment models or reporting-only schema copies.
+- Do not add online payment behavior.
+- Do not change checkout transaction behavior unless tests cover the full customer/admin order flow.
+- Keep credential-dependent dashboard checks marked `BLOCKED_BY_USER_ACTION` when the agent cannot access the required account or UI.
