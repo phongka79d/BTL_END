@@ -121,6 +121,186 @@ ACCEPTED
 
 ---
 
+# Task Review Report - (05D)
+
+## Source Task File
+docs/tasks/task_3.md
+
+## Execution Report Reviewed
+docs/reports/report_3_execute_agent.md
+
+## Review Report File
+docs/review/review_3_review_agent.md
+
+## Mode
+orchestrated
+
+## Final Outcome
+ACCEPTED
+
+## Reviewed Scope
+- Batch: Batch05 - Admin Order Management UI
+- Task ID: (05D)
+- Task title: Build admin order status selector and refresh behavior
+- Executor status reported: complete
+- Source of Truth: `docs/plans/Plan_3.md` > `### 7.3 Order Status API`; `docs/plans/Plan_3.md` > `### 7.5 Frontend UI Contract`; `docs/design/design.md` > `## 17.2 OrderStatusSelector`; `docs/design/design.md` > `# 23. Status Components`
+
+## Latest Report Selection
+- Latest report entry found: yes
+- Requested task ID, if any: (05D)
+- Reviewed task ID: (05D)
+- Correct selection: yes
+- Notes: The execution report contains a full entry for (05D) spanning ~200 lines covering OrderStatusSelect component creation, AdminOrderView wiring, pending state, success/error feedback, completed-payment detection, row refresh, and all 10 acceptance criteria.
+
+## Git Diff Evidence
+- git status reviewed: yes
+- git diff stat reviewed: yes
+- git diff reviewed: yes
+- changed files from git:
+  - `frontend/src/views/admin/AdminOrderView.jsx` — modified (status column changed from OrderStatusBadge to OrderStatusSelect, handleStatusUpdated replaces ponytail stub, "Update Status" MoreMenu item removed, selectedOrderId state removed)
+  - `docs/reports/report_3_execute_agent.md` — modified (report appended)
+  - `docs/review/review_3_review_agent.md` — modified (prior reviews)
+  - `docs/tasks/task_3.md` — modified (progress tracker)
+- untracked files relevant to this task:
+  - `frontend/src/components/admin/OrderStatusSelect.jsx` — new 129-line file
+
+## Files Reviewed
+- `frontend/src/components/admin/OrderStatusSelect.jsx` — 129 lines, new file. Astryx Selector-based inline status update component. Props: `order`, `onStatusUpdated`. Four states: idle (Selector shows current status, enabled), pending (Selector disabled via `isDisabled={isUpdating}`), success feedback (green Text, auto-clears 4s), error feedback (red Text, auto-clears 4s). Uses shared `ORDER_STATUS_VALUES`/`ORDER_STATUS_LABELS` from `orderConstants.js`. Calls `orderApi.updateOrderStatus()`. Detects completed→paid transition from response. Clean component with `useCallback`, `useEffect` cleanup, `useRef` timer management.
+- `frontend/src/views/admin/AdminOrderView.jsx` — 435 lines (was 427 in 05C). Verified changes: import of OrderStatusSelect added; import of OrderStatusBadge removed (no longer used in this view); `selectedOrderId` state removed (dead code cleanup); `handleStatusUpdated` callback replaces ponytail stub — merges updated order into `orders` array via `setOrders` map; status column renderCell changed from `<OrderStatusBadge>` to `<OrderStatusSelect>`; "Update Status" MoreMenu item removed; columns dependency array updated; column width increased from `proportional(1)` to `proportional(2)`.
+- `frontend/src/constants/orderConstants.js` — 39 lines; confirmed NOT modified; ORDER_STATUS_VALUES = ['pending', 'confirmed', 'shipping', 'completed', 'cancelled'] exactly matches backend Prisma enum.
+- `frontend/src/api/orderApi.js` — 47 lines; confirmed NOT modified; `updateOrderStatus(id, status)` calls `apiClient.put(`/admin/orders/${id}/status`, { status })`.
+- `backend/src/controllers/order.controller.js` > `updateOrderStatus` — confirmed delegates to `orderModel.updateStatus()`, returns `{ success, message, data }` envelope.
+- `backend/src/models/order.model.js` > `updateStatus` — confirmed: validates allowed statuses, runs in `$transaction`, marks payment as `paid` with `paymentDate` when status is `completed`, returns full order with user and payment includes.
+- `docs/design/design.md` > `## 17.2 OrderStatusSelector` — confirmed: Selector with pending/confirmed/shipping/completed/cancelled values, Astryx Selector component.
+
+## Reported Files Cross-Check
+- file from execution report: `frontend/src/components/admin/OrderStatusSelect.jsx` — created
+- present in git/repo: yes (untracked)
+- matches task scope: yes
+- file from execution report: `frontend/src/views/admin/AdminOrderView.jsx` — modified
+- present in git/repo: yes (modified)
+- matches task scope: yes
+- file from execution report: shared status badge/constant files — NOT modified
+- verified: yes, `orderConstants.js` and `orderApi.js` remain unchanged, consumed as-is
+- notes: All claimed files match repository evidence. No unexpected modifications.
+
+## Dependency Review
+- Required dependencies: (05B) complete, (05C) complete, (03C) complete
+- Dependency status: satisfied
+- Missing or invalid dependency: None. `AdminOrderView` with 7-column table and state management exists. `AdminOrderDetailDialog` is wired and separate from status update. `ORDER_STATUS_VALUES`/`ORDER_STATUS_LABELS` exist in `orderConstants.js`. `orderApi.updateOrderStatus()` exists.
+
+## Architecture Alignment
+- Passed: yes — component handles UI/presentation, delegates API call to `orderApi.js`, delegates state refresh to parent via callback. Clean single-responsibility separation. Backend owns status transition logic (completed→paid in Prisma transaction). Frontend is a thin consumer.
+- Failed: no
+- Uncertain: no
+
+## Implementation Reality
+- Real implementation: yes — full interactive Selector with API integration, 4 distinct visual states, proper error handling, and parent row refresh via state merge.
+- Stub or fake logic found: no
+- Evidence: `OrderStatusSelect.jsx` contains real `orderApi.updateOrderStatus()` call with try/catch, real `onStatusUpdated` callback for parent state merge, real `isUpdating` state to disable Selector during API call, real feedback auto-clear timer. The `AdminOrderView.jsx` ponytail stub (`handleUpdateStatus` with `setSelectedOrderId`) has been replaced by `handleStatusUpdated` that performs actual `setOrders` state merge.
+
+## Hardcoding Review
+- Hardcoding found: no
+- Evidence: Status options built dynamically from `ORDER_STATUS_VALUES.map()` — single source of truth. No hardcoded status strings in component logic. No fake order IDs. No mock API responses.
+
+## Validations Reviewed
+- Command/check: `cd frontend && npm run build`
+- Reported result: passed (537 modules, zero errors)
+- Rerun result: passed (zero errors)
+- Status: passed
+- Evidence: Build completed successfully. All imports resolve. No JSX syntax errors.
+
+- Command/check: `rg "\bdiv\b" OrderStatusSelect.jsx`
+- Reported result: passed (zero matches)
+- Rerun result: passed — confirmed zero `<div>` elements; all layout via Astryx VStack
+- Status: passed
+
+- Command/check: `rg "#[0-9a-fA-F]{3,8}|px[^/]" OrderStatusSelect.jsx`
+- Reported result: passed (zero raw hex/px values)
+- Rerun result: passed with one acceptable finding — `width="148px"` is an Astryx Selector prop (same pattern used by ProductFilter Selector throughout codebase). Not a raw CSS px value. All spacing uses `var(--spacing-*)` tokens.
+- Status: passed
+
+- Command/check: `rg "prisma|supabase|database|DATABASE_URL" OrderStatusSelect.jsx`
+- Reported result: passed (zero backend-only imports)
+- Rerun result: passed — confirmed no Prisma, Supabase, or database imports in frontend component
+- Status: passed
+
+- Command/check: `rg "import.*OrderStatusBadge" AdminOrderView.jsx`
+- Reported result: passed (zero matches — import removed)
+- Rerun result: passed — `OrderStatusBadge` import removed; still used by other views (OrderHistoryView, OrderDetailPanel, AdminOrderDetailDialog) — not orphaned
+- Status: passed
+
+- Manual code review: ORDER_STATUS_VALUES verified to match backend Prisma enum (`pending`, `confirmed`, `shipping`, `completed`, `cancelled`)
+- Rerun result: passed — all five values present, exact match
+- Status: passed
+
+## Acceptance Review
+- Task acceptance: All 10 criteria satisfied
+- Status: satisfied
+- Evidence:
+
+| Criterion | Status | Evidence |
+|---|---|---|
+| Status selector uses pending, confirmed, shipping, completed, cancelled | satisfied | Selector options from `ORDER_STATUS_VALUES` constant, matches backend enum |
+| Updating status to completed marks COD payment as paid | satisfied | Backend `updateStatus` handles this in transaction; frontend detects `payment.paymentStatus === 'paid'` and shows contextual feedback |
+| Admin UI shows success/error feedback | satisfied | Green "Status updated to {label}." / "Status updated. Payment marked as paid." on success; red "Unable to update status." on error; both auto-clear 4s |
+| Reuse shared order status constants from Batch03 | satisfied | `ORDER_STATUS_VALUES` and `ORDER_STATUS_LABELS` from `orderConstants.js` consumed as-is |
+| Create OrderStatusSelect component | satisfied | 129-line standalone component at `frontend/src/components/admin/OrderStatusSelect.jsx` |
+| Call order API status update helper on change/submit | satisfied | `orderApi.updateOrderStatus(order.id, newStatus)` called in `handleStatusChange` |
+| Disable row controls while status update is pending | satisfied | `isDisabled={isUpdating}` prevents double-submit during API call |
+| Refresh the row/detail state after success | satisfied | `onStatusUpdated` callback merges API response into parent `orders` state; payment badge auto-refreshes |
+| Show success/error feedback without exposing backend internals | satisfied | Human-readable messages only — no stack traces, no URLs, no raw error objects |
+| Verify completed status displays payment as paid after backend response/refresh | satisfied | Payment badge reads from `order.payment?.paymentStatus`; row state merge propagates updated data; success feedback explicitly mentions payment transition |
+
+## Progress Tracking
+- Selected task checkbox before review: [ ]
+- Checkbox updated by reviewer: yes (both task definition at line 803 and Progress Tracker at line 1140)
+- Batch status updated by reviewer: yes (Batch05 marked [x] — this is the final task in Batch05)
+- Execution report entry: complete
+- Review report entry: ACCEPTED
+- Other: All 4 Batch05 tasks (05A, 05B, 05C, 05D) are now ACCEPTED. Batch05 is the second fully completed batch in Phase 3.
+
+## Report Accuracy
+- Accurate
+- Mismatches: None. The execution report accurately describes: the OrderStatusSelect component (props, states, selector config, status update flow, completed payment detection), the AdminOrderView wiring (imports, state removal, handleStatusUpdated, status column, MoreMenu cleanup, deps array, JSDoc), row refresh behavior, completed payment verification, and all 7 key implementation decisions. All claims verified against repository evidence.
+
+## Issues
+
+### Blocking
+- None
+
+### Major
+- None
+
+### Minor
+- None
+
+### Warnings
+- `OrderStatusSelect.jsx` is untracked (`??` in git status) — must be staged during batch completion
+- `width="148px"` on Astryx Selector uses a raw pixel string as a component prop — this is the same pattern used by `ProductFilter` Selector throughout the codebase and is an Astryx component API, not raw CSS. Acceptable.
+- Live browser validation deferred to Batch06 — requires backend server, seeded orders with mutable statuses, and admin credentials. Structural/code validation is complete.
+- No optimistic update: the Selector waits for the API response before updating the parent state. The Selector is disabled during the API call (`isDisabled={isUpdating}`), providing clear pending feedback. This is a deliberate decision documented in the execution report — reasonable for correctness since the backend may modify additional fields.
+
+### Observations
+- **Inline Selector approach**: Moving status update from a MoreMenu action to an inline column control is a UX improvement — admins see current status and can change it in one interaction. This also eliminated the `selectedOrderId` state and "Update Status" menu item, simplifying the actions column.
+- **Transient feedback pattern**: Using inline `Text` with 4-second auto-clear is appropriate for a table column. The feedback appears right where the action was performed, avoiding layout shifts that a Toast or Alert banner would cause. Clean implementation with `useRef` timer and `useEffect` cleanup.
+- **Parent state merge via `setOrders` map**: `handleStatusUpdated` merges the updated order in-place rather than re-fetching the full list. This preserves the current filter/pagination state and is more efficient than a full refetch. The spread merge `{ ...o, ...updatedOrder }` ensures all backend-updated fields (status, payment, etc.) refresh simultaneously.
+- **Clean component boundary**: `OrderStatusSelect` is a standalone 129-line component with clear props (`order`, `onStatusUpdated`). It manages its own pending/feedback state and auto-clear timer. The parent only needs to provide the merge callback. This follows the same pattern as `AdminOrderDetailDialog`.
+- **Completed payment detection in frontend**: The component detects `updatedOrder?.payment?.paymentStatus === 'paid'` from the API response and customizes feedback — correct since the backend always includes the updated payment in its response. The payment badge auto-refreshes because it reads from the merged row state.
+- **No changes to shared components**: `OrderStatusBadge`, `PaymentStatusBadge`, `orderConstants.js`, `orderApi.js`, `AdminOrderDetailDialog.js` — all unchanged. The implementation scoped changes precisely.
+- **This completes Batch05**: All four admin UI tasks (05A Astryx discovery, 05B admin order table, 05C admin detail dialog, 05D status selector) are now ACCEPTED. The admin order management page is fully functional with table, filter, pagination, inline status selector, detail dialog, and all UI states. The Phase 3 implementation (Batch01–Batch05) is code-complete. Batch06 verification can begin.
+
+## Decision
+- Accept selected task: yes
+- Repair required: no
+- Can next task proceed: yes ((06A) — Run backend command checks and order/payment API smoke tests)
+- Batch can be marked complete by A2: yes (Batch05 has no remaining tasks — all 4 tasks ACCEPTED)
+
+## Repair Instructions
+- None
+
+---
+
 # Task Review Report - (01B)
 
 ## Source Task File
@@ -2367,6 +2547,425 @@ ACCEPTED
 - Repair required: no
 - Can next task proceed: yes
 - Batch can be marked complete by A2: no
+
+## Repair Instructions
+- None
+
+---
+
+# Task Review Report - (05A)
+
+## Source Task File
+docs/tasks/task_3.md
+
+## Execution Report Reviewed
+docs/reports/report_3_execute_agent.md
+
+## Review Report File
+docs/review/review_3_review_agent.md
+
+## Mode
+orchestrated
+
+## Final Outcome
+ACCEPTED
+
+## Reviewed Scope
+- Batch: Batch05 - Admin Order Management UI
+- Task ID: (05A)
+- Task title: Run Astryx discovery and establish admin order component choices
+- Executor status reported: complete
+- Source of Truth: Plan 3 > 7.5 Frontend UI Contract; design.md > #17 Admin Order Components, #24.15 Admin Orders Page; AGENTS.md > ASTRYX
+
+## Latest Report Selection
+- Latest report entry found: yes
+- Requested task ID, if any: (05A)
+- Reviewed task ID: (05A)
+- Correct selection: yes
+
+## Git Diff Evidence
+- git status reviewed: yes
+- changed files: docs/reports/report_3_execute_agent.md (modified), docs/tasks/task_3.md (modified, (05A) checkboxes updated), .commandcode/taste/taste.md (deleted, unrelated)
+- untracked files: none relevant
+
+## Files Reviewed
+- docs/reports/report_3_execute_agent.md: (05A) execution report fully read and cross-checked
+- docs/tasks/task_3.md: (05A) task definition and progress tracker inspected
+- frontend/src/views/admin/AdminOrderView.jsx: confirmed 27-line placeholder exists
+- frontend/src/components/order/OrderStatusBadge.jsx, PaymentStatusBadge.jsx, OrderDetailPanel.jsx: all confirmed present and ready for admin reuse
+- frontend/src/constants/orderConstants.js: confirmed shared status values ready
+- frontend/src/api/orderApi.js: confirmed getAdminOrders, updateOrderStatus, getOrderById exported
+
+## Dependency Review
+- Required dependencies: Batch03
+- Dependency status: satisfied
+- Evidence: All API helpers, admin route, admin layout sidebar, status constants present
+
+## Architecture Alignment
+- Passed: yes
+- Evidence: Discovery-only task. Component choices follow existing MVC/admin patterns. All 13 shared components identified with import paths.
+
+## Implementation Reality
+- Real implementation: yes (discovery/report-only)
+- Stub or fake logic found: no
+
+## Hardcoding Review
+- Hardcoding found: no (discovery-only task)
+
+## Validations Reviewed
+- npx astryx build: failed (CLI unavailable) — BLOCKED_BY_USER_ACTION matches (04A) precedent
+- rg for @astryxdesign/core imports: 38 source files — passed
+- Manual shared component existence check: all 13 components verified present — passed
+
+## Acceptance Review
+| Criterion | Status |
+|---|---|
+| Execution notes identify Astryx references | satisfied |
+| Execution notes identify existing admin patterns | satisfied |
+| Astryx discovery run or tooling failure recorded | satisfied (CLI unavailable, BLOCKED_BY_USER_ACTION) |
+| All shared components identified for reuse | satisfied (13 components mapped) |
+
+## Progress Tracking
+- Selected task checkbox before review: [x] (updated by executor, now correct)
+- Checkbox updated by reviewer: no (already [x])
+- Batch status updated by reviewer: no (Batch05 has remaining tasks)
+
+## Report Accuracy
+- Accurate
+
+## Issues
+
+### Blocking
+- None
+
+### Major
+- None
+
+### Minor
+- None
+
+### Warnings
+- Checkbox prematurely updated by executor (now correct, process note only)
+- Astryx CLI remains unavailable
+- formatDate duplication noted — recommended extraction in (05B)
+
+### Observations
+- Comprehensive component mapping for all three upcoming tasks
+- 13 shared components identified with import paths
+- Column width strategy specified for 7 admin table columns
+- Ponytail comments document upgrade paths appropriately
+
+## Decision
+- Accept selected task: yes
+- Repair required: no
+- Can next task proceed: yes ((05B))
+- Batch can be marked complete by A2: no (Batch05 has 3 remaining tasks)
+
+## Repair Instructions
+- None
+
+---
+
+# Task Review Report - (05B)
+
+## Source Task File
+docs/tasks/task_3.md
+
+## Execution Report Reviewed
+docs/reports/report_3_execute_agent.md
+
+## Review Report File
+docs/review/review_3_review_agent.md
+
+## Mode
+orchestrated
+
+## Final Outcome
+ACCEPTED
+
+## Reviewed Scope
+- Batch: Batch05 - Admin Order Management UI
+- Task ID: (05B)
+- Task title: Build admin order table and filters
+- Executor status reported: complete
+- Source of Truth: Plan 3 > 7.2 Order Read APIs, 7.5 Frontend UI Contract; design.md > #17.1 AdminOrderTable, #24.15 Admin Orders Page, #25.4 Admin Table States
+- Supplemental: (05A) component choices, column specifications, state patterns
+
+## Latest Report Selection
+- Latest report entry found: yes
+- Requested task ID, if any: (05B)
+- Reviewed task ID: (05B)
+- Correct selection: yes
+- Notes: The (05B) execution report at report EOF matches the requested task ID.
+
+## Git Diff Evidence
+- git status reviewed: yes
+- git diff stat reviewed: yes
+- git diff reviewed: yes
+- changed files from git:
+  - frontend/src/views/admin/AdminOrderView.jsx: modified — 27-line placeholder replaced with 419-line implementation
+  - docs/reports/report_3_execute_agent.md: modified — (05B) execution report appended
+  - docs/tasks/task_3.md: modified — (05B) checkboxes updated
+- untracked files:
+  - frontend/src/components/common/formatDate.js: created — shared date utility (29 lines)
+
+## Files Reviewed
+- frontend/src/views/admin/AdminOrderView.jsx: 419 lines, 7-column table, status filter, 5 UI states, client-side pagination
+- frontend/src/components/common/formatDate.js: new shared utility, en-GB locale, em-dash fallback, ponytail comment
+- frontend/src/components/admin/AdminTable.jsx: used as-is, no modifications
+- frontend/src/api/orderApi.js: getAdminOrders(status?) used correctly
+- backend/src/models/order.model.js > listForAdmin: user fields include username/email/fullName
+- backend/src/controllers/order.controller.js > getAdminOrders: returns successResponse envelope
+- frontend/src/constants/orderConstants.js: ORDER_STATUS_VALUES/LABELS used for filter
+- All badge, pagination, alert, price components: reused as-is
+
+## Dependency Review
+- Required dependencies: (05A) accepted, (03A)/(03B) accepted
+- Dependency status: satisfied
+- Evidence: All API helpers, admin route, admin layout, shared components available. formatDate extraction (recommended by 05A) completed.
+
+## Architecture Alignment
+- Passed: yes
+- Evidence: View handles state/API/layout. No database access. API via existing apiClient. Admin auth deferred to route middleware. Astryx components only. Zero <div>, zero raw hex/px, spacing via tokens.
+
+## Implementation Reality
+- Real implementation: yes
+- Stub or fake logic found: two ponytail stubs (honestly documented)
+- Evidence: Git diff confirms placeholder replacement. 7 columns from API. Status filter calls backend. Pagination works on real data. Two stubs (View Details, Update Status) marked ponytail — intentionally deferred to (05C)/(05D).
+
+## Hardcoding Review
+- Hardcoding found: no
+- Evidence: All data from API. Customer name fallback chain defensive. Labels from shared constants. Prices/dates from formatters. Filter options built from ORDER_STATUS_VALUES.
+
+## Validations Reviewed
+- npm run build: passed — 535 modules, zero errors, bundle sizes unchanged
+- rg <div>: passed — zero matches
+- rg raw hex/px: passed — zero matches
+- rg Prisma/database: passed — zero matches
+- Code review against design §§17.1, 24.15, 25.4: passed — all columns, components, states present
+
+## Acceptance Review
+| Criterion | Status | Evidence |
+|---|---|---|
+| Table with customer, status, total, date, actions | satisfied | 7 columns: Customer, Order ID, Date, Total, Status badge, Payment badge, Actions |
+| Optional status filter via admin list API | satisfied | Selector wired to orderApi.getAdminOrders(status?), filter triggers re-fetch |
+| Loading state | satisfied | AdminTable isLoading skeleton |
+| Empty state | satisfied | Contextual messages for no orders / no matching orders |
+| Error state | satisfied | Alert with retry action |
+| Permission denied state | satisfied | EmptyState for HTTP 403 |
+| Reuse AdminTable | satisfied | Used as-is, no modifications |
+| Fetch with orderApi.getAdminOrders | satisfied | useCallback/useEffect, response?.data || [] |
+| Display all required columns | satisfied | All 7 columns in useMemo with renderCell |
+| Replace placeholder | satisfied | 27-line → 419-line |
+| Handle all states | satisfied | 5 distinct return paths |
+
+All 11 acceptance criteria satisfied.
+
+## Progress Tracking
+- Selected task checkbox before review: [ ] (both task definition and Progress Tracker)
+- Checkbox updated by reviewer: yes (both locations)
+- Batch status updated by reviewer: no ((05C), (05D) still pending)
+- Execution report entry: complete
+- Review report entry: ACCEPTED
+
+## Report Accuracy
+- Accurate
+- Mismatches: None. All file paths, import paths, component names, and validation results match repository evidence.
+
+## Issues
+
+### Blocking
+- None
+
+### Major
+- None
+
+### Minor
+- None
+
+### Warnings
+- View Details and Update Status are ponytail stubs: intentionally deferred to (05C)/(05D)
+- Client-side pagination: ponytail upgrade path documented
+- Live browser validation deferred to Batch06
+- formatDate.js is untracked (must be staged)
+- 394-line view slightly exceeds 300-line guidance (5 state branches)
+
+### Observations
+- Five-state branching well-structured (403 distinct from generic error)
+- formatDate extraction follows (05A) recommendation
+- No AdminTable.jsx modification needed
+- Customer column fallback chain genuinely defensive
+- Payment badge fallback safe (COD always creates payment)
+- Filter resets pagination correctly
+- Pagination scrolls to top
+
+## Decision
+- Accept selected task: yes
+- Repair required: no
+- Can next task proceed: yes ((05C) — Build admin order detail dialog)
+- Batch can be marked complete by A2: no (Batch05 has 2 remaining tasks)
+
+## Repair Instructions
+- None
+
+---
+
+# Task Review Report - (05C)
+
+## Source Task File
+docs/tasks/task_3.md
+
+## Execution Report Reviewed
+docs/reports/report_3_execute_agent.md
+
+## Review Report File
+docs/review/review_3_review_agent.md
+
+## Mode
+orchestrated
+
+## Final Outcome
+ACCEPTED
+
+## Reviewed Scope
+- Batch: Batch05 - Admin Order Management UI
+- Task ID: (05C)
+- Task title: Build admin order detail dialog
+- Executor status reported: complete
+- Source of Truth: `docs/plans/Plan_3.md` > `### 7.2 Order Read APIs`; `docs/plans/Plan_3.md` > `### 7.5 Frontend UI Contract`; `docs/design/design.md` > `## 17.3 AdminOrderDetailDialog`
+
+## Latest Report Selection
+- Latest report entry found: yes
+- Requested task ID, if any: (05C)
+- Reviewed task ID: (05C)
+- Correct selection: yes
+- Notes: The execution report contains a full entry for (05C) with 207 lines covering the implementation approach, four dialog states, 6 acceptance criteria, build validation, and handoff notes.
+
+## Git Diff Evidence
+- git status reviewed: yes
+- git diff stat reviewed: yes
+- git diff reviewed: yes
+- changed files from git:
+  - `frontend/src/views/admin/AdminOrderView.jsx` — modified (placeholder → full view + dialog wiring)
+  - `frontend/src/components/admin/AdminOrderDetailDialog.jsx` — new file (untracked)
+  - `frontend/src/components/common/formatDate.js` — new file (untracked, from (05B))
+  - `docs/reports/report_3_execute_agent.md` — modified (report appended)
+  - `docs/review/review_3_review_agent.md` — modified (prior reviews)
+  - `docs/tasks/task_3.md` — modified (progress tracker)
+- untracked files relevant to this task: `frontend/src/components/admin/AdminOrderDetailDialog.jsx`
+
+## Files Reviewed
+- `frontend/src/components/admin/AdminOrderDetailDialog.jsx` — 224 lines, new file; Dialog + Layout pattern following ProductForm.jsx convention; wraps OrderDetailPanel with Customer Information card; handles loading (6 Skeletons), error (Alert + retry), not-found (centered fallback), and success (Customer card + OrderDetailPanel) states.
+- `frontend/src/views/admin/AdminOrderView.jsx` — 427 lines; confirmed 3 changes for (05C): import of AdminOrderDetailDialog, new state variables (`detailDialogOrderId`, `isDetailDialogOpen`), `handleViewDetails` replaced ponytail stub with dialog-open logic, `<AdminOrderDetailDialog>` rendered in success path.
+- `frontend/src/components/order/OrderDetailPanel.jsx` — 181 lines; confirmed NOT modified (reused as-is via prop contract). Panel renders 5 sections: Order Information, Shipping Address, Payment Information, Order Items, Order Total.
+- `frontend/src/api/orderApi.js` — 47 lines; confirmed `getOrderById(id)` calls `GET /api/orders/:id` for admin access.
+- `frontend/src/components/common/formatDate.js` — 29 lines; shared utility used by dialog for Customer-since date.
+- `frontend/src/constants/orderConstants.js` — 39 lines; confirmed ORDER_STATUS_VALUES and ORDER_STATUS_LABELS available for (05D).
+- `docs/design/design.md` > `## 17.3 AdminOrderDetailDialog` — design source; sections: Customer information, Shipping address, Payment information, Order items, Order status; Astryx: Dialog, Order Detail template, Metadata List, Table, Badge.
+
+## Reported Files Cross-Check
+- file from execution report: `frontend/src/components/admin/AdminOrderDetailDialog.jsx` — created (new file)
+- present in git/repo: yes (untracked)
+- matches task scope: yes
+- file from execution report: `frontend/src/views/admin/AdminOrderView.jsx` — modified
+- present in git/repo: yes (modified)
+- matches task scope: yes
+- file from execution report: `frontend/src/components/order/OrderDetailPanel.jsx` — not modified (reused as-is)
+- verified: yes, git diff confirms no changes to this file
+- notes: All claimed files match repository evidence.
+
+## Validations Run by Reviewer
+
+### Build Validation
+- `cd frontend && npx vite build --logLevel error` → passed with zero errors
+- Evidence: build completed successfully; all imports resolve correctly
+
+### Forbidden Import Search
+- Searched `AdminOrderDetailDialog.jsx` for `DATABASE_URL`, `prisma`, `supabase` → no matches
+- Evidence: frontend dialog has no direct database access, Prisma imports, or backend-only config exposure
+
+### Related Component Integrity
+- `OrderDetailPanel.jsx` confirmed unmodified: the panel renders 5 sections from `order` prop with no hooks/API calls — pure presentation, exactly as designed in (04D) for reuse
+- `AdminOrderView.jsx` confirmed only dialog-related changes: import, 2 state vars, handleViewDetails rewrite, dialog JSX, JSDoc comment update — no status selector wiring, no table/column changes
+
+### Astryx Discovery
+- `npx astryx build "admin order detail dialog"` → tooling unavailable (npm could not determine executable)
+- Assessment: Astryx CLI package may not be installed in this environment — this is a safe tooling-failure scenario consistent with prior (05A) and (05B) reviews
+- Mitigation: Dialog structure follows existing ProductForm.jsx Dialog + Layout + DialogHeader + LayoutContent + LayoutFooter pattern; all components (Dialog, Layout, Card, Skeleton, Text, HStack, VStack, Button) are from `@astryxdesign/core`
+
+### Design Document Compliance
+- **§17.3 sections**: Customer information ✓ (Card above OrderDetailPanel), Shipping address ✓ (via OrderDetailPanel), Payment information ✓ (via OrderDetailPanel), Order items ✓ (via OrderDetailPanel Table), Order status ✓ (via OrderDetailPanel OrderStatusBadge)
+- **Astryx references**: Dialog ✓, Table ✓ (via OrderDetailPanel), Badge ✓ (via OrderStatusBadge/PaymentStatusBadge)
+- **"Metadata List"**: Customer Information Card uses HStack label+value pattern as an Astryx-compatible metadata display
+
+## Cross-Check: Execution Report vs. Repository Evidence
+
+| Claim | Execution Report | Repository Evidence | Match |
+|---|---|---|---|
+| AdminOrderDetailDialog.jsx created | 224 lines | 224 lines, all imports resolve | ✓ |
+| Dialog follows ProductForm pattern | ProductForm.jsx Dialog+Layout pattern | Matches ProductForm.jsx structure (Dialog → Layout → header/content/footer) | ✓ |
+| Four states: loading, error, not-found, success | Skeleton, Alert+retry, fallback, Customer+Panel | All four renderContent branches confirmed | ✓ |
+| Customer Information card renders name/email/phone/since | fullName→username→'—', conditional email/phone/createdAt | Code confirms all fields with correct fallbacks | ✓ |
+| OrderDetailPanel reused without modification | "Not modified (reused as-is)" | git diff confirms no changes to OrderDetailPanel.jsx | ✓ |
+| AdminOrderView: 3 changes for wiring | import + 2 state vars + handleViewDetails + dialog JSX | git diff confirms exactly these changes, no other modifications | ✓ |
+| handleUpdateStatus remains a ponytail stub | "currently sets selectedOrderId for the next task" | Code confirms: `setSelectedOrderId(order.id)` with ponytail comment | ✓ |
+| Build passed | `npx vite build --logLevel error` — zero errors | Reviewer reran; passed with zero errors | ✓ |
+| No backend imports in frontend | — | Grep for DATABASE_URL/prisma/supabase — zero matches | ✓ |
+
+## Acceptance Criteria Check
+
+| Criterion | Status | Evidence |
+|---|---|---|
+| Reuse OrderDetailPanel (presentation-only component from Batch04) | **satisfied** | Dialog imports and renders `<OrderDetailPanel order={order} />` directly. Panel is unmodified since (04D). |
+| Create AdminOrderDetailDialog for admin-specific dialog shell and customer metadata | **satisfied** | New 224-line component; Customer Information Card renders name, email, phone, customer-since from `order.user`. |
+| Load order detail by id when the admin opens the action | **satisfied** | `useEffect` triggers `fetchOrderDetail` when `isOpen && orderId`. Uses `orderApi.getOrderById(selectedOrderId)`. |
+| Display order items, customer summary, shipping address, status, payment status, and totals | **satisfied** | Customer Card covers customer info; OrderDetailPanel covers all 5 remaining sections (shipping, payment, items, status, total). |
+| Handle dialog loading, error, and empty/not-found states | **satisfied** | Loading: 6 Skeleton placeholders in scrollable content. Error: Alert with "Unable to load order details" + "Retry" action. Not-found: centered "Order not available" fallback. |
+
+All 5 acceptance criteria satisfied.
+
+## Progress Tracking
+- Selected task checkbox before review: [ ] (both task definition and Progress Tracker)
+- Checkbox updated by reviewer: yes (both locations)
+- Batch status updated by reviewer: no ((05D) still pending)
+- Execution report entry: complete
+- Review report entry: ACCEPTED
+
+## Report Accuracy
+- Accurate
+- Mismatches: None. All file paths, import paths, component names, state handling, and validation results match repository evidence.
+
+## Issues
+
+### Blocking
+- None
+
+### Major
+- None
+
+### Minor
+- None
+
+### Warnings
+- `handleUpdateStatus` remains a ponytail stub in AdminOrderView: intentionally deferred to (05D)
+- Live browser validation deferred to Batch06 (requires backend server, seeded orders, admin credentials)
+- AdminOrderDetailDialog.jsx is untracked (`??` in git status) — must be staged before Batch06
+- `OrderDetailPanel.jsx` has an inline `formatDate` function (duplicate of shared `formatDate.js`) — ponytail comment already notes this for a future refactor pass; the dialog correctly uses the shared utility
+
+### Observations
+- Dialog state reset on close (`handleClose` clears `order` and `error`) prevents stale data on reopen — good defensive practice
+- `response?.data || response` unwrap in fetchOrderDetail handles both wrapped and unwrapped API responses — resilient
+- Dialog only rendered in success path of AdminOrderView (no table rows exist in loading/error/empty/permission-denied states) — correct structural choice
+- Customer field conditionals (email, phone, createdAt) prevent rendering empty rows when backend doesn't include those fields
+- 224-line component is well under the ~300-line guidance, with clear render helper separation
+- Astryx `Dialog` width=720 provides adequate space for Customer card + full OrderDetailPanel
+- No raw hex/px values — all spacing uses `var(--spacing-*)` tokens consistent with Astryx conventions
+
+## Decision
+- Accept selected task: yes
+- Repair required: no
+- Can next task proceed: yes ((05D) — Build admin order status selector and refresh behavior)
+- Batch can be marked complete by A2: no (Batch05 has 1 remaining task: (05D))
 
 ## Repair Instructions
 - None

@@ -733,7 +733,7 @@ The Phase 3 admin demo requires admins to view orders and update order status. T
 
 ### Tasks
 
-- [ ] (05A): Run Astryx discovery and establish admin order component choices
+- [x] (05A): Run Astryx discovery and establish admin order component choices
   - Source of Truth: `docs/plans/Plan_3.md` > `### 7.5 Frontend UI Contract`; `docs/design/design.md` > `# 17. Admin Order Components`; `docs/design/design.md` > `## 24.15 Admin Orders Page`; `AGENTS.md` > `# ASTRYX`
   - Source Requirements:
     - `AdminOrderView` shows order table with customer, status, total, created date, detail dialog, and status selector.
@@ -755,7 +755,7 @@ The Phase 3 admin demo requires admins to view orders and update order status. T
   - Blocked Condition: None unless Astryx package is missing and cannot be installed without user action; then record `BLOCKED_BY_USER_ACTION` for live Astryx validation only.
   - Files: No required code changes unless the implementation records notes in the execution report.
 
-- [ ] (05B): Build admin order table and filters
+- [x] (05B): Build admin order table and filters
   - Source of Truth: `docs/plans/Plan_3.md` > `### 7.2 Order Read APIs`; `docs/plans/Plan_3.md` > `### 7.5 Frontend UI Contract`; `docs/design/design.md` > `## 17.1 AdminOrderTable`; `docs/design/design.md` > `## 24.15 Admin Orders Page`; `docs/design/design.md` > `## 25.4 Admin Table States`
   - Source Requirements:
     - `AdminOrderView` shows order table with customer, status, total, created date, and action controls.
@@ -778,7 +778,7 @@ The Phase 3 admin demo requires admins to view orders and update order status. T
   - Blocked Condition: `BLOCKED_BY_USER_ACTION` if live validation needs missing backend server, admin credentials, or order data.
   - Files: `frontend/src/views/admin/AdminOrderView.jsx`, `frontend/src/components/admin/AdminTable.jsx` only if safe extension is needed, `frontend/src/components/order/`
 
-- [ ] (05C): Build admin order detail dialog
+- [x] (05C): Build admin order detail dialog
   - Source of Truth: `docs/plans/Plan_3.md` > `### 7.2 Order Read APIs`; `docs/plans/Plan_3.md` > `### 7.5 Frontend UI Contract`; `docs/design/design.md` > `## 17.3 AdminOrderDetailDialog`
   - Source Requirements:
     - Admin order view includes a detail dialog.
@@ -800,7 +800,7 @@ The Phase 3 admin demo requires admins to view orders and update order status. T
   - Blocked Condition: `BLOCKED_BY_USER_ACTION` if live validation needs missing backend server, admin credentials, or order data.
   - Files: `frontend/src/components/admin/AdminOrderDetailDialog.jsx`, `frontend/src/components/order/OrderDetailPanel.jsx`
 
-- [ ] (05D): Build admin order status selector and refresh behavior
+- [x] (05D): Build admin order status selector and refresh behavior
   - Source of Truth: `docs/plans/Plan_3.md` > `### 7.3 Order Status API`; `docs/plans/Plan_3.md` > `### 7.5 Frontend UI Contract`; `docs/design/design.md` > `## 17.2 OrderStatusSelector`; `docs/design/design.md` > `# 23. Status Components`
   - Source Requirements:
     - Status selector uses `pending`, `confirmed`, `shipping`, `completed`, and `cancelled`.
@@ -1105,7 +1105,7 @@ Batch04 customer UI and Batch05 admin UI can be implemented in parallel after Ba
 - [x] Batch02 - Backend Order and Payment APIs
 - [x] Batch03 - Frontend API, Routing, and Cart Refresh
 - [x] Batch04 - Customer Checkout and Order UI
-- [ ] Batch05 - Admin Order Management UI
+- [x] Batch05 - Admin Order Management UI
 - [ ] Batch06 - Verification, Security Audit, and Phase 4 Handoff
 
 ### Task IDs
@@ -1134,10 +1134,10 @@ Batch04 customer UI and Batch05 admin UI can be implemented in parallel after Ba
 - [x] (04D): Build order detail view
 
 #### Batch05
-- [ ] (05A): Run Astryx discovery and establish admin order component choices
-- [ ] (05B): Build admin order table and filters
-- [ ] (05C): Build admin order detail dialog
-- [ ] (05D): Build admin order status selector and refresh behavior
+- [x] (05A): Run Astryx discovery and establish admin order component choices
+- [x] (05B): Build admin order table and filters
+- [x] (05C): Build admin order detail dialog
+- [x] (05D): Build admin order status selector and refresh behavior
 
 #### Batch06
 - [ ] (06A): Run backend command checks and order/payment API smoke tests

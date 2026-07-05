@@ -197,6 +197,14 @@ Phase 3 constraints:
   - Four-state pattern (loading/error/empty/data) on all three customer views
   - Files: `frontend/src/views/CheckoutView.jsx`, `frontend/src/views/OrderHistoryView.jsx`, `frontend/src/views/OrderDetailView.jsx`, `frontend/src/components/checkout/CheckoutForm.jsx`, `frontend/src/components/checkout/CheckoutOrderSummary.jsx`, `frontend/src/components/checkout/CheckoutSuccessDialog.jsx`, `frontend/src/components/order/OrderStatusBadge.jsx`, `frontend/src/components/order/PaymentStatusBadge.jsx`, `frontend/src/components/order/OrderDetailPanel.jsx`
 
+- **Batch05 (P3B5): Admin Order Management UI** — Complete
+  - Astryx component discovery and choice mapping for admin order views
+  - Admin order table: 7-column table with customer info, order ID, date, total, inline status selector, payment badge, and actions
+  - Status filter with client-side pagination
+  - Admin order detail dialog: customer metadata card + shared OrderDetailPanel, four-state handling
+  - Inline OrderStatusSelect component: calls PUT /api/admin/orders/:id/status, transient success/error feedback
+  - Five UI states: loading, empty, error, permission denied, success
+  - Files: `frontend/src/views/admin/AdminOrderView.jsx`, `frontend/src/components/admin/AdminOrderDetailDialog.jsx`, `frontend/src/components/admin/OrderStatusSelect.jsx`, `frontend/src/components/common/formatDate.js`
+
 ### Pending Batches
-- Batch05: Admin Order Management UI
 - Batch06: Verification, Security Audit, and Phase 4 Handoff
