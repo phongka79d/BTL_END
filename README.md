@@ -66,6 +66,11 @@ All API endpoints are mounted under `/api`:
 - `PUT /api/cart/items/:id` - Update cart item quantity (requires JWT, stock validated)
 - `DELETE /api/cart/items/:id` - Remove a product from the cart (requires JWT)
 
+### Review APIs
+- `GET /api/products/:id/reviews` - List visible reviews for a product, newest first
+- `POST /api/products/:id/reviews` - Create a product review with integer rating 1-5 and optional trimmed comment (requires JWT)
+- `DELETE /api/admin/reviews/:id` - Hide a review from public listings for admin moderation (requires admin JWT)
+
 ## Implemented Frontend Views & Layouts
 
 The application implements a multi-role web interface utilizing the Astryx Design System:
@@ -233,3 +238,14 @@ Phase 4 constraints:
 - Do not add online payment behavior.
 - Do not change checkout transaction behavior unless tests cover the full customer/admin order flow.
 - Keep credential-dependent dashboard checks marked `BLOCKED_BY_USER_ACTION` when the agent cannot access the required account or UI.
+
+## Phase 4 Implementation Status
+
+### Completed Batches
+
+- **Batch01 (P4B1): Backend Review APIs** - Complete
+  - Review model helpers list only visible reviews newest first, create visible customer reviews, find reviews for moderation, and hide reviews by status.
+  - Review controller and routes expose `GET /api/products/:id/reviews`, `POST /api/products/:id/reviews`, and `DELETE /api/admin/reviews/:id`.
+  - Review creation requires authentication, validates integer ratings from 1 to 5, trims optional comments, and reuses existing product lookup, response, auth, admin, and Prisma patterns.
+  - Backend smoke validation passed for public listing, unauthenticated creation rejection, invalid rating rejection, authenticated creation, customer moderation denial, admin hide behavior, and hidden-review exclusion from public results.
+  - The validation smoke created one review row and hid it through the admin API, leaving a hidden validation review row in the connected database.
