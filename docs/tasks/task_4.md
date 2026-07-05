@@ -452,7 +452,7 @@ Admin report UI and final submission checks depend on trustworthy backend report
 
 ### Tasks
 
-- [ ] (03A): Inspect order, payment, and report prerequisites
+- [x] (03A): Inspect order, payment, and report prerequisites
   - Source of Truth: `docs/plans/Plan_4.md` > `## 3. Prerequisites from Prior Phases`; `docs/plans/Plan_4.md` > `## 8. Implementation Steps`; `README.md` > `## Phase 4 Handoff Notes`
   - Source Requirements:
     - Reports must use completed order/payment data from Phase 3.
@@ -474,7 +474,7 @@ Admin report UI and final submission checks depend on trustworthy backend report
   - Blocked Condition: None
   - Files: No required code changes unless stale report placeholders exist.
 
-- [ ] (03B): Implement report aggregation helpers
+- [x] (03B): Implement report aggregation helpers
   - Source of Truth: `docs/plans/Plan_4.md` > `### 7.2 Report API`; `docs/plans/Master_Plan.md` > `## 13. Controller Design` > `### 12.9 ReportController`
   - Source Requirements:
     - Revenue report calculates revenue from completed orders with paid COD payment.
@@ -498,7 +498,7 @@ Admin report UI and final submission checks depend on trustworthy backend report
   - Blocked Condition: None
   - Files: `backend/src/models/report.model.js` or a focused existing backend model/helper file if local conventions prefer reuse.
 
-- [ ] (03C): Implement report controller and admin routes
+- [x] (03C): Implement report controller and admin routes
   - Source of Truth: `docs/plans/Plan_4.md` > `## 4. Scope`; `docs/plans/Plan_4.md` > `### 7.2 Report API`; `docs/plans/Master_Plan.md` > `## 15. API Design Summary` > `### Report APIs`
   - Source Requirements:
     - Implement `GET /api/admin/reports/revenue`.
@@ -522,7 +522,7 @@ Admin report UI and final submission checks depend on trustworthy backend report
   - Blocked Condition: None
   - Files: `backend/src/controllers/report.controller.js`, `backend/src/routes/report.routes.js`, `backend/src/routes/index.js`, `backend/src/models/report.model.js`
 
-- [ ] (03D): Validate backend report API behavior
+- [x] (03D): Validate backend report API behavior
   - Source of Truth: `docs/plans/Plan_4.md` > `## 9. Verification & Testing Plan`; `docs/plans/Plan_4.md` > `### 7.2 Report API`
   - Source Requirements:
     - Smoke test revenue, best-selling products, and order-summary report endpoints.
@@ -1121,10 +1121,10 @@ Batch01 and Batch03 can be implemented in parallel if they do not edit shared ro
 - [x] (02D): Validate customer review UI states and access behavior
 
 #### Batch03
-- [ ] (03A): Inspect order, payment, and report prerequisites
-- [ ] (03B): Implement report aggregation helpers
-- [ ] (03C): Implement report controller and admin routes
-- [ ] (03D): Validate backend report API behavior
+- [x] (03A): Inspect order, payment, and report prerequisites
+- [x] (03B): Implement report aggregation helpers
+- [x] (03C): Implement report controller and admin routes
+- [x] (03D): Validate backend report API behavior
 
 #### Batch04
 - [ ] (04A): Run Astryx discovery and map admin report components

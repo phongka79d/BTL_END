@@ -1364,3 +1364,651 @@ complete
 - validations to rerun: focused node:test command; `cd frontend && npm run build`; forbidden-reference/styling search for AdminReviewView and reviewApi.
 - risk areas: product-by-product admin review loading is intentionally scoped to existing Batch02 APIs.
 - next task readiness: can_review
+
+---
+
+# Task Execution Report - 03A
+
+## Source Task File
+docs/tasks/task_4.md
+
+## Report File
+docs/reports/report_4_execute_agent.md
+
+## Mode
+orchestrated
+
+## Batch
+Batch03 - Backend Report APIs
+
+## Task
+03A - Inspect order, payment, and report prerequisites
+
+## Status
+complete
+
+## Source of Truth Used
+- docs/plans/Plan_4.md > ## 3. Prerequisites from Prior Phases
+- docs/plans/Plan_4.md > ## 8. Implementation Steps
+- README.md > ## Phase 4 Handoff Notes
+- docs/tasks/task_4.md > (03A): Inspect order, payment, and report prerequisites
+
+## Supplemental Documents Used
+- None
+
+## Selected Scope
+- Batch: Batch03 - Backend Report APIs
+- Task ID: 03A
+- Task title: Inspect order, payment, and report prerequisites
+- Files allowed: No required code changes unless stale report placeholders exist; execution report append only.
+- Repair scope if any: None
+
+## Dependency and User Action Check
+- dependencies: None
+- user action: None
+- status: satisfied
+
+## Files Inspected Before Editing
+- AGENTS.md: confirmed project-specific Astryx and local agent guidance; no UI work was in scope.
+- docs/tasks/task_4.md: confirmed selected 03A scope, no dependencies, no user action, no checkbox update in orchestrated mode.
+- docs/plans/Plan_4.md: confirmed Phase 4 prerequisites and report implementation step requiring Phase 3 order/payment helper review.
+- README.md: confirmed Phase 4 handoff notes requiring reuse of Phase 3 order/payment artifacts and backend/database revenue calculation.
+- backend/src/models/order.model.js: inspected checkout, admin order listing, and completed-status payment side effect.
+- backend/src/models/orderDetail.model.js: inspected existing focused order detail helper boundary.
+- backend/src/models/payment.model.js: inspected COD payment helper and payment field ownership.
+- backend/src/models/product.model.js: inspected product field/helper boundaries for report product summaries.
+- backend/prisma/schema.prisma: inspected OrderStatus, PaymentMethod, PaymentStatus, Order, OrderDetail, Payment, and Product relations.
+- backend/src/models/index.js: confirmed existing model exports and no report model export yet.
+- backend/src/controllers/order.controller.js: inspected existing controller/model split and admin order pattern.
+- backend/src/routes/index.js: inspected existing route mounting pattern and confirmed no report route mount.
+- backend/src/models, backend/src/controllers, backend/src/routes: confirmed no existing report model, controller, or route file.
+- docs/reports/report_4_execute_agent.md: inspected final lines before appending the 03A execution report at EOF.
+
+## Completed Work
+- Searched for existing report helpers/routes before adding files; no backend report model, controller, route, or route mount exists.
+- Confirmed report data must come from backend Prisma relations: Order -> OrderDetail -> Product and Order -> Payment.
+- Confirmed revenue definition for Phase 4: orders with `Order.status = "completed"` and related `Payment.paymentMethod = "COD"` plus `Payment.paymentStatus = "paid"`.
+- Confirmed Phase 3 order status updates set COD payment rows to paid when an order becomes completed.
+- Identified a focused `backend/src/models/report.model.js` as the correct future aggregation owner for 03B, because existing order/payment helpers own checkout, reads, payment creation, and status mutation rather than cross-model report aggregation.
+- Confirmed 03B should not duplicate order/payment schema or create reporting-only model copies; it should use the existing Prisma client, schema models, and relations.
+
+## Files Created or Modified
+- docs/reports/report_4_execute_agent.md
+
+## Tests or Validations Run
+- command/check: `rg "OrderStatus|PaymentStatus|completed|paid|OrderDetail|Payment|report|revenue" backend/src backend/prisma`
+- result: passed
+- evidence or reason: Found Prisma enum/model definitions, migration enum definitions, order status/payment side-effect code, payment helper code, route references, and no existing backend report implementation.
+- command/check: `rg -n "report|Report|revenue|best-selling|bestSelling|order-summary|orderSummary" backend/src`
+- result: passed
+- evidence or reason: No matches in backend source, confirming no stale report placeholders/routes/helpers.
+- command/check: `Test-Path backend/src/models/report.model.js; Test-Path backend/src/controllers/report.controller.js; Test-Path backend/src/routes/report.routes.js`
+- result: passed
+- evidence or reason: All returned False before this report append.
+
+## Acceptance Check
+- condition: Execution notes identify reusable files.
+- status: satisfied
+- evidence: Reusable inspected files are `backend/src/models/order.model.js`, `backend/src/models/orderDetail.model.js`, `backend/src/models/payment.model.js`, `backend/src/models/product.model.js`, `backend/prisma/schema.prisma`, `backend/src/config/database.js` by existing model usage, `backend/src/controllers/order.controller.js`, and `backend/src/routes/index.js`.
+- condition: Execution notes identify aggregation owner without duplicating order/payment data-access logic.
+- status: satisfied
+- evidence: Future 03B aggregation should live in focused `backend/src/models/report.model.js` and query existing Order/OrderDetail/Payment/Product relations through the shared Prisma client; no duplicate order/payment models or schema copies are needed.
+- condition: Completed orders with paid COD payment is the single revenue definition for this phase.
+- status: satisfied
+- evidence: Plan 4/README require backend/database report data, schema has `OrderStatus.completed`, `PaymentMethod.COD`, and `PaymentStatus.paid`, and `order.model.js` marks related payment rows paid when status changes to completed.
+
+## Progress Update
+- task checkbox updated: no
+- batch status updated: no
+- reason: orchestrated A1 mode forbids task checkbox and batch status updates.
+
+## Key Implementation Decisions
+- Use a focused `report.model.js` in 03B for report-specific aggregation rather than adding aggregation behavior to checkout/payment mutation helpers.
+- Keep report revenue and best-selling filters aligned on completed orders with paid COD payment.
+- Use backend/database Prisma queries only; frontend state must not be report truth.
+
+## Risks or Open Issues
+- Live report validation in later tasks will require seeded completed orders with paid COD payments.
+- Decimal serialization and aggregate return shape should be handled explicitly in 03B to match existing JSON response patterns.
+
+## Minor In-Scope Issues Fixed
+- None
+
+## Workflow Integrity Check
+- Only task 03A was executed.
+- No 03B helpers, 03C routes/controllers, 03D validation smoke tests, or UI work were implemented.
+- No task checkbox, batch status, staging, or commit was performed.
+
+## Notes for Review Agent
+- changed files: docs/reports/report_4_execute_agent.md
+- validations to rerun: `rg "OrderStatus|PaymentStatus|completed|paid|OrderDetail|Payment|report|revenue" backend/src backend/prisma`; `rg -n "report|Report|revenue|best-selling|bestSelling|order-summary|orderSummary" backend/src`; report EOF check.
+- risk areas: future 03B should avoid reusing `order.model.js` admin list as an in-memory reporting source and should query aggregates directly from existing Prisma relations.
+- next task readiness: can_review
+
+---
+
+# Task Execution Report - 03A
+
+## Source Task File
+docs/tasks/task_4.md
+
+## Report File
+docs/reports/report_4_execute_agent.md
+
+## Mode
+orchestrated
+
+## Batch
+Batch03 - Backend Report APIs
+
+## Task
+03A - Inspect order, payment, and report prerequisites
+
+## Status
+complete
+
+## Source of Truth Used
+- docs/plans/Plan_4.md > ## 3. Prerequisites from Prior Phases
+- docs/plans/Plan_4.md > ## 8. Implementation Steps
+- README.md > ## Phase 4 Handoff Notes
+- docs/tasks/task_4.md > (03A): Inspect order, payment, and report prerequisites
+
+## Supplemental Documents Used
+- None
+
+## Selected Scope
+- Batch: Batch03 - Backend Report APIs
+- Task ID: 03A
+- Task title: Inspect order, payment, and report prerequisites
+- Files allowed: No required code changes unless stale report placeholders exist; execution report append only.
+- Repair scope if any: None
+
+## Dependency and User Action Check
+- dependencies: None
+- user action: None
+- status: satisfied
+
+## Files Inspected Before Editing
+- AGENTS.md: applied search-before-write, anti-duplication, focused-module, and root-cause caller guidance.
+- docs/tasks/task_4.md: confirmed exact 03A scope, acceptance, validation, and no code deliverable unless stale report placeholders exist.
+- docs/plans/Plan_4.md: confirmed Phase 3 order/payment prerequisites and the required review before report implementation.
+- README.md: confirmed Phase 4 must reuse Phase 3 backend artifacts and must not use frontend revenue truth or reporting-only schema copies.
+- backend/prisma/schema.prisma: confirmed exact enum values, fields, and Order/OrderDetail/Payment/Product relations.
+- backend/src/config/database.js: confirmed the shared runtime Prisma client used by existing models.
+- backend/src/models/order.model.js: confirmed checkout data creation, admin read boundary, and completed-order payment side effect.
+- backend/src/models/orderDetail.model.js: confirmed its existing single-record lookup boundary is not a report aggregation helper.
+- backend/src/models/payment.model.js: confirmed COD payment ownership, field names, and create-or-get behavior.
+- backend/src/models/product.model.js: confirmed existing product CRUD/list helpers and no report aggregation helper.
+- backend/src/models/index.js: confirmed existing exports and no report model export.
+- backend/src/controllers/order.controller.js: confirmed controller/model separation and admin order pattern.
+- backend/src/routes/index.js: confirmed current route-mount pattern and absence of report routes.
+- backend/src/models, backend/src/controllers, backend/src/routes: searched all current backend source filenames for report placeholders.
+- docs/reports/report_4_execute_agent.md: inspected the existing unreviewed 03A append and physical EOF before this required fresh attempt append.
+
+## Completed Work
+- Independently rechecked the existing unreviewed 03A execution notes against current repository evidence.
+- Confirmed there is no existing report helper, controller, route, route mount, or stale report placeholder to reuse or remove.
+- Confirmed exact report relations and fields: `Order.status`, `Order.totalAmount`, `Order.details`; `OrderDetail.quantity`, `OrderDetail.price`, `OrderDetail.productId`; `Payment.paymentMethod`, `Payment.paymentStatus`, `Payment.amount`; and `Product.id`, `Product.name`, `Product.brand`.
+- Confirmed the Phase 4 revenue filter is `Order.status = "completed"` with related `Payment.paymentMethod = "COD"` and `Payment.paymentStatus = "paid"`.
+- Confirmed `order.model.js` establishes the completed-to-paid lifecycle side effect, while the existing order, order-detail, payment, and product helpers do not own cross-model reporting.
+- Identified focused `backend/src/models/report.model.js` as the future 03B aggregation owner, using the shared Prisma client and existing schema relations without copying order/payment models or loading frontend state.
+
+## Files Created or Modified
+- docs/reports/report_4_execute_agent.md
+
+## Tests or Validations Run
+- command/check: `rg "OrderStatus|PaymentStatus|completed|paid|OrderDetail|Payment|report|revenue" backend/src backend/prisma`
+- result: passed
+- evidence or reason: Current matches confirm the schema enums/models/relations, migration enum values, order completed-to-paid side effect, payment helper, and existing payment route references.
+- command/check: `rg -n "report|Report|revenue|best-selling|bestSelling|order-summary|orderSummary" backend/src`
+- result: passed
+- evidence or reason: No backend source matches were returned, confirming no report implementation or stale report placeholder currently exists.
+- command/check: `Test-Path` checks for `backend/src/models/report.model.js`, `backend/src/controllers/report.controller.js`, and `backend/src/routes/report.routes.js`
+- result: passed
+- evidence or reason: All three checks returned False, consistent with the source search.
+
+## Acceptance Check
+- condition: Execution notes identify reusable files.
+- status: satisfied
+- evidence: The reusable foundation is the shared Prisma client, current Prisma schema/relations, order lifecycle helper, payment helper, product model conventions, controller separation, and route-mount pattern listed above.
+- condition: Execution notes identify the aggregation owner without duplicating order/payment data-access logic.
+- status: satisfied
+- evidence: Future 03B should add one focused `report.model.js` that queries the existing Order/OrderDetail/Payment/Product relations via the shared Prisma client; existing mutation/read helpers retain their present ownership.
+- condition: Completed orders with paid COD payment is the single Phase 4 revenue definition.
+- status: satisfied
+- evidence: The task contract defines this filter, Prisma exposes the exact enum values, and `order.model.js` transitions the related payment to paid when an order is completed.
+
+## Progress Update
+- task checkbox updated: no
+- batch status updated: no
+- reason: orchestrated A1 mode forbids task checkbox and batch status updates.
+
+## Key Implementation Decisions
+- Do not broaden existing order/payment mutation and list helpers into reporting owners.
+- Use a focused report model for database-side cross-model aggregation in 03B.
+- Filter report revenue and sales aggregates through completed orders with paid COD payments; never derive revenue from frontend state.
+
+## Risks or Open Issues
+- 03B must choose explicit Decimal serialization and aggregate response shapes compatible with the existing JSON response conventions.
+- Later live validation depends on seeded completed orders with paid COD payments; it is not part of inspection-only 03A.
+
+## Minor In-Scope Issues Fixed
+- None
+
+## Workflow Integrity Check
+- Only task 03A was executed.
+- No 03B model implementation, 03C controller/routes, 03D smoke validation, frontend work, task checkbox update, batch status update, staging, or commit was performed.
+
+## Notes for Review Agent
+- changed files: docs/reports/report_4_execute_agent.md
+- validations to rerun: required `rg` command; no-report source search; report physical EOF and task checkbox checks.
+- risk areas: preserve the completed + paid COD filter and avoid using the broad admin order list as an in-memory report source.
+- next task readiness: can_review
+
+---
+
+# Task Execution Report - 03B
+
+## Source Task File
+docs/tasks/task_4.md
+
+## Report File
+docs/reports/report_4_execute_agent.md
+
+## Mode
+orchestrated
+
+## Batch
+Batch03 - Backend Report APIs
+
+## Task
+03B - Implement report aggregation helpers
+
+## Status
+complete
+
+## Source of Truth Used
+- docs/plans/Plan_4.md > ### 7.2 Report API
+- docs/plans/Master_Plan.md > ## 13. Controller Design > ### 12.9 ReportController
+- docs/tasks/task_4.md > (03B): Implement report aggregation helpers
+
+## Supplemental Documents Used
+- None
+
+## Selected Scope
+- Batch: Batch03 - Backend Report APIs
+- Task ID: 03B
+- Task title: Implement report aggregation helpers
+- Files allowed: backend/src/models/report.model.js or a focused existing helper, directly required focused tests, and execution report append.
+- Repair scope if any: None
+
+## Dependency and User Action Check
+- dependencies: (03A), checked complete in both the selected task block and Progress Tracker.
+- user action: None
+- status: satisfied
+
+## Files Inspected Before Editing
+- AGENTS.md: applied search-before-write, reuse, focused-module, minimal-diff, and caller-inspection rules.
+- docs/tasks/task_4.md: confirmed exact 03B scope, dependency, acceptance, validation, files, and sibling-task exclusions.
+- docs/plans/Plan_4.md: confirmed report filters and response data shapes.
+- docs/plans/Master_Plan.md: confirmed the three simple report responsibilities.
+- backend/prisma/schema.prisma: confirmed existing enums, Decimal fields, and Order/OrderDetail/Payment/Product relations.
+- backend/src/config/database.js: confirmed the shared Prisma client used by backend models.
+- backend/src/models/order.model.js: confirmed completed-order behavior, paid-payment side effect, existing query ownership, and Decimal usage.
+- backend/src/models/orderDetail.model.js: confirmed no existing aggregate owner to reuse.
+- backend/src/models/payment.model.js: confirmed COD and payment status field conventions.
+- backend/src/models/product.model.js: confirmed model style and product summary fields.
+- backend/src/models/cart.model.js: confirmed existing two-decimal string serialization convention.
+- backend/src/controllers/order.controller.js: confirmed aggregation helpers should remain free of Express response logic.
+- backend/src: searched report/revenue helper names and every direct Prisma order/order-detail/payment/product caller before adding the focused module.
+- backend/package.json: confirmed no test framework exists and Node's built-in test runner requires no dependency.
+- docs/reports/report_4_execute_agent.md: inspected the physical EOF before appending this report.
+
+## Completed Work
+- Added a focused report model backed by the existing shared Prisma client and schema relations.
+- Added revenue aggregation for completed orders whose related payment is paid COD, returning `totalRevenue` as a two-decimal string and `completedOrderCount`.
+- Added best-selling aggregation from captured OrderDetail quantity and price groups, filtered to completed paid-COD orders, consolidated per product, sorted by sold quantity and revenue, and limited to five products.
+- Added order-status aggregation with explicit zero defaults for pending, confirmed, shipping, completed, and cancelled.
+- Added focused unit tests for query filters, empty revenue data, captured-price consolidation, top-five behavior, product metadata, Decimal serialization, and missing status defaults.
+
+## Files Created or Modified
+- backend/src/models/report.model.js
+- backend/src/models/report.model.test.js
+- docs/reports/report_4_execute_agent.md
+
+## Tests or Validations Run
+- command/check: `cd backend && node --test src/models/report.model.test.js`
+- result: passed
+- evidence or reason: All 4 focused report-model tests passed with 0 failures.
+- command/check: `cd backend && npx prisma validate`
+- result: passed
+- evidence or reason: Prisma loaded `prisma/schema.prisma` and reported that the schema is valid; only the existing package.json Prisma configuration deprecation warning was emitted.
+- command/check: source/caller and scope inspection with `rg`, `git status --short`, file line counts, report EOF tail, and exact 03A-03D task-state search
+- result: passed
+- evidence or reason: The only new implementation files are the focused 105-line report model and 194-line test; no report controller, route, route mount, schema copy, checkbox update, staging, or commit was added by 03B.
+
+## Acceptance Check
+- condition: Helpers compute from database order/order-detail/product/payment records.
+- status: satisfied
+- evidence: The helpers use Prisma `order.aggregate`, `orderDetail.groupBy`, `product.findMany`, and `order.groupBy` against existing schema relations.
+- condition: Revenue uses completed orders with paid COD payment and returns the required safe response values.
+- status: satisfied
+- evidence: The revenue query applies all three predicates and tests verify `totalRevenue` two-decimal serialization plus `completedOrderCount`, including an empty data set.
+- condition: Best-selling products aggregate sold quantity and captured-price revenue, include product metadata, and limit results.
+- status: satisfied
+- evidence: Tests verify multi-price groups consolidate per product, results are quantity/revenue ordered, metadata is loaded from Product, revenue is a two-decimal string, and only five products return.
+- condition: Order summary includes counts for every OrderStatus value.
+- status: satisfied
+- evidence: Tests verify grouped database counts and zero defaults for statuses absent from the aggregate result.
+- condition: No reporting-only schema copies or Express response logic are added.
+- status: satisfied
+- evidence: No schema changes were made, and the focused model imports only Prisma Decimal plus the existing shared Prisma client.
+
+## Progress Update
+- task checkbox updated: no
+- batch status updated: no
+- reason: orchestrated A1 mode forbids task checkbox and batch status updates.
+
+## Key Implementation Decisions
+- Keep cross-model report reads in one focused model instead of broadening existing order/payment mutation helpers.
+- Use completed orders with paid COD payment for both revenue and best-selling data so sold quantities and captured-price revenue share one trustworthy completed-sale definition.
+- Group OrderDetail by both product and captured price, then consolidate per product with Prisma Decimal arithmetic because a product can have historical order details at different prices.
+- Limit best-selling output to five products, which is allowed by the Plan 4 contract.
+
+## Risks or Open Issues
+- Live database/API smoke remains intentionally deferred to 03D; focused tests validate Prisma query contracts with a controlled client substitute.
+- `npx prisma validate` reports the repository's existing package.json Prisma configuration deprecation warning; it does not invalidate the schema.
+
+## Minor In-Scope Issues Fixed
+- None
+
+## Workflow Integrity Check
+- Only task 03B was implemented.
+- No 03C controller/routes, 03D API smoke, UI work, schema changes, task checkbox updates, batch status updates, staging, or commit were performed.
+
+## Notes for Review Agent
+- changed files: backend/src/models/report.model.js; backend/src/models/report.model.test.js; docs/reports/report_4_execute_agent.md
+- validations to rerun: `cd backend && node --test src/models/report.model.test.js`; `cd backend && npx prisma validate`; inspect report EOF and task checkbox state.
+- risk areas: Prisma relation-filter shape, historical captured-price consolidation, Decimal serialization, empty data behavior, and strict 03B/03C boundary.
+- next task readiness: can_review
+
+---
+
+# Task Execution Report - 03C
+
+## Source Task File
+docs/tasks/task_4.md
+
+## Report File
+docs/reports/report_4_execute_agent.md
+
+## Mode
+orchestrated
+
+## Batch
+Batch03 - Backend Report APIs
+
+## Task
+03C - Implement report controller and admin routes
+
+## Status
+complete
+
+## Source of Truth Used
+- docs/plans/Plan_4.md > ## 4. Scope
+- docs/plans/Plan_4.md > ### 7.2 Report API
+- docs/plans/Master_Plan.md > ## 15. API Design Summary > ### Report APIs
+
+## Supplemental Documents Used
+- None
+
+## Selected Scope
+- Batch: Batch03 - Backend Report APIs
+- Task ID: 03C
+- Task title: Implement report controller and admin routes
+- Files allowed: backend/src/controllers/report.controller.js; backend/src/routes/report.routes.js; backend/src/routes/index.js; backend/src/models/report.model.js; directly required focused tests; execution report append.
+- Repair scope if any: None
+
+## Dependency and User Action Check
+- dependencies: (03B), checked complete in both the selected task block and Progress Tracker; accepted aggregation helpers are present in backend/src/models/report.model.js.
+- user action: None
+- status: satisfied
+
+## Files Inspected Before Editing
+- AGENTS.md: applied search-before-write, reuse, focused-module, minimal-diff, and caller/mount inspection rules.
+- docs/tasks/task_4.md: confirmed exact 03C scope, dependency, response contract, validation, files, and 03D exclusion.
+- docs/plans/Plan_4.md: confirmed the three endpoint paths, admin requirement, and response data shapes.
+- docs/plans/Master_Plan.md: confirmed the report API path summary.
+- backend/package.json: confirmed Node's built-in test runner is available without adding a dependency.
+- backend/src/models/report.model.js: confirmed the accepted 03B aggregation owners and safe empty values to expose without duplicating report logic.
+- backend/src/models/report.model.test.js: confirmed 03B query, Decimal, and empty-data coverage.
+- backend/src/controllers/review.controller.js: reused the existing async controller, shared response helper, and next(error) pattern.
+- backend/src/controllers/order.controller.js: confirmed existing admin controller and response conventions.
+- backend/src/routes/review.routes.js: confirmed protect-then-admin middleware ordering.
+- backend/src/routes/order.routes.js: confirmed admin route middleware and router patterns.
+- backend/src/routes/index.js: inspected every current mount before adding the report mount.
+- backend/src/app.js: confirmed the route index is mounted under /api.
+- backend/src/middlewares/auth.middleware.js: confirmed protect returns 401 before controller execution for anonymous requests.
+- backend/src/middlewares/admin.middleware.js: confirmed admin role enforcement returns 403 for non-admin users.
+- backend/src/utils/response.js: reused the shared success response envelope.
+- backend/src/controllers/index.js and backend/src/models/index.js: checked current barrel-file conventions and avoided unrelated placeholder/barrel refactoring.
+- docs/reports/report_4_execute_agent.md: inspected physical EOF before appending.
+
+## Completed Work
+- Added three thin report controllers that call the accepted 03B aggregation helpers and return the shared success response envelope.
+- Added GET routes for revenue, best-selling products, and order summary with protect and admin middleware on every endpoint.
+- Mounted the report router at /admin/reports inside the router already mounted by app.js under /api.
+- Added focused tests for all three Plan 4 response shapes, error forwarding, exact middleware order, route paths, the /api/admin/reports mount, and anonymous denial.
+- Followed RED-GREEN TDD: the focused suite first failed because the controller/routes/mount were absent, then passed after the minimal implementation.
+
+## Files Created or Modified
+- backend/src/controllers/report.controller.js
+- backend/src/controllers/report.controller.test.js
+- backend/src/routes/report.routes.js
+- backend/src/routes/index.js
+- docs/reports/report_4_execute_agent.md
+
+## Tests or Validations Run
+- command/check: `cd backend && node --test src/controllers/report.controller.test.js` before implementation
+- result: passed
+- evidence or reason: RED was confirmed with 4 expected failures: three missing-controller failures and a 404 instead of the required protected mounted endpoint.
+- command/check: `cd backend && node --test src/controllers/report.controller.test.js` after implementation
+- result: passed
+- evidence or reason: All 4 controller/route tests passed with 0 failures.
+- command/check: `cd backend && npx prisma validate`
+- result: passed
+- evidence or reason: Prisma loaded prisma/schema.prisma and reported the schema is valid; only the repository's existing Prisma configuration deprecation warning was emitted.
+- command/check: `cd backend && node --test src/models/report.model.test.js src/controllers/report.controller.test.js`
+- result: passed
+- evidence or reason: All 8 combined report model/controller/route tests passed with 0 failures.
+- command/check: `cd backend && node --check src/controllers/report.controller.js; node --check src/routes/report.routes.js; node --check src/routes/index.js`
+- result: passed
+- evidence or reason: All three touched runtime JavaScript files passed syntax checks.
+- command/check: live authenticated API and database smoke
+- result: not_run
+- evidence or reason: Explicitly deferred by task 03C to task 03D; no live credentials or database assertions were attempted.
+
+## Acceptance Check
+- condition: GET /api/admin/reports/revenue returns the Plan 4 revenue data shape.
+- status: satisfied
+- evidence: The controller passes getRevenue output through the shared response helper; focused tests verify the required empty-safe totalRevenue and completedOrderCount data.
+- condition: GET /api/admin/reports/best-selling-products returns the Plan 4 product report array.
+- status: satisfied
+- evidence: The controller exposes getBestSellingProducts directly; focused tests verify the empty-safe array response.
+- condition: GET /api/admin/reports/order-summary returns all Plan 4 status counts.
+- status: satisfied
+- evidence: The controller exposes getOrderSummary directly; combined tests verify all five status keys and zero defaults.
+- condition: Every report endpoint requires authentication and admin authorization.
+- status: satisfied
+- evidence: Route-stack tests verify protect and admin precede each controller; a mounted endpoint request without credentials returns 401 rather than reaching report logic.
+- condition: Report helpers are reused without duplicated business logic.
+- status: satisfied
+- evidence: Controllers delegate to the accepted backend/src/models/report.model.js helpers and contain no Prisma queries or aggregation logic.
+
+## Progress Update
+- task checkbox updated: no
+- batch status updated: no
+- reason: orchestrated A1 mode forbids task checkbox and batch status updates.
+
+## Key Implementation Decisions
+- Keep controllers thin and use the shared successResponse helper so report response envelopes match existing backend APIs.
+- Apply protect and admin middleware at each report route to make the authorization boundary explicit and locally testable.
+- Mount the focused report router once at /admin/reports because app.js already owns the /api prefix.
+- Keep live authenticated/database smoke checks in 03D as explicitly required by the task sequence.
+
+## Risks or Open Issues
+- Live admin/customer authorization and database-backed result comparisons remain deferred to 03D.
+- `npx prisma validate` reports the repository's existing package.json Prisma configuration deprecation warning; it does not invalidate the schema.
+
+## Minor In-Scope Issues Fixed
+- None
+
+## Workflow Integrity Check
+- Only task 03C was implemented.
+- No 03D live smoke, frontend/UI work, schema changes, task checkbox updates, batch status updates, staging, or commit were performed.
+
+## Notes for Review Agent
+- changed files: backend/src/controllers/report.controller.js; backend/src/controllers/report.controller.test.js; backend/src/routes/report.routes.js; backend/src/routes/index.js; docs/reports/report_4_execute_agent.md
+- validations to rerun: `cd backend && npx prisma validate`; `cd backend && node --test src/models/report.model.test.js src/controllers/report.controller.test.js`; syntax checks for the three touched runtime files; inspect report EOF and task checkbox state.
+- risk areas: exact middleware order, mount composition into /api/admin/reports, shared response envelope, safe empty outputs, and strict 03C/03D boundary.
+- next task readiness: can_review
+
+---
+
+# Task Execution Report - 03D
+
+## Source Task File
+docs/tasks/task_4.md
+
+## Report File
+docs/reports/report_4_execute_agent.md
+
+## Mode
+orchestrated
+
+## Batch
+Batch03 - Backend Report APIs
+
+## Task
+03D - Validate backend report API behavior
+
+## Status
+complete
+
+## Source of Truth Used
+- docs/plans/Plan_4.md > ## 9. Verification & Testing Plan
+- docs/plans/Plan_4.md > ### 7.2 Report API
+
+## Supplemental Documents Used
+- None
+
+## Selected Scope
+- Batch: Batch03 - Backend Report APIs
+- Task ID: 03D
+- Task title: Validate backend report API behavior
+- Files allowed: execution report; optional docs/demo-checklist.md
+- Repair scope if any: None
+
+## Dependency and User Action Check
+- dependencies: 03C is checked complete; its report controller, protected routes, mount, and focused tests are present.
+- user action: backend/.env, live database access, completed paid COD data, and seeded admin/customer credentials were available. Secrets and tokens were not printed.
+- status: satisfied
+
+## Files Inspected Before Editing
+- docs/tasks/task_4.md: read the complete 03D contract, dependency, validation, and blocked conditions.
+- docs/plans/Plan_4.md: read the report API contract and verification evidence requirements.
+- backend/package.json: confirmed the required dev and Prisma commands.
+- backend/prisma/schema.prisma: confirmed order, order-detail, payment, user-role, and status fields.
+- backend/prisma/seed.js: reused the existing seeded admin/customer login flow without printing credentials or tokens.
+- backend/src/server.js: confirmed backend startup behavior and configured port usage.
+- backend/src/app.js: confirmed health, auth, and API mounts.
+- backend/src/config/database.js: confirmed the shared Prisma client used for the independent database read.
+- backend/src/models/report.model.js: inspected the report filters and aggregations under validation.
+- backend/src/controllers/report.controller.js: confirmed controller response flow.
+- backend/src/controllers/report.controller.test.js: reused the focused report route/access tests.
+- backend/src/middlewares/auth.middleware.js: confirmed bearer-token authentication behavior.
+- backend/src/middlewares/admin.middleware.js: confirmed the admin role boundary.
+- backend/src/utils/response.js: confirmed the shared response envelope.
+- docs/reports/report_4_execute_agent.md: inspected physical EOF before appending.
+
+## Completed Work
+- Ran Prisma schema validation.
+- Started `npm run dev` in a hidden Windows process, confirmed `http://localhost:5000/api/health`, and stopped only the process tree started for this task.
+- Logged in through the existing seeded admin and customer flows while keeping credentials and tokens out of output.
+- Smoke tested all three report endpoints as admin.
+- Verified anonymous requests receive 401 and customer requests receive 403 for all three report endpoints.
+- Queried live order/payment/detail rows independently of the report helpers and compared API revenue, completed-order count, best-selling quantities/revenue, and all order-status counts against the database.
+- Re-ran the focused report model/controller/route test suite.
+
+## Files Created or Modified
+- docs/reports/report_4_execute_agent.md
+
+## Tests or Validations Run
+- command/check: `cd backend && npx prisma validate`
+- result: passed
+- evidence or reason: Prisma loaded `prisma/schema.prisma` and reported the schema valid; only the existing Prisma configuration deprecation warning was emitted.
+- command/check: independent live Prisma read of users, orders, payments, and order details
+- result: passed
+- evidence or reason: Database access succeeded with 4 orders, including 2 completed paid COD orders suitable for non-empty report verification.
+- command/check: hidden `cd backend && npm run dev` startup plus `GET http://localhost:5000/api/health`
+- result: passed
+- evidence or reason: The health endpoint returned success. Cleanup verification found zero listeners on the configured backend port afterward.
+- command/check: safe seeded admin and customer login
+- result: passed
+- evidence or reason: Both logins succeeded with the expected roles; tokens were retained only in memory and were not printed.
+- command/check: admin GETs for `/api/admin/reports/revenue`, `/best-selling-products`, and `/order-summary`
+- result: passed
+- evidence or reason: All three endpoints returned HTTP 200 and successful response envelopes.
+- command/check: anonymous and customer GETs for all three report endpoints
+- result: passed
+- evidence or reason: Every anonymous request returned HTTP 401 and every authenticated customer request returned HTTP 403.
+- command/check: independent database-to-API report comparison
+- result: passed
+- evidence or reason: Revenue and completed-order count matched 2 completed paid COD orders; best-selling quantities and captured-price revenue matched 3 independently aggregated product rows; order summary matched pending=1, confirmed=1, shipping=0, completed=2, cancelled=0.
+- command/check: `cd backend && node --test src/models/report.model.test.js src/controllers/report.controller.test.js`
+- result: passed
+- evidence or reason: All 8 focused report tests passed with 0 failures.
+
+## Acceptance Check
+- condition: Smoke test revenue, best-selling products, and order-summary endpoints.
+- status: satisfied
+- evidence: Each admin request returned HTTP 200 with the expected successful API envelope.
+- condition: Revenue matches completed paid COD orders in the database.
+- status: satisfied
+- evidence: API total and count matched an independent live database read containing 2 eligible orders.
+- condition: Best-selling report aggregates order-detail quantities correctly.
+- status: satisfied
+- evidence: API product order, quantities, and captured-price revenue matched independent aggregation of live eligible order details.
+- condition: Order summary counts match order statuses in the database.
+- status: satisfied
+- evidence: All five API counts matched the independently counted live order rows.
+- condition: Report endpoints enforce admin access.
+- status: satisfied
+- evidence: Admin received 200, anonymous received 401, and customer received 403 on every report endpoint.
+
+## Progress Update
+- task checkbox updated: no
+- batch status updated: no
+- reason: orchestrated A1 mode forbids task checkbox and batch status updates.
+
+## Key Implementation Decisions
+- Reused seeded credentials and existing auth/report paths rather than creating a new smoke helper.
+- Compared API output to independently read raw database rows so the validation did not merely call the same report model twice.
+- Kept tokens in memory only and emitted status/count evidence without credentials or token values.
+
+## Risks or Open Issues
+- `npx prisma validate` continues to emit the repository's existing Prisma package.json configuration deprecation warning.
+- The first PowerShell smoke harness used `Invoke-WebRequest`, which hit a local Windows PowerShell null-reference bug; it was replaced with `Invoke-RestMethod`, and the complete rerun passed.
+
+## Minor In-Scope Issues Fixed
+- None
+
+## Workflow Integrity Check
+- Only task 03D was validated.
+- No production implementation, schema, frontend, task checkbox, batch status, staging, or commit changes were made.
+
+## Notes for Review Agent
+- changed files: docs/reports/report_4_execute_agent.md
+- validations to rerun: `cd backend && npx prisma validate`; focused report tests; optional live HTTP/database comparison using safe local credentials.
+- risk areas: live database dataset drift, admin/customer authorization statuses, completed-paid-COD filter, and report-to-database equality.
+- next task readiness: can_review

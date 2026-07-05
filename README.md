@@ -71,6 +71,11 @@ All API endpoints are mounted under `/api`:
 - `POST /api/products/:id/reviews` - Create a product review with integer rating 1-5 and optional trimmed comment (requires JWT)
 - `DELETE /api/admin/reviews/:id` - Hide a review from public listings for admin moderation (requires admin JWT)
 
+### Report APIs
+- `GET /api/admin/reports/revenue` - Get revenue and completed-order count from completed orders with paid COD payments (requires admin JWT)
+- `GET /api/admin/reports/best-selling-products` - Get the top five products by completed paid-COD sales quantity (requires admin JWT)
+- `GET /api/admin/reports/order-summary` - Get order counts by status (requires admin JWT)
+
 ## Implemented Frontend Views & Layouts
 
 The application implements a multi-role web interface utilizing the Astryx Design System:
@@ -257,3 +262,9 @@ Phase 4 constraints:
   - Review list and form UI live in focused product components and avoid direct database access or frontend API base URL duplication.
   - Admin Reviews UI is available at `/admin/reviews` behind the existing admin route/layout, lets admins choose a product, view visible reviews, and hide a review from public product detail.
   - Focused review UI tests and the frontend production build passed; user-provided manual evidence confirmed customer review UI checks passed, and browser smoke verified admin hide removes the review from public product detail.
+
+- **Batch03 (P4B3): Backend Report APIs** - Complete
+  - Admin-only revenue, best-selling-product, and order-summary endpoints are mounted under `/api/admin/reports`.
+  - Report calculations use existing Prisma order, order-detail, payment, and product data; revenue and product sales are filtered to completed orders with paid COD payments.
+  - Revenue uses API-safe decimal strings, best-selling products are limited to five, and missing order statuses return zero counts.
+  - Prisma validation, focused report tests, live admin/customer/anonymous authorization checks, and independent database-to-API comparisons passed.

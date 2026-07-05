@@ -7,6 +7,7 @@ const cartRoutes = require('./cart.routes');
 const orderRoutes = require('./order.routes');
 const paymentRoutes = require('./payment.routes');
 const reviewRoutes = require('./review.routes');
+const reportRoutes = require('./report.routes');
 
 // Mount routes under their path prefixes
 // Public product/category endpoints will match e.g. GET /api/products, GET /api/categories
@@ -30,5 +31,8 @@ router.use('/payments', paymentRoutes);
 // Review routes keep the exact Plan 4 paths:
 // e.g. GET/POST /api/products/:id/reviews, DELETE /api/admin/reviews/:id
 router.use('/', reviewRoutes);
+
+// Admin-only report endpoints
+router.use('/admin/reports', reportRoutes);
 
 module.exports = router;
