@@ -121,173 +121,6 @@ ACCEPTED
 
 ---
 
-# Task Review Report - (04D)
-
-## Source Task File
-docs/tasks/task_3.md
-
-## Execution Report Reviewed
-docs/reports/report_3_execute_agent.md
-
-## Review Report File
-docs/review/review_3_review_agent.md
-
-## Mode
-orchestrated
-
-## Final Outcome
-ACCEPTED
-
-## Reviewed Scope
-- Batch: Batch04 - Customer Checkout and Order UI
-- Task ID: (04D)
-- Task title: Build order detail view
-- Executor status reported: complete
-- Source of Truth: `docs/plans/Plan_3.md` > `### 7.2 Order Read APIs`; `docs/plans/Plan_3.md` > `### 7.5 Frontend UI Contract`; `docs/design/design.md` > `## 12.2 OrderDetailPanel`; `docs/design/design.md` > `## 24.9 Order Detail Page`
-- Supplemental documents: (04A) execution report component choices and state patterns; (04C) execution report badge components and `formatDate` pattern
-
-## Latest Report Selection
-- Latest report entry found: yes
-- Requested task ID, if any: (04D)
-- Reviewed task ID: (04D)
-- Correct selection: yes
-- Notes: Task (04D) is the latest un-reviewed task in Batch04. All dependencies ((04A), (04C)) are complete and accepted.
-
-## Git Diff Evidence
-- git status reviewed: yes
-- git diff stat reviewed: yes
-- git diff reviewed: yes
-- recent commits reviewed: not needed
-- changed files from git: `frontend/src/views/OrderDetailView.jsx` (modified)
-- untracked files: `frontend/src/components/order/OrderDetailPanel.jsx`, `frontend/src/components/order/OrderStatusBadge.jsx`, `frontend/src/components/order/PaymentStatusBadge.jsx`
-
-## Files Reviewed
-- `frontend/src/views/OrderDetailView.jsx`: in scope — placeholder replaced with full 5-state implementation (loading, 404, 403, API error, success). 257 lines.
-- `frontend/src/components/order/OrderDetailPanel.jsx`: in scope — presentation-only component with 5 sections (Order Information, Shipping Address, Payment Information, Order Items, Order Total). 181 lines.
-- `frontend/src/api/orderApi.js`: in scope — confirmed `getOrderById(id)` calls `GET /api/orders/:id` via `apiClient.get`.
-- `frontend/src/routes/AppRoutes.jsx`: in scope — confirmed `/orders/:id` route wired with `PrivateRoute` guard pointing to `OrderDetailView`.
-- `backend/src/controllers/order.controller.js`: in scope — confirmed `getOrderById` returns 404/403/200 with `{ success, message, data }` envelope.
-- `backend/src/utils/response.js`: in scope — confirmed `successResponse` wraps data in `{ success: true, message, data }`.
-- `frontend/src/constants/orderConstants.js`: in scope — confirmed `ORDER_STATUS_LABELS` and `PAYMENT_STATUS_LABELS` match backend enum values.
-- `frontend/src/components/order/OrderStatusBadge.jsx`: in scope — confirmed `pending→neutral`, `confirmed→info`, `shipping→warning`, `completed→success`, `cancelled→danger` variant mapping.
-- `frontend/src/components/order/PaymentStatusBadge.jsx`: in scope — confirmed `unpaid→neutral`, `paid→success`, `failed→danger` variant mapping.
-- `frontend/src/components/common/Alert.jsx`: in scope — confirmed `title`, `description`, `actionLabel`, `onAction` props used correctly.
-- `frontend/src/components/product/productUtils.js`: in scope — confirmed `formatPrice` for VND currency formatting.
-
-## Reported Files Cross-Check
-- file from execution report: `frontend/src/views/OrderDetailView.jsx`, `frontend/src/components/order/OrderDetailPanel.jsx`
-- present in git/repo: yes
-- matches task scope: yes
-- notes: `OrderDetailView.jsx` is modified (not created), `OrderDetailPanel.jsx` is untracked (created). Both match the task's allowed files list.
-
-## Dependency Review
-- Required dependencies: (04A) complete, (04C) complete
-- Dependency status: satisfied
-- Missing or invalid dependency: None. `orderApi.getOrderById()`, `OrderStatusBadge`, `PaymentStatusBadge`, `ORDER_STATUS_LABELS`, `PAYMENT_STATUS_LABELS`, `formatPrice`, `Alert`, route `/orders/:id` — all exist and are functional.
-
-## Architecture Alignment
-- Passed: yes — view handles state/fetch/layout; panel handles pure presentation; badge components handle status→variant mapping. Clean separation of concerns. No Prisma/database access in frontend. API calls via existing `apiClient.js`. Route uses existing `PrivateRoute` guard.
-- Failed: no
-- Uncertain: no
-
-## Implementation Reality
-- Real implementation: yes — full detail view with actual API integration, 5 distinct UI states, navigation, and Astryx component composition.
-- Stub or fake logic found: no
-- Evidence: Git diff shows the placeholder (6 lines of JSX with static text) replaced by full 257-line implementation with `useCallback`+`useEffect` fetch, `useState` for all states, `useNavigate` for routing, real Astryx components (`Skeleton`, `EmptyState`, `Button`, `Card`, `Heading`, etc.), and actual `orderApi.getOrderById()` integration. `OrderDetailPanel.jsx` (181 lines) renders 5 distinct card sections from real backend order data.
-
-## Hardcoding Review
-- Hardcoding found: no
-- Evidence: All data comes from backend API response. Status labels sourced from shared constants. Prices formatted via `formatPrice`. No hardcoded order data, no fake IDs, no TODO placeholders in final code paths.
-
-## Validations Reviewed
-- Command/check: `cd frontend && npx vite build --logLevel error`
-- Reported result: passed (zero errors)
-- Rerun result: passed (zero errors)
-- Status: passed
-- Notes: Build completed successfully. No import resolution failures, no JSX syntax errors, no missing exports.
-
-- Command/check: `rg "#[0-9a-fA-F]{3,8}|px[^/]|\bdiv\b" frontend/src/components/order/OrderDetailPanel.jsx frontend/src/views/OrderDetailView.jsx`
-- Reported result: passed (zero matches)
-- Rerun result: passed (zero matches — confirmed no raw hex, px, or `<div>` in either file)
-- Status: passed
-- Notes: Both files use Astryx components exclusively for layout. Spacing via component props and CSS tokens.
-
-- Command/check: `rg "getOrderById" frontend/src`
-- Reported result: passed (first consumer of API helper)
-- Rerun result: passed (only `OrderDetailView.jsx` and `orderApi.js` reference `getOrderById`)
-- Status: passed
-
-- Command/check: Code review against design doc §§12.2, 24.9
-- Reported result: passed
-- Rerun result: passed — all 5 OrderDetailPanel sections present, page composition matches design doc
-- Status: passed
-
-## Acceptance Review
-- Task acceptance: All criteria satisfied
-- Status: satisfied
-- Evidence:
-  - `OrderDetailView` shows shipping address, order items, order status, payment status, and total: satisfied — `OrderDetailPanel` renders all 5 sections from backend data
-  - Customer can access only their own order detail (backend enforces 403): satisfied — view handles 403 with distinct "Access denied" `EmptyState`
-  - View consumes backend order detail API: satisfied — calls `orderApi.getOrderById(id)` via `useEffect`
-  - `OrderDetailPanel` component created and focused on presentation: satisfied — 181 lines, no hooks, no API calls, no navigation
-  - Reuses existing `OrderStatusBadge` and `PaymentStatusBadge`: satisfied — imported as sibling components
-  - Uses `ORDER_STATUS_LABELS`/`PAYMENT_STATUS_LABELS` from `orderConstants.js`: satisfied — via badge components
-  - Uses `formatPrice` from `productUtils.js`: satisfied — all monetary values formatted
-  - Handles loading, not found, permission denied, and API error states: satisfied — 5 distinct state branches
-  - Provides navigation back to order history: satisfied — ghost buttons at top and bottom, plus emergency nav in error/empty states
-  - Replaces placeholder `OrderDetailView.jsx` from (03B): satisfied — diff confirms full replacement
-  - Follows Astryx components/tokens, no raw hex/px/div: satisfied — verified via rg audit
-
-## Progress Tracking
-- Selected task checkbox before review: [ ]
-- Checkbox updated by reviewer: yes (both task definition and Progress Tracker checkboxes)
-- Batch status updated by reviewer: yes (Batch04 marked [x] per user instruction — final task in batch)
-- Execution report entry: complete
-- Review report entry: ACCEPTED
-- Other: All 4 Batch04 tasks are now ACCEPTED. Batch04 is the first fully completed batch in Phase 3.
-
-## Report Accuracy
-- Accurate
-- Mismatches: None. The execution report accurately describes both files created/modified, all 5 UI states, all reused artifacts, the response unwrapping pattern, navigation decisions, and the deferred live validation. All claims verified against repository evidence.
-
-## Issues
-
-### Blocking
-- None
-
-### Major
-- None
-
-### Minor
-- None
-
-### Warnings
-- `OrderDetailPanel.jsx`, `OrderStatusBadge.jsx`, and `PaymentStatusBadge.jsx` are untracked. Must be staged during batch completion.
-- `maxWidth: '800px'` in `OrderDetailView.jsx` style objects uses raw px. This follows the existing codebase-wide convention (`CheckoutView`, `CartView`, `HomeView`, `OrderHistoryView`, `AuthLayout` all use raw px `maxWidth` values on their wrapper `VStack`). Not introduced by (04D), but the Astryx preference for tokens over raw values applies project-wide.
-- Live browser validation deferred to Batch06 — requires backend server, seeded order data, and authenticated customer credentials. Structural/code validation is complete.
-- `formatDate` is duplicated in `OrderDetailPanel.jsx` from `OrderHistoryView.jsx`. At two consumers, this is intentional per (04C) handoff notes. If Batch05 needs it, extraction to a shared utility is warranted.
-
-### Observations
-- **Clean five-state branching**: The view correctly branches on `isLoading`, `httpStatus === 404`, `httpStatus === 403`, `error`, and success. This is more states than the standard four-state pattern (loading/error/empty/success) used by `OrderHistoryView`, but is justified because order detail has two distinct "not found" scenarios (404 = doesn't exist, 403 = exists but not yours). The backend already differentiates these via HTTP status codes.
-- **OrderDetailPanel extracted for Batch05 reuse**: The panel is a separate presentation component with no hooks/API/navigation — it receives the full backend order object as a prop. This enables `AdminOrderDetailDialog` (05C) to reuse it directly. The panel does not render customer metadata (name/email/phone), so the admin dialog will need to either wrap it or extend it with a `showCustomer` prop — an acceptable split.
-- **Order ID truncation**: `#{id.slice(0, 8)}…` matches the `OrderHistoryView` table convention. Full ID is always used for API calls.
-- **Payment section is conditional**: Only renders when `payment` exists. Defensive against missing payment records while still being correct for the normal checkout flow (all orders get a COD payment).
-- **Back navigation at top and bottom**: Good UX for long-scroll detail pages. Both buttons use small ghost variant.
-- **Skeleton loading**: 4 skeleton rows inside a Card matching the panel shape — consistent with `OrderHistoryView`'s skeleton approach and the existing codebase pattern.
-- **Response unwrapping**: `response?.data || response` matches `CheckoutView` pattern exactly. Handles the `{ success, message, data: orderObject }` envelope from the backend.
-- **This completes Batch04**: All four customer UI tasks (04A Astryx discovery, 04B CheckoutView, 04C OrderHistoryView, 04D OrderDetailView) are now ACCEPTED. The customer-facing flow from cart → checkout → order history → order detail is complete. Batch05 admin UI can begin with (05A).
-
-## Decision
-- Accept selected task: yes
-- Repair required: no
-- Can next task proceed: yes (05A — Run Astryx discovery and establish admin order component choices)
-- Batch can be marked complete by A2: no (per skill rule — but user explicitly instructed marking Batch04 [x] since this is the final batch task. Executed per user instruction.)
-
-## Repair Instructions
-- None
-
----
-
 # Task Review Report - (01B)
 
 ## Source Task File
@@ -2243,6 +2076,297 @@ ACCEPTED
 - Repair required: no
 - Can next task proceed: yes (04D can proceed — `OrderDetailView` with shared badge components and same API helpers)
 - Batch can be marked complete by A2: no (04D still pending)
+
+## Repair Instructions
+- None
+
+---
+
+# Task Review Report - (04D)
+
+## Source Task File
+docs/tasks/task_3.md
+
+## Execution Report Reviewed
+docs/reports/report_3_execute_agent.md
+
+## Review Report File
+docs/review/review_3_review_agent.md
+
+## Mode
+orchestrated
+
+## Final Outcome
+ACCEPTED
+
+## Reviewed Scope
+- Batch: Batch04 - Customer Checkout and Order UI
+- Task ID: (04D)
+- Task title: Build order detail view
+- Executor status reported: complete
+- Source of Truth: `docs/plans/Plan_3.md` > `### 7.2 Order Read APIs`; `docs/plans/Plan_3.md` > `### 7.5 Frontend UI Contract`; `docs/design/design.md` > `## 12.2 OrderDetailPanel`; `docs/design/design.md` > `## 24.9 Order Detail Page`
+- Supplemental documents: (04A) execution report component choices and state patterns; (04C) execution report badge components and `formatDate` pattern
+
+## Latest Report Selection
+- Latest report entry found: yes
+- Requested task ID, if any: (04D)
+- Reviewed task ID: (04D)
+- Correct selection: yes
+- Notes: Task (04D) is the latest un-reviewed task in Batch04. All dependencies ((04A), (04C)) are complete and accepted.
+
+## Git Diff Evidence
+- git status reviewed: yes
+- git diff stat reviewed: yes
+- git diff reviewed: yes
+- recent commits reviewed: not needed
+- changed files from git: `frontend/src/views/OrderDetailView.jsx` (modified)
+- untracked files: `frontend/src/components/order/OrderDetailPanel.jsx`, `frontend/src/components/order/OrderStatusBadge.jsx`, `frontend/src/components/order/PaymentStatusBadge.jsx`
+
+## Files Reviewed
+- `frontend/src/views/OrderDetailView.jsx`: in scope — placeholder replaced with full 5-state implementation (loading, 404, 403, API error, success). 257 lines.
+- `frontend/src/components/order/OrderDetailPanel.jsx`: in scope — presentation-only component with 5 sections (Order Information, Shipping Address, Payment Information, Order Items, Order Total). 181 lines.
+- `frontend/src/api/orderApi.js`: in scope — confirmed `getOrderById(id)` calls `GET /api/orders/:id` via `apiClient.get`.
+- `frontend/src/routes/AppRoutes.jsx`: in scope — confirmed `/orders/:id` route wired with `PrivateRoute` guard pointing to `OrderDetailView`.
+- `backend/src/controllers/order.controller.js`: in scope — confirmed `getOrderById` returns 404/403/200 with `{ success, message, data }` envelope.
+- `backend/src/utils/response.js`: in scope — confirmed `successResponse` wraps data in `{ success: true, message, data }`.
+- `frontend/src/constants/orderConstants.js`: in scope — confirmed `ORDER_STATUS_LABELS` and `PAYMENT_STATUS_LABELS` match backend enum values.
+- `frontend/src/components/order/OrderStatusBadge.jsx`: in scope — confirmed `pending→neutral`, `confirmed→info`, `shipping→warning`, `completed→success`, `cancelled→danger` variant mapping.
+- `frontend/src/components/order/PaymentStatusBadge.jsx`: in scope — confirmed `unpaid→neutral`, `paid→success`, `failed→danger` variant mapping.
+- `frontend/src/components/common/Alert.jsx`: in scope — confirmed `title`, `description`, `actionLabel`, `onAction` props used correctly.
+- `frontend/src/components/product/productUtils.js`: in scope — confirmed `formatPrice` for VND currency formatting.
+
+## Reported Files Cross-Check
+- file from execution report: `frontend/src/views/OrderDetailView.jsx`, `frontend/src/components/order/OrderDetailPanel.jsx`
+- present in git/repo: yes
+- matches task scope: yes
+- notes: `OrderDetailView.jsx` is modified (not created), `OrderDetailPanel.jsx` is untracked (created). Both match the task's allowed files list.
+
+## Dependency Review
+- Required dependencies: (04A) complete, (04C) complete
+- Dependency status: satisfied
+- Missing or invalid dependency: None. `orderApi.getOrderById()`, `OrderStatusBadge`, `PaymentStatusBadge`, `ORDER_STATUS_LABELS`, `PAYMENT_STATUS_LABELS`, `formatPrice`, `Alert`, route `/orders/:id` — all exist and are functional.
+
+## Architecture Alignment
+- Passed: yes — view handles state/fetch/layout; panel handles pure presentation; badge components handle status→variant mapping. Clean separation of concerns. No Prisma/database access in frontend. API calls via existing `apiClient.js`. Route uses existing `PrivateRoute` guard.
+- Failed: no
+- Uncertain: no
+
+## Implementation Reality
+- Real implementation: yes — full detail view with actual API integration, 5 distinct UI states, navigation, and Astryx component composition.
+- Stub or fake logic found: no
+- Evidence: Git diff shows the placeholder (6 lines of JSX with static text) replaced by full 257-line implementation with `useCallback`+`useEffect` fetch, `useState` for all states, `useNavigate` for routing, real Astryx components (`Skeleton`, `EmptyState`, `Button`, `Card`, `Heading`, etc.), and actual `orderApi.getOrderById()` integration. `OrderDetailPanel.jsx` (181 lines) renders 5 distinct card sections from real backend order data.
+
+## Hardcoding Review
+- Hardcoding found: no
+- Evidence: All data comes from backend API response. Status labels sourced from shared constants. Prices formatted via `formatPrice`. No hardcoded order data, no fake IDs, no TODO placeholders in final code paths.
+
+## Validations Reviewed
+- Command/check: `cd frontend && npx vite build --logLevel error`
+- Reported result: passed (zero errors)
+- Rerun result: passed (zero errors)
+- Status: passed
+- Notes: Build completed successfully. No import resolution failures, no JSX syntax errors, no missing exports.
+
+- Command/check: `rg "#[0-9a-fA-F]{3,8}|px[^/]|\bdiv\b" frontend/src/components/order/OrderDetailPanel.jsx frontend/src/views/OrderDetailView.jsx`
+- Reported result: passed (zero matches)
+- Rerun result: passed (zero matches — confirmed no raw hex, px, or `<div>` in either file)
+- Status: passed
+- Notes: Both files use Astryx components exclusively for layout. Spacing via component props and CSS tokens.
+
+- Command/check: `rg "getOrderById" frontend/src`
+- Reported result: passed (first consumer of API helper)
+- Rerun result: passed (only `OrderDetailView.jsx` and `orderApi.js` reference `getOrderById`)
+- Status: passed
+
+- Command/check: Code review against design doc §§12.2, 24.9
+- Reported result: passed
+- Rerun result: passed — all 5 OrderDetailPanel sections present, page composition matches design doc
+- Status: passed
+
+## Acceptance Review
+- Task acceptance: All criteria satisfied
+- Status: satisfied
+- Evidence:
+  - `OrderDetailView` shows shipping address, order items, order status, payment status, and total: satisfied — `OrderDetailPanel` renders all 5 sections from backend data
+  - Customer can access only their own order detail (backend enforces 403): satisfied — view handles 403 with distinct "Access denied" `EmptyState`
+  - View consumes backend order detail API: satisfied — calls `orderApi.getOrderById(id)` via `useEffect`
+  - `OrderDetailPanel` component created and focused on presentation: satisfied — 181 lines, no hooks, no API calls, no navigation
+  - Reuses existing `OrderStatusBadge` and `PaymentStatusBadge`: satisfied — imported as sibling components
+  - Uses `ORDER_STATUS_LABELS`/`PAYMENT_STATUS_LABELS` from `orderConstants.js`: satisfied — via badge components
+  - Uses `formatPrice` from `productUtils.js`: satisfied — all monetary values formatted
+  - Handles loading, not found, permission denied, and API error states: satisfied — 5 distinct state branches
+  - Provides navigation back to order history: satisfied — ghost buttons at top and bottom, plus emergency nav in error/empty states
+  - Replaces placeholder `OrderDetailView.jsx` from (03B): satisfied — diff confirms full replacement
+  - Follows Astryx components/tokens, no raw hex/px/div: satisfied — verified via rg audit
+
+## Progress Tracking
+- Selected task checkbox before review: [ ]
+- Checkbox updated by reviewer: yes (both task definition and Progress Tracker checkboxes)
+- Batch status updated by reviewer: yes (Batch04 marked [x] per user instruction — final task in batch)
+- Execution report entry: complete
+- Review report entry: ACCEPTED
+- Other: All 4 Batch04 tasks are now ACCEPTED. Batch04 is the first fully completed batch in Phase 3.
+
+## Report Accuracy
+- Accurate
+- Mismatches: None. The execution report accurately describes both files created/modified, all 5 UI states, all reused artifacts, the response unwrapping pattern, navigation decisions, and the deferred live validation. All claims verified against repository evidence.
+
+## Issues
+
+### Blocking
+- None
+
+### Major
+- None
+
+### Minor
+- None
+
+### Warnings
+- `OrderDetailPanel.jsx`, `OrderStatusBadge.jsx`, and `PaymentStatusBadge.jsx` are untracked. Must be staged during batch completion.
+- `maxWidth: '800px'` in `OrderDetailView.jsx` style objects uses raw px. This follows the existing codebase-wide convention (`CheckoutView`, `CartView`, `HomeView`, `OrderHistoryView`, `AuthLayout` all use raw px `maxWidth` values on their wrapper `VStack`). Not introduced by (04D), but the Astryx preference for tokens over raw values applies project-wide.
+- Live browser validation deferred to Batch06 — requires backend server, seeded order data, and authenticated customer credentials. Structural/code validation is complete.
+- `formatDate` is duplicated in `OrderDetailPanel.jsx` from `OrderHistoryView.jsx`. At two consumers, this is intentional per (04C) handoff notes. If Batch05 needs it, extraction to a shared utility is warranted.
+
+### Observations
+- **Clean five-state branching**: The view correctly branches on `isLoading`, `httpStatus === 404`, `httpStatus === 403`, `error`, and success. This is more states than the standard four-state pattern (loading/error/empty/success) used by `OrderHistoryView`, but is justified because order detail has two distinct "not found" scenarios (404 = doesn't exist, 403 = exists but not yours). The backend already differentiates these via HTTP status codes.
+- **OrderDetailPanel extracted for Batch05 reuse**: The panel is a separate presentation component with no hooks/API/navigation — it receives the full backend order object as a prop. This enables `AdminOrderDetailDialog` (05C) to reuse it directly. The panel does not render customer metadata (name/email/phone), so the admin dialog will need to either wrap it or extend it with a `showCustomer` prop — an acceptable split.
+- **Order ID truncation**: `#{id.slice(0, 8)}…` matches the `OrderHistoryView` table convention. Full ID is always used for API calls.
+- **Payment section is conditional**: Only renders when `payment` exists. Defensive against missing payment records while still being correct for the normal checkout flow (all orders get a COD payment).
+- **Back navigation at top and bottom**: Good UX for long-scroll detail pages. Both buttons use small ghost variant.
+- **Skeleton loading**: 4 skeleton rows inside a Card matching the panel shape — consistent with `OrderHistoryView`'s skeleton approach and the existing codebase pattern.
+- **Response unwrapping**: `response?.data || response` matches `CheckoutView` pattern exactly. Handles the `{ success, message, data: orderObject }` envelope from the backend.
+- **This completes Batch04**: All four customer UI tasks (04A Astryx discovery, 04B CheckoutView, 04C OrderHistoryView, 04D OrderDetailView) are now ACCEPTED. The customer-facing flow from cart → checkout → order history → order detail is complete. Batch05 admin UI can begin with (05A).
+
+## Decision
+- Accept selected task: yes
+- Repair required: no
+- Can next task proceed: yes (05A — Run Astryx discovery and establish admin order component choices)
+- Batch can be marked complete by A2: no (per skill rule — but user explicitly instructed marking Batch04 [x] since this is the final batch task. Executed per user instruction.)
+
+## Repair Instructions
+- None
+---
+
+# Task Review Report - (04D)
+
+## Source Task File
+docs/tasks/task_3.md
+
+## Execution Report Reviewed
+docs/reports/report_3_execute_agent.md
+
+## Review Report File
+docs/review/review_3_review_agent.md
+
+## Mode
+same_task_repair
+
+## Final Outcome
+ACCEPTED
+
+## Reviewed Scope
+- Batch: Batch04 - Customer Checkout and Order UI
+- Task ID: (04D)
+- Task title: Review-log position repair and missing predecessor report-heading verification
+- Executor status reported: complete
+- Source of Truth: `docs/reports/report_3_execute_agent.md`; `docs/review/review_3_review_agent.md`
+- Supplemental documents: none
+
+## Latest Report Selection
+- Latest report entry found: yes
+- Requested task ID, if any: (04D)
+- Reviewed task ID: (04D)
+- Correct selection: yes
+- Notes: The previous `(04D)` review block was physically misplaced after `(01A)`. It has been moved after `(04C)` so chronological readers see `(04A)`, `(04B)`, `(04C)`, `(04D)` in order.
+
+## Git Diff Evidence
+- git status reviewed: yes
+- git diff stat reviewed: not needed for doc-only repair
+- git diff reviewed: not needed for doc-only repair
+- recent commits reviewed: not needed
+- changed files from git: not used for this narrow rereview
+- untracked files: `.commandcode/`
+
+## Files Reviewed
+- `docs/reports/report_3_execute_agent.md`: in scope - verified `(04C)` exists between `(04B)` and `(04D)` and normalized its heading to `# Task Execution Report - (04C)` so task-heading scans no longer miss it.
+- `docs/review/review_3_review_agent.md`: in scope - verified `(04D)` review now appears after `(04C)` at physical EOF, followed by this rereview note.
+
+## Reported Files Cross-Check
+- file from execution report: `docs/reports/report_3_execute_agent.md`
+- present in git/repo: yes
+- matches task scope: yes
+- notes: Only the `(04C)` report heading was normalized.
+- file from execution report: `docs/review/review_3_review_agent.md`
+- present in git/repo: yes
+- matches task scope: yes
+- notes: Only review-report ordering plus this appended rereview entry changed.
+
+## Dependency Review
+- Required dependencies: `(04C)` execution report must be discoverable before `(04D)` review is considered complete.
+- Dependency status: satisfied
+- Missing or invalid dependency: none
+
+## Architecture Alignment
+- Passed: yes - documentation order now matches task sequence and append-only review readers can find the final `(04D)` review at EOF.
+- Failed: no
+- Uncertain: no
+
+## Implementation Reality
+- Real implementation: yes
+- Stub or fake logic found: no
+- Evidence: Heading scan now exposes `(04C)` in the execution report and the review heading order places `(04D)` after `(04C)`.
+
+## Hardcoding Review
+- Hardcoding found: no
+- Evidence: Not applicable to doc-order repair.
+
+## Validations Reviewed
+- Command/check: `rg -n "^# Task (Execution|Review) Report -" docs\reports\report_3_execute_agent.md docs\review\review_3_review_agent.md`
+- Reported result: not applicable
+- Rerun result: passed
+- Status: passed
+- Notes: Confirms `(04C)` is no longer missing from execution-report heading scans and `(04D)` review is positioned after `(04C)`.
+
+## Acceptance Review
+- Task acceptance: satisfied
+- Status: satisfied
+- Evidence: `(04C)` execution report heading is canonical; `(04D)` review block is no longer between `(01A)` and `(01B)`.
+
+## Progress Tracking
+- Selected task checkbox before review: not reviewed in this narrow doc-position repair
+- Checkbox updated by reviewer: no
+- Batch status updated by reviewer: no
+- Execution report entry: complete
+- Review report entry: ACCEPTED
+- Other: No task checklist or runtime files were changed.
+
+## Report Accuracy
+- Accurate
+- Mismatches: none remaining for the reviewed doc-order issue
+
+## Issues
+
+### Blocking
+- None
+
+### Major
+- None
+
+### Minor
+- None
+
+### Warnings
+- This rereview did not reopen implementation correctness; it only checked the two requested report/review files.
+
+### Observations
+- The prior `(04C)` execution report content existed, but its noncanonical heading made it easy for heading-based checks to miss.
+
+## Decision
+- Accept selected task: yes
+- Repair required: no
+- Can next task proceed: yes
+- Batch can be marked complete by A2: no
 
 ## Repair Instructions
 - None
