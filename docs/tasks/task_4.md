@@ -896,7 +896,7 @@ Final submission should be based on verified runtime behavior, clean MVC boundar
 
 ### Tasks
 
-- [ ] (06A): Run backend command checks and review/report API smoke tests
+- [x] (06A): Run backend command checks and review/report API smoke tests
   - Source of Truth: `docs/plans/Plan_4.md` > `## 9. Verification & Testing Plan`; `docs/plans/Master_Plan.md` > `## 23. Testing Plan`
   - Source Requirements:
     - Run backend validation/startup commands.
@@ -922,7 +922,7 @@ Final submission should be based on verified runtime behavior, clean MVC boundar
   - Blocked Condition: `BLOCKED_BY_USER_ACTION` if real env values, live database, backend server, seeded data, or test credentials are unavailable.
   - Files: Execution report, `docs/demo-checklist.md`
 
-- [ ] (06B): Run frontend command checks and full customer/admin UI demo
+- [x] (06B): Run frontend command checks and full customer/admin UI demo
   - Source of Truth: `docs/plans/Plan_4.md` > `## 9. Verification & Testing Plan`; `docs/plans/Master_Plan.md` > `## 21. Minimum Viable Demo Flow`; `docs/design/design.md` > `# 30. Final UI Checklist`
   - Source Requirements:
     - Run frontend dev command.
@@ -946,7 +946,7 @@ Final submission should be based on verified runtime behavior, clean MVC boundar
   - Blocked Condition: `BLOCKED_BY_USER_ACTION` if backend, seeded data, login credentials, or browser tooling is unavailable.
   - Files: Execution report, `docs/demo-checklist.md`
 
-- [ ] (06C): Audit security, MVC boundaries, anti-duplication, and Astryx compliance
+- [x] (06C): Audit security, MVC boundaries, anti-duplication, and Astryx compliance
   - Source of Truth: `docs/plans/Plan_4.md` > `## 5. Out of Scope`; `docs/plans/Plan_4.md` > `## 9. Verification & Testing Plan`; `docs/plans/Master_Plan.md` > `## 22. MVC Acceptance Criteria`; `AGENTS.md` > `# Custom Rules & Workflows`
   - Source Requirements:
     - Confirm no real `.env` credentials are committed.
@@ -972,7 +972,7 @@ Final submission should be based on verified runtime behavior, clean MVC boundar
   - Blocked Condition: None
   - Files: Execution report; changed source files only if fixes are needed.
 
-- [ ] (06D): Finalize submission evidence, reports, and progress state
+- [x] (06D): Finalize submission evidence, reports, and progress state
   - Source of Truth: `docs/plans/Plan_4.md` > `## 10. Handoff Notes for Final Submission`; `docs/plans/Master_Plan.md` > `## 26. Final Submission Checklist`; `docs/plans/Master_Plan.md` > `## 27. Suggested Presentation Division`
   - Source Requirements:
     - Final deliverable exposes running React View layer, Express Controller layer, Supabase PostgreSQL database through Prisma Models, seeded demo data, customer/admin demo flows, README/docs, and clear MVC explanation.
@@ -1139,10 +1139,10 @@ Batch01 and Batch03 can be implemented in parallel if they do not edit shared ro
 - [x] (05D): Update demo checklist, API testing notes, and presentation support
 
 #### Batch06
-- [ ] (06A): Run backend command checks and review/report API smoke tests
-- [ ] (06B): Run frontend command checks and full customer/admin UI demo
-- [ ] (06C): Audit security, MVC boundaries, anti-duplication, and Astryx compliance
-- [ ] (06D): Finalize submission evidence, reports, and progress state
+- [x] (06A): Run backend command checks and review/report API smoke tests
+- [x] (06B): Run frontend command checks and full customer/admin UI demo
+- [x] (06C): Audit security, MVC boundaries, anti-duplication, and Astryx compliance
+- [x] (06D): Finalize submission evidence, reports, and progress state
 
 ## Completion Reporting Rules for Future Execution Agents
 

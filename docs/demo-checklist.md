@@ -3,7 +3,10 @@
 This checklist records evidence-backed status for the complete electronics
 e-commerce MVC demo. `Passed - user provided` identifies manual browser evidence
 reported by the user; `BLOCKED_BY_USER_ACTION` and `Pending` are not completion
-claims. Batch06 final verification has not run.
+claims. Batch06 final verification evidence now includes accepted 06A backend/API
+checks, accepted 06B user-provided UI/demo checks, accepted 06C
+security/MVC/scope audit checks, and this 06D handoff-evidence update. Batch06
+itself remains open until reviewer/orchestrator acceptance.
 
 ## Plan 1 Verification Status
 
@@ -121,9 +124,13 @@ claims. Batch06 final verification has not run.
 | Responsive demo routes | Passed - user provided | Accepted task 05A records the user's post-repair PASS for tablet header and orders, mobile login/product detail/cart/admin orders, and desktop regression. This is manual evidence, not automated browser evidence. |
 | README setup and runtime documentation | Passed | Accepted task 05B verified setup, API groups, routes, MVC description, seed credential provenance, and secret-safe environment examples against runtime files. |
 | Database design and embedded ERD | Passed | Accepted task 05C verified all nine models, five enums, fields, constraints, and relationships against the Prisma schema and tracked migration. |
+| Batch06 backend/API verification | Passed | Task 06A ran Prisma validation, backend startup/health, review list/create/hide checks, report authorization boundaries, and database-to-report comparisons for revenue, best-selling products, and order-summary responses. |
+| Batch06 frontend dev command | Passed | Task 06B ran `cd frontend && npm run dev`; Vite started successfully at `http://localhost:5174/` in the user run and the SPA shell returned HTTP 200. The repair rerun also started Vite successfully at `http://127.0.0.1:5173/` and confirmed HTTP 200 before stopping the temporary server. |
+| Batch06 full customer/admin UI demo | Passed - user provided | User reports backend health PASS, backend/frontend launched, browser-subagent/manual checks completed at `http://localhost:5174/`, no blockers, no code files modified, and PASS for customer homepage/products/search/product detail/review/cart/checkout/orders, admin dashboard/reports/orders/status/reviews/products/categories, route guards, loading/empty/error/success states, and desktop/tablet/mobile responsive checks. Focused frontend structure and integration tests were rerun and passed as corroborating evidence. |
 | Supabase Table Editor visual confirmation | BLOCKED_BY_USER_ACTION | Database-backed checks passed, but no agent inspected the Supabase dashboard. A user with project access must confirm the expected tables and representative seeded/order/review rows. |
 | Team-specific slide ownership and rehearsal | BLOCKED_BY_USER_ACTION | The role template is documented below, but names, slide completion, timing, and each member's understanding require team confirmation. |
-| Batch06 final backend/UI/security/submission audit | Pending | Batch06 has not run. Do not treat this checklist as Batch06 evidence. |
+| Batch06 security/MVC/scope audit | Passed | Task 06C was accepted after safe secret handling, frontend database-access, duplicate-helper, MVC-boundary, Astryx, out-of-scope, and broad-file checks passed. Existing ignored local `.env` files remain untracked and were not read. |
+| Batch06 final handoff evidence | Pending A2 review | Task 06D reconciled this checklist against accepted 06A/06B/06C evidence, README, database docs, API runbook, Plan 4 final handoff notes, and Master Plan final checklist. A1 did not update the 06D checkbox or mark Batch06 complete. |
 
 ## Customer Demo Flow - Homepage Through Review
 
@@ -182,6 +189,13 @@ tokens, `.env` contents, or database credentials in screenshots or reports.
 | Presentation slides are ready | Pending | Team must create and review the actual slides; no slide deck is claimed by task 05D. |
 | Demo script is ready | Passed - documented | The customer and admin flows above cover the master-plan minimum viable demo. |
 | Each member understands their MVC responsibility | BLOCKED_BY_USER_ACTION | Assign names, rehearse, and confirm ownership using the presentation notes below. |
+
+## Final Freeze and Handoff Notes
+
+- No new nice-to-have runtime features were added after final verification started.
+- No schema changes were made during Batch06; database/report verification remains tied to the accepted Prisma schema and seeded demo data evidence.
+- Online payment, shipping provider integration, email, realtime behavior, AI, recommendations, mobile app, multi-store, warehouse/accounting systems, image upload, and dashboard charts remain out of scope.
+- Planned or placeholder work is not counted as runtime-complete in this checklist. Supabase dashboard visuals, slide readiness, rehearsal, and member understanding remain pending user/team actions until explicitly confirmed.
 
 ## Presentation Responsibility Notes - Master Plan Section 27
 

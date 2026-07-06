@@ -3823,3 +3823,742 @@ complete
 - validations to rerun: source-plan checklist comparison, accepted-evidence provenance check, route/controller-to-runbook comparison, secret scan, and git diff --check.
 - risk areas: verify every final checklist status is supported, user-side checks remain blocked/pending, and the runbook is not presented as executed Batch06 evidence.
 - next task readiness: can_review.
+
+---
+
+# Task Execution Report - 06A
+
+## Source Task File
+docs/tasks/task_4.md
+
+## Report File
+docs/reports/report_4_execute_agent.md
+
+## Mode
+orchestrated
+
+## Batch
+Batch06 - Final Verification, Audit, and Submission Readiness
+
+## Task
+06A - Run backend command checks and review/report API smoke tests
+
+## Status
+complete
+
+## Source of Truth Used
+- docs/plans/Plan_4.md > ## 9. Verification & Testing Plan
+- docs/plans/Master_Plan.md > ## 23. Testing Plan
+
+## Supplemental Documents Used
+- None
+
+## Selected Scope
+- Batch: Batch06 - Final Verification, Audit, and Submission Readiness
+- Task ID: 06A
+- Task title: Run backend command checks and review/report API smoke tests
+- Files allowed: Execution report, docs/demo-checklist.md
+- Repair scope if any: None
+
+## Dependency and User Action Check
+- dependencies: Batch01 and Batch03 were already completed before this task; current backend review/report routes and prior checklist evidence were inspected.
+- user action: backend .env was present, backend connected to a live configured database during HTTP/API checks, seeded demo product and demo admin/customer accounts were available, and the server ran locally on port 5000.
+- status: satisfied for the required 06A backend/API checks.
+
+## Files Inspected Before Editing
+- docs/tasks/task_4.md: read the complete 06A task block, dependencies, blocked condition, specific steps, and file scope.
+- docs/plans/Plan_4.md: read the verification/testing plan commands and API smoke endpoints.
+- docs/plans/Master_Plan.md: read the API, view, model, and database testing expectations.
+- backend/package.json: checked backend scripts and Prisma commands before running them.
+- backend/src/server.js: verified startup port and server entrypoint.
+- backend/src/app.js: verified health endpoint and API route mounting.
+- backend/src/routes/index.js: verified review and report route prefixes.
+- backend/src/controllers/review.controller.js: verified review list/create/hide behavior and status responses.
+- backend/src/controllers/report.controller.js: verified report controller response surfaces.
+- backend/src/models/report.model.js: inspected report aggregation logic before independent database comparisons.
+- backend/src/models/review.model.js: inspected visible/hidden review persistence behavior.
+- backend/src/utils/response.js: checked success/error response envelope shape for smoke assertions.
+- backend/src/controllers/auth.controller.js: checked login response shape without printing tokens.
+- backend/prisma/schema.prisma: verified report/review/order/payment models and enum fields for independent comparisons.
+- backend/prisma/seed.js: confirmed seeded demo account and product assumptions without reporting passwords.
+- docs/demo-checklist.md: inspected existing Plan 4 evidence section before adding the 06A evidence row.
+- docs/reports/report_4_execute_agent.md: inspected physical EOF before appending.
+
+## Completed Work
+- Ran `npx prisma validate` in backend; schema validation passed.
+- Started backend with `npm run dev`; nodemon launched `src/server.js` and reported `Server is running on port 5000`.
+- Confirmed `GET /api/health` returned HTTP 200 with the standard success envelope.
+- Ran a secret-safe HTTP smoke harness against localhost review and report APIs.
+- Verified customer login returned a token without printing it.
+- Verified public review listing, anonymous review create rejection, customer review creation, customer/admin boundary for hide, anonymous hide rejection, admin hide, and hidden-review exclusion from the public list.
+- Verified anonymous/customer/admin authorization boundaries for report access.
+- Independently compared admin revenue, best-selling products, and order-summary API payloads against live Prisma database aggregations.
+- Updated docs/demo-checklist.md with a narrow 06A backend/API verification evidence row while leaving remaining Batch06 checks pending.
+
+## Files Created or Modified
+- docs/demo-checklist.md
+- docs/reports/report_4_execute_agent.md
+
+## Tests or Validations Run
+- command/check: `cd backend && npx prisma validate`
+- result: passed
+- evidence or reason: Prisma loaded `prisma/schema.prisma` and reported the schema is valid; only Prisma 7 deprecation/config warnings were emitted.
+- command/check: `cd backend && npm run dev`
+- result: passed
+- evidence or reason: nodemon started `node src/server.js` and printed `Server is running on port 5000`.
+- command/check: `GET http://localhost:5000/api/health`
+- result: passed
+- evidence or reason: returned HTTP 200 with `success: true` and `Backend is healthy`.
+- command/check: Review API smoke harness
+- result: passed
+- evidence or reason: seeded product lookup passed; admin/customer login returned tokens redacted from output; public review list returned HTTP 200; anonymous create returned 401; customer create returned 201; customer hide returned 403; anonymous hide returned 401; admin hide returned 200 with hidden status; hidden review was excluded from public list.
+- command/check: Report API smoke harness and database comparison
+- result: passed
+- evidence or reason: anonymous report access returned 401, customer access returned 403, admin revenue/best-selling/order-summary returned HTTP 200, and all three payloads matched independent Prisma aggregations from current database records.
+- command/check: Focused credential-like pattern scan over docs/demo-checklist.md and docs/reports/report_4_execute_agent.md
+- result: passed
+- evidence or reason: no PostgreSQL URLs, database URL assignments, JWT secret assignments, bearer JWTs, or seeded passwords were printed in the changed docs.
+- command/check: `git diff --check -- docs/demo-checklist.md docs/reports/report_4_execute_agent.md`
+- result: passed
+- evidence or reason: no whitespace errors were reported; Git emitted only the expected line-ending notice for docs/demo-checklist.md.
+
+## Acceptance Check
+- condition: Run backend validation/startup commands.
+- status: satisfied
+- evidence: `npx prisma validate`, `npm run dev`, and `/api/health` all passed.
+- condition: Smoke test review and report APIs.
+- status: satisfied
+- evidence: review list/create/hide behavior, report endpoints, and admin/customer/anonymous authorization boundaries passed against localhost.
+- condition: Revenue, best-selling, and order-summary data must match database records.
+- status: satisfied
+- evidence: all three report API responses matched independent Prisma database aggregations.
+- condition: Summarize results without printing JWTs, passwords, or database connection strings.
+- status: satisfied
+- evidence: smoke harness output redacted tokens and report/checklist secret-pattern scan passed.
+
+## Progress Update
+- task checkbox updated: no
+- batch status updated: no
+- reason: Orchestrated mode reserves progress updates for A2/orchestration.
+
+## Key Implementation Decisions
+- Used the existing backend routes, controllers, middleware, and Prisma models; no runtime code was changed.
+- Used an independent Prisma aggregation inside the smoke harness for report comparison instead of reusing report.model.js results.
+- Recorded 06A in docs/demo-checklist.md without marking remaining Batch06 checks complete.
+
+## Risks or Open Issues
+- Supabase Table Editor visual confirmation remains BLOCKED_BY_USER_ACTION because the agent did not inspect the Supabase dashboard.
+- Remaining Batch06 UI, security, MVC, scope, and submission-readiness tasks still require their own evidence.
+
+## Minor In-Scope Issues Fixed
+- Added a narrow 06A evidence row to docs/demo-checklist.md and changed the previous Batch06 pending wording so it no longer implies backend/API checks are still unrun.
+
+## Workflow Integrity Check
+- Exactly Task 06A was executed.
+- No sibling task, task checkbox, batch status, staging, or commit was performed.
+- No backend runtime code, schema, README, or unrelated documentation was changed.
+
+## Notes for Review Agent
+- changed files: docs/demo-checklist.md and docs/reports/report_4_execute_agent.md.
+- validations to rerun: backend Prisma validate, backend startup/health, review/report HTTP smoke checks with database comparisons, focused secret scan, and git diff --check.
+- risk areas: verify the smoke harness evidence matches task 06A only and that remaining Batch06 work is still pending.
+- next task readiness: can_review.
+
+---
+
+# Task Execution Report - 06B
+
+## Source Task File
+docs/tasks/task_4.md
+
+## Report File
+docs/reports/report_4_execute_agent.md
+
+## Mode
+orchestrated
+
+## Batch
+Batch06 - Final Verification, Audit, and Submission Readiness
+
+## Task
+06B - Run frontend command checks and full customer/admin UI demo
+
+## Status
+blocked
+
+## Source of Truth Used
+- docs/plans/Plan_4.md > ## 9. Verification & Testing Plan
+- docs/plans/Master_Plan.md > ## 21. Minimum Viable Demo Flow
+- docs/design/design.md > # 30. Final UI Checklist
+
+## Supplemental Documents Used
+- None
+
+## Selected Scope
+- Batch: Batch06 - Final Verification, Audit, and Submission Readiness
+- Task ID: 06B
+- Task title: Run frontend command checks and full customer/admin UI demo
+- Files allowed: Execution report, docs/demo-checklist.md
+- Repair scope if any: None
+
+## Dependency and User Action Check
+- dependencies: Batch02, Batch04, Batch05, and 06A are recorded as complete/accepted in the task file and demo checklist.
+- user action: running backend/API data, seeded demo data, admin/customer credentials, and manual browser observations are required for full live UI validation when browser automation is unavailable.
+- status: BLOCKED_BY_USER_ACTION for live UI validation because the in-app browser target was unavailable, backend health was not reachable during this task, and no live credentials, seeded-data confirmation, or user browser observations were supplied for 06B.
+
+## Files Inspected Before Editing
+- docs/tasks/task_4.md: selected task block, dependencies, progress tracker, and sibling task boundaries.
+- docs/plans/Plan_4.md: frontend command and full demo verification requirements.
+- docs/plans/Master_Plan.md: customer and admin minimum viable demo flows.
+- docs/design/design.md: final UI checklist for customer/admin pages and states.
+- docs/demo-checklist.md: existing Phase 4 evidence and current pending/blocked rows before adding 06B evidence.
+- docs/reports/report_4_execute_agent.md: final lines inspected before append-only report write.
+- frontend/package.json: confirmed the frontend `dev` script runs Vite.
+- frontend/src/routes/AppRoutes.jsx: inspected customer/admin routes and route guards for the 06B flow list.
+- frontend/src/contexts/AuthContext.jsx: inspected authentication state and admin role guard source used by routes.
+- frontend/src/views/ProductListView.jsx: inspected product list search/filter loading, empty, and error handling.
+- frontend/src/views/ProductDetailView.jsx: inspected product detail, add-to-cart feedback, review list, review form, loading, empty, and error handling.
+- frontend/src/views/AdminDashboardView.jsx: inspected dashboard report-backed metrics loading/error/success handling.
+- frontend/src/views/admin/ReportView.jsx: inspected reports loading/error/success composition.
+
+## Completed Work
+- Ran the required frontend dev command.
+- Confirmed Vite served the React app at `http://localhost:5174/` because `http://localhost:5173/` was already in use.
+- Confirmed the SPA shell returned HTTP 200 from `http://localhost:5174/`.
+- Attempted to connect to the in-app browser before any fallback; the `iab` browser target was unavailable and `agent.browsers.list()` returned no browser targets.
+- Checked backend health for live data-backed UI validation; `http://localhost:5000/api/health` was not reachable during this task.
+- Inspected route and view source files for the required customer/admin route surfaces and state-handling paths.
+- Updated docs/demo-checklist.md with 06B frontend command evidence and an explicit blocked row for the full customer/admin UI demo.
+
+## Files Created or Modified
+- docs/demo-checklist.md
+- docs/reports/report_4_execute_agent.md
+
+## Tests or Validations Run
+- command/check: `cd frontend && npm run dev`
+- result: passed
+- evidence or reason: Vite started successfully and reported `Local: http://localhost:5174/`; port 5173 was already in use.
+- command/check: `GET http://localhost:5174/`
+- result: passed
+- evidence or reason: returned HTTP 200 with a 564-byte SPA shell.
+- command/check: In-app browser availability for local UI smoke checks
+- result: blocked
+- evidence or reason: `agent.browsers.get("iab")` returned `Browser is not available: iab`; troubleshooting was read and `agent.browsers.list()` returned `[]`.
+- command/check: `GET http://localhost:5000/api/health`
+- result: blocked
+- evidence or reason: backend health was not reachable, so data-backed homepage, product, cart, checkout, order, review, dashboard, report, and admin flows could not be verified live.
+- command/check: Customer/admin route and UI-state source inspection
+- result: passed
+- evidence or reason: AppRoutes includes homepage, products, product detail, cart, checkout, orders, order detail, admin dashboard, admin categories, admin products, admin orders, admin reviews, and admin reports behind the expected guards; inspected product list/detail and dashboard/report views include loading, empty/error, and success-state paths.
+- command/check: Full browser/manual customer and admin demo flow
+- result: blocked
+- evidence or reason: BLOCKED_BY_USER_ACTION because no browser target, user manual browser observations, live backend, seeded demo data confirmation, or safe customer/admin credentials were available for this task.
+- command/check: Focused credential-like pattern scan over docs/demo-checklist.md and docs/reports/report_4_execute_agent.md
+- result: passed
+- evidence or reason: no PostgreSQL URLs, database URL assignments, JWT secret assignments, bearer JWTs, or password assignments were printed in the changed docs.
+- command/check: `git diff --check -- docs/demo-checklist.md docs/reports/report_4_execute_agent.md`
+- result: passed
+- evidence or reason: no whitespace errors were reported; Git emitted only expected line-ending notices for the changed docs.
+
+## Acceptance Check
+- condition: Run frontend dev command.
+- status: satisfied
+- evidence: `npm run dev` started Vite successfully at `http://localhost:5174/`.
+- condition: Customer demo flow runs from homepage through product review.
+- status: blocked
+- evidence: live browser/manual customer flow requires browser access, running backend/API data, seeded data, and customer credentials; these were unavailable for 06B.
+- condition: Admin demo flow runs from dashboard through reports.
+- status: blocked
+- evidence: live browser/manual admin flow requires browser access, running backend/API data, seeded data, and admin credentials; these were unavailable for 06B.
+- condition: Key pages show loading, success, empty, and error states.
+- status: partially satisfied
+- evidence: source inspection confirmed state paths in the product list/detail and admin dashboard/report views, but live browser state validation was blocked.
+- condition: Desktop, tablet, and mobile usability where browser tooling is available.
+- status: blocked
+- evidence: no in-app browser target or screenshot surface was available in this session.
+
+## Progress Update
+- task checkbox updated: no
+- batch status updated: no
+- reason: Orchestrated mode reserves progress updates for A2/orchestration.
+
+## Key Implementation Decisions
+- Did not start or mutate backend data because full UI validation was already blocked by unavailable browser tooling and missing user-provided live credentials/data.
+- Recorded command/source evidence separately from blocked live UI evidence to avoid claiming a browser/manual UI PASS that was not observed.
+
+## Risks or Open Issues
+- Full customer flow from homepage through review remains BLOCKED_BY_USER_ACTION until a running backend, seeded data, customer credentials, and browser/manual observations are available.
+- Full admin flow from dashboard through reports remains BLOCKED_BY_USER_ACTION until a running backend, seeded data, admin credentials, and browser/manual observations are available.
+- Screenshot evidence was unavailable because the in-app browser target was unavailable.
+
+## Minor In-Scope Issues Fixed
+- Added 06B frontend command and full UI demo blocked evidence rows to docs/demo-checklist.md.
+
+## Workflow Integrity Check
+- Exactly Task 06B was executed.
+- No sibling task 06C or 06D was executed.
+- No task checkbox, batch status, staging, commit, runtime source change, or future-batch work was performed.
+
+## Notes for Review Agent
+- changed files: docs/demo-checklist.md and docs/reports/report_4_execute_agent.md.
+- validations to rerun: `cd frontend && npm run dev`, GET the served Vite URL, browser/manual customer flow, browser/manual admin flow, backend health, and responsive browser checks if browser tooling and credentials are available.
+- risk areas: validate that blocked live UI evidence is not treated as a UI PASS; confirm no sibling-task scope was added.
+- next task readiness: cannot_review.
+
+---
+
+# Task Execution Report - 06B Repair
+
+## Source Task File
+docs/tasks/task_4.md
+
+## Report File
+docs/reports/report_4_execute_agent.md
+
+## Mode
+orchestrated
+
+## Batch
+Batch06 - Final Verification, Audit, and Submission Readiness
+
+## Task
+06B - Run frontend command checks and full customer/admin UI demo
+
+## Status
+complete
+
+## Source of Truth Used
+- docs/plans/Plan_4.md > ## 9. Verification & Testing Plan
+- docs/plans/Master_Plan.md > ## 21. Minimum Viable Demo Flow
+- docs/design/design.md > # 30. Final UI Checklist
+
+## Supplemental Documents Used
+- None
+
+## Selected Scope
+- Batch: Batch06 - Final Verification, Audit, and Submission Readiness
+- Task ID: 06B
+- Task title: Run frontend command checks and full customer/admin UI demo
+- Files allowed: Execution report, docs/demo-checklist.md
+- Repair scope if any: Resolve prior 06B BLOCKED_BY_USER_ACTION state using newly supplied user manual evidence.
+
+## Dependency and User Action Check
+- dependencies: Batch02, Batch04, Batch05, and 06A are recorded as completed before this repair scope.
+- user action: newly supplied 06B manual evidence provides running backend/API data, seeded demo data, browser/manual observations, and customer/admin flow results without exposing credentials.
+- status: satisfied for 06B repair because the prior blocked user action has now been supplied and corroborating frontend checks passed.
+
+## Files Inspected Before Editing
+- docs/tasks/task_4.md: selected 06B task block, dependencies, specific steps, blocked condition, progress tracker, and sibling 06C/06D boundaries.
+- docs/plans/Plan_4.md: frontend command, API smoke, full demo verification, expected evidence, and UI-state requirements.
+- docs/plans/Master_Plan.md: customer and admin minimum viable demo flows.
+- docs/design/design.md: final customer/admin UI checklist and component-quality requirements.
+- docs/demo-checklist.md: existing Plan 4 Batch06 rows before replacing only the prior 06B blocked UI status.
+- docs/reports/report_4_execute_agent.md: physical EOF and prior 06B blocked report before append-only repair report write.
+- frontend/package.json: confirmed the frontend `dev` script runs Vite.
+- frontend/src/views/responsiveDemoRoutes.structure.test.js: inspected responsive demo route structure checks supplied in user evidence.
+- frontend/src/views/AdminDashboardView.structure.test.js: inspected admin dashboard/report wiring checks supplied in user evidence.
+- frontend/src/views/ProductDetailView.reviewIntegration.test.js: inspected customer review integration checks supplied in user evidence.
+- frontend/src/views/admin/AdminReviewView.structure.test.js: inspected admin review moderation checks supplied in user evidence.
+- frontend/src/views/admin/ReportView.structure.test.js: inspected admin report route/surface checks supplied in user evidence.
+
+## Completed Work
+- Recorded the user-provided backend health PASS and manual/browser-subagent 06B UI PASS evidence.
+- Confirmed `http://localhost:5174/` returned HTTP 200 from the running frontend URL reported by the user.
+- Confirmed `http://localhost:5000/api/health` returned HTTP 200 with the standard healthy backend response.
+- Ran `cd frontend && npm run dev -- --host 127.0.0.1`; Vite started successfully at `http://127.0.0.1:5173/`.
+- Confirmed the temporary Vite URL returned HTTP 200, then stopped the temporary server.
+- Reran the five focused frontend structure/integration tests listed in the user evidence.
+- Updated docs/demo-checklist.md only as needed to replace the prior 06B full UI demo `BLOCKED_BY_USER_ACTION` row with evidence-backed `Passed - user provided`.
+- Kept 06C and 06D pending and did not update task checkboxes, batch status, staging, commits, or runtime code.
+
+## User-Provided Manual Evidence Recorded
+- Backend health: PASS.
+- Frontend URL used: `http://localhost:5174/`.
+- Backend and frontend were launched; manual/browser-subagent checks completed.
+- No code files were modified in the user run.
+- Customer flow PASS: homepage, products/search, product detail, review create, cart, checkout, orders, and order detail.
+- Admin flow PASS: dashboard, revenue report, best-selling report, order-summary report, orders/status update, reviews moderation, products, and categories.
+- Route guard PASS: anonymous customer route, anonymous admin route, customer admin route, and admin login redirect.
+- UI states PASS: loading, empty, error/validation, and success.
+- Responsive PASS: desktop, tablet 768x1024, and mobile 360x800.
+- Blockers: none; user reports everything working as expected.
+
+## Files Created or Modified
+- docs/demo-checklist.md
+- docs/reports/report_4_execute_agent.md
+
+## Tests or Validations Run
+- command/check: `GET http://localhost:5174/`
+- result: passed
+- evidence or reason: returned HTTP 200 with a 564-byte SPA shell.
+- command/check: `GET http://localhost:5000/api/health`
+- result: passed
+- evidence or reason: returned HTTP 200 with `success: true` and `Backend is healthy`; no secrets or environment values were printed.
+- command/check: `cd frontend && npm run dev -- --host 127.0.0.1`
+- result: passed
+- evidence or reason: Vite started successfully at `http://127.0.0.1:5173/`; the temporary server was stopped after validation.
+- command/check: `GET http://127.0.0.1:5173/`
+- result: passed
+- evidence or reason: returned HTTP 200 with a 564-byte SPA shell.
+- command/check: `cd frontend && node src/views/responsiveDemoRoutes.structure.test.js`
+- result: passed
+- evidence or reason: 6 tests passed for mobile grid sizing, checkout loading copy, shell navigation, auth card width, table scroll containers, and empty-cart action count.
+- command/check: `cd frontend && node src/views/AdminDashboardView.structure.test.js`
+- result: passed
+- evidence or reason: 3 tests passed for report API reuse, reports navigation, and responsive Astryx header layout.
+- command/check: `cd frontend && node src/views/ProductDetailView.reviewIntegration.test.js`
+- result: passed
+- evidence or reason: 3 tests passed for customer review API/components, review states/refresh, and no frontend database access in the view.
+- command/check: `cd frontend && node src/views/admin/AdminReviewView.structure.test.js`
+- result: passed
+- evidence or reason: 3 tests passed for product/review loading, hide action, moderation states, and protected admin review route registration.
+- command/check: `cd frontend && node src/views/admin/ReportView.structure.test.js`
+- result: passed
+- evidence or reason: 3 tests passed for all three report surfaces, protected reports route registration, and admin navigation.
+- command/check: Focused credential-like pattern scan over docs/demo-checklist.md and docs/reports/report_4_execute_agent.md
+- result: passed
+- evidence or reason: no PostgreSQL URLs, database URL assignments, JWT secret assignments, bearer JWTs, or password assignments were printed in the changed docs.
+- command/check: `git diff --check -- docs/demo-checklist.md docs/reports/report_4_execute_agent.md`
+- result: passed
+- evidence or reason: no whitespace errors were reported; Git emitted only expected line-ending notices for the changed docs.
+
+## Acceptance Check
+- condition: Run frontend dev command.
+- status: satisfied
+- evidence: user evidence recorded frontend launch at `http://localhost:5174/`; repair rerun started Vite at `http://127.0.0.1:5173/` and returned HTTP 200.
+- condition: Customer demo flow runs from homepage through product review.
+- status: satisfied
+- evidence: user-provided manual/browser-subagent PASS covers homepage, products/search, product detail, cart, checkout, order history/detail, and review creation.
+- condition: Admin demo flow runs from dashboard through reports.
+- status: satisfied
+- evidence: user-provided manual/browser-subagent PASS covers dashboard, reports revenue, reports best-selling, reports order-summary, orders/status, reviews moderation, products, and categories.
+- condition: Key pages show loading, success, empty, and error states.
+- status: satisfied
+- evidence: user-provided manual/browser-subagent PASS covers loading, empty, error/validation, and success states; focused dashboard/report/review/product-detail tests also passed.
+- condition: Desktop, tablet, and mobile usability where browser tooling is available.
+- status: satisfied
+- evidence: user-provided manual/browser-subagent PASS covers desktop, tablet 768x1024, and mobile 360x800; responsive structure test passed.
+
+## Progress Update
+- task checkbox updated: no
+- batch status updated: no
+- reason: Orchestrated mode reserves progress updates for A2/orchestration.
+
+## Key Implementation Decisions
+- Treated the full UI flow PASS as user-provided manual/browser-subagent evidence, not as agent-generated browser automation.
+- Corroborated the manual evidence with safe local HTTP checks and focused frontend structure/integration tests.
+- Updated only the prior 06B checklist blocked status and left 06C/06D pending.
+
+## Risks or Open Issues
+- Screenshot evidence was not newly generated by this A1 repair; the accepted UI flow evidence is user-provided manual/browser-subagent evidence.
+- Supabase Table Editor visual confirmation and team slide/rehearsal confirmations remain outside 06B and are not changed by this repair.
+- 06C and 06D still require their own task-scoped evidence.
+
+## Minor In-Scope Issues Fixed
+- Replaced the prior 06B `BLOCKED_BY_USER_ACTION` checklist row with evidence-backed user-provided PASS.
+- Appended this repair/completion execution report at physical EOF.
+
+## Workflow Integrity Check
+- Exactly Task 06B repair was executed.
+- No sibling task 06C or 06D was executed.
+- No task checkbox, batch status, staging, commit, runtime source change, or future-batch work was performed.
+- The temporary frontend dev server started by this agent was stopped.
+
+## Notes for Review Agent
+- changed files: docs/demo-checklist.md and docs/reports/report_4_execute_agent.md.
+- validations to rerun: frontend dev startup, frontend URL HTTP check, backend health, the five focused frontend structure/integration tests, focused secret-pattern scan, and `git diff --check`.
+- evidence classification: full customer/admin browser flow, route guards, UI states, and responsive viewport checks are user-provided manual/browser-subagent PASS evidence.
+- risk areas: confirm 06C and 06D remain pending and task checkboxes were not changed by A1.
+- next task readiness: can_review.
+
+---
+
+# Task Execution Report - 06C
+
+## Source Task File
+docs/tasks/task_4.md
+
+## Report File
+docs/reports/report_4_execute_agent.md
+
+## Mode
+orchestrated
+
+## Batch
+Batch06 - Final Verification, Audit, and Submission Readiness
+
+## Task
+06C - Audit security, MVC boundaries, anti-duplication, and Astryx compliance
+
+## Status
+complete
+
+## Source of Truth Used
+- docs/plans/Plan_4.md > ## 5. Out of Scope
+- docs/plans/Plan_4.md > ## 9. Verification & Testing Plan
+- docs/plans/Master_Plan.md > ## 22. MVC Acceptance Criteria
+- AGENTS.md > # Custom Rules & Workflows and Astryx project guidance
+
+## Supplemental Documents Used
+- None
+
+## Selected Scope
+- Batch: Batch06 - Final Verification, Audit, and Submission Readiness
+- Task ID: 06C
+- Task title: Audit security, MVC boundaries, anti-duplication, and Astryx compliance
+- Files allowed: Execution report; changed source files only if fixes were needed
+- Repair scope if any: None
+
+## Dependency and User Action Check
+- dependencies: Batch01 through Batch05 were provided as current accepted context, with 06A and 06B accepted and checked
+- user action: None
+- status: satisfied
+
+## Files Inspected Before Editing
+- docs/tasks/task_4.md: read selected 06C task block, dependencies, acceptance, and validation requirements.
+- docs/plans/Plan_4.md: read out-of-scope and verification sections.
+- docs/plans/Master_Plan.md: read MVC acceptance criteria.
+- AGENTS.md: read Astryx project guidance; prompt-provided custom workflow rules were also applied.
+- .gitignore: confirmed `.env` and `.env.*` are ignored except `.env.example`.
+- docs/reports/report_4_execute_agent.md: inspected EOF before appending this report.
+- backend/src/config/database.js and backend/prisma/seed.js: identified the only PrismaClient construction paths.
+- backend/src/utils/response.js, backend/src/utils/generateToken.js, backend/src/utils/index.js: inspected shared response and JWT helper locations through search evidence.
+- backend/src/controllers/review.controller.js: inspected review HTTP handling and model calls.
+- backend/src/models/review.model.js: inspected review Prisma access.
+- backend/src/routes/review.routes.js: inspected review route ownership and middleware.
+- backend/src/controllers/report.controller.js: inspected report HTTP handling and model calls.
+- backend/src/models/report.model.js: inspected report Prisma aggregation logic.
+- backend/src/routes/report.routes.js: inspected admin report route ownership and middleware.
+- frontend/src/api/reviewApi.js and frontend/src/api/reportApi.js: inspected API-only React data access helpers.
+- frontend/src/views/admin/AdminReviewView.jsx: inspected Astryx UI usage, review moderation flow, and absence of direct database access.
+- frontend/src/views/admin/ReportView.jsx: inspected Astryx UI usage, report loading/error flow, and absence of direct database access.
+- frontend/src/components/report/RevenueSummaryCard.jsx, frontend/src/components/report/OrderSummaryCards.jsx, frontend/src/components/report/BestSellingProductsTable.jsx: inspected report UI composition.
+- frontend/src/components/product/ProductReviewForm.jsx and frontend/src/components/product/ProductReviewList.jsx: inspected review UI composition.
+- frontend/src/api/paymentApi.js, backend/src/controllers/payment.controller.js, backend/src/models/payment.model.js, backend/src/routes/payment.routes.js: inspected payment path to confirm COD-only behavior rather than online gateway integration.
+- frontend/src/views/ProductDetailView.jsx, frontend/src/views/admin/AdminOrderView.jsx, backend/src/models/order.model.js: inspected large-file responsibility evidence and line-count results.
+
+## Completed Work
+- Audited tracked and local env-like files without printing secret values.
+- Confirmed only `.env.example` files are tracked; local `backend/.env` and `frontend/.env` are ignored and were not read.
+- Ran credential-pattern searches as filename/count summaries only and found no committed real `.env` credential file.
+- Confirmed React source does not import Prisma, database URLs, Supabase clients, PostgreSQL URLs, or SQL/database access.
+- Confirmed backend Prisma client construction is centralized in `backend/src/config/database.js`; models import that shared client and seed/test Decimal usage is expected.
+- Confirmed shared response and JWT helpers are centralized in `backend/src/utils/response.js` and `backend/src/utils/generateToken.js`.
+- Confirmed review/report controllers, models, and routes preserve MVC boundaries: controllers handle HTTP, routes mount middleware, and models own Prisma/database work.
+- Confirmed Phase 4 UI files use Astryx components; targeted raw styling findings are layout-only style props and token values, with no blocking raw hex or `<div>` usage in the inspected Phase 4 review/report UI files.
+- Confirmed out-of-scope online payment gateway, shipping provider, email, realtime, AI, recommendation, mobile, image upload, and chart implementations were not added; the payment path remains COD-only.
+- Checked broad files over 300 lines and found them cohesive to a single order/product-detail/admin-order responsibility; no split was needed for 06C.
+
+## Files Created or Modified
+- docs/reports/report_4_execute_agent.md
+
+## Tests or Validations Run
+- command/check: `git ls-files | rg -i '(^|/)(\.env|.*\.env|env)(\.|$)|(^|/).*(secret|credential|key).*'`
+- result: passed
+- evidence or reason: only `backend/.env.example` and `frontend/.env.example` are tracked env-like files.
+- command/check: local env-like file listing without contents
+- result: passed
+- evidence or reason: `backend/.env` and `frontend/.env` exist locally but `git status --ignored` reports both as ignored.
+- command/check: credential-like pattern count scan over repository, excluding build/dependency/git directories
+- result: passed
+- evidence or reason: results were limited to docs/examples/tests/schema/config/helper references by filename/count; no secret values were printed or required for the audit.
+- command/check: frontend source search for `DATABASE_URL`, `DIRECT_URL`, Prisma, Supabase/PostgreSQL URL, SQL, and backend-only config names
+- result: passed
+- evidence or reason: no direct database or backend credential access was found in React runtime files; matches were negative assertions, comments, ordinary wording, or API helper references.
+- command/check: backend search for Prisma client construction, database config imports, response helpers, JWT helpers, and review/report route/controller/model paths
+- result: passed
+- evidence or reason: PrismaClient construction is centralized in `backend/src/config/database.js`; response and JWT helpers are shared utilities; review/report files are single route/controller/model paths.
+- command/check: manual inspection of `backend/src/controllers/review.controller.js`, `backend/src/models/review.model.js`, `backend/src/routes/review.routes.js`, `backend/src/controllers/report.controller.js`, `backend/src/models/report.model.js`, and `backend/src/routes/report.routes.js`
+- result: passed
+- evidence or reason: HTTP validation/response handling stays in controllers/routes while Prisma access stays in models.
+- command/check: targeted Phase 4 UI raw styling/Astryx/direct database search
+- result: passed
+- evidence or reason: inspected review/report UI files use Astryx components and API helpers; no `<div>`, raw hex, direct database call, fetch, Prisma, Supabase, or SQL usage was found in targeted Phase 4 UI surfaces.
+- command/check: out-of-scope implementation search for payment gateway, shipping provider, email, realtime, AI, recommendations, mobile, image upload, and charts
+- result: passed
+- evidence or reason: only plan/task text and a COD-only payment comment appeared; package/runtime searches found no Stripe/PayPal/shipping/email/realtime/AI/upload/chart dependencies or implementation.
+- command/check: line-count scan for files over 300 lines
+- result: passed
+- evidence or reason: found `frontend/src/views/ProductDetailView.jsx`, `frontend/src/views/admin/AdminOrderView.jsx`, and `backend/src/models/order.model.js`; each remains cohesive to one focused responsibility and was not split.
+- command/check: `git diff --check -- docs/reports/report_4_execute_agent.md`
+- result: passed
+- evidence or reason: no whitespace errors were reported before this append; Git emitted only the expected line-ending notice.
+
+## Acceptance Check
+- condition: No real `.env` credentials are committed.
+- status: satisfied
+- evidence: tracked env-like search found only `.env.example` files; local real `.env` files are ignored and were not read.
+- condition: React never imports database credentials or Prisma.
+- status: satisfied
+- evidence: frontend searches and inspected API/view/component files found no Prisma import, database URL, Supabase/PostgreSQL URL, SQL, or direct database access.
+- condition: No out-of-scope features were added.
+- status: satisfied
+- evidence: runtime/package searches found no online gateway, shipping provider, email, realtime, AI, recommendation, mobile, image upload, or chart implementation; COD-only payment remains in scope.
+- condition: MVC boundaries remain clear.
+- status: satisfied
+- evidence: review/report routes/controllers/models keep HTTP, routing/middleware, and Prisma responsibilities separated.
+- condition: Each large file is split if it drifts beyond focused responsibility.
+- status: satisfied
+- evidence: broad files over 300 lines were reviewed as cohesive existing responsibility files; no split was needed.
+
+## Progress Update
+- task checkbox updated: no
+- batch status updated: no
+- reason: Orchestrated mode reserves progress updates for A2/orchestration.
+
+## Key Implementation Decisions
+- Kept the task audit-only because no blocking security, MVC, duplication, Astryx, or scope defect was found.
+- Did not read or print local `.env` contents; secret validation used tracked-status and count/filename evidence.
+- Did not split broad files because the detected files stayed focused on a single owned responsibility and splitting would be unrelated runtime churn for 06C.
+
+## Risks or Open Issues
+- Local ignored `.env` files exist and should remain uncommitted.
+- `frontend/src/components/product/productUtils.js` contains raw hex inside an SVG placeholder data string outside the targeted Phase 4 review/report surfaces; this was not treated as a blocking 06C Astryx UI violation because it is existing image-placeholder data, not new review/report UI styling.
+- 06D remains pending and was not executed.
+
+## Minor In-Scope Issues Fixed
+- None.
+
+## Workflow Integrity Check
+- Exactly Task 06C was executed.
+- No sibling task 06D was executed.
+- No task checkbox, batch status, staging, commit, or runtime source change was performed.
+- Source files were inspected before deciding that no runtime edit was needed.
+
+## Notes for Review Agent
+- changed files: docs/reports/report_4_execute_agent.md only for this 06C task.
+- validations to rerun: tracked env-like search, ignored `.env` status, frontend database/Prisma/Supabase search, backend duplicate helper/MVC searches, out-of-scope runtime/package searches, line-count scan, and `git diff --check`.
+- risk areas: verify no secret values are printed in report history, confirm 06C checkbox remains unchecked for A2, and confirm local ignored `.env` files are not staged or tracked.
+- next task readiness: can_review.
+
+---
+
+# Task Execution Report - 06D
+
+## Source Task File
+docs/tasks/task_4.md
+
+## Report File
+docs/reports/report_4_execute_agent.md
+
+## Mode
+orchestrated
+
+## Batch
+Batch06 - Final Verification, Audit, and Submission Readiness
+
+## Task
+06D - Finalize submission evidence, reports, and progress state
+
+## Status
+complete
+
+## Source of Truth Used
+- docs/plans/Plan_4.md > ## 10. Handoff Notes for Final Submission
+- docs/plans/Master_Plan.md > ## 26. Final Submission Checklist
+- docs/plans/Master_Plan.md > ## 27. Suggested Presentation Division
+
+## Supplemental Documents Used
+- None
+
+## Selected Scope
+- Batch: Batch06 - Final Verification, Audit, and Submission Readiness
+- Task ID: 06D
+- Task title: Finalize submission evidence, reports, and progress state
+- Files allowed: docs/demo-checklist.md, docs/reports/report_4_execute_agent.md, docs/review/review_4_review_agent.md, docs/tasks/task_4.md
+- Repair scope if any: None
+
+## Dependency and User Action Check
+- dependencies: 06A, 06B, and 06C are checked in docs/tasks/task_4.md and accepted in docs/review/review_4_review_agent.md.
+- user action: Supabase Table Editor visual confirmation, presentation slide readiness, rehearsal, and member understanding are not confirmed by current evidence.
+- status: implementation dependencies satisfied; unavailable user/team checks are recorded as BLOCKED_BY_USER_ACTION or Pending and do not block this documentation handoff.
+
+## Files Inspected Before Editing
+- docs/tasks/task_4.md: read selected 06D task block, dependencies, hard rules, global checklist, and progress tracker state.
+- docs/plans/Plan_4.md: read final submission handoff requirements and hard final rules.
+- docs/plans/Master_Plan.md: read final submission checklist and suggested presentation division.
+- README.md: checked implemented stack, MVC explanation, setup commands, routes, API groups, validation notes, and manual-check wording.
+- docs/database-design.md: checked Prisma/Supabase model, enum, ERD, migration, and credential-safety documentation.
+- docs/api-testing.md: checked API runbook coverage and wording that it is a reusable runbook, not live-run evidence.
+- docs/demo-checklist.md: checked current final evidence map, manual-evidence attribution, blocked user actions, and stale Batch06 wording before editing.
+- docs/reports/report_4_execute_agent.md: inspected EOF and prior 06A/06B/06C execution evidence before appending.
+- docs/review/review_4_review_agent.md: checked A2 acceptance evidence for 06A, 06B, and 06C.
+
+## Completed Work
+- Updated docs/demo-checklist.md to remove stale wording that Batch06 final verification had not run.
+- Added accepted 06C security/MVC/scope audit status to the Plan 4 verification map.
+- Added a 06D final handoff evidence row marked Pending A2 review, without claiming A2 acceptance or Batch06 completion.
+- Preserved user-provided attribution for 06B full customer/admin UI evidence.
+- Preserved Supabase Table Editor visual confirmation as BLOCKED_BY_USER_ACTION.
+- Preserved presentation slides as Pending and member understanding as BLOCKED_BY_USER_ACTION.
+- Added final freeze and handoff notes covering no new nice-to-have features, no Batch06 schema changes, explicit out-of-scope items, and no placeholder/runtime-complete conflation.
+- Left docs/tasks/task_4.md checkboxes and Batch06 batch status unchanged for A2/orchestration.
+
+## Files Created or Modified
+- docs/demo-checklist.md
+- docs/reports/report_4_execute_agent.md
+
+## Tests or Validations Run
+- command/check: PowerShell assertions over docs/demo-checklist.md final evidence wording
+- result: passed
+- evidence or reason: Confirmed accepted 06A/06B/06C summary, 06D Pending A2 review row, final freeze section, Supabase BLOCKED_BY_USER_ACTION status, presentation Pending status, member BLOCKED_BY_USER_ACTION status, and absence of stale Batch06 pending wording.
+- command/check: corrected PCRE2 credential-pattern scan over changed task/demo/report/review docs
+- result: passed
+- evidence or reason: No live PostgreSQL URLs, non-placeholder DATABASE_URL or DIRECT_URL assignments, non-placeholder JWT_SECRET assignments, or bearer JWT patterns were found.
+- command/check: stale/falsely-complete status search over docs/demo-checklist.md and docs/tasks/task_4.md
+- result: passed
+- evidence or reason: No stale Batch06 "not run" wording or false Passed statuses for Supabase Table Editor, presentation slides, or member understanding were found.
+- command/check: evidence anchor search for 06D and pending user-action statuses
+- result: passed
+- evidence or reason: Confirmed 06D remains unchecked in both task locations, while demo checklist records the 06C passed row, 06D Pending A2 review row, Supabase BLOCKED_BY_USER_ACTION, slides Pending, member understanding BLOCKED_BY_USER_ACTION, and final freeze section.
+
+## Acceptance Check
+- condition: Actual Phase 4 backend/API/frontend/admin/docs check statuses are recorded.
+- status: satisfied
+- evidence: docs/demo-checklist.md maps accepted 06A backend/API evidence, user-provided 06B UI/demo evidence, accepted 06C audit evidence, and 06D handoff status.
+- condition: Execution report entries are written for completed batches and blocked validations.
+- status: satisfied
+- evidence: Prior reports contain accepted 06A/06B/06C evidence; this 06D report was appended at EOF with remaining user/team checks recorded.
+- condition: Final out-of-scope and no-new-feature freeze status is recorded.
+- status: satisfied
+- evidence: docs/demo-checklist.md now includes Final Freeze and Handoff Notes.
+- condition: Supabase/dashboard checks are BLOCKED_BY_USER_ACTION unless confirmed.
+- status: satisfied
+- evidence: Supabase Table Editor visual confirmation remains BLOCKED_BY_USER_ACTION; no dashboard visual confirmation is claimed.
+- condition: README/docs/database/demo/API docs match implemented behavior.
+- status: satisfied
+- evidence: README, database-design, demo-checklist, and API runbook were inspected and distinguish implemented runtime behavior from pending/user-side checks.
+- condition: Task file progress tracker synchronization.
+- status: satisfied
+- evidence: 06A, 06B, and 06C are checked; 06D remains unchecked in both task locations as required for orchestrated A1.
+
+## Progress Update
+- task checkbox updated: no
+- batch status updated: no
+- reason: Orchestrated mode reserves the 06D checkbox for A2 and Batch06 status for A3/orchestration.
+
+## Key Implementation Decisions
+- Treated 06D as a documentation/evidence-finalization task only; no runtime, schema, or nice-to-have feature changes were made.
+- Kept 06B UI evidence explicitly user-provided/manual-browser-subagent evidence with corroborating checks, not agent-generated browser automation.
+- Marked user/team-only confirmations as Pending or BLOCKED_BY_USER_ACTION instead of completing them from plan text.
+
+## Risks or Open Issues
+- Supabase Table Editor visual confirmation remains BLOCKED_BY_USER_ACTION until a user with dashboard access confirms tables and representative rows.
+- Presentation slide completion, rehearsal, speaking time, and each member's MVC responsibility understanding remain Pending or BLOCKED_BY_USER_ACTION until the team confirms them.
+- Batch06 is not marked complete by this A1 handoff; 06D still requires A2 review.
+
+## Minor In-Scope Issues Fixed
+- Removed stale checklist wording that said Batch06 final verification had not run.
+- Added final freeze/no-new-feature/no-schema-change/out-of-scope handoff notes to the checklist.
+
+## Workflow Integrity Check
+- Exactly Task 06D was executed.
+- No sibling task, A2 review, A3 audit, staging, commit, runtime code change, schema change, task checkbox update, or batch status update was performed.
+- Source and evidence documents were inspected before editing.
+- This execution report was appended to physical EOF.
+
+## Notes for Review Agent
+- changed files: docs/demo-checklist.md and docs/reports/report_4_execute_agent.md.
+- validations to rerun: demo-checklist final evidence assertions, corrected PCRE2 credential-pattern scan, stale/falsely-complete status search, evidence anchor search, and git diff whitespace check over changed docs.
+- risk areas: verify 06D remains unchecked, Batch06 remains unchecked, Supabase/dashboard/team confirmations are not falsely marked complete, and 06B manual evidence attribution remains explicit.
+- next task readiness: can_review.

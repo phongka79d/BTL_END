@@ -2547,6 +2547,8 @@ ACCEPTED
 ## Repair Instructions
 - None.
 
+---
+
 # Task Review Report - 05B
 
 ## Source Task File
@@ -3659,6 +3661,693 @@ ACCEPTED
 
 ### Observations
 - Consolidating presentation roles into the existing demo checklist avoids a redundant presentation document.
+
+## Decision
+- Accept selected task: yes
+- Repair required: no
+- Can next task proceed: yes
+- Batch can be marked complete by A2: no
+
+## Repair Instructions
+- None.
+
+---
+
+# Task Review Report - 06A
+
+## Source Task File
+docs/tasks/task_4.md
+
+## Execution Report Reviewed
+docs/reports/report_4_execute_agent.md
+
+## Review Report File
+docs/review/review_4_review_agent.md
+
+## Mode
+orchestrated
+
+## Final Outcome
+ACCEPTED
+
+## Reviewed Scope
+- Batch: Batch06 - Final Verification, Audit, and Submission Readiness
+- Task ID: 06A
+- Task title: Run backend command checks and review/report API smoke tests
+- Executor status reported: complete
+- Source of Truth: docs/plans/Plan_4.md > ## 9. Verification & Testing Plan; docs/plans/Master_Plan.md > ## 23. Testing Plan
+- Supplemental documents: None
+
+## Latest Report Selection
+- Latest report entry found: yes
+- Requested task ID, if any: 06A
+- Reviewed task ID: 06A
+- Correct selection: yes
+- Notes: The latest matching execution report at physical EOF is for task 06A.
+
+## Git Diff Evidence
+- git status reviewed: yes
+- git diff stat reviewed: yes
+- git diff reviewed: yes
+- recent commits reviewed: not needed
+- changed files from git: docs/demo-checklist.md; docs/reports/report_4_execute_agent.md
+- untracked files: None
+
+## Files Reviewed
+- `docs/tasks/task_4.md`: in scope - selected 06A task block and progress tracker were reviewed.
+- `docs/reports/report_4_execute_agent.md`: in scope - latest 06A execution report was reviewed.
+- `docs/demo-checklist.md`: in scope - 06A evidence row and remaining Batch06 pending row were reviewed.
+- `docs/plans/Plan_4.md`: in scope - verification and expected-evidence requirements were checked.
+- `docs/plans/Master_Plan.md`: in scope - API testing requirements were checked.
+- `backend/package.json`: in scope - backend dev and Prisma command surfaces were checked.
+- `backend/src/app.js`: in scope - health endpoint and API route mounting were checked.
+- `backend/src/routes/index.js`: in scope - review and report route mounting was checked.
+- `backend/src/routes/review.routes.js`: in scope - review list/create/hide route protections were checked.
+- `backend/src/routes/report.routes.js`: in scope - admin report route protections were checked.
+- `backend/src/controllers/review.controller.js`: in scope - review behavior surface was searched and checked.
+- `backend/src/controllers/report.controller.js`: in scope - report behavior surface was searched and checked.
+- `backend/src/models/review.model.js`: in scope - visible/hidden review persistence surface was searched and checked.
+- `backend/src/models/report.model.js`: in scope - report aggregation behavior was checked.
+- `backend/prisma/schema.prisma`: in scope - Prisma schema was validated.
+
+## Reported Files Cross-Check
+- file from execution report: docs/demo-checklist.md
+- present in git/repo: yes
+- matches task scope: yes
+- notes: Diff contains only the narrow 06A checklist evidence row and keeps remaining Batch06 work pending.
+- file from execution report: docs/reports/report_4_execute_agent.md
+- present in git/repo: yes
+- matches task scope: yes
+- notes: Diff appends the 06A execution report at physical EOF.
+
+## Dependency Review
+- Required dependencies: Batch01 and Batch03 backend review/report APIs; live backend env/database and seeded demo credentials for A1 smoke checks.
+- Dependency status: satisfied
+- Missing or invalid dependency: None found for 06A review.
+
+## Architecture Alignment
+- Passed: Review and report APIs are routed through Express routes/controllers/models with Prisma-backed model helpers; report routes use protect and admin middleware.
+- Failed: None.
+- Uncertain: A2 did not rerun the credentialed mutation/report smoke harness because it requires live credentials and can mutate database state; A1 reported it passed.
+
+## Implementation Reality
+- Real implementation: yes
+- Stub or fake logic found: no
+- Evidence: Existing review/report routes, controllers, Prisma-backed models, schema validation, and A1 HTTP smoke evidence support the reported backend/API behavior.
+
+## Hardcoding Review
+- Hardcoding found: no
+- Evidence: Report aggregation reads Prisma order/orderDetail/product data; changed docs did not add secrets or fake payloads.
+
+## Validations Reviewed
+- Command/check: `cd backend && npx prisma validate`
+- Reported result: passed
+- Rerun result: passed
+- Status: passed
+- Notes: Prisma reported the schema valid; only deprecation/update notices were emitted.
+- Command/check: `cd backend && npm run dev`
+- Reported result: passed
+- Rerun result: passed
+- Status: passed
+- Notes: Rerun started nodemon and printed `Server is running on port 5000`; A2 stopped the server afterward.
+- Command/check: `GET http://localhost:5000/api/health`
+- Reported result: passed
+- Rerun result: passed
+- Status: passed
+- Notes: Rerun returned HTTP 200 with `success: true` and `Backend is healthy`.
+- Command/check: Review API smoke harness
+- Reported result: passed
+- Rerun result: not run
+- Status: passed
+- Notes: A2 reviewed the routes/controllers/models and accepted A1's credentialed live-smoke evidence; rerunning the full harness would create/hide database rows.
+- Command/check: Report API smoke harness and database comparison
+- Reported result: passed
+- Rerun result: not run
+- Status: passed
+- Notes: A2 reviewed admin-protected report routes and Prisma aggregation logic; A1 reported live API payloads matched independent database aggregations.
+- Command/check: Focused credential-like pattern scan over docs/demo-checklist.md and docs/reports/report_4_execute_agent.md
+- Reported result: passed
+- Rerun result: passed
+- Status: passed
+- Notes: No PostgreSQL URLs, database URL assignments, JWT secret assignments, bearer JWTs, or seeded passwords were found.
+- Command/check: `git diff --check -- docs/demo-checklist.md docs/reports/report_4_execute_agent.md`
+- Reported result: passed
+- Rerun result: passed
+- Status: passed
+- Notes: No whitespace errors were reported; Git emitted expected line-ending warnings only.
+
+## Acceptance Review
+- Task acceptance: Commands and smoke checks pass or are explicitly marked blocked with safe reasons.
+- Status: satisfied
+- Evidence: A1 reported live Prisma/startup/health/review/report smoke checks passed; A2 reran Prisma validate, backend startup, health, secret scan, and diff check; changed files are limited to task-allowed docs and the report leaves remaining Batch06 checks pending.
+
+## Progress Tracking
+- Selected task checkbox before review: unchecked in the task block and Progress Tracker.
+- Checkbox updated by reviewer: yes
+- Batch status updated by reviewer: no
+- Execution report entry: latest 06A execution report appended at physical EOF.
+- Review report entry: this 06A review report appended at physical EOF.
+- Other: No sibling task checkbox or Batch06 completion status was updated.
+
+## Report Accuracy
+- Accurate
+- Mismatches: None found.
+
+## Issues
+
+### Blocking
+- None.
+
+### Major
+- None.
+
+### Minor
+- None.
+
+### Warnings
+- A2 did not rerun the credentialed review/report mutation harness because doing so would require live seeded credentials and would mutate database state; A1's execution report provides the credentialed smoke evidence.
+
+### Observations
+- docs/demo-checklist.md correctly records only 06A backend/API evidence and keeps remaining Batch06 UI/security/submission work pending.
+
+## Decision
+- Accept selected task: yes
+- Repair required: no
+- Can next task proceed: yes
+- Batch can be marked complete by A2: no
+
+## Repair Instructions
+- None.
+
+---
+
+# Task Review Report - 06B
+
+## Source Task File
+docs/tasks/task_4.md
+
+## Execution Report Reviewed
+docs/reports/report_4_execute_agent.md
+
+## Review Report File
+docs/review/review_4_review_agent.md
+
+## Mode
+orchestrated
+
+## Final Outcome
+ACCEPTED
+
+## Reviewed Scope
+- Batch: Batch06 - Final Verification, Audit, and Submission Readiness
+- Task ID: 06B
+- Task title: Run frontend command checks and full customer/admin UI demo
+- Executor status reported: complete
+- Source of Truth: docs/plans/Plan_4.md > ## 9. Verification & Testing Plan; docs/plans/Master_Plan.md > ## 21. Minimum Viable Demo Flow; docs/design/design.md > # 30. Final UI Checklist
+- Supplemental documents: None
+
+## Latest Report Selection
+- Latest report entry found: yes
+- Requested task ID, if any: 06B
+- Reviewed task ID: 06B Repair
+- Correct selection: yes
+- Notes: Reviewed the latest matching `Task Execution Report - 06B Repair` entry and used the prior blocked 06B entry only as repair context.
+
+## Git Diff Evidence
+- git status reviewed: yes
+- git diff stat reviewed: yes
+- git diff reviewed: yes
+- recent commits reviewed: not needed
+- changed files from git: docs/demo-checklist.md; docs/reports/report_4_execute_agent.md; docs/review/review_4_review_agent.md; docs/tasks/task_4.md
+- untracked files: None
+
+## Files Reviewed
+- `docs/tasks/task_4.md`: in scope - selected 06B task block and Progress Tracker were reviewed; A2 updated only 06B task/progress checkboxes after acceptance.
+- `docs/reports/report_4_execute_agent.md`: in scope - prior blocked 06B entry and latest 06B Repair entry were reviewed.
+- `docs/demo-checklist.md`: in scope - 06B frontend command and user-provided full UI demo PASS rows were reviewed.
+- `docs/review/review_4_review_agent.md`: in scope - existing EOF was inspected before appending this A2 report.
+- `docs/plans/Plan_4.md`: in scope - verification plan, frontend command, full demo, expected evidence, and UI-state requirements were checked.
+- `docs/plans/Master_Plan.md`: in scope - minimum viable customer/admin demo flow requirements were checked.
+- `docs/design/design.md`: in scope - final UI checklist for customer/admin surfaces, states, and mobile usability was checked.
+- `frontend/package.json`: in scope - `dev` script was checked.
+- `frontend/src/views/responsiveDemoRoutes.structure.test.js`: in scope - A1-reported responsive test was rerun.
+- `frontend/src/views/AdminDashboardView.structure.test.js`: in scope - A1-reported dashboard/report test was rerun.
+- `frontend/src/views/ProductDetailView.reviewIntegration.test.js`: in scope - A1-reported review integration test was rerun.
+- `frontend/src/views/admin/AdminReviewView.structure.test.js`: in scope - A1-reported admin review test was rerun.
+- `frontend/src/views/admin/ReportView.structure.test.js`: in scope - A1-reported report view test was rerun.
+
+## Reported Files Cross-Check
+- file from execution report: docs/demo-checklist.md
+- present in git/repo: yes
+- matches task scope: yes
+- notes: Diff records 06B frontend command and user-provided full customer/admin UI demo PASS while leaving 06C and 06D pending.
+- file from execution report: docs/reports/report_4_execute_agent.md
+- present in git/repo: yes
+- matches task scope: yes
+- notes: Diff appends the 06B Repair execution report at physical EOF after the prior blocked 06B entry.
+
+## Dependency Review
+- Required dependencies: Batch02, Batch04, Batch05, and accepted 06A; running backend/API data, seeded demo data, customer/admin credentials, and manual/browser evidence when automation is unavailable.
+- Dependency status: satisfied
+- Missing or invalid dependency: None found for 06B repair review.
+
+## Architecture Alignment
+- Passed: 06B changed only documentation/report evidence; frontend checks corroborate API-backed review/report surfaces and route guards without runtime code changes.
+- Failed: None.
+- Uncertain: Screenshot evidence was not generated by A1; the live browser flow evidence is user-provided manual/browser-subagent evidence.
+
+## Implementation Reality
+- Real implementation: yes
+- Stub or fake logic found: no
+- Evidence: A2 reran the focused frontend structure/integration tests, frontend dev startup, frontend HTTP shell check, and backend health check; user-provided manual/browser-subagent evidence covers the full live UI flow.
+
+## Hardcoding Review
+- Hardcoding found: no
+- Evidence: No runtime code was changed for 06B, focused tests check API wiring and view-layer boundaries, and changed docs passed credential-like pattern scanning.
+
+## Validations Reviewed
+- Command/check: `GET http://localhost:5174/`
+- Reported result: passed
+- Rerun result: passed
+- Status: passed
+- Notes: Returned HTTP 200 with a 564-byte SPA shell.
+- Command/check: `GET http://localhost:5000/api/health`
+- Reported result: passed
+- Rerun result: passed
+- Status: passed
+- Notes: Returned HTTP 200 with `success: true` and `Backend is healthy`.
+- Command/check: frontend dev startup
+- Reported result: passed
+- Rerun result: passed
+- Status: passed
+- Notes: A2 started Vite with `node ./node_modules/vite/bin/vite.js --host 127.0.0.1 --port 5180 --strictPort`, confirmed HTTP 200 with a 564-byte SPA shell, and stopped the temporary server.
+- Command/check: `cd frontend && node src/views/responsiveDemoRoutes.structure.test.js`
+- Reported result: passed
+- Rerun result: passed
+- Status: passed
+- Notes: 6 tests passed.
+- Command/check: `cd frontend && node src/views/AdminDashboardView.structure.test.js`
+- Reported result: passed
+- Rerun result: passed
+- Status: passed
+- Notes: 3 tests passed.
+- Command/check: `cd frontend && node src/views/ProductDetailView.reviewIntegration.test.js`
+- Reported result: passed
+- Rerun result: passed
+- Status: passed
+- Notes: 3 tests passed.
+- Command/check: `cd frontend && node src/views/admin/AdminReviewView.structure.test.js`
+- Reported result: passed
+- Rerun result: passed
+- Status: passed
+- Notes: 3 tests passed.
+- Command/check: `cd frontend && node src/views/admin/ReportView.structure.test.js`
+- Reported result: passed
+- Rerun result: passed
+- Status: passed
+- Notes: 3 tests passed.
+- Command/check: User-provided manual/browser-subagent 06B UI evidence
+- Reported result: passed
+- Rerun result: not run
+- Status: passed
+- Notes: User reports PASS for customer flow, admin flow, route guards, loading/empty/error/success states, and desktop/tablet/mobile responsive checks at `http://localhost:5174/` with no blockers.
+- Command/check: Focused credential-like pattern scan over docs/demo-checklist.md and docs/reports/report_4_execute_agent.md
+- Reported result: passed
+- Rerun result: passed
+- Status: passed
+- Notes: No PostgreSQL URLs, database URL assignments, JWT secret assignments, bearer JWTs, or password assignments were found.
+- Command/check: `git diff --check -- docs/demo-checklist.md docs/reports/report_4_execute_agent.md`
+- Reported result: passed
+- Rerun result: passed
+- Status: passed
+- Notes: No whitespace errors were reported; Git emitted expected line-ending warnings only.
+
+## Acceptance Review
+- Task acceptance: UI smoke checks pass or are explicitly marked `BLOCKED_BY_USER_ACTION` with safe reasons.
+- Status: satisfied
+- Evidence: The repair report resolves the prior blocked 06B state with user-provided manual/browser-subagent PASS evidence and A2 reran the safe corroborating frontend/backend checks. Changed A1 files are limited to task-allowed documentation/report evidence, and 06C/06D remain pending.
+
+## Progress Tracking
+- Selected task checkbox before review: unchecked in the task block and Progress Tracker.
+- Checkbox updated by reviewer: yes
+- Batch status updated by reviewer: no
+- Execution report entry: latest 06B Repair execution report appended at physical EOF.
+- Review report entry: this 06B review report appended at physical EOF.
+- Other: No sibling 06C/06D checkbox or Batch06 completion status was updated.
+
+## Report Accuracy
+- Accurate
+- Mismatches: None found.
+
+## Issues
+
+### Blocking
+- None.
+
+### Major
+- None.
+
+### Minor
+- None.
+
+### Warnings
+- A2 did not independently reproduce the full browser walkthrough or screenshots; acceptance relies on the explicitly supplied user manual/browser-subagent PASS evidence, corroborated by HTTP checks and focused frontend tests.
+
+### Observations
+- The prior blocked 06B report correctly remains in history; the later 06B Repair entry records the new evidence that resolves it.
+
+## Decision
+- Accept selected task: yes
+- Repair required: no
+- Can next task proceed: yes
+- Batch can be marked complete by A2: no
+
+## Repair Instructions
+- None.
+
+---
+
+# Task Review Report - 06C
+
+## Source Task File
+docs/tasks/task_4.md
+
+## Execution Report Reviewed
+docs/reports/report_4_execute_agent.md
+
+## Review Report File
+docs/review/review_4_review_agent.md
+
+## Mode
+orchestrated
+
+## Final Outcome
+ACCEPTED
+
+## Reviewed Scope
+- Batch: Batch06 - Final Verification, Audit, and Submission Readiness
+- Task ID: 06C
+- Task title: Audit security, MVC boundaries, anti-duplication, and Astryx compliance
+- Executor status reported: complete
+- Source of Truth: docs/plans/Plan_4.md > ## 5. Out of Scope; docs/plans/Plan_4.md > ## 9. Verification & Testing Plan; docs/plans/Master_Plan.md > ## 22. MVC Acceptance Criteria; AGENTS.md plus prompt-provided Custom Rules & Workflows
+- Supplemental documents: None
+
+## Latest Report Selection
+- Latest report entry found: yes
+- Requested task ID, if any: 06C
+- Reviewed task ID: 06C
+- Correct selection: yes
+- Notes: Reviewed the latest matching `Task Execution Report - 06C`, which is the current physical EOF entry in the execution report.
+
+## Git Diff Evidence
+- git status reviewed: yes
+- git diff stat reviewed: yes
+- git diff reviewed: yes
+- recent commits reviewed: not needed
+- changed files from git: docs/demo-checklist.md; docs/reports/report_4_execute_agent.md; docs/review/review_4_review_agent.md; docs/tasks/task_4.md
+- untracked files: None
+
+## Files Reviewed
+- `docs/tasks/task_4.md`: in scope - selected 06C task block and Progress Tracker were reviewed; A2 updated only 06C checkboxes after acceptance.
+- `docs/reports/report_4_execute_agent.md`: in scope - latest 06C execution report was reviewed.
+- `docs/review/review_4_review_agent.md`: in scope - existing EOF was inspected before appending this report.
+- `docs/plans/Plan_4.md`: in scope - out-of-scope list and final verification/manual quality checks were reviewed.
+- `docs/plans/Master_Plan.md`: in scope - MVC acceptance criteria were reviewed.
+- `AGENTS.md`: in scope - Astryx project rules were reviewed; prompt-provided custom workflow rules were applied.
+- `backend/src/config/database.js`: in scope - shared Prisma client construction was reviewed.
+- `backend/src/utils/response.js`: in scope - shared response helper was reviewed.
+- `backend/src/utils/generateToken.js`: in scope - shared JWT helper was reviewed.
+- `backend/src/routes/review.routes.js`: in scope - review route ownership and middleware were reviewed.
+- `backend/src/controllers/review.controller.js`: in scope - review HTTP handling and model calls were reviewed.
+- `backend/src/models/review.model.js`: in scope - review Prisma access was reviewed.
+- `backend/src/routes/report.routes.js`: in scope - report route ownership and admin middleware were reviewed.
+- `backend/src/controllers/report.controller.js`: in scope - report HTTP handling and model calls were reviewed.
+- `backend/src/models/report.model.js`: in scope - report Prisma aggregation was reviewed.
+- `frontend/src/api/reviewApi.js`: in scope - API-only review helper was reviewed.
+- `frontend/src/api/reportApi.js`: in scope - API-only report helper was reviewed.
+
+## Reported Files Cross-Check
+- file from execution report: docs/reports/report_4_execute_agent.md
+- present in git/repo: yes
+- matches task scope: yes
+- notes: The 06C report is append-only and reports no runtime/source modifications.
+
+## Dependency Review
+- Required dependencies: Batch01 through Batch05; accepted 06A and 06B context for final verification readiness.
+- Dependency status: satisfied
+- Missing or invalid dependency: None found for 06C review.
+
+## Architecture Alignment
+- Passed: Review/report routes, controllers, and models preserve MVC boundaries; frontend review/report helpers call APIs rather than database services; Prisma client and response/JWT helpers remain centralized.
+- Failed: None.
+- Uncertain: None.
+
+## Implementation Reality
+- Real implementation: yes
+- Stub or fake logic found: no
+- Evidence: A2 inspected the concrete review/report routes, controllers, models, frontend API helpers, shared database config, and helper modules; no runtime code was changed for this audit task.
+
+## Hardcoding Review
+- Hardcoding found: no
+- Evidence: No real tracked `.env` files were found, local `.env` files are ignored, and credential-like scans were filename/count based without exposed secrets.
+
+## Validations Reviewed
+- Command/check: `git ls-files | rg -i '(^|/)(\.env|.*\.env|env)(\.|$)|(^|/).*(secret|credential|key).*'`
+- Reported result: passed
+- Rerun result: passed
+- Status: passed
+- Notes: Only `backend/.env.example` and `frontend/.env.example` were listed as tracked env-like files.
+- Command/check: local env-like file listing and ignored status without reading contents
+- Reported result: passed
+- Rerun result: passed
+- Status: passed
+- Notes: `backend/.env` and `frontend/.env` are present but ignored.
+- Command/check: credential-like pattern count scan excluding dependency/build/git directories
+- Reported result: passed
+- Rerun result: passed
+- Status: passed
+- Notes: Matches were references in docs, examples, tests, schema, config, or helpers; no secret values were printed.
+- Command/check: frontend source search for database credentials, Prisma, Supabase/PostgreSQL URL, SQL, and backend-only config names
+- Reported result: passed
+- Rerun result: passed
+- Status: passed
+- Notes: Matches were negative test assertions only; React runtime files did not expose direct database access.
+- Command/check: backend duplicate helper/MVC search
+- Reported result: passed
+- Rerun result: passed
+- Status: passed
+- Notes: Prisma client construction is centralized in `backend/src/config/database.js`, with expected seed usage; shared response and JWT helpers are centralized.
+- Command/check: manual inspection of review/report controllers, models, and routes
+- Reported result: passed
+- Rerun result: passed
+- Status: passed
+- Notes: Controllers handle HTTP and validation flow; routes own middleware; models own Prisma access.
+- Command/check: targeted Phase 4 UI raw styling/Astryx/direct database search
+- Reported result: passed
+- Rerun result: passed
+- Status: passed
+- Notes: Targeted review/report UI and API helper search found no `<div>`, raw hex, direct database call, fetch, Prisma, Supabase, or SQL usage.
+- Command/check: out-of-scope runtime/package implementation search
+- Reported result: passed
+- Rerun result: passed
+- Status: passed
+- Notes: No runtime/package matches were found for prohibited payment gateway, shipping, email, realtime, AI, recommendation, mobile, upload, or chart implementations.
+- Command/check: line-count scan for files over 300 lines
+- Reported result: passed
+- Rerun result: passed
+- Status: passed
+- Notes: Found `frontend/src/views/ProductDetailView.jsx`, `frontend/src/views/admin/AdminOrderView.jsx`, and `backend/src/models/order.model.js`; A2 found no evidence that these files drifted beyond focused responsibilities in 06C scope.
+- Command/check: `git diff --check -- docs/reports/report_4_execute_agent.md`
+- Reported result: passed
+- Rerun result: passed
+- Status: passed
+- Notes: No whitespace errors were reported; Git emitted only the expected line-ending warning.
+
+## Acceptance Review
+- Task acceptance: No secrets, direct frontend database access, duplicate core helpers, MVC boundary violations, or out-of-scope behavior are present.
+- Status: satisfied
+- Evidence: Safe searches and source inspection corroborate the A1 report; the only A1-reported 06C changed file is the execution report, and 06D remains pending.
+
+## Progress Tracking
+- Selected task checkbox before review: unchecked in the task block and Progress Tracker.
+- Checkbox updated by reviewer: yes
+- Batch status updated by reviewer: no
+- Execution report entry: latest 06C execution report appended at physical EOF.
+- Review report entry: this 06C review report appended at physical EOF.
+- Other: No sibling 06D checkbox or Batch06 completion status was updated.
+
+## Report Accuracy
+- Accurate
+- Mismatches: None found.
+
+## Issues
+
+### Blocking
+- None.
+
+### Major
+- None.
+
+### Minor
+- None.
+
+### Warnings
+- Existing ignored local `.env` files are present and must remain untracked.
+- Existing raw hex in `frontend/src/components/product/productUtils.js` is an SVG placeholder data string outside the targeted Phase 4 review/report UI surfaces; A2 did not treat it as a blocking 06C Astryx violation.
+
+### Observations
+- `docs/demo-checklist.md` is modified in the working tree from prior accepted Batch06 work, but it is not a 06C A1-reported changed file.
+
+## Decision
+- Accept selected task: yes
+- Repair required: no
+- Can next task proceed: yes
+- Batch can be marked complete by A2: no
+
+## Repair Instructions
+- None.
+---
+
+# Task Review Report - 06D
+
+## Source Task File
+docs/tasks/task_4.md
+
+## Execution Report Reviewed
+docs/reports/report_4_execute_agent.md
+
+## Review Report File
+docs/review/review_4_review_agent.md
+
+## Mode
+orchestrated
+
+## Final Outcome
+ACCEPTED
+
+## Reviewed Scope
+- Batch: Batch06 - Final Verification, Audit, and Submission Readiness
+- Task ID: 06D
+- Task title: Finalize submission evidence, reports, and progress state
+- Executor status reported: complete
+- Source of Truth: docs/plans/Plan_4.md > ## 10. Handoff Notes for Final Submission; docs/plans/Master_Plan.md > ## 26. Final Submission Checklist; docs/plans/Master_Plan.md > ## 27. Suggested Presentation Division
+- Supplemental documents: None
+
+## Latest Report Selection
+- Latest report entry found: yes
+- Requested task ID, if any: 06D
+- Reviewed task ID: 06D
+- Correct selection: yes
+- Notes: Reviewed the latest matching `Task Execution Report - 06D`, which is the current physical EOF entry in the execution report.
+
+## Git Diff Evidence
+- git status reviewed: yes
+- git diff stat reviewed: yes
+- git diff reviewed: yes
+- recent commits reviewed: not needed
+- changed files from git: docs/demo-checklist.md; docs/reports/report_4_execute_agent.md; docs/review/review_4_review_agent.md; docs/tasks/task_4.md
+- untracked files: None
+
+## Files Reviewed
+- `docs/tasks/task_4.md`: in scope - selected 06D task block and Progress Tracker were reviewed; A2 updated only 06D task/progress checkboxes after acceptance.
+- `docs/reports/report_4_execute_agent.md`: in scope - latest 06D execution report was reviewed.
+- `docs/demo-checklist.md`: in scope - final evidence map, blocked user actions, pending presentation work, and freeze notes were reviewed.
+- `docs/review/review_4_review_agent.md`: in scope - existing EOF was inspected before appending this report.
+- `docs/plans/Plan_4.md`: in scope - final handoff requirements and hard final rules were reviewed.
+- `docs/plans/Master_Plan.md`: in scope - final submission checklist and presentation division were reviewed.
+- `README.md`: in scope - runtime stack, MVC explanation, setup, implemented behavior, and manual-check boundaries were reviewed.
+- `docs/database-design.md`: in scope - Prisma/Supabase schema documentation and migration notes were reviewed.
+- `docs/api-testing.md`: in scope - reusable runbook wording and blocked user-action guidance were reviewed.
+
+## Reported Files Cross-Check
+- file from execution report: docs/demo-checklist.md
+- present in git/repo: yes
+- matches task scope: yes
+- notes: Diff updates only final evidence wording, Batch06 06A/06B/06C/06D status rows, and final freeze/handoff notes.
+- file from execution report: docs/reports/report_4_execute_agent.md
+- present in git/repo: yes
+- matches task scope: yes
+- notes: The latest 06D execution report is append-only and reports no runtime/schema modifications.
+
+## Dependency Review
+- Required dependencies: accepted 06A, accepted 06B, and accepted 06C.
+- Dependency status: satisfied
+- Missing or invalid dependency: None found for 06D review.
+
+## Architecture Alignment
+- Passed: The final evidence distinguishes React View, Express Controller, Prisma Model, Supabase PostgreSQL, README/docs, demo flows, user-provided evidence, pending user/team actions, and explicit out-of-scope work.
+- Failed: None.
+- Uncertain: Supabase Table Editor visual confirmation, slide readiness, rehearsal, and each member's understanding remain user/team actions and are not claimed complete.
+
+## Implementation Reality
+- Real implementation: yes
+- Stub or fake logic found: no
+- Evidence: 06D is a documentation/evidence-finalization task; the changed checklist is anchored to accepted 06A/06B/06C evidence and supporting docs, with no runtime code changes.
+
+## Hardcoding Review
+- Hardcoding found: no
+- Evidence: Credential-like pattern scan over changed task/demo/report/review docs and supporting docs found no live PostgreSQL URLs, non-placeholder database URL assignments, non-placeholder JWT secrets, or bearer JWTs.
+
+## Validations Reviewed
+- Command/check: PowerShell assertions over docs/demo-checklist.md and docs/tasks/task_4.md final evidence state
+- Reported result: passed
+- Rerun result: passed
+- Status: passed
+- Notes: Confirmed 06D remained unchecked before review, Batch06 remained unchecked, 06A/06B/06C were checked, 06D was Pending A2 review, Supabase was BLOCKED_BY_USER_ACTION, slides were Pending, member understanding was BLOCKED_BY_USER_ACTION, and final freeze notes existed.
+- Command/check: stale/falsely-complete status search over docs/demo-checklist.md and docs/tasks/task_4.md
+- Reported result: passed
+- Rerun result: passed
+- Status: passed
+- Notes: No stale Batch06-not-run wording or false Passed statuses for Supabase Table Editor, presentation slides, or member understanding were found.
+- Command/check: corrected PCRE2 credential-pattern scan over changed task/demo/report/review docs and supporting docs
+- Reported result: passed
+- Rerun result: passed
+- Status: passed
+- Notes: No live PostgreSQL URLs, non-placeholder DATABASE_URL or DIRECT_URL assignments, non-placeholder JWT_SECRET assignments, or bearer JWT patterns were found.
+- Command/check: `git diff --check -- docs/demo-checklist.md docs/reports/report_4_execute_agent.md docs/review/review_4_review_agent.md docs/tasks/task_4.md`
+- Reported result: passed
+- Rerun result: passed
+- Status: passed
+- Notes: No whitespace errors were reported; Git emitted expected line-ending warnings only.
+- Command/check: `Get-Content docs/reports/report_4_execute_agent.md -Tail 25`
+- Reported result: passed
+- Rerun result: passed
+- Status: passed
+- Notes: Confirmed the 06D execution report is the physical EOF entry and records next task readiness as can_review.
+
+## Acceptance Review
+- Task acceptance: Future readers can distinguish completed runtime behavior, verified evidence, pending user actions, and explicitly out-of-scope work.
+- Status: satisfied
+- Evidence: The demo checklist maps accepted backend/API, user-provided UI/demo, security/MVC/scope, README, database design, API runbook, final submission checklist, presentation ownership, blocked user confirmations, and final freeze notes without claiming Batch06 completion.
+
+## Progress Tracking
+- Selected task checkbox before review: unchecked in the task block and Progress Tracker.
+- Checkbox updated by reviewer: yes
+- Batch status updated by reviewer: no
+- Execution report entry: latest 06D execution report appended at physical EOF.
+- Review report entry: this 06D review report appended at physical EOF.
+- Other: No sibling task checkbox or Batch06 completion status was updated.
+
+## Report Accuracy
+- Accurate
+- Mismatches: None found.
+
+## Issues
+
+### Blocking
+- None.
+
+### Major
+- None.
+
+### Minor
+- None.
+
+### Warnings
+- Supabase Table Editor visual confirmation, presentation slide completion, rehearsal, and each member's MVC responsibility understanding remain user/team actions and are not completed by this acceptance.
+
+### Observations
+- A1-reported changed files are docs/demo-checklist.md and docs/reports/report_4_execute_agent.md; the current working tree also includes prior A2 progress/review updates in docs/tasks/task_4.md and docs/review/review_4_review_agent.md.
 
 ## Decision
 - Accept selected task: yes
