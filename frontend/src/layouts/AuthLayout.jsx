@@ -17,18 +17,19 @@ export const AuthLayout = () => {
   return (
     <Center
       style={{
+        width: '100%',
+        minWidth: 0,
         minHeight: '100vh',
         backgroundColor: 'var(--color-background-body)',
         padding: 'var(--spacing-4)'
       }}
     >
       <Card
+        width="100%"
+        maxWidth="calc(var(--spacing-10) * 10)"
+        padding={6}
         style={{
-          width: '100%',
-          maxWidth: '420px',
-          padding: 'var(--spacing-6)',
-          backgroundColor: 'var(--color-background-surface)',
-          borderRadius: 'var(--radius-container)',
+          minWidth: 0,
           boxShadow: 'var(--elevation-2)'
         }}
       >

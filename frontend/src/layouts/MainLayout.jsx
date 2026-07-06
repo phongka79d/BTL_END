@@ -12,7 +12,8 @@ import {
   Button,
   VStack,
   HStack,
-  Text
+  Text,
+  useAppShellMobile
 } from '@astryxdesign/core';
 import { useAuth } from '../contexts/AuthContext';
 import { useCart } from '../contexts/CartContext';
@@ -24,6 +25,26 @@ import {
   OrdersIcon,
   UserIcon
 } from '../components/common/LayoutIcons';
+
+const CustomerAccountMenu = ({ items, user }) => {
+  const { isMobile } = useAppShellMobile();
+  const accountLabel = user.username || user.email || 'Account';
+
+  return (
+    <DropdownMenu
+      button={{
+        label: accountLabel,
+        icon: <Avatar name={accountLabel} size="xsmall" />,
+        variant: 'secondary',
+        size: 'sm',
+        isIconOnly: isMobile,
+        tooltip: isMobile ? accountLabel : undefined
+      }}
+      hasChevron={!isMobile}
+      items={items}
+    />
+  );
+};
 
 /**
  * MainLayout component that serves as the page shell for normal customers.
@@ -138,13 +159,8 @@ export const MainLayout = () => {
 
           {/* Authentication actions / User Dropdown */}
           {isAuthenticated && user ? (
-            <DropdownMenu
-              button={{
-                label: user.username || user.email || 'Account',
-                icon: <Avatar name={user.username || user.email} size="xsmall" />,
-                variant: 'secondary',
-                size: 'sm'
-              }}
+            <CustomerAccountMenu
+              user={user}
               items={getDropdownItems()}
             />
           ) : (
@@ -169,7 +185,7 @@ export const MainLayout = () => {
   );
 
   return (
-    <AppShell height="auto" topNav={topNav}>
+    <AppShell height="fill" mobileNav={{ breakpoint: 'lg' }} topNav={topNav}>
       <VStack
         style={{
           minHeight: 'calc(100vh - (var(--spacing-8) * 2))',

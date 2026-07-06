@@ -47,10 +47,10 @@ const CheckoutSkeleton = () => (
   <VStack gap={4} style={{ width: '100%' }}>
     <VStack gap={1}>
       <Skeleton width="180px" height="var(--spacing-8)" radius="rounded" />
-      <Skeleton width="320px" height="var(--spacing-5)" radius="rounded" />
+      <Skeleton width="100%" height="var(--spacing-5)" radius="rounded" />
     </VStack>
 
-    <Grid columns={{ minWidth: 360, max: 2 }} gap={4}>
+    <Grid columns={{ minWidth: 280, max: 2 }} gap={4}>
       <VStack gap={3} style={{ padding: 'var(--spacing-4)' }}>
         <Skeleton width="100%" height="var(--spacing-10)" radius="rounded" />
         <Skeleton width="100%" height="var(--spacing-10)" radius="rounded" />
@@ -274,7 +274,7 @@ export const CheckoutView = () => {
       )}
 
       <Grid
-        columns={{ minWidth: 360, max: 2 }}
+        columns={{ minWidth: 280, max: 2 }}
         gap={4}
         style={{ alignItems: 'start' }}
       >

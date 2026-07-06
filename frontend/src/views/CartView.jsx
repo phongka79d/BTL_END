@@ -1,6 +1,6 @@
 import React, { useCallback, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Button, Grid, Heading, HStack, Text, VStack } from '@astryxdesign/core';
+import { Grid, Heading, Text, VStack } from '@astryxdesign/core';
 import { useCart } from '../contexts/CartContext';
 import Alert from '../components/common/Alert';
 import CartItemList from '../components/cart/CartItemList';
@@ -88,7 +88,7 @@ export const CartView = () => {
         />
       )}
 
-      <Grid columns={{ minWidth: 360, max: 2 }} gap={4} style={{ alignItems: 'start' }}>
+      <Grid columns={{ minWidth: 280, max: 2 }} gap={4} style={{ alignItems: 'start' }}>
         <CartItemList
           items={items}
           isLoading={loading}
@@ -111,21 +111,6 @@ export const CartView = () => {
           />
         )}
       </Grid>
-
-      {!loading && !error && items.length === 0 && (
-        <HStack gap={3} style={{ flexWrap: 'wrap' }}>
-          <Button
-            label="Browse products"
-            variant="primary"
-            onClick={() => navigate('/products')}
-          />
-          <Button
-            label="Return home"
-            variant="secondary"
-            onClick={() => navigate('/')}
-          />
-        </HStack>
-      )}
     </VStack>
   );
 };

@@ -270,7 +270,7 @@ export const OrderHistoryView = () => {
         </Text>
       </VStack>
 
-      <Card padding={0}>
+      <Card padding={0} style={{ width: '100%', minWidth: 0 }}>
         <Table
           columns={columns}
           data={pagedOrders}

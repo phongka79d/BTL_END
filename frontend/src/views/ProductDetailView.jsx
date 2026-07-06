@@ -51,7 +51,7 @@ const DetailSkeleton = () => {
         <BreadcrumbItem isCurrent>Loading product</BreadcrumbItem>
       </Breadcrumbs>
 
-      <Grid columns={{ minWidth: 360, max: 2 }} gap={5}>
+      <Grid columns={{ minWidth: 280, max: 2 }} gap={5}>
         <Card padding={0} style={{ overflow: 'hidden' }}>
           <VStack gap={3} style={{ width: '100%', padding: 'var(--spacing-4)' }}>
             <VStack
@@ -350,7 +350,7 @@ export const ProductDetailView = () => {
         />
       )}
 
-      <Grid columns={{ minWidth: 360, max: 2 }} gap={5}>
+      <Grid columns={{ minWidth: 280, max: 2 }} gap={5}>
         <Card padding={0} style={{ overflow: 'hidden' }}>
           <VStack gap={3} style={{ width: '100%' }}>
             <VStack
@@ -478,7 +478,7 @@ export const ProductDetailView = () => {
         </Text>
       )}
 
-      <Grid columns={{ minWidth: 360, max: 2 }} gap={5}>
+      <Grid columns={{ minWidth: 280, max: 2 }} gap={5}>
         <ProductReviewList
           reviews={reviews}
           isLoading={isReviewsLoading}

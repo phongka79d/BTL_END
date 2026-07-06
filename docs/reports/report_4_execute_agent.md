@@ -3011,3 +3011,815 @@ complete
 - validations to rerun: focused historical diff inspection; Batch04 review chronology/outcome checks; task/tracker checkbox checks; user evidence attribution search; git diff --check.
 - risk areas: historical review-file hunk and append-only report placement.
 - next task readiness: can_review
+
+---
+
+# Task Execution Report - 05A
+
+## Source Task File
+docs/tasks/task_4.md
+
+## Report File
+docs/reports/report_4_execute_agent.md
+
+## Mode
+orchestrated
+
+## Batch
+Batch05 - Polish, Documentation, and Demo Artifacts
+
+## Task
+05A - Polish responsive customer and admin demo routes
+
+## Status
+blocked
+
+## Source of Truth Used
+- docs/plans/Plan_4.md > ## 4. Scope
+- docs/design/design.md > # 26. Responsive Design
+- docs/design/design.md > # 30. Final UI Checklist
+
+## Supplemental Documents Used
+- docs/plans/Plan_4.md
+- docs/design/design.md
+- AGENTS.md
+
+## Selected Scope
+- Batch: Batch05 - Polish, Documentation, and Demo Artifacts
+- Task ID: 05A
+- Task title: Polish responsive customer and admin demo routes
+- Files allowed: Focused frontend files only where concrete issues are found; required execution report append.
+- Repair scope if any: None
+
+## Dependency and User Action Check
+- dependencies: Batch02 and Batch04 task checkboxes are complete.
+- user action: Browser/manual responsive evidence is required when automation is unavailable. No current user-provided evidence was available.
+- status: BLOCKED_BY_USER_ACTION because the in-app browser inventory was empty, so desktop/tablet/mobile viewport smoke checks could not run.
+
+## Files Inspected Before Editing
+- AGENTS.md: Astryx discovery and token/component constraints.
+- docs/tasks/task_4.md: selected Task 05A contract, dependencies, validation, and blocked condition.
+- docs/plans/Plan_4.md: responsive polish scope and non-goals.
+- docs/design/design.md: responsive rules and final customer/admin UI checklist.
+- frontend/src/routes/AppRoutes.jsx: named customer/admin route wiring.
+- frontend/src/layouts/MainLayout.jsx: customer AppShell and TopNav responsive behavior.
+- frontend/src/layouts/AdminLayout.jsx: admin AppShell, SideNav, and mobile collapse behavior.
+- frontend/src/views/HomeView.jsx: homepage layout and loading/error/empty behavior.
+- frontend/src/views/ProductListView.jsx: catalog filters, loading, error, empty, and product-grid behavior.
+- frontend/src/views/ProductDetailView.jsx: detail/loading/review two-column grids and states.
+- frontend/src/views/CartView.jsx: cart grid and loading/error/empty behavior.
+- frontend/src/views/CheckoutView.jsx: checkout loading/content grids, form states, and empty/error behavior.
+- frontend/src/views/OrderHistoryView.jsx: loading/error/empty/success table behavior.
+- frontend/src/views/OrderDetailView.jsx: loading/not-found/permission/error/success behavior.
+- frontend/src/views/AdminDashboardView.jsx: responsive header and report loading/error/success behavior.
+- frontend/src/views/admin/AdminOrderView.jsx: admin order states, toolbar, table, and detail dialog.
+- frontend/src/views/admin/ReportView.jsx: report loading/error/success surfaces.
+- frontend/src/components/admin/AdminTable.jsx: shared admin loading/error/empty/table behavior.
+- frontend/src/components/report/BestSellingProductsTable.jsx: report table columns and shared table reuse.
+- frontend/src/components/product/ProductList.jsx: responsive product grid and states.
+- frontend/src/components/product/ProductFilter.jsx: filter control wrapping.
+- frontend/src/components/cart/CartItem.jsx: cart item action wrapping.
+- frontend/src/components/cart/CartSummary.jsx: cart summary controls.
+- frontend/src/components/checkout/CheckoutForm.jsx: full-width form controls.
+- frontend/src/components/checkout/CheckoutOrderSummary.jsx: order summary layout.
+- frontend/src/components/order/OrderDetailPanel.jsx: order detail wrapping.
+- frontend/node_modules/@astryxdesign/core/src/Grid/Grid.tsx: documented responsive min-track implementation.
+- frontend/node_modules/@astryxdesign/core/src/Table/Table.tsx: built-in horizontal table scrolling.
+- frontend/node_modules/@astryxdesign/core/src/AppShell/AppShell.tsx: built-in mobile TopNav/SideNav collapse.
+- frontend/node_modules/@astryxdesign/core/src/TopNav/TopNav.tsx: mobile-bar and drawer rendering.
+
+## Completed Work
+- Ran Astryx discovery first; `npx astryx build` was unavailable because the installed package exposes no executable, so inspected the installed Grid, Table, AppShell, TopNav, and SideNav sources/props as fallback evidence.
+- Identified a concrete mobile overflow root cause: six two-column Grid instances required 360px tracks even though the AppShell adds inline content spacing.
+- Reduced only the product-detail, cart, and checkout demo grids to the Astryx-documented 280px responsive track pattern.
+- Made the checkout loading-description skeleton fluid instead of fixing it at 320px.
+- Confirmed existing homepage/catalog grids already use smaller responsive tracks, AppShell already collapses navigation, and Astryx Table already provides touch horizontal scrolling; no unsupported redesign was added.
+- Added a focused source-structure regression test and observed it fail before the implementation, then pass afterward.
+
+## Files Created or Modified
+- frontend/src/views/ProductDetailView.jsx
+- frontend/src/views/CartView.jsx
+- frontend/src/views/CheckoutView.jsx
+- frontend/src/views/responsiveDemoRoutes.structure.test.js
+- docs/reports/report_4_execute_agent.md
+
+## Tests or Validations Run
+- command/check: `npx astryx build "responsive ecommerce customer admin demo routes tables forms states"`
+- result: blocked
+- evidence or reason: npm reported `could not determine executable to run`; installed `@astryxdesign/core` source/props were inspected as the discovery fallback.
+- command/check: pre-fix `node --test src/views/responsiveDemoRoutes.structure.test.js`
+- result: failed
+- evidence or reason: 0/2 passed for the expected reasons: 360px responsive Grid tracks and a fixed 320px checkout skeleton were still present.
+- command/check: post-fix `node --test src/views/responsiveDemoRoutes.structure.test.js`
+- result: passed
+- evidence or reason: 2/2 responsive structure checks passed.
+- command/check: all frontend `*.test.js` files via Node test runner
+- result: passed
+- evidence or reason: 33/33 tests passed.
+- command/check: `npm run dev -- --host localhost`
+- result: passed
+- evidence or reason: Vite 5.4.21 started successfully at `http://localhost:5173/`.
+- command/check: in-app browser inventory and responsive smoke attempt
+- result: blocked
+- evidence or reason: Browser inventory returned `[]`; no desktop/tablet/mobile visual or authenticated-data smoke check could run.
+- command/check: source inspection for key route states and responsive primitives
+- result: passed
+- evidence or reason: Named routes expose loading/error/empty or relevant not-found/permission states; shared Astryx Table has `overflowX: auto`; AppShell/TopNav provide mobile navigation collapse.
+- command/check: `npm run build`
+- result: passed
+- evidence or reason: Vite transformed 546 modules and completed the production build; only the existing chunk-size advisory was emitted.
+- command/check: `npm run lint`
+- result: failed
+- evidence or reason: ESLint found no configuration file in the project; this is a pre-existing repository tooling gap, not an error produced by the Task 05A changes.
+
+## Acceptance Check
+- condition: Demo routes are usable across practical viewport sizes without unsupported redesign.
+- status: blocked
+- evidence: Source-level responsive defects were fixed and automated checks/build pass, but the task's required browser/manual viewport smoke evidence is unavailable in this session.
+
+## Progress Update
+- task checkbox updated: no
+- batch status updated: no
+- reason: Orchestrated mode forbids task checkbox and batch status updates.
+
+## Key Implementation Decisions
+- Used the installed Astryx Grid's documented 280px responsive pattern instead of adding CSS media queries or a custom responsive helper.
+- Left admin/order tables unchanged because the installed Astryx Table already owns horizontal touch scrolling.
+- Left AppShell navigation unchanged because installed AppShell/TopNav sources already provide the required mobile drawer/collapse behavior.
+
+## Risks or Open Issues
+- BLOCKED_BY_USER_ACTION: desktop, tablet, and mobile visual smoke checks still require an available browser plus any needed customer/admin credentials and backend data.
+- Repository lint cannot run successfully until an ESLint configuration is provided; adding one is outside Task 05A.
+
+## Minor In-Scope Issues Fixed
+- Checkout loading copy skeleton no longer has a fixed width that can overflow narrow content areas.
+
+## Workflow Integrity Check
+- Exactly Task 05A was handled.
+- No sibling task, documentation deliverable, checkbox, batch status, staging, or commit work was performed.
+- Production changes are limited to concrete responsive issues in named customer demo routes.
+
+## Notes for Review Agent
+- changed files: frontend/src/views/ProductDetailView.jsx; frontend/src/views/CartView.jsx; frontend/src/views/CheckoutView.jsx; frontend/src/views/responsiveDemoRoutes.structure.test.js; docs/reports/report_4_execute_agent.md
+- validations to rerun: targeted responsive structure test; all frontend Node tests; frontend build; browser checks at practical desktop/tablet/mobile widths when available.
+- risk areas: browser/manual responsive evidence remains unavailable; authenticated customer/admin data routes were not visually exercised.
+- next task readiness: cannot_review until browser/manual evidence is supplied.
+
+---
+
+# Task Execution Report - 05A
+
+## Source Task File
+docs/tasks/task_4.md
+
+## Report File
+docs/reports/report_4_execute_agent.md
+
+## Mode
+same_task_repair
+
+## Batch
+Batch05 - Polish, Documentation, and Demo Artifacts
+
+## Task
+05A - Polish responsive customer and admin demo routes
+
+## Status
+blocked
+
+## Source of Truth Used
+- docs/plans/Plan_4.md > ## 4. Scope
+- docs/design/design.md > # 26. Responsive Design
+- docs/design/design.md > # 30. Final UI Checklist
+
+## Supplemental Documents Used
+- docs/plans/Plan_4.md
+- docs/design/design.md
+- AGENTS.md
+
+## Selected Scope
+- Batch: Batch05 - Polish, Documentation, and Demo Artifacts
+- Task ID: 05A
+- Task title: Polish responsive customer and admin demo routes
+- Files allowed: Focused frontend files required to repair the seven user-reported responsive failures; focused regression tests; required execution report append.
+- Repair scope if any: User-reported 05A browser failures on the tablet customer header and order table, and the mobile login form, product-detail scrolling, empty-cart action, and admin-order table.
+
+## Dependency and User Action Check
+- dependencies: Batch02 and Batch04 remain complete; the prior 05A implementation is present.
+- user action: The user supplied authoritative pre-repair FAILED evidence. Post-repair browser/manual evidence is still required because the in-app browser inventory is empty.
+- status: BLOCKED_BY_USER_ACTION pending the exact post-repair viewport retest listed below.
+
+## Files Inspected Before Editing
+- AGENTS.md: Astryx discovery, reuse, token, anti-duplication, and root-cause rules.
+- docs/tasks/task_4.md: Task 05A repair scope, dependencies, validation, and blocked condition.
+- docs/plans/Plan_4.md: responsive polish scope and non-goals.
+- docs/design/design.md: tablet/mobile navigation and table behavior plus final UI checklist.
+- frontend/src/layouts/MainLayout.jsx: shared customer navigation and scrolling owner.
+- frontend/src/layouts/AuthLayout.jsx: shared login/register card constraint owner.
+- frontend/src/layouts/AdminLayout.jsx: admin AppShell and content-scrolling owner.
+- frontend/src/views/LoginView.jsx: login field and action composition.
+- frontend/src/views/ProductDetailView.jsx: long mobile detail/review content and responsive grids.
+- frontend/src/views/CartView.jsx: empty-cart action composition and responsive grid.
+- frontend/src/components/cart/CartItemList.jsx: existing empty-state Browse products action.
+- frontend/src/views/OrderHistoryView.jsx: customer order table container.
+- frontend/src/views/admin/AdminOrderView.jsx: all loading, empty, error, and success AdminTable callers.
+- frontend/src/components/admin/AdminTable.jsx: shared admin table container used by order, product, category, review, and report surfaces.
+- frontend/src/views/responsiveDemoRoutes.structure.test.js: existing Task 05A responsive regression coverage.
+- frontend/node_modules/@astryxdesign/core/src/AppShell/AppShell.tsx: breakpoint, internal-scroll, and mobile-drawer behavior.
+- frontend/node_modules/@astryxdesign/core/src/AppShell/AppShellMobileContext.tsx: existing shared mobile-breakpoint state.
+- frontend/node_modules/@astryxdesign/core/src/MobileNav/MobileNav.tsx: document scroll lock while the mobile drawer is active.
+- frontend/node_modules/@astryxdesign/core/src/TopNav/TopNav.tsx: mobile-bar treatment of heading, end content, and hamburger.
+- frontend/node_modules/@astryxdesign/core/src/Table/Table.tsx: built-in horizontal scroll wrapper and width requirements.
+- frontend/node_modules/@astryxdesign/core/src/Card/Card.tsx: card sizing and overflow behavior.
+- frontend/node_modules/@astryxdesign/core/src/Center/Center.tsx: auth-page centering behavior.
+- frontend/node_modules/@astryxdesign/core/src/TextInput/TextInput.tsx: field sizing behavior.
+
+## Completed Work
+- Reproduced all testable root causes with four focused failing regression checks before changing production code.
+- Moved the customer shell to AppShell internal scrolling so long product-detail content remains scrollable even when the mobile drawer owns document-level scroll locking.
+- Reused AppShell mobile context to make the authenticated account control icon-only at the same `lg` breakpoint where customer navigation collapses; cart, account, and hamburger now have bounded tablet/mobile header width without duplicating breakpoint configuration.
+- Constrained the shared auth Center/Card with full-width, zero-min-width sizing and Astryx spacing tokens so login/register form controls cannot be positioned outside the mobile viewport.
+- Constrained customer and shared admin table cards to the available width so Astryx Table owns horizontal scrolling instead of forcing the page or clipping the table.
+- Removed the duplicate empty-cart Browse products action from CartView while preserving the existing CartItemList empty-state action.
+- Preserved the prior 280px product-detail/cart/checkout grids and fluid checkout loading skeleton.
+- Inspected every AdminTable caller; the shared containment repair covers admin orders plus existing product, category, review, and report consumers without duplicating table logic.
+
+## Files Created or Modified
+- frontend/src/components/admin/AdminTable.jsx
+- frontend/src/layouts/AuthLayout.jsx
+- frontend/src/layouts/MainLayout.jsx
+- frontend/src/views/CartView.jsx
+- frontend/src/views/CheckoutView.jsx
+- frontend/src/views/OrderHistoryView.jsx
+- frontend/src/views/ProductDetailView.jsx
+- frontend/src/views/responsiveDemoRoutes.structure.test.js
+- docs/reports/report_4_execute_agent.md
+
+## Tests or Validations Run
+- command/check: `npx astryx build "responsive customer header authentication form product detail cart and order tables"` plus `npx astryx component AppShell` and `npx astryx component Table`
+- result: blocked
+- evidence or reason: npm reported `could not determine executable to run`; the installed Astryx component sources and props were inspected as the repository-approved fallback.
+- command/check: pre-repair `node --test src/views/responsiveDemoRoutes.structure.test.js`
+- result: failed
+- evidence or reason: 2/6 passed and the four new checks failed for the expected root causes: auto/page scrolling with non-compact navigation, unconstrained auth card, unconstrained table cards, and two empty-cart Browse products actions.
+- command/check: post-repair `node --test src/views/responsiveDemoRoutes.structure.test.js`
+- result: passed
+- evidence or reason: 6/6 focused responsive regression checks passed.
+- command/check: `node --test src/**/*.test.js`
+- result: passed
+- evidence or reason: 37/37 frontend tests passed.
+- command/check: `npm run build`
+- result: passed
+- evidence or reason: Vite transformed 546 modules and completed the production build; only the existing chunk-size advisory was emitted.
+- command/check: running Vite development server plus `Invoke-WebRequest http://localhost:5173`
+- result: passed
+- evidence or reason: The local development URL returned HTTP 200.
+- command/check: in-app browser setup, documentation, troubleshooting, and inventory
+- result: blocked
+- evidence or reason: Browser inventory returned `[]`; no post-repair computed-layout or authenticated route smoke test could run.
+- command/check: AdminTable caller search and scoped legacy/forbidden-pattern searches
+- result: passed
+- evidence or reason: All seven AdminTable consumers were inspected; one empty-cart Browse products action remains; legacy 360px demo grids, auto customer shell, and 420px auth-card pattern are absent; added production lines contain no raw color, raw px, div, xstyle, or utility-class additions.
+- command/check: `git diff --check`
+- result: passed
+- evidence or reason: No whitespace errors were reported; Git emitted only line-ending notices.
+
+## Acceptance Check
+- condition: Repair all seven user-reported responsive failures while preserving desktop behavior and working functionality.
+- status: blocked
+- evidence: Focused tests, all frontend tests, build, development-server response, source checks, caller inspection, and diff hygiene pass. Required post-repair browser/manual evidence is unavailable in this session.
+
+## Progress Update
+- task checkbox updated: no
+- batch status updated: no
+- reason: Orchestrated same-task repair mode forbids task checkbox and batch status updates.
+
+## Key Implementation Decisions
+- Reused `useAppShellMobile` rather than duplicating a media-query breakpoint.
+- Fixed table containment in shared AdminTable so every admin table caller receives the same root repair.
+- Kept the existing CartItemList empty-state action and deleted the duplicate caller action.
+- Used AppShell `height="fill"` so route content scrolls in the shell's intended scroll container instead of relying on document scrolling that MobileNav temporarily locks.
+
+## Risks or Open Issues
+- BLOCKED_BY_USER_ACTION: Retest authenticated customer header and `/orders` at 768x1024; retest `/login`, `/products/:id`, empty `/cart`, and authenticated `/admin/orders` at 360x800.
+- Because shared customer shell/auth/table owners changed, also confirm no desktop regression at 1440x900 on `/login`, `/products/:id`, `/orders`, and `/admin/orders`.
+- For `/products/:id`, open and close the hamburger before verifying vertical scrolling reaches Add to cart and reviews.
+- For `/orders` and `/admin/orders`, confirm the table remains in the DOM and the table area scrolls horizontally without page-level overflow.
+
+## Minor In-Scope Issues Fixed
+- None beyond the seven reported responsive failures.
+
+## Workflow Integrity Check
+- Exactly the user-reported Task 05A repair scope was handled.
+- No 05B or sibling task, broad redesign, unrelated cleanup, checkbox, batch status, staging, or commit work was performed.
+
+## Notes for Review Agent
+- changed files: frontend/src/components/admin/AdminTable.jsx; frontend/src/layouts/AuthLayout.jsx; frontend/src/layouts/MainLayout.jsx; frontend/src/views/CartView.jsx; frontend/src/views/CheckoutView.jsx; frontend/src/views/OrderHistoryView.jsx; frontend/src/views/ProductDetailView.jsx; frontend/src/views/responsiveDemoRoutes.structure.test.js; docs/reports/report_4_execute_agent.md
+- validations to rerun: focused responsive test; all frontend Node tests; production build; git diff --check; manual retest at the exact viewports/routes in Risks or Open Issues.
+- risk areas: post-repair computed layout remains manually unverified because browser inventory is empty; shared customer AppShell scrolling and shared AdminTable containment.
+- next task readiness: cannot_review until the exact post-repair browser/manual evidence is supplied.
+
+---
+
+# Task Execution Report - 05A
+
+## Source Task File
+docs/tasks/task_4.md
+
+## Report File
+docs/reports/report_4_execute_agent.md
+
+## Mode
+same_task_repair
+
+## Batch
+Batch05 - Polish, Documentation, and Demo Artifacts
+
+## Task
+05A - Polish responsive customer and admin demo routes
+
+## Status
+complete
+
+## Source of Truth Used
+- docs/plans/Plan_4.md > ## 4. Scope
+- docs/design/design.md > # 26. Responsive Design
+- docs/design/design.md > # 30. Final UI Checklist
+
+## Supplemental Documents Used
+- docs/plans/Plan_4.md
+- docs/design/design.md
+
+## Selected Scope
+- Batch: Batch05 - Polish, Documentation, and Demo Artifacts
+- Task ID: 05A
+- Task title: Polish responsive customer and admin demo routes
+- Files allowed: Focused frontend files where concrete responsive issues were found, directly relevant tests, and this execution report.
+- Repair scope if any: Resolve the prior `BLOCKED_BY_USER_ACTION` state by recording the user's post-repair responsive PASS evidence and confirming the established repair worktree still passes cheap directly relevant validations.
+
+## Dependency and User Action Check
+- dependencies: Batch02 and Batch04 outputs remain present in the existing worktree.
+- user action: The user supplied the required post-repair manual browser evidence for the tablet header, tablet order history, mobile login, mobile product-detail scrolling, mobile empty cart, mobile admin orders, and desktop regression checks.
+- status: satisfied; evidence provenance is explicitly user-provided manual browser testing, not automated browser evidence.
+
+## Files Inspected Before Editing
+- docs/tasks/task_4.md: Task 05A contract, dependencies, user action, acceptance, validation, and scope.
+- docs/plans/Plan_4.md: responsive-polish scope and non-goals.
+- docs/design/design.md: desktop/tablet/mobile behavior and final UI checklist.
+- frontend/src/components/admin/AdminTable.jsx: existing shared admin-table containment repair.
+- frontend/src/layouts/AuthLayout.jsx: existing mobile auth-card containment repair.
+- frontend/src/layouts/MainLayout.jsx: existing compact navigation and internal-scroll repair.
+- frontend/src/views/CartView.jsx: existing mobile grid and duplicate empty-cart action repair.
+- frontend/src/views/CheckoutView.jsx: existing mobile grid and fluid skeleton repair.
+- frontend/src/views/OrderHistoryView.jsx: existing customer table containment repair.
+- frontend/src/views/ProductDetailView.jsx: existing mobile-grid repair.
+- frontend/src/views/responsiveDemoRoutes.structure.test.js: focused responsive regression coverage.
+- docs/reports/report_4_execute_agent.md: prior 05A attempts and physical EOF append point.
+
+## Completed Work
+- Recorded the user's post-repair manual browser result as PASS for the tablet header and `/orders`, mobile `/login`, mobile `/products/:id` scrolling, mobile empty `/cart`, mobile `/admin/orders`, and desktop regression coverage.
+- Preserved provenance: this is user-provided manual evidence; browser automation remains unavailable and was not claimed.
+- Reconstructed and inspected the established 05A repair state without altering implementation.
+- Reran focused and repository frontend tests, the production build, and diff hygiene; all passed.
+
+## Files Created or Modified
+- docs/reports/report_4_execute_agent.md
+
+## Tests or Validations Run
+- command/check: User-provided post-repair manual responsive browser report
+- result: passed
+- evidence or reason: User explicitly reported PASS for tablet header, tablet `/orders`, mobile `/login`, mobile `/products/:id` scrolling, mobile empty `/cart`, mobile `/admin/orders`, and desktop regression. This evidence was supplied by the user, not produced by browser automation.
+- command/check: `node --test src/views/responsiveDemoRoutes.structure.test.js`
+- result: passed
+- evidence or reason: 6/6 focused responsive regression checks passed.
+- command/check: `node --test src/**/*.test.js`
+- result: passed
+- evidence or reason: 37/37 frontend tests passed.
+- command/check: `npm run build`
+- result: passed
+- evidence or reason: Vite transformed 546 modules and completed the production build; only the existing chunk-size advisory was emitted.
+- command/check: `git diff --check`
+- result: passed
+- evidence or reason: No whitespace errors were reported; Git emitted only line-ending notices.
+- command/check: Automated browser responsive smoke
+- result: not_run
+- evidence or reason: Browser automation remains unavailable. The required viewport evidence was instead supplied manually by the user and is recorded with accurate provenance.
+
+## Acceptance Check
+- condition: Demo routes are usable across practical desktop, tablet, and mobile viewport sizes without unsupported redesign.
+- status: satisfied
+- evidence: The established focused responsive repairs pass 6/6 targeted checks, all 37 frontend tests, and the production build. The user-provided post-repair manual browser report passes every previously blocked route/viewport check and the desktop regression check.
+
+## Progress Update
+- task checkbox updated: no
+- batch status updated: no
+- reason: Orchestrated same-task repair mode forbids task checkbox and batch status updates; A2 remains the acceptance gate.
+
+## Key Implementation Decisions
+- Treated the user's report as manual browser evidence with explicit provenance, not as automated browser output.
+- Did not modify implementation because the established repair state still passes all directly relevant checks.
+
+## Risks or Open Issues
+- Automated browser evidence remains unavailable, but Task 05A explicitly permits user-provided manual evidence and the user supplied the complete requested retest result.
+
+## Minor In-Scope Issues Fixed
+- None; this completion attempt only resolved the outstanding evidence blocker.
+
+## Workflow Integrity Check
+- Exactly Task 05A's prior user-action blocker was handled.
+- No implementation, sibling task, task checkbox, batch status, staging, or commit work was performed.
+
+## Notes for Review Agent
+- changed files: docs/reports/report_4_execute_agent.md in this completion attempt; the existing 05A repair implementation remains in frontend/src/components/admin/AdminTable.jsx, frontend/src/layouts/AuthLayout.jsx, frontend/src/layouts/MainLayout.jsx, frontend/src/views/CartView.jsx, frontend/src/views/CheckoutView.jsx, frontend/src/views/OrderHistoryView.jsx, frontend/src/views/ProductDetailView.jsx, and frontend/src/views/responsiveDemoRoutes.structure.test.js.
+- validations to rerun: focused responsive test, frontend test suite, production build, and report provenance/EOF review.
+- risk areas: manual browser evidence is user-provided; do not relabel it as automated evidence.
+- next task readiness: can_review.
+
+---
+
+# Task Execution Report - 05B
+
+## Source Task File
+docs/tasks/task_4.md
+
+## Report File
+docs/reports/report_4_execute_agent.md
+
+## Mode
+orchestrated
+
+## Batch
+Batch05 - Polish, Documentation, and Demo Artifacts
+
+## Task
+05B - Update README with final setup and implemented behavior
+
+## Status
+complete
+
+## Source of Truth Used
+- docs/plans/Plan_4.md > ### 7.4 Documentation Contract
+- docs/plans/Master_Plan.md > ## 26. Final Submission Checklist
+- README.md
+
+## Supplemental Documents Used
+- docs/plans/Plan_4.md
+- docs/plans/Master_Plan.md
+
+## Selected Scope
+- Batch: Batch05 - Polish, Documentation, and Demo Artifacts
+- Task ID: 05B
+- Task title: Update README with final setup and implemented behavior
+- Files allowed: README.md and the required append-only execution report
+- Repair scope if any: None
+
+## Dependency and User Action Check
+- dependencies: Batch01 through Batch04 are recorded complete in docs/tasks/task_4.md and their implemented route/API evidence was inspected.
+- user action: No additional user confirmation was required because the documented demo-only credentials were verified directly in tracked backend/prisma/seed.js.
+- status: satisfied
+
+## Files Inspected Before Editing
+- README.md: reviewed the existing setup, API, implementation-status, and stale handoff sections before consolidation.
+- docs/tasks/task_4.md: read the complete 05B contract, dependencies, acceptance criteria, validation, and file scope.
+- docs/plans/Plan_4.md: read the documentation contract.
+- docs/plans/Master_Plan.md: read the final submission checklist.
+- backend/package.json: verified backend scripts, Prisma seed command, and dependency versions.
+- frontend/package.json: verified frontend scripts and dependency versions.
+- backend/.env.example: verified safe backend environment placeholders without copying real environment values.
+- frontend/.env.example: verified the frontend API base URL example.
+- backend/prisma/seed.js: verified demo-only admin/customer emails and passwords are tracked seed values.
+- backend/prisma/schema.prisma: checked implemented models and status enums.
+- backend/src/app.js: verified health, auth, user, and API route mounts.
+- backend/src/routes/index.js: verified product, category, cart, order, payment, review, and report route groups.
+- backend/src/routes/auth.routes.js: verified auth endpoints and protection.
+- backend/src/routes/user.routes.js: verified profile and admin-user endpoints.
+- backend/src/routes/product.routes.js: verified public and admin product operations.
+- backend/src/routes/category.routes.js: verified public and admin category operations.
+- backend/src/routes/cart.routes.js: verified authenticated cart operations.
+- backend/src/routes/order.routes.js: verified customer/admin order operations.
+- backend/src/routes/payment.routes.js: verified COD payment operation.
+- backend/src/routes/review.routes.js: verified public/authenticated/admin review operations.
+- backend/src/routes/report.routes.js: verified admin report operations.
+- frontend/src/routes/AppRoutes.jsx: verified implemented public, customer, and admin frontend routes.
+- docs/reports/report_4_execute_agent.md: inspected prior Phase 4 execution evidence and physical EOF before appending.
+
+## Completed Work
+- Replaced the layered phase-by-phase handoff README with a concise final-submission README.
+- Added the TechMart project name and a concrete Model/View/Controller/routes-and-middleware explanation.
+- Documented the verified stack, prerequisites, Supabase PostgreSQL setup, placeholder-only environment examples, backend/frontend commands, and localhost URLs.
+- Added demo-only customer/admin accounts after verifying all values directly in tracked seed code.
+- Reconciled implemented customer/admin features, frontend routes, and API groups against current route files.
+- Documented Phase 4 review/report completion evidence, manual responsive evidence provenance, remaining Supabase dashboard visual confirmation, and explicit out-of-scope behavior.
+
+## Files Created or Modified
+- README.md
+- docs/reports/report_4_execute_agent.md
+
+## Tests or Validations Run
+- command/check: README contract heading assertion
+- result: passed
+- evidence or reason: PowerShell assertions found project/MVC, stack, Supabase, environment, setup, demo account, API group, and verification sections.
+- command/check: Seed credential provenance assertion
+- result: passed
+- evidence or reason: All four documented demo values were found in both README.md and tracked backend/prisma/seed.js.
+- command/check: README secret scan
+- result: passed
+- evidence or reason: No non-placeholder PostgreSQL URL, unsafe JWT secret assignment, Supabase key marker, or JWT-shaped token was found in README.md.
+- command/check: Manual README-to-route review
+- result: passed
+- evidence or reason: Backend app/route mounts and frontend AppRoutes were inspected; documented route groups and implemented features match the current runtime files.
+- command/check: git diff --check -- README.md
+- result: passed
+- evidence or reason: No whitespace errors were reported; Git emitted only the expected line-ending notice.
+
+## Acceptance Check
+- condition: README setup and feature status match actual runtime behavior and do not leak credentials.
+- status: satisfied
+- evidence: README now contains every Plan 4 documentation-contract item, documents only verified seed credentials as demo-only, uses placeholder environment values, and reconciles feature/API claims against implemented route files.
+
+## Progress Update
+- task checkbox updated: no
+- batch status updated: no
+- reason: Orchestrated mode forbids task checkbox and batch status updates; A2 remains the acceptance gate.
+
+## Key Implementation Decisions
+- Consolidated and deleted stale phase handoff narration instead of layering another final-state section over contradictory historical statements.
+- Used `prisma migrate deploy` for applying the tracked migration and documented `prisma migrate dev` separately for local schema development.
+- Kept user-supplied responsive evidence explicitly labeled as manual evidence.
+- Documented seeded sample passwords because they are intentionally tracked demo-only values, while retaining a warning against reuse.
+
+## Risks or Open Issues
+- Supabase Table Editor visual confirmation remains a user-side check when dashboard access is unavailable.
+- Final demo/database/API-testing/presentation documents are sibling tasks and were not changed or claimed complete.
+
+## Minor In-Scope Issues Fixed
+- Added previously omitted order and COD payment API groups.
+- Removed stale claims that later-phase order, review, and report behavior was unimplemented.
+- Removed mojibake from the final user-facing README by replacing corrupted historical handoff text.
+
+## Workflow Integrity Check
+- Exactly Task 05B was executed.
+- No sibling documentation task, task checkbox, batch status, staging, or commit work was performed.
+
+## Notes for Review Agent
+- changed files: README.md and docs/reports/report_4_execute_agent.md.
+- validations to rerun: README contract/manual route comparison, seed credential provenance check, secret scan, and git diff --check.
+- risk areas: verify documented endpoint paths and that demo credentials are accepted as intentionally tracked seed values.
+- next task readiness: can_review.
+
+---
+
+# Task Execution Report - 05C
+
+## Source Task File
+docs/tasks/task_4.md
+
+## Report File
+docs/reports/report_4_execute_agent.md
+
+## Mode
+orchestrated
+
+## Batch
+Batch05 - Polish, Documentation, and Demo Artifacts
+
+## Task
+05C - Update database design and ERD documentation
+
+## Status
+complete
+
+## Source of Truth Used
+- docs/plans/Plan_4.md > 7.4 Documentation Contract
+- docs/plans/Master_Plan.md > 26. Final Submission Checklist
+- backend/prisma/schema.prisma
+
+## Supplemental Documents Used
+- backend/prisma/migrations/20260704020610_init/migration.sql
+- backend/package.json
+- backend/.env.example
+- README.md
+
+## Selected Scope
+- Batch: Batch05 - Polish, Documentation, and Demo Artifacts
+- Task ID: 05C
+- Task title: Update database design and ERD documentation
+- Files allowed: docs/database-design.md, optional docs/erd.md, and the execution report
+- Repair scope if any: None
+
+## Dependency and User Action Check
+- dependencies: Batch01 and Batch03 task checkboxes are complete in docs/tasks/task_4.md.
+- user action: None; the existing embedded Mermaid ERD avoids an external image-export requirement.
+- status: satisfied
+
+## Files Inspected Before Editing
+- docs/tasks/task_4.md: read the complete 05C contract and dependency state.
+- docs/plans/Plan_4.md: read the database documentation contract.
+- docs/plans/Master_Plan.md: read the final database and ERD checklist items.
+- backend/prisma/schema.prisma: treated all models, fields, enums, mappings, constraints, and relations as authoritative.
+- docs/database-design.md: inspected the existing field summaries and embedded Mermaid ERD before deciding to update rather than duplicate it.
+- backend/prisma/migrations/20260704020610_init/migration.sql: verified the tracked migration and generated database constraints.
+- backend/package.json: verified available Prisma scripts.
+- backend/.env.example: verified environment-variable names and placeholder-only values.
+- README.md: kept Supabase connection and migration guidance consistent with current setup documentation.
+- docs/reports/report_4_execute_agent.md: inspected physical EOF before appending.
+
+## Completed Work
+- Removed stale phase-specific framing and made the current Prisma schema explicitly authoritative.
+- Preserved and checked field summaries for all nine implemented models.
+- Corrected the Review rating note so it does not claim a database range constraint absent from Prisma.
+- Clarified Prisma navigation fields, foreign-key ownership, enum values, uniqueness, and cascade relationships.
+- Retained the existing Mermaid ERD because it already represents all schema relations without requiring a redundant docs/erd.md.
+- Replaced the stale init-development command with tracked-migration deployment and intentional schema-development guidance.
+- Added Supabase/Prisma connection-role notes and explicit credential-safety rules.
+
+## Files Created or Modified
+- docs/database-design.md
+- docs/reports/report_4_execute_agent.md
+
+## Tests or Validations Run
+- command/check: cd backend; npx prisma validate
+- result: passed
+- evidence or reason: Prisma loaded prisma/schema.prisma and reported that the schema is valid; only existing Prisma configuration deprecation warnings were emitted.
+- command/check: PowerShell schema-to-doc model, field, enum, and ERD comparison
+- result: passed
+- evidence or reason: All 9 models, every Prisma model field, all 5 enums and their values, and all 10 schema relationships/cardinalities appear in the matching documentation sections.
+- command/check: Documentation contract and stale/credential content assertions
+- result: passed
+- evidence or reason: Entity/field, enum, relationship/ERD, migration, and credential-safety sections are present; no stale 1-to-5 database constraint, stale init migration command, connection string, or JWT-like token was found. An initial ad hoc enum assertion had an incorrect PowerShell escape pattern; the corrected assertion passed.
+- command/check: git diff --check -- docs/database-design.md
+- result: passed
+- evidence or reason: No whitespace errors were reported; Git emitted only the expected line-ending notice.
+- command/check: Manual schema-to-doc comparison
+- result: passed
+- evidence or reason: Model types, optionality, defaults, database mappings, decimal precision, unique constraints, relation ownership, and cascade behavior were compared with schema.prisma and the tracked initial migration.
+
+## Acceptance Check
+- condition: Database documentation contains the required entity list, field summaries, relationship summary, Supabase/Prisma migration notes, and an ERD that match the actual Prisma schema without planned-only fields.
+- status: satisfied
+- evidence: docs/database-design.md documents all 9 current entities, 5 current enums, all schema fields and relationships, the tracked migration workflow, credential safety, and an embedded Mermaid ERD.
+
+## Progress Update
+- task checkbox updated: no
+- batch status updated: no
+- reason: Orchestrated mode reserves acceptance and progress updates for A2/orchestration.
+
+## Key Implementation Decisions
+- Updated the existing embedded Mermaid ERD instead of creating docs/erd.md, avoiding two database diagrams that could drift.
+- Distinguished the application-level 1-to-5 review validation from the Prisma/database schema, which stores rating as an unconstrained Int.
+- Documented migrate deploy for applying tracked migrations and migrate dev only for intentional schema development.
+
+## Risks or Open Issues
+- Supabase Table Editor visual confirmation remains outside this text-document task and is not claimed.
+- The existing Prisma package configuration emits deprecation warnings but validates successfully; changing that configuration is outside 05C.
+
+## Minor In-Scope Issues Fixed
+- Removed stale Phase 1/2 wording from the current database contract.
+- Removed the obsolete prisma migrate dev --name init instruction.
+
+## Workflow Integrity Check
+- Exactly Task 05C was executed.
+- No runtime schema, migration, seed, source code, README, sibling 05D artifact, checkbox, batch status, staging, or commit was changed.
+
+## Notes for Review Agent
+- changed files: docs/database-design.md and docs/reports/report_4_execute_agent.md.
+- validations to rerun: Prisma validate, schema-to-doc model/field/enum/relationship comparison, secret/stale-content scan, and git diff --check.
+- risk areas: Review rating is intentionally documented as an unconstrained Prisma Int; 1-to-5 is enforced above the database layer. Verify migrate deploy versus migrate dev wording and all cascade edges.
+- next task readiness: can_review.
+
+---
+
+# Task Execution Report - 05D
+
+## Source Task File
+docs/tasks/task_4.md
+
+## Report File
+docs/reports/report_4_execute_agent.md
+
+## Mode
+orchestrated
+
+## Batch
+Batch05 - Polish, Documentation, and Demo Artifacts
+
+## Task
+05D - Update demo checklist, API testing notes, and presentation support
+
+## Status
+complete
+
+## Source of Truth Used
+- docs/plans/Plan_4.md > 7.4 Documentation Contract
+- docs/plans/Plan_4.md > 10. Handoff Notes for Final Submission
+- docs/plans/Master_Plan.md > 21. Minimum Viable Demo Flow
+- docs/plans/Master_Plan.md > 26. Final Submission Checklist
+- docs/plans/Master_Plan.md > 27. Suggested Presentation Division
+
+## Supplemental Documents Used
+- README.md
+- docs/database-design.md
+- docs/review/review_4_review_agent.md
+- backend/src/routes/index.js
+- backend/src/routes/auth.routes.js
+- backend/src/routes/product.routes.js
+- backend/src/routes/category.routes.js
+- backend/src/routes/cart.routes.js
+- backend/src/routes/order.routes.js
+- backend/src/routes/payment.routes.js
+- backend/src/routes/review.routes.js
+- backend/src/routes/report.routes.js
+- backend/src/controllers/auth.controller.js
+- backend/src/controllers/cart.controller.js
+- backend/src/controllers/order.controller.js
+- backend/src/controllers/review.controller.js
+- backend/src/controllers/report.controller.js
+
+## Selected Scope
+- Batch: Batch05 - Polish, Documentation, and Demo Artifacts
+- Task ID: 05D
+- Task title: Update demo checklist, API testing notes, and presentation support
+- Files allowed: docs/demo-checklist.md, optional docs/api-testing.md, optional presentation/demo docs, and the execution report
+- Repair scope if any: None
+
+## Dependency and User Action Check
+- dependencies: Batch01 through Batch04 and tasks 05B/05C are checked complete; A2 review reports show 05B and 05C ACCEPTED.
+- user action: Supabase Table Editor confirmation, real team-member assignment, slide completion, rehearsal timing, and member understanding were not supplied.
+- status: implementation dependency satisfied; unavailable user-side checks are explicitly recorded as BLOCKED_BY_USER_ACTION as required by the selected task.
+
+## Files Inspected Before Editing
+- docs/tasks/task_4.md: read the complete 05D contract, dependencies, blocked condition, and progress state.
+- docs/plans/Plan_4.md: read the documentation contract and final-submission handoff rules.
+- docs/plans/Master_Plan.md: read the minimum customer/admin demo flows, final submission checklist, and suggested presentation division.
+- docs/demo-checklist.md: inspected existing Plan 1-3 evidence and handoff notes before extending the same artifact.
+- docs/review/review_4_review_agent.md: used accepted task evidence for review APIs/UI, report APIs/UI, responsive 05A manual results, README, and database docs.
+- README.md: checked current setup, local URLs, seeded demo accounts, runtime routes, and API groups.
+- docs/database-design.md: checked the accepted schema/ERD artifact referenced by the final checklist.
+- backend route/controller files listed above: verified documented API paths, payloads, authorization, status behavior, and response envelopes.
+- docs/reports/report_4_execute_agent.md: inspected physical EOF before appending.
+
+## Completed Work
+- Extended docs/demo-checklist.md with evidence-backed Plan 4 status, including explicit user-provided provenance for 05A responsive PASS.
+- Added an executable customer demo path from homepage through review and an admin path from dashboard through reports.
+- Mapped every Master Plan section 26 final-submission item to Passed, Pending, or BLOCKED_BY_USER_ACTION evidence without claiming Batch06 execution.
+- Added concise Master Plan section 27 presentation responsibility notes while leaving names, slides, rehearsal, and member confirmation as user-owned checks.
+- Added docs/api-testing.md because no consolidated API runbook existed.
+- Documented a secret-safe Postman/manual sequence for authentication, products/categories, cart, orders/COD, reviews, reports, and authorization boundaries.
+- Preserved existing Plan 1-3 evidence and avoided creating a separate presentation document that would duplicate the demo checklist.
+
+## Files Created or Modified
+- docs/demo-checklist.md
+- docs/api-testing.md
+- docs/reports/report_4_execute_agent.md
+
+## Tests or Validations Run
+- command/check: Manual documentation review against Plan 4 sections 7.4 and 10 and Master Plan sections 21, 26, and 27
+- result: passed
+- evidence or reason: Customer/admin flows, every final-checklist item, presentation role notes, runtime-versus-pending labels, and hard final rules are represented.
+- command/check: PowerShell documentation contract assertions
+- result: passed
+- evidence or reason: Required demo headings, status labels, 05A manual provenance, all six required API areas, review moderation, all three report endpoints, and the Batch06 non-claim were present.
+- command/check: Manual API runbook comparison with current backend route and controller files
+- result: passed
+- evidence or reason: Paths, auth roles, payload fields, expected status codes, review hide semantics, COD behavior, report meanings, and response-envelope guidance match current runtime code.
+- command/check: Credential-like value scan over docs/demo-checklist.md and docs/api-testing.md
+- result: passed
+- evidence or reason: No live PostgreSQL URL, configured database/direct URL, JWT secret assignment, bearer JWT, or private key was found.
+- command/check: git diff --check -- docs/demo-checklist.md docs/api-testing.md
+- result: passed
+- evidence or reason: No whitespace errors were reported; Git emitted only the expected line-ending notice for the tracked checklist.
+
+## Acceptance Check
+- condition: Team-usable demo and presentation support docs distinguish verified runtime behavior from pending and user-side checks.
+- status: satisfied
+- evidence: The checklist contains complete customer/admin demo flows, an item-by-item final submission map, presentation responsibilities, explicit evidence provenance, BLOCKED_BY_USER_ACTION entries, and a separate API runbook covering all required API groups.
+
+## Progress Update
+- task checkbox updated: no
+- batch status updated: no
+- reason: Orchestrated mode reserves acceptance and progress updates for A2/orchestration.
+
+## Key Implementation Decisions
+- Consolidated presentation roles into docs/demo-checklist.md because that file already owns the demo/submission handoff; no redundant presentation document was created.
+- Created docs/api-testing.md because searches found no existing consolidated manual/Postman sequence.
+- Treated accepted A2 reviews as evidence and preserved user-provided manual attribution instead of converting it into automated browser evidence.
+- Marked unverified Supabase dashboard, slide, rehearsal, and member-readiness items as user-owned; left Batch06 explicitly Pending.
+
+## Risks or Open Issues
+- Supabase Table Editor rows/tables remain BLOCKED_BY_USER_ACTION until a user with dashboard access confirms them.
+- Presentation slides, team names, speaking times, rehearsal, and each member's understanding remain Pending or BLOCKED_BY_USER_ACTION.
+- Batch06 final verification has not run and is not claimed by these documentation artifacts.
+
+## Minor In-Scope Issues Fixed
+- Replaced the checklist's stale Plan 1/2-only introduction with a complete evidence-status explanation.
+- Added the previously missing consolidated API testing sequence.
+
+## Workflow Integrity Check
+- Exactly Task 05D was executed.
+- No runtime code, schema, README, database-design doc, task checkbox, batch status, staging, commit, or Batch06 validation was changed or claimed.
+
+## Notes for Review Agent
+- changed files: docs/demo-checklist.md, docs/api-testing.md, and docs/reports/report_4_execute_agent.md.
+- validations to rerun: source-plan checklist comparison, accepted-evidence provenance check, route/controller-to-runbook comparison, secret scan, and git diff --check.
+- risk areas: verify every final checklist status is supported, user-side checks remain blocked/pending, and the runbook is not presented as executed Batch06 evidence.
+- next task readiness: can_review.

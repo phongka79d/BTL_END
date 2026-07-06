@@ -2547,6 +2547,161 @@ ACCEPTED
 ## Repair Instructions
 - None.
 
+# Task Review Report - 05B
+
+## Source Task File
+docs/tasks/task_4.md
+
+## Execution Report Reviewed
+docs/reports/report_4_execute_agent.md
+
+## Review Report File
+docs/review/review_4_review_agent.md
+
+## Mode
+orchestrated
+
+## Final Outcome
+ACCEPTED
+
+## Reviewed Scope
+- Batch: Batch05 - Polish, Documentation, and Demo Artifacts
+- Task ID: 05B
+- Task title: Update README with final setup and implemented behavior
+- Executor status reported: complete
+- Source of Truth: `docs/plans/Plan_4.md` > `### 7.4 Documentation Contract`; `docs/plans/Master_Plan.md` > `## 26. Final Submission Checklist`; `README.md`
+- Supplemental documents: `docs/plans/Plan_4.md`; `docs/plans/Master_Plan.md`
+
+## Latest Report Selection
+- Latest report entry found: yes
+- Requested task ID, if any: 05B
+- Reviewed task ID: 05B
+- Correct selection: yes
+- Notes: The final execution-report entry is the matching 05B report and reports `complete`.
+
+## Git Diff Evidence
+- git status reviewed: yes
+- git diff stat reviewed: yes
+- git diff reviewed: yes
+- recent commits reviewed: not needed
+- changed files from git: `README.md`; `docs/reports/report_4_execute_agent.md`; `docs/review/review_4_review_agent.md`; `docs/tasks/task_4.md`; `frontend/src/components/admin/AdminTable.jsx`; `frontend/src/layouts/AuthLayout.jsx`; `frontend/src/layouts/MainLayout.jsx`; `frontend/src/views/CartView.jsx`; `frontend/src/views/CheckoutView.jsx`; `frontend/src/views/OrderHistoryView.jsx`; `frontend/src/views/ProductDetailView.jsx`
+- untracked files: `frontend/src/views/responsiveDemoRoutes.structure.test.js`
+
+## Files Reviewed
+- `README.md`: in scope - 05B final-submission documentation change.
+- `docs/reports/report_4_execute_agent.md`: in scope - required append-only 05B execution evidence.
+- `docs/tasks/task_4.md`: in scope as progress evidence - pre-review changes were accepted 05A checkbox updates; A2 updated only both 05B checkbox locations after acceptance.
+- `docs/review/review_4_review_agent.md`: in scope as review evidence - pre-review changes were prior A2 reports; this 05B review is appended at physical EOF.
+- `backend/package.json`: in scope evidence - backend scripts and versions match README commands and stack.
+- `frontend/package.json`: in scope evidence - frontend scripts and versions match README commands and stack.
+- `backend/.env.example`: in scope evidence - README backend environment names and placeholders match.
+- `frontend/.env.example`: in scope evidence - README frontend API base URL matches.
+- `backend/prisma/seed.js`: in scope evidence - documented customer/admin credentials exactly match tracked demo seed values.
+- `backend/prisma/schema.prisma`: in scope evidence - PostgreSQL datasource, `DATABASE_URL`, `DIRECT_URL`, models, and enums support README claims.
+- `backend/src/app.js`; `backend/src/routes/index.js`; backend route files; `frontend/src/routes/AppRoutes.jsx`: in scope evidence - documented API groups and frontend routes match runtime mounts.
+- `backend/src/server.js`; `frontend/src/api/apiClient.js`: in scope evidence - documented ports and API client boundary match runtime.
+- `backend/src/models/order.model.js`; `backend/src/models/review.model.js`; `backend/src/controllers/review.controller.js`; `backend/src/models/report.model.js`: in scope evidence - transaction, review moderation, rating, and report-filter claims are implemented.
+- 05A frontend files and `frontend/src/views/responsiveDemoRoutes.structure.test.js`: out of 05B execution scope but reviewed as accepted 05A carryover; they were not claimed as 05B changes.
+
+## Reported Files Cross-Check
+- file from execution report: `README.md`
+- present in git/repo: yes
+- matches task scope: yes
+- notes: Contains the final setup and implemented-behavior update required by 05B.
+- file from execution report: `docs/reports/report_4_execute_agent.md`
+- present in git/repo: yes
+- matches task scope: yes
+- notes: Required append-only execution report; 05B entry is at physical EOF.
+
+## Dependency Review
+- Required dependencies: Batch01 through Batch04.
+- Dependency status: satisfied; all required task checkboxes are complete and README behavior claims were independently reconciled against current runtime files.
+- Missing or invalid dependency: None.
+
+## Architecture Alignment
+- Passed: README accurately separates Prisma models, React views, Express controllers, routes/middleware, and hosted Supabase PostgreSQL.
+- Failed: None.
+- Uncertain: Supabase Table Editor visual confirmation remains explicitly identified as a user-side check rather than claimed complete.
+
+## Implementation Reality
+- Real implementation: yes
+- Stub or fake logic found: no
+- Evidence: Current route, controller, model, package, schema, seed, and frontend route files support the documented setup and implemented behavior.
+
+## Hardcoding Review
+- Hardcoding found: no
+- Evidence: Environment examples are placeholders. The only passwords documented are exact values already tracked in `backend/prisma/seed.js`, labeled demo-only, and accompanied by a non-reuse warning.
+
+## Validations Reviewed
+- Command/check: README contract and package-script assertion
+- Reported result: passed
+- Rerun result: passed
+- Status: passed
+- Notes: All required project/MVC, stack, Supabase, environment, setup, demo-account, API, and verification sections exist; documented commands map to package scripts.
+- Command/check: Seed credential provenance assertion
+- Reported result: passed
+- Rerun result: passed
+- Status: passed
+- Notes: `customer@example.com` / `customer123` and `admin@example.com` / `admin123` occur in both README and tracked seed code.
+- Command/check: README secret scan
+- Reported result: passed
+- Rerun result: passed
+- Status: passed
+- Notes: No non-placeholder PostgreSQL URL, unsafe JWT secret assignment, Supabase key assignment, or JWT-shaped token was found.
+- Command/check: Manual README-to-runtime route and behavior review
+- Reported result: passed
+- Rerun result: passed
+- Status: passed
+- Notes: API mounts, frontend routes, checkout/review/report behavior, environment names, ports, and setup commands match current files.
+- Command/check: `git diff --check -- README.md`
+- Reported result: passed
+- Rerun result: passed
+- Status: passed
+- Notes: No whitespace errors; only the expected line-ending warning was emitted.
+
+## Acceptance Review
+- Task acceptance: README setup and feature status match actual runtime behavior and do not leak credentials.
+- Status: satisfied
+- Evidence: Every Plan 4 documentation-contract item is present, setup commands and API groups match current runtime files, real secrets are absent, and documented credentials are exactly the safely labeled tracked demo seed values.
+
+## Progress Tracking
+- Selected task checkbox before review: unchecked in the detailed task entry and Progress Tracker.
+- Checkbox updated by reviewer: yes
+- Batch status updated by reviewer: no
+- Execution report entry: latest matching 05B entry reports complete.
+- Review report entry: appended at physical EOF.
+- Other: Only both selected 05B checkbox locations were updated; 05C, 05D, and Batch05 status remain unchanged.
+
+## Report Accuracy
+- Accurate / partial / inaccurate: accurate
+- Mismatches: None.
+
+## Issues
+
+### Blocking
+- None.
+
+### Major
+- None.
+
+### Minor
+- None.
+
+### Warnings
+- Supabase Table Editor visual confirmation remains user-side and is accurately documented as such.
+
+### Observations
+- Replacing stale phase handoff narration removed contradictions without expanding into sibling documentation tasks.
+
+## Decision
+- Accept selected task: yes
+- Repair required: no
+- Can next task proceed: yes
+- Batch can be marked complete by A2: no
+
+## Repair Instructions
+- None.
+
 ---
 
 # Task Review Report - 04D
@@ -3028,6 +3183,482 @@ ACCEPTED
 
 ### Observations
 - The cumulative Batch04 implementation diff remains for A3 to assess; this review addresses only the listed historical-scope repair.
+
+## Decision
+- Accept selected task: yes
+- Repair required: no
+- Can next task proceed: yes
+- Batch can be marked complete by A2: no
+
+## Repair Instructions
+- None.
+
+---
+
+# Task Review Report - 05A
+
+## Source Task File
+docs/tasks/task_4.md
+
+## Execution Report Reviewed
+docs/reports/report_4_execute_agent.md
+
+## Review Report File
+docs/review/review_4_review_agent.md
+
+## Mode
+orchestrated
+
+## Final Outcome
+ACCEPTED
+
+## Reviewed Scope
+- Batch: Batch05 - Polish, Documentation, and Demo Artifacts
+- Task ID: 05A
+- Task title: Polish responsive customer and admin demo routes
+- Executor status reported: complete
+- Source of Truth: `docs/plans/Plan_4.md` > `## 4. Scope`; `docs/design/design.md` > `# 26. Responsive Design`; `docs/design/design.md` > `# 30. Final UI Checklist`
+- Supplemental documents: `docs/plans/Plan_4.md`; `docs/design/design.md`
+
+## Latest Report Selection
+- Latest report entry found: yes
+- Requested task ID, if any: 05A
+- Reviewed task ID: 05A
+- Correct selection: yes
+- Notes: Reviewed the cumulative initial implementation, responsive repair entry, and final evidence-completion entry. The latest entry reports `complete`.
+
+## Git Diff Evidence
+- git status reviewed: yes
+- git diff stat reviewed: yes
+- git diff reviewed: yes
+- recent commits reviewed: not needed
+- changed files from git: `docs/reports/report_4_execute_agent.md`; `frontend/src/components/admin/AdminTable.jsx`; `frontend/src/layouts/AuthLayout.jsx`; `frontend/src/layouts/MainLayout.jsx`; `frontend/src/views/CartView.jsx`; `frontend/src/views/CheckoutView.jsx`; `frontend/src/views/OrderHistoryView.jsx`; `frontend/src/views/ProductDetailView.jsx`
+- untracked files: `frontend/src/views/responsiveDemoRoutes.structure.test.js`
+
+## Files Reviewed
+- `docs/tasks/task_4.md`: in scope - selected 05A contract, dependencies, acceptance, and both checkbox locations.
+- `docs/reports/report_4_execute_agent.md`: in scope - cumulative 05A implementation, repair, validation, and evidence entries.
+- `frontend/src/components/admin/AdminTable.jsx`: in scope - constrains the shared admin table card so Astryx Table owns horizontal scrolling.
+- `frontend/src/layouts/AuthLayout.jsx`: in scope - constrains the authentication card to narrow viewports using Astryx props and tokens.
+- `frontend/src/layouts/MainLayout.jsx`: in scope - uses AppShell internal scrolling and existing mobile context for compact navigation.
+- `frontend/src/views/CartView.jsx`: in scope - narrows the responsive grid and removes the duplicated empty-state action.
+- `frontend/src/views/CheckoutView.jsx`: in scope - narrows responsive grids and makes loading copy fluid.
+- `frontend/src/views/OrderHistoryView.jsx`: in scope - constrains the customer order-table card.
+- `frontend/src/views/ProductDetailView.jsx`: in scope - narrows responsive grids for mobile usability.
+- `frontend/src/views/responsiveDemoRoutes.structure.test.js`: in scope - focused regression coverage for the concrete responsive repairs.
+- `docs/plans/Plan_4.md`: in scope - responsive polish source requirement.
+- `docs/design/design.md`: in scope - desktop/tablet/mobile and final-route requirements.
+
+## Reported Files Cross-Check
+- file from execution report: cumulative frontend implementation files, focused regression test, and execution report.
+- present in git/repo: yes
+- matches task scope: yes
+- notes: The final completion entry correctly states that only the execution report changed during evidence completion while identifying the existing cumulative repair implementation separately.
+
+## Dependency Review
+- Required dependencies: Batch02 and Batch04.
+- Dependency status: satisfied; both dependency task sets are checked in the tracker and their implemented frontend surfaces are present.
+- Missing or invalid dependency: None.
+
+## Architecture Alignment
+- Passed: Reuses Astryx AppShell mobile context, Grid, Card, and Table behavior; keeps changes in focused shared owners and route views; adds no duplicate business logic or unsupported redesign.
+- Failed: None.
+- Uncertain: None.
+
+## Implementation Reality
+- Real implementation: yes
+- Stub or fake logic found: no
+- Evidence: Production components contain concrete sizing, scrolling, table containment, and empty-state changes. The user manually confirmed every previously failing route/viewport plus desktop regression.
+
+## Hardcoding Review
+- Hardcoding found: no
+- Evidence: Responsive values use existing Astryx patterns and design tokens; no fixture-, route-ID-, or test-only success logic was added.
+
+## Validations Reviewed
+- Command/check: `node --test src/views/responsiveDemoRoutes.structure.test.js`
+- Reported result: 6/6 passed
+- Rerun result: 6/6 passed
+- Status: passed
+- Notes: Covers mobile grids, fluid checkout skeleton, shell scrolling/navigation, auth containment, table containment, and duplicate cart action.
+- Command/check: `node --test src/**/*.test.js`
+- Reported result: 37/37 passed
+- Rerun result: 37/37 passed
+- Status: passed
+- Notes: Full frontend Node test suite passed.
+- Command/check: `npm run build`
+- Reported result: passed; 546 modules transformed
+- Rerun result: passed; 546 modules transformed
+- Status: passed
+- Notes: Only the existing chunk-size advisory was emitted.
+- Command/check: `git diff --check`
+- Reported result: passed
+- Rerun result: passed
+- Status: passed
+- Notes: Line-ending notices only; no whitespace errors.
+- Command/check: post-repair responsive browser checks
+- Reported result: user-provided manual PASS
+- Rerun result: not rerun by A2; user explicitly supplied PASS for tablet header and `/orders`, mobile `/login`, `/products/:id` scrolling, empty `/cart`, `/admin/orders`, and desktop regression.
+- Status: passed
+- Notes: This is user-provided manual evidence, not automated browser evidence.
+- Command/check: `npm run dev -- --host localhost` and local HTTP response
+- Reported result: passed; Vite started and returned HTTP 200
+- Rerun result: not run because build, tests, and the user browser report already verify the current worktree.
+- Status: passed
+- Notes: A1 evidence is credible and not contradicted.
+
+## Acceptance Review
+- Task acceptance: Demo routes are usable across practical viewport sizes without unsupported redesign.
+- Status: satisfied
+- Evidence: Source changes address every concrete failure, focused and full tests plus production build pass, and the user's cumulative manual browser evidence confirms desktop, tablet, and mobile usability after repair.
+
+## Progress Tracking
+- Selected task checkbox before review: unchecked in the detailed task entry and Progress Tracker.
+- Checkbox updated by reviewer: yes
+- Batch status updated by reviewer: no
+- Execution report entry: latest matching 05A entry reports complete and accurately attributes manual evidence to the user.
+- Review report entry: appended at physical EOF.
+- Other: Only both selected 05A checkbox locations were updated; sibling tasks and Batch05 remain unchecked.
+
+## Report Accuracy
+- Accurate / partial / inaccurate: accurate
+- Mismatches: None.
+
+## Issues
+
+### Blocking
+- None.
+
+### Major
+- None.
+
+### Minor
+- None.
+
+### Warnings
+- Automated browser evidence remains unavailable; acceptance relies on the complete user-provided manual PASS as explicitly permitted by Task 05A.
+
+### Observations
+- The cumulative repair stayed focused on concrete layout/state defects and reused shared layout/table owners.
+
+## Decision
+- Accept selected task: yes
+- Repair required: no
+- Can next task proceed: yes
+- Batch can be marked complete by A2: no
+
+## Repair Instructions
+- None.
+
+---
+
+# Task Review Report - 05C
+
+## Source Task File
+docs/tasks/task_4.md
+
+## Execution Report Reviewed
+docs/reports/report_4_execute_agent.md
+
+## Review Report File
+docs/review/review_4_review_agent.md
+
+## Mode
+orchestrated
+
+## Final Outcome
+ACCEPTED
+
+## Reviewed Scope
+- Batch: Batch05 - Polish, Documentation, and Demo Artifacts
+- Task ID: 05C
+- Task title: Update database design and ERD documentation
+- Executor status reported: complete
+- Source of Truth: `docs/plans/Plan_4.md` > `### 7.4 Documentation Contract`; `docs/plans/Master_Plan.md` > `## 26. Final Submission Checklist`; `backend/prisma/schema.prisma`
+- Supplemental documents: `docs/plans/Plan_4.md`; `docs/plans/Master_Plan.md`; `backend/prisma/migrations/20260704020610_init/migration.sql`; `backend/package.json`; `backend/.env.example`
+
+## Latest Report Selection
+- Latest report entry found: yes
+- Requested task ID, if any: 05C
+- Reviewed task ID: 05C
+- Correct selection: yes
+- Notes: The final execution-report entry is the matching 05C report and reports `complete`.
+
+## Git Diff Evidence
+- git status reviewed: yes
+- git diff stat reviewed: yes
+- git diff reviewed: yes
+- recent commits reviewed: not needed
+- changed files from git: `README.md`; `docs/database-design.md`; `docs/reports/report_4_execute_agent.md`; `docs/review/review_4_review_agent.md`; `docs/tasks/task_4.md`; `frontend/src/components/admin/AdminTable.jsx`; `frontend/src/layouts/AuthLayout.jsx`; `frontend/src/layouts/MainLayout.jsx`; `frontend/src/views/CartView.jsx`; `frontend/src/views/CheckoutView.jsx`; `frontend/src/views/OrderHistoryView.jsx`; `frontend/src/views/ProductDetailView.jsx`
+- untracked files: `frontend/src/views/responsiveDemoRoutes.structure.test.js`
+
+## Files Reviewed
+- `docs/database-design.md`: in scope - the only 05C product artifact; every model, enum, relationship, ERD, migration, and credential section was compared with repository evidence.
+- `docs/reports/report_4_execute_agent.md`: in scope - required append-only execution evidence; the 05C entry is at physical EOF.
+- `docs/tasks/task_4.md`: in scope - selected 05C contract, dependencies, acceptance criteria, and both checkbox locations.
+- `docs/review/review_4_review_agent.md`: in scope - prior review evidence establishes the accumulated 05A/05B carryover; this review is appended at physical EOF.
+- `backend/prisma/schema.prisma`: in scope evidence - authoritative nine-model, five-enum schema and relationship contract.
+- `backend/prisma/migrations/20260704020610_init/migration.sql`: in scope evidence - tables, indexes, foreign keys, enums, decimal precision, and delete actions.
+- `backend/package.json`: in scope evidence - Prisma generation, development-migration, and seed script names.
+- `backend/.env.example`: in scope evidence - placeholder-only connection and JWT variable names.
+- `README.md`: out of 05C execution scope but accepted 05B carryover; its earlier timestamp and prior review precede 05C.
+- 05A frontend files and `frontend/src/views/responsiveDemoRoutes.structure.test.js`: out of 05C execution scope but accepted 05A carryover; their timestamps and prior review precede 05C.
+- `backend/prisma/schema.prisma`; tracked migration; `backend/prisma/seed.js`: unchanged for 05C.
+- `docs/demo-checklist.md`: unchanged 05D artifact; `docs/api-testing.md`, `docs/presentation.md`, and `docs/erd.md` do not exist and were not created.
+
+## Reported Files Cross-Check
+- file from execution report: `docs/database-design.md`
+- present in git/repo: yes
+- matches task scope: yes
+- notes: Contains the current database contract and embedded Mermaid ERD required by 05C.
+- file from execution report: `docs/reports/report_4_execute_agent.md`
+- present in git/repo: yes
+- matches task scope: yes
+- notes: Required append-only execution evidence at physical EOF.
+
+## Dependency Review
+- Required dependencies: Batch01 and Batch03.
+- Dependency status: satisfied; their task checkboxes are complete and the implemented Review, Order, OrderDetail, and Payment schema entities exist.
+- Missing or invalid dependency: None.
+
+## Architecture Alignment
+- Passed: Documentation keeps Prisma authoritative, Express as the browser data boundary, tracked migrations as schema history, and Supabase as PostgreSQL hosting.
+- Failed: None.
+- Uncertain: None.
+
+## Implementation Reality
+- Real implementation: yes
+- Stub or fake logic found: no
+- Evidence: The document describes the actual tracked Prisma schema and migration without planned-only schema changes or false Supabase dashboard claims.
+
+## Hardcoding Review
+- Hardcoding found: no
+- Evidence: Migration directory, schema names, enum values, and commands are repository-derived. No live URL, JWT, password, or token appears.
+
+## Validations Reviewed
+- Command/check: `cd backend; npx prisma validate`
+- Reported result: passed
+- Rerun result: passed
+- Status: passed
+- Notes: Prisma reported the schema valid; only existing configuration deprecation warnings appeared.
+- Command/check: schema-to-document model, field, and enum comparison
+- Reported result: passed
+- Rerun result: passed
+- Status: passed
+- Notes: A read-only comparison found all 9 models, every scalar/navigation field, all 5 enums, and every enum value in the matching documentation.
+- Command/check: manual relationship/cardinality and migration comparison
+- Reported result: passed
+- Rerun result: passed
+- Status: passed
+- Notes: All 10 relations appear in the ERD with correct cardinality; foreign keys, uniqueness, precision, mappings, defaults, and four cascade edges match.
+- Command/check: documentation contract, stale-command, and credential-safety scan
+- Reported result: passed
+- Rerun result: passed with one minor wording artifact
+- Status: passed
+- Notes: Required sections exist; no obsolete init command, live connection string, JWT secret, or token was found. `PaymentMethod` still says `Phase 1/2 restricted to COD`, although COD is current and schema-correct.
+- Command/check: 05C scope and sibling-artifact check
+- Reported result: passed
+- Rerun result: passed
+- Status: passed
+- Notes: No schema, migration, seed, runtime, 05D artifact, or new ERD file changed for 05C. README and frontend diffs are accepted 05B/05A carryover.
+- Command/check: `git diff --check -- docs/database-design.md`
+- Reported result: passed
+- Rerun result: passed
+- Status: passed
+- Notes: No whitespace errors; only the expected line-ending notice appeared.
+
+## Acceptance Review
+- Task acceptance: Docs match the actual schema and do not describe planned-only fields or unimplemented schema changes.
+- Status: satisfied
+- Evidence: The document covers every current entity, field, enum, relationship, constraint, tracked migration workflow, credential rule, and a complete embedded Mermaid ERD.
+
+## Progress Tracking
+- Selected task checkbox before review: unchecked in the detailed task entry and Progress Tracker.
+- Checkbox updated by reviewer: yes
+- Batch status updated by reviewer: no
+- Execution report entry: latest matching 05C entry reports complete.
+- Review report entry: appended at physical EOF.
+- Other: Only both selected 05C checkbox locations were updated; 05D and Batch05 status remain unchanged.
+
+## Report Accuracy
+- Accurate / partial / inaccurate: accurate
+- Mismatches: The report says stale Phase 1/2 wording was removed, but one non-schema-affecting `PaymentMethod` description still uses that phrase.
+
+## Issues
+
+### Blocking
+- None.
+
+### Major
+- None.
+
+### Minor
+- `docs/database-design.md` still describes COD as `Phase 1/2 restricted to COD`; current wording would be clearer, although the enum remains schema-correct.
+
+### Warnings
+- Supabase Table Editor visual confirmation was not performed and is correctly not claimed by this documentation-only task.
+
+### Observations
+- Reusing one embedded Mermaid ERD avoids a second diagram artifact that could drift.
+
+## Decision
+- Accept selected task: yes
+- Repair required: no
+- Can next task proceed: yes
+- Batch can be marked complete by A2: no
+
+## Repair Instructions
+- None.
+
+---
+
+# Task Review Report - 05D
+
+## Source Task File
+docs/tasks/task_4.md
+
+## Execution Report Reviewed
+docs/reports/report_4_execute_agent.md
+
+## Review Report File
+docs/review/review_4_review_agent.md
+
+## Mode
+orchestrated
+
+## Final Outcome
+ACCEPTED
+
+## Reviewed Scope
+- Batch: Batch05 - Polish, Documentation, and Demo Artifacts
+- Task ID: 05D
+- Task title: Update demo checklist, API testing notes, and presentation support
+- Executor status reported: complete
+- Source of Truth: `docs/plans/Plan_4.md` sections 7.4 and 10; `docs/plans/Master_Plan.md` sections 21, 26, and 27
+- Supplemental documents: accepted 01D, 02D, 03D, 04D, 05A, 05B, and 05C review evidence; current backend routes/controllers/models
+
+## Latest Report Selection
+- Latest report entry found: yes
+- Requested task ID, if any: 05D
+- Reviewed task ID: 05D
+- Correct selection: yes
+- Notes: The final execution-report entry is the matching 05D report and reports `complete`.
+
+## Git Diff Evidence
+- git status reviewed: yes
+- git diff stat reviewed: yes
+- git diff reviewed: yes
+- recent commits reviewed: not needed
+- changed files from git: `README.md`, `docs/database-design.md`, `docs/demo-checklist.md`, `docs/reports/report_4_execute_agent.md`, `docs/review/review_4_review_agent.md`, `docs/tasks/task_4.md`, `frontend/src/components/admin/AdminTable.jsx`, `frontend/src/layouts/AuthLayout.jsx`, `frontend/src/layouts/MainLayout.jsx`, `frontend/src/views/CartView.jsx`, `frontend/src/views/CheckoutView.jsx`, `frontend/src/views/OrderHistoryView.jsx`, `frontend/src/views/ProductDetailView.jsx`
+- untracked files: `docs/api-testing.md`, `frontend/src/views/responsiveDemoRoutes.structure.test.js`
+
+## Files Reviewed
+- `docs/demo-checklist.md`: in scope - adds evidence-backed Plan 4 status, customer/admin flows, the complete Master Plan section 26 map, and presentation responsibilities.
+- `docs/api-testing.md`: in scope - adds the optional secret-safe auth/product/cart/order/review/report runbook.
+- `docs/reports/report_4_execute_agent.md`: in scope - latest 05D execution entry is at physical EOF before this review.
+- `docs/tasks/task_4.md`: in scope - selected 05D contract and both permitted checkbox locations.
+- `docs/review/review_4_review_agent.md`: in scope - prior accepted evidence and append-only review target.
+- `docs/plans/Plan_4.md`: in scope - documentation contract and final handoff rules.
+- `docs/plans/Master_Plan.md`: in scope - demo flows, final checklist, testing plan, and presentation division.
+- `backend/src/routes/index.js`, `auth.routes.js`, `product.routes.js`, `category.routes.js`, `cart.routes.js`, `order.routes.js`, `payment.routes.js`, `review.routes.js`, `report.routes.js`: in scope evidence - API mounts, methods, and middleware order.
+- `backend/src/controllers/auth.controller.js`, `cart.controller.js`, `order.controller.js`, `payment.controller.js`, `review.controller.js`, `report.controller.js`: in scope evidence - payloads, status codes, response envelopes, access behavior, and moderation/COD semantics.
+- `backend/src/models/report.model.js`: in scope evidence - revenue, best-selling, and all-status summary meanings.
+- `README.md`, `docs/database-design.md`, and listed frontend files: accepted Batch05 carryover, not changed by 05D.
+- `frontend/src/views/responsiveDemoRoutes.structure.test.js`: accepted 05A carryover, not changed by 05D.
+
+## Reported Files Cross-Check
+- file from execution report: `docs/demo-checklist.md`
+- present in git/repo: yes
+- matches task scope: yes
+- notes: Tracked diff contains the reported introduction and Plan 4/demo/final-submission/presentation additions.
+- file from execution report: `docs/api-testing.md`
+- present in git/repo: yes
+- matches task scope: yes
+- notes: New untracked file contains the optional consolidated manual/Postman sequence.
+- file from execution report: `docs/reports/report_4_execute_agent.md`
+- present in git/repo: yes
+- matches task scope: yes
+- notes: Required append-only 05D evidence is present.
+
+## Dependency Review
+- Required dependencies: Batch01 through Batch04, accepted 05B, and accepted 05C.
+- Dependency status: satisfied; task tracker and prior A2 reports show the required tasks accepted.
+- Missing or invalid dependency: none.
+
+## Architecture Alignment
+- Passed: Documentation preserves React View, Express Controller, and Prisma Model boundaries; report truth is assigned to backend/database queries.
+- Failed: none.
+- Uncertain: Supabase dashboard ownership and team presentation readiness remain user-side checks and are not asserted complete.
+
+## Implementation Reality
+- Real implementation: yes
+- Stub or fake logic found: no
+- Evidence: Every newly marked runtime PASS points to accepted task evidence; user-provided browser results remain explicitly attributed; dashboard/team-only checks remain blocked or pending; Batch06 remains pending.
+
+## Hardcoding Review
+- Hardcoding found: no
+- Evidence: No live database URL, bearer JWT, configured secret, private key, or runtime fixture-specific success logic appears in the 05D docs. Local demo variables and sample payloads are clearly instructional.
+
+## Validations Reviewed
+- Command/check: source-plan documentation contract assertions
+- Reported result: passed
+- Rerun result: passed
+- Status: passed
+- Notes: Required customer/admin flow, final-checklist, presentation, status-provenance, six API-area, report-endpoint, and Batch06 non-claim content is present.
+- Command/check: accepted evidence provenance review for 01D, 02D, 03D, 04D, 05A, 05B, and 05C
+- Reported result: passed
+- Rerun result: passed
+- Status: passed
+- Notes: Newly claimed PASS statuses match prior accepted evidence, including explicit user-provided attribution for UI/manual results.
+- Command/check: API runbook comparison with current routes, controllers, middleware, response helper, and report model
+- Reported result: passed
+- Rerun result: passed with minor documentation omissions
+- Status: passed
+- Notes: Documented paths, methods, roles, main payloads, status expectations, COD idempotency, review hiding, and report meanings match runtime. Successful admin category/product mutation payloads/statuses and the COD endpoint's explicit `200` are not fully enumerated.
+- Command/check: credential-like value scan over `docs/demo-checklist.md` and `docs/api-testing.md`
+- Reported result: passed
+- Rerun result: passed
+- Status: passed
+- Notes: No live PostgreSQL URL, configured database/direct URL, JWT secret assignment, bearer JWT, or private key was found.
+- Command/check: `git diff --check -- docs/demo-checklist.md docs/api-testing.md`
+- Reported result: passed
+- Rerun result: passed
+- Status: passed
+- Notes: No whitespace errors; only the expected line-ending notice appeared.
+
+## Acceptance Review
+- Task acceptance: Docs are usable by the team and distinguish verified runtime behavior from pending/user-side checks.
+- Status: satisfied
+- Evidence: The checklist covers complete customer/admin demo flows, every Master Plan final-submission item, presentation responsibilities, explicit manual provenance, blocked Supabase/team checks, and a separate API runbook covering all required groups without claiming Batch06 completion.
+
+## Progress Tracking
+- Selected task checkbox before review: unchecked in the detailed task entry and Progress Tracker.
+- Checkbox updated by reviewer: yes
+- Batch status updated by reviewer: no
+- Execution report entry: latest matching 05D entry reports complete.
+- Review report entry: appended at physical EOF.
+- Other: Only both selected 05D checkbox locations were updated; Batch05 status remains unchanged.
+
+## Report Accuracy
+- Accurate / partial / inaccurate: partial
+- Mismatches: The report overstates that all runbook payload/status details are documented; successful admin category/product mutation payloads/statuses and the COD endpoint's explicit `200` expectation are omitted. Required API-group coverage and runtime accuracy are otherwise satisfied.
+
+## Issues
+
+### Blocking
+- None.
+
+### Major
+- None.
+
+### Minor
+- `docs/api-testing.md` leaves successful admin category/product mutation payloads/statuses implicit and describes COD success as existing behavior rather than explicitly stating runtime HTTP `200`.
+
+### Warnings
+- Supabase Table Editor confirmation, real team assignments, slide completion, rehearsal, and member understanding remain `BLOCKED_BY_USER_ACTION` or `Pending`.
+- Batch06 final verification has not run and is correctly not claimed.
+
+### Observations
+- Consolidating presentation roles into the existing demo checklist avoids a redundant presentation document.
 
 ## Decision
 - Accept selected task: yes

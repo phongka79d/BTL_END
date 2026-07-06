@@ -753,7 +753,7 @@ The course-project submission requires accurate setup/docs, clear MVC explanatio
 
 ### Tasks
 
-- [ ] (05A): Polish responsive customer and admin demo routes
+- [x] (05A): Polish responsive customer and admin demo routes
   - Source of Truth: `docs/plans/Plan_4.md` > `## 4. Scope`; `docs/design/design.md` > `# 26. Responsive Design`; `docs/design/design.md` > `# 30. Final UI Checklist`
   - Source Requirements:
     - Polish responsive UI using the design document.
@@ -775,7 +775,7 @@ The course-project submission requires accurate setup/docs, clear MVC explanatio
   - Blocked Condition: `BLOCKED_BY_USER_ACTION` if browser tooling, login credentials, backend data, or user-side visual checks are unavailable.
   - Files: Focused frontend files only where concrete issues are found.
 
-- [ ] (05B): Update README with final setup and implemented behavior
+- [x] (05B): Update README with final setup and implemented behavior
   - Source of Truth: `docs/plans/Plan_4.md` > `### 7.4 Documentation Contract`; `docs/plans/Master_Plan.md` > `## 26. Final Submission Checklist`; `README.md`
   - Source Requirements:
     - README must include project name and MVC explanation.
@@ -797,7 +797,7 @@ The course-project submission requires accurate setup/docs, clear MVC explanatio
   - Blocked Condition: `BLOCKED_BY_USER_ACTION` if demo account details require user confirmation.
   - Files: `README.md`
 
-- [ ] (05C): Update database design and ERD documentation
+- [x] (05C): Update database design and ERD documentation
   - Source of Truth: `docs/plans/Plan_4.md` > `### 7.4 Documentation Contract`; `docs/plans/Master_Plan.md` > `## 26. Final Submission Checklist`; `backend/prisma/schema.prisma`
   - Source Requirements:
     - `docs/database-design.md` must include entity list, field summaries, relationship summary, and Supabase/Prisma migration notes.
@@ -819,7 +819,7 @@ The course-project submission requires accurate setup/docs, clear MVC explanatio
   - Blocked Condition: None for text docs; `BLOCKED_BY_USER_ACTION` only if a required image export needs unavailable tooling.
   - Files: `docs/database-design.md`, optional `docs/erd.md`
 
-- [ ] (05D): Update demo checklist, API testing notes, and presentation support
+- [x] (05D): Update demo checklist, API testing notes, and presentation support
   - Source of Truth: `docs/plans/Plan_4.md` > `### 7.4 Documentation Contract`; `docs/plans/Plan_4.md` > `## 10. Handoff Notes for Final Submission`; `docs/plans/Master_Plan.md` > `## 21. Minimum Viable Demo Flow`; `docs/plans/Master_Plan.md` > `## 27. Suggested Presentation Division`
   - Source Requirements:
     - Demo checklist must include customer demo flow from homepage through review.
@@ -1133,10 +1133,10 @@ Batch01 and Batch03 can be implemented in parallel if they do not edit shared ro
 - [x] (04D): Update admin dashboard with simple report-backed metrics
 
 #### Batch05
-- [ ] (05A): Polish responsive customer and admin demo routes
-- [ ] (05B): Update README with final setup and implemented behavior
-- [ ] (05C): Update database design and ERD documentation
-- [ ] (05D): Update demo checklist, API testing notes, and presentation support
+- [x] (05A): Polish responsive customer and admin demo routes
+- [x] (05B): Update README with final setup and implemented behavior
+- [x] (05C): Update database design and ERD documentation
+- [x] (05D): Update demo checklist, API testing notes, and presentation support
 
 #### Batch06
 - [ ] (06A): Run backend command checks and review/report API smoke tests

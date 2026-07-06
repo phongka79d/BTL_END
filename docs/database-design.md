@@ -1,18 +1,20 @@
-# Database Design & Schema Contract
+# Database Design and ERD
 
-This document outlines the database design, schema contract, and Phase 2 stability rules for the Electronics E-Commerce Project. All implementations in Phase 1 (and subsequent phases) must strictly respect and consume this schema.
+This document describes the database currently implemented by
+`backend/prisma/schema.prisma`. That Prisma schema is authoritative if this
+document and the runtime schema ever differ.
 
 ---
 
-## 1. Objective and Stability Contract
+## 1. Schema Contract
 
-As defined in the project plan, **the database schema is finalized early** during Phase 1. 
-- **Stability Rule:** Later development phases (including Phase 2) must **consume, not redefine**, the model names, field names, enum values, and relationships established here.
-- **Change Management:** Any changes to the database schema require:
-  1. An explicit migration note documenting the business reason.
-  2. Coordinated updates across all affected backend controllers, models, and frontend views.
-  3. No introduction of Supabase Auth (authentication remains JWT-based).
-  4. No direct frontend-to-database connections.
+- Prisma is the ORM and Supabase provides the PostgreSQL database.
+- The React frontend accesses data only through the Express API; it does not
+  connect to Supabase or Prisma directly.
+- Authentication is implemented by the application with JWT and bcrypt, not
+  Supabase Auth.
+- Schema changes require a reviewed Prisma migration and coordinated updates
+  to affected model, controller, API, and view code.
 
 ---
 
@@ -140,7 +142,7 @@ A user review and rating for a specific product.
   - `id` (String, UUID, Primary Key)
   - `userId` (String, UUID, Foreign Key, mapped as `user_id`)
   - `productId` (String, UUID, Foreign Key, mapped as `product_id`)
-  - `rating` (Int, 1 to 5)
+  - `rating` (Int; the Prisma/database schema does not add a range constraint)
   - `comment` (String, Optional)
   - `status` (ReviewStatus enum, default: `visible`)
   - `createdAt` (DateTime, default: `now()`, mapped as `created_at`)
@@ -165,7 +167,11 @@ To ensure data integrity, the schema leverages five strict enums.
 
 ---
 
-## 4. Relationship Summary Diagram
+## 4. Relationship Summary and ERD
+
+The relation properties such as `User.cart`, `Order.details`, and
+`Product.reviews` are Prisma navigation fields, not additional database
+columns. Foreign keys live on the child entities shown below.
 
 ```mermaid
 erDiagram
@@ -187,34 +193,43 @@ erDiagram
 
 ---
 
-## 5. CLI Commands Reference
+## 5. Supabase and Prisma Migration Notes
 
-All database synchronization and initial data loading should be managed through the Prisma CLI in the `backend/` directory.
+The Prisma datasource reads two local environment variables:
 
-### 5.1. Database Migration
-To apply schema changes and synchronize the database state (requires valid `DATABASE_URL` and `DIRECT_URL` in `backend/.env`):
-```bash
+- `DATABASE_URL`: PostgreSQL transaction/pooler connection used by the
+  application.
+- `DIRECT_URL`: direct PostgreSQL connection used by Prisma migrations.
+
+The repository currently contains the tracked
+`backend/prisma/migrations/20260704020610_init` migration. From `backend/`,
+use `npx prisma migrate deploy` to apply tracked migrations to the configured
+Supabase database. Use `npm run prisma:migrate -- --name <migration-name>` only
+while intentionally developing a new schema migration. Do not use `prisma db
+push` as a substitute for committed migration history.
+
+Useful commands:
+
+```powershell
 cd backend
-npx prisma migrate dev --name init
-```
-
-### 5.2. Seeding default data
-To populate the database with default Categories, Products, a test Customer, and a test Admin (with bcrypt-hashed passwords):
-```bash
-cd backend
-npx prisma db seed
-```
-
-### 5.3. Schema Validation
-To statically check `schema.prisma` for semantic correctness:
-```bash
-cd backend
+npm run prisma:generate
 npx prisma validate
+npx prisma migrate deploy
+npm run prisma:seed
 ```
 
-### 5.4. Database Verification
-To verify data and view generated tables, consult the **Supabase Table Editor** on the Supabase dashboard project dashboard, or spin up the Prisma studio locally:
-```bash
-cd backend
-npx prisma studio
-```
+`npx prisma studio` or Supabase Table Editor may be used to inspect the
+resulting tables and rows. Neither tool replaces migration validation or
+application-level tests.
+
+## 6. Credential Safety
+
+- Store real `DATABASE_URL`, `DIRECT_URL`, and `JWT_SECRET` values only in the
+  untracked `backend/.env` file.
+- Keep placeholders, not live credentials, in `backend/.env.example` and
+  documentation.
+- Never expose database connection strings, service credentials, or JWT
+  secrets to frontend code or `VITE_*` variables.
+- Do not print connection strings or tokens in test output, screenshots, or
+  execution reports.
+- Rotate a credential immediately if it is accidentally committed or shared.

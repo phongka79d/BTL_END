@@ -1,6 +1,9 @@
 # Demo Checklist
 
-This checklist records the verified Plan 1 foundation state and Phase 2 product/category/cart state for the electronics e-commerce MVC project.
+This checklist records evidence-backed status for the complete electronics
+e-commerce MVC demo. `Passed - user provided` identifies manual browser evidence
+reported by the user; `BLOCKED_BY_USER_ACTION` and `Pending` are not completion
+claims. Batch06 final verification has not run.
 
 ## Plan 1 Verification Status
 
@@ -106,6 +109,93 @@ This checklist records the verified Plan 1 foundation state and Phase 2 product/
 11. Confirm the admin order table, status filter, detail dialog, and inline status selector work.
 12. Update an order to `completed` and confirm the UI reflects the COD payment as `paid`.
 13. If credentials are available, visually confirm the created rows in Supabase Table Editor for `Order`, `OrderDetail`, and `Payment`; otherwise record this as `BLOCKED_BY_USER_ACTION`.
+
+## Plan 4 Verification Status
+
+| Check | Status | Evidence |
+|---|---|---|
+| Review API behavior and authorization | Passed | Accepted task 01D recorded Prisma validation, backend startup/health, and live review list/create/hide checks, including anonymous/customer/admin boundaries and hidden-review exclusion. |
+| Customer review UI | Passed - user provided | Accepted task 02D records user-provided customer review UI PASS plus 12 focused tests, a production build, and an admin moderation browser smoke check. |
+| Revenue, best-selling products, and order-summary APIs | Passed | Accepted task 03D independently compared all three admin-only API responses with current database rows and verified admin `200`, anonymous `401`, and customer `403` behavior. |
+| Admin dashboard and reports UI | Passed - user provided | Accepted task 04D records user-provided dashboard/report navigation, loading, error, retry, refresh, responsive, and access PASS; 31 frontend tests and the production build also passed. |
+| Responsive demo routes | Passed - user provided | Accepted task 05A records the user's post-repair PASS for tablet header and orders, mobile login/product detail/cart/admin orders, and desktop regression. This is manual evidence, not automated browser evidence. |
+| README setup and runtime documentation | Passed | Accepted task 05B verified setup, API groups, routes, MVC description, seed credential provenance, and secret-safe environment examples against runtime files. |
+| Database design and embedded ERD | Passed | Accepted task 05C verified all nine models, five enums, fields, constraints, and relationships against the Prisma schema and tracked migration. |
+| Supabase Table Editor visual confirmation | BLOCKED_BY_USER_ACTION | Database-backed checks passed, but no agent inspected the Supabase dashboard. A user with project access must confirm the expected tables and representative seeded/order/review rows. |
+| Team-specific slide ownership and rehearsal | BLOCKED_BY_USER_ACTION | The role template is documented below, but names, slide completion, timing, and each member's understanding require team confirmation. |
+| Batch06 final backend/UI/security/submission audit | Pending | Batch06 has not run. Do not treat this checklist as Batch06 evidence. |
+
+## Customer Demo Flow - Homepage Through Review
+
+1. Start the backend and frontend using the commands in `README.md`.
+2. Open `http://localhost:5173/` and show featured products.
+3. Open `/products`, search by keyword, filter by category, and open a product.
+4. Register or log in as a customer.
+5. Add the in-stock product to the cart and update its quantity.
+6. Checkout with COD and a valid shipping address.
+7. Open `/orders`, then open the new order detail.
+8. Return to the product detail page.
+9. Submit a rating from 1 to 5 with an optional comment.
+10. Confirm the new review appears in the visible review list.
+
+Use seeded demo accounts only in a local/course environment. Do not expose
+tokens, `.env` contents, or database credentials in screenshots or reports.
+
+## Admin Demo Flow - Dashboard Through Reports
+
+1. Log in as the seeded admin and open `/admin`.
+2. Show report-backed dashboard metrics and the reports navigation action.
+3. Open `/admin/categories`; create a temporary category if mutation evidence is needed.
+4. Open `/admin/products`; create or update a temporary product if mutation evidence is needed.
+5. Open `/admin/orders`, filter orders, open details, and update an appropriate order status.
+6. Open `/admin/reviews`, select a product, and show visible review moderation.
+7. Open `/admin/reports`.
+8. Show revenue, best-selling products, and all order-status counts.
+9. Explain that report truth comes from Express/Prisma queries, not React calculations.
+10. Remove disposable demo records when safe; do not delete shared seeded data.
+
+## Final Submission Checklist - Master Plan Section 26
+
+| Master-plan item | Status | Evidence or required action |
+|---|---|---|
+| React View layer runs successfully | Passed | Accepted 05A evidence includes Vite startup, frontend tests/build, and manual route checks. |
+| Express Controller layer runs successfully | Passed | Accepted 01D and 03D live API evidence used the running Express app. |
+| Supabase project is created | Passed - runtime evidence | Accepted database-backed migrations, Prisma queries, API smoke checks, and report comparisons require the configured project; dashboard ownership was not inspected. |
+| Supabase PostgreSQL database connects successfully | Passed | Accepted Prisma, migration, seed, order, review, and report evidence used the configured database. |
+| `DATABASE_URL` is configured in backend `.env` | Passed - runtime evidence | Accepted Prisma and runtime checks loaded the private backend environment. The value remains undisclosed. |
+| `DIRECT_URL` is configured for Prisma migrations | Passed - runtime evidence | Accepted migration evidence used the private migration connection. The value remains undisclosed. |
+| ORM Models are created | Passed | `docs/database-design.md` and accepted 05C evidence cover all nine Prisma models. |
+| Tables are visible in Supabase Table Editor | BLOCKED_BY_USER_ACTION | Confirm visually while signed in to the correct Supabase project. |
+| MVC folder structure is clear | Passed | README and accepted task evidence document React Views, Express Controllers, and Prisma Models. |
+| Register works | Passed | Plan 1 accepted API/UI evidence. |
+| Login works | Passed | Plan 1 accepted API/UI evidence. |
+| Product list works | Passed | Plan 2 accepted API/UI evidence. |
+| Product detail works | Passed | Plan 2 evidence plus accepted 02D/05A review and responsive checks. |
+| Add to cart works | Passed | Plan 2 accepted API/UI evidence. |
+| Checkout works | Passed - user provided UI | Plan 3 API evidence passed and the user reported the repaired checkout UI flow PASS. |
+| Order history works | Passed - user provided UI | Plan 3 API evidence passed and the user reported order-history/detail UI PASS. |
+| Admin product management works | Passed | Plan 2 accepted API/UI evidence. |
+| Admin order management works | Passed - user provided UI | Plan 3 API evidence passed and the user reported admin order UI PASS. |
+| Report page works | Passed - user provided UI | Accepted 03D API evidence and accepted 04D manual UI evidence. |
+| Documentation includes MVC explanation | Passed | Accepted 05B README review. |
+| ERD diagram is complete | Passed | Accepted 05C schema-to-ERD review. |
+| Presentation slides are ready | Pending | Team must create and review the actual slides; no slide deck is claimed by task 05D. |
+| Demo script is ready | Passed - documented | The customer and admin flows above cover the master-plan minimum viable demo. |
+| Each member understands their MVC responsibility | BLOCKED_BY_USER_ACTION | Assign names, rehearse, and confirm ownership using the presentation notes below. |
+
+## Presentation Responsibility Notes - Master Plan Section 27
+
+Replace `Member 1` through `Member 5` with real names before submission:
+
+- Member 1: project overview, MVC architecture, Model layer, database design, and ERD.
+- Member 2: customer View layer, product browsing, search, and filters.
+- Member 3: cart and checkout Views, admin Views, and report View.
+- Member 4: core Controller layer, authentication, product, and category controllers.
+- Member 5: business Controller layer, cart, order, payment, and report controllers.
+
+Before presenting, each member must confirm their slides, live-demo handoff,
+fallback screenshots, speaking time, and the MVC boundary they will explain.
+These team-specific confirmations remain `BLOCKED_BY_USER_ACTION` until supplied.
 
 ## Phase 3 Handoff Checklist
 
