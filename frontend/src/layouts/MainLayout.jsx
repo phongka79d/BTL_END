@@ -1,15 +1,16 @@
 import React from 'react';
-import { Outlet, Link, useNavigate, useLocation } from 'react-router-dom';
+import { Outlet, Link, useNavigate } from 'react-router-dom';
 import {
   AppShell,
   TopNav,
   TopNavHeading,
-  TopNavItem,
   Avatar,
   DropdownMenu,
   Icon,
+  NavIcon,
   Badge,
   Button,
+  IconButton,
   VStack,
   HStack,
   Text,
@@ -17,10 +18,10 @@ import {
 } from '@astryxdesign/core';
 import { useAuth } from '../contexts/AuthContext';
 import { useCart } from '../contexts/CartContext';
+import StorefrontMegaNav from '../components/layout/StorefrontMegaNav';
 import {
   AdminIcon,
   CartIcon,
-  HomeIcon,
   LogOutIcon,
   OrdersIcon,
   UserIcon
@@ -54,7 +55,6 @@ export const MainLayout = () => {
   const { user, isAuthenticated, logout } = useAuth();
   const { itemCount } = useCart();
   const navigate = useNavigate();
-  const location = useLocation();
 
   // Define dropdown items for logged-in user dynamically based on role
   const getDropdownItems = () => {
@@ -93,92 +93,52 @@ export const MainLayout = () => {
 
   const topNav = (
     <TopNav
+      label="TechMart storefront navigation"
       heading={
         <TopNavHeading
-          logo={<Icon icon="wrench" color="accent" />}
-          heading="TechMart"
+          logo={<NavIcon icon={<Icon icon="wrench" size="sm" />} />}
+          heading="Lumen"
           headingHref="/"
           as={Link}
         />
       }
-      startContent={
-        <HStack gap={1}>
-          <TopNavItem
-            label="Home"
-            href="/"
-            as={Link}
-            isSelected={location.pathname === '/'}
-          />
-          <TopNavItem
-            label="Products"
-            href="/products"
-            as={Link}
-            isSelected={location.pathname.startsWith('/products')}
-          />
+      centerContent={
+        <HStack gap={1} style={{ alignItems: 'center' }}>
+          <StorefrontMegaNav />
         </HStack>
       }
       endContent={
         <HStack gap={3} style={{ alignItems: 'center' }}>
-          {/* Cart Icon with badge placeholder */}
-          <Link
-            to="/cart"
-            style={{
-              position: 'relative',
-              display: 'inline-flex',
-              textDecoration: 'none',
-              color: 'var(--color-text-primary)'
-            }}
-          >
-            <HStack
-              style={{
-                padding: 'var(--spacing-2)',
-                borderRadius: 'var(--radius-element)',
-                cursor: 'pointer',
-                backgroundColor: 'transparent',
-                transition: 'background-color var(--duration-fast)',
-                ':hover': {
-                  backgroundColor: 'var(--color-overlay-hover)'
-                }
-              }}
-            >
-              <CartIcon />
-              <Badge
-                variant="accent"
-                style={{
-                  position: 'absolute',
-                  top: 'calc(var(--spacing-1) * -1)',
-                  right: 'calc(var(--spacing-1) * -1)',
-                  paddingInline: 'var(--spacing-1)',
-                  borderRadius: 'var(--radius-full)'
-                }}
-              >
-                {itemCount}
-              </Badge>
-            </HStack>
-          </Link>
+          <IconButton
+            label="Search products"
+            tooltip="Search"
+            variant="ghost"
+            icon={<Icon icon="search" size="sm" />}
+            onClick={() => navigate('/products')}
+          />
 
-          {/* Authentication actions / User Dropdown */}
           {isAuthenticated && user ? (
             <CustomerAccountMenu
               user={user}
               items={getDropdownItems()}
             />
           ) : (
-            <HStack gap={2}>
-              <Button
-                label="Login"
-                variant="secondary"
-                size="sm"
-                onClick={() => navigate('/login')}
-              />
-              <Button
-                label="Register"
-                variant="primary"
-                size="sm"
-                onClick={() => navigate('/register')}
-              />
-            </HStack>
+            <Button
+              label="Sign in"
+              variant="ghost"
+              size="sm"
+              onClick={() => navigate('/login')}
+            />
           )}
+
+          <Button
+            label="Checkout"
+            variant="primary"
+            size="sm"
+            icon={<CartIcon />}
+            endContent={<Badge label={itemCount} />}
+            onClick={() => navigate('/cart')}
+          />
         </HStack>
       }
     />

@@ -1,17 +1,13 @@
 ﻿import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import {
-  Badge,
   BreadcrumbItem,
   Breadcrumbs,
   Button,
   Card,
-  Divider,
   EmptyState,
   Grid,
   Heading,
-  HStack,
-  NumberInput,
   Skeleton,
   Text,
   VStack,
@@ -24,9 +20,9 @@ import { reviewApi } from '../api/reviewApi';
 import Alert from '../components/common/Alert';
 import ProductReviewForm from '../components/product/ProductReviewForm';
 import ProductReviewList from '../components/product/ProductReviewList';
+import ProductDetailMedia from '../components/product/ProductDetailMedia';
+import ProductPurchasePanel from '../components/product/ProductPurchasePanel';
 import {
-  formatPrice,
-  getProductImageSrc,
   getStockLabel,
   getStockVariant
 } from '../components/product/productUtils';
@@ -44,44 +40,117 @@ const clampQuantity = (value, maxQuantity) => {
 
 const DetailSkeleton = () => {
   return (
-    <VStack gap={4}>
+    <VStack gap={5} style={{ width: '100%', maxWidth: '72rem', marginInline: 'auto' }}>
       <Breadcrumbs variant="supporting" label="Product details">
         <BreadcrumbItem as={Link} href="/">Home</BreadcrumbItem>
         <BreadcrumbItem as={Link} href="/products">Products</BreadcrumbItem>
         <BreadcrumbItem isCurrent>Loading product</BreadcrumbItem>
       </Breadcrumbs>
 
-      <Grid columns={{ minWidth: 280, max: 2 }} gap={5}>
-        <Card padding={0} style={{ overflow: 'hidden' }}>
-          <VStack gap={3} style={{ width: '100%', padding: 'var(--spacing-4)' }}>
+      <Grid columns={{ minWidth: 280, max: 2 }} gap={5} style={{ alignItems: 'start' }}>
+        <VStack gap={3}>
+          <Card
+            padding={0}
+            width="100%"
+            style={{
+              '--_card-radius': 'var(--radius-container)',
+              overflow: 'hidden',
+              backgroundColor: 'var(--color-background-muted)'
+            }}
+          >
             <VStack
               style={{
                 width: '100%',
                 aspectRatio: '4 / 3',
                 overflow: 'hidden',
-                borderRadius: 'var(--radius-element)'
+                borderRadius: 'var(--radius-container)'
               }}
             >
-              <Skeleton width="100%" height="100%" radius="rounded" />
+              <Skeleton width="100%" height="100%" radius={3} />
             </VStack>
-            <Skeleton width="58%" height="var(--spacing-5)" radius="rounded" />
-            <Skeleton width="84%" height="var(--spacing-4)" radius="rounded" />
+          </Card>
+
+          <Card
+            padding={0}
+            width="calc(var(--spacing-8) * 3)"
+            height="calc(var(--spacing-8) * 3)"
+            style={{
+              '--_card-radius': 'var(--radius-element)',
+              overflow: 'hidden',
+              backgroundColor: 'var(--color-background-muted)'
+            }}
+          >
+            <Skeleton width="100%" height="100%" radius={2} />
+          </Card>
+        </VStack>
+
+        <VStack
+          style={{
+            position: 'sticky',
+            top: 'var(--spacing-8)',
+            alignSelf: 'start'
+          }}
+        >
+          <Card padding={5}>
+            <VStack gap={5}>
+              <VStack gap={3}>
+                <VStack gap={2} style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
+                  <Skeleton width="calc(var(--spacing-8) * 3)" height="var(--spacing-5)" radius="rounded" />
+                  <Skeleton width="calc(var(--spacing-8) * 2.5)" height="var(--spacing-5)" radius="rounded" />
+                </VStack>
+                <VStack gap={2}>
+                  <Skeleton width="76%" height="var(--spacing-7)" radius="rounded" />
+                  <Skeleton width="36%" height="var(--spacing-4)" radius="rounded" />
+                </VStack>
+                <Skeleton width="42%" height="var(--spacing-6)" radius="rounded" />
+              </VStack>
+
+              <Skeleton width="100%" height="var(--spacing-8)" radius="rounded" />
+
+              <VStack gap={3}>
+                <Skeleton width="24%" height="var(--spacing-4)" radius="rounded" />
+                <Skeleton width="100%" height="var(--spacing-8)" radius={2} />
+                <Skeleton width="100%" height="var(--spacing-10)" radius={2} />
+              </VStack>
+
+              <VStack gap={3}>
+                <Skeleton width="100%" height="var(--spacing-10)" radius={2} />
+                <Skeleton width="100%" height="var(--spacing-10)" radius={2} />
+              </VStack>
+            </VStack>
+          </Card>
+        </VStack>
+      </Grid>
+
+      <VStack
+        style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, calc(var(--spacing-8) * 9)), 1fr))',
+          gap: 'var(--spacing-5)'
+        }}
+      >
+        <Card padding={4}>
+          <VStack gap={4} style={{ minHeight: 'calc(var(--spacing-8) * 4)' }}>
+            <VStack gap={2}>
+              <Skeleton width="44%" height="var(--spacing-5)" radius="rounded" />
+              <Skeleton width="72%" height="var(--spacing-4)" radius="rounded" />
+            </VStack>
+            <Skeleton width="100%" height="var(--spacing-8)" radius={2} />
+            <Skeleton width="86%" height="var(--spacing-4)" radius="rounded" />
           </VStack>
         </Card>
 
         <Card padding={4}>
-          <VStack gap={4}>
+          <VStack gap={4} style={{ minHeight: 'calc(var(--spacing-8) * 4)' }}>
             <VStack gap={2}>
-              <Skeleton width="42%" height="var(--spacing-4)" radius="rounded" />
-              <Skeleton width="72%" height="var(--spacing-6)" radius="rounded" />
-              <Skeleton width="34%" height="var(--spacing-5)" radius="rounded" />
+              <Skeleton width="48%" height="var(--spacing-5)" radius="rounded" />
+              <Skeleton width="90%" height="var(--spacing-4)" radius="rounded" />
             </VStack>
-            <Skeleton width="100%" height="var(--spacing-10)" radius="rounded" />
-            <Skeleton width="100%" height="var(--spacing-10)" radius="rounded" />
-            <Skeleton width="100%" height="var(--spacing-10)" radius="rounded" />
+            <Skeleton width="100%" height="var(--spacing-8)" radius={2} />
+            <Skeleton width="100%" height="var(--spacing-8)" radius={2} />
           </VStack>
         </Card>
-      </Grid>
+      </VStack>
     </VStack>
   );
 };
@@ -350,133 +419,34 @@ export const ProductDetailView = () => {
         />
       )}
 
-      <Grid columns={{ minWidth: 280, max: 2 }} gap={5}>
-        <Card padding={0} style={{ overflow: 'hidden' }}>
-          <VStack gap={3} style={{ width: '100%' }}>
-            <VStack
-              style={{
-                width: '100%',
-                aspectRatio: '4 / 3',
-                overflow: 'hidden',
-                backgroundColor: 'var(--color-background-muted)'
-              }}
-            >
-              <img
-                src={getProductImageSrc(product.imageUrl)}
-                alt={product.name}
-                style={{
-                  width: '100%',
-                  height: '100%',
-                  objectFit: 'cover',
-                  display: 'block'
-                }}
-              />
-            </VStack>
+      <Grid columns={{ minWidth: 280, max: 2 }} gap={5} style={{ alignItems: 'start' }}>
+        <ProductDetailMedia product={product} />
 
-            <VStack gap={2} style={{ paddingInline: 'var(--spacing-4)', paddingBottom: 'var(--spacing-4)' }}>
-              <Text size="supporting" color="secondary" weight="semibold">
-                Image URL
-              </Text>
-              <Text size="supporting" color="secondary" style={{ overflowWrap: 'anywhere' }}>
-                {product.imageUrl || 'No image URL is set, so the fallback illustration is shown.'}
-              </Text>
-            </VStack>
-          </VStack>
-        </Card>
-
-        <Card padding={4}>
-          <VStack gap={4}>
-            <VStack gap={2}>
-              <HStack gap={2} style={{ flexWrap: 'wrap' }}>
-                <Badge variant="blue" label={product.category?.name || 'Uncategorized'} />
-                <Badge variant={stockVariant} label={stockLabel} />
-              </HStack>
-              <Heading level={1}>{product.name}</Heading>
-              <Text size="supporting" color="secondary">
-                {product.brand}
-              </Text>
-              <Text weight="semibold" color="accent">
-                {formatPrice(product.price)}
-              </Text>
-            </VStack>
-
-            <Divider />
-
-            <VStack gap={3}>
-              <Text>{product.description || 'No description available for this product.'}</Text>
-
-              <Grid columns={{ minWidth: 180, max: 2 }} gap={3}>
-                <VStack gap={1}>
-                  <Text size="supporting" color="secondary" weight="semibold">
-                    Category
-                  </Text>
-                  <Text>{product.category?.name || 'Uncategorized'}</Text>
-                </VStack>
-                <VStack gap={1}>
-                  <Text size="supporting" color="secondary" weight="semibold">
-                    Quantity
-                  </Text>
-                  <Text>{availableQuantity}</Text>
-                </VStack>
-                <VStack gap={1}>
-                  <Text size="supporting" color="secondary" weight="semibold">
-                    Stock status
-                  </Text>
-                  <Text>{stockLabel}</Text>
-                </VStack>
-                <VStack gap={1}>
-                  <Text size="supporting" color="secondary" weight="semibold">
-                    Brand
-                  </Text>
-                  <Text>{product.brand}</Text>
-                </VStack>
-              </Grid>
-            </VStack>
-
-            <Divider />
-
-            <VStack gap={3}>
-              <NumberInput
-                label="Quantity"
-                value={quantity}
-                onChange={handleQuantityChange}
-                min={1}
-                max={maxSelectableQuantity}
-                step={1}
-                isIntegerOnly
-                isDisabled={availableQuantity < 1 || actionLoading}
-                description={
-                  availableQuantity > 0
-                    ? `Choose a quantity from 1 to ${maxSelectableQuantity}. Final stock validation still happens on the backend.`
-                    : 'This product is unavailable until stock is replenished.'
-                }
-                status={quantityStatus || undefined}
-              />
-
-              <HStack gap={3} style={{ flexWrap: 'wrap' }}>
-                <Button
-                  label="Add to cart"
-                  variant="primary"
-                  isLoading={actionLoading}
-                  isDisabled={availableQuantity < 1}
-                  onClick={handleAddToCart}
-                />
-                <Button
-                  label="Back to products"
-                  variant="secondary"
-                  onClick={() => navigate('/products')}
-                />
-              </HStack>
-            </VStack>
-          </VStack>
-        </Card>
+        <VStack
+          style={{
+            position: 'sticky',
+            top: 'var(--spacing-8)',
+            alignSelf: 'start'
+          }}
+        >
+          <ProductPurchasePanel
+            actionLoading={actionLoading}
+            availableQuantity={availableQuantity}
+            isAuthenticated={isAuthenticated}
+            isReviewsLoading={isReviewsLoading}
+            maxSelectableQuantity={maxSelectableQuantity}
+            onAddToCart={handleAddToCart}
+            onBackToProducts={() => navigate('/products')}
+            onQuantityChange={handleQuantityChange}
+            product={product}
+            quantity={quantity}
+            quantityStatus={quantityStatus}
+            reviews={reviews}
+            stockLabel={stockLabel}
+            stockVariant={stockVariant}
+          />
+        </VStack>
       </Grid>
-
-      {!isAuthenticated && (
-        <Text size="supporting" color="secondary">
-          Sign in to complete cart actions and keep your cart synchronized across sessions.
-        </Text>
-      )}
 
       <Grid columns={{ minWidth: 280, max: 2 }} gap={5}>
         <ProductReviewList
