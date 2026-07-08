@@ -112,6 +112,7 @@ Admin features:
 - Order listing, detail, status filtering, and status updates
 - Product review moderation by hiding reviews from public results
 - Dashboard and reports for paid-COD revenue, best-selling products, and order-status totals
+- Manage storefront carousel slides and customer navigation links from the admin Storefront page.
 
 Frontend routes include `/`, `/login`, `/register`, `/products`, `/products/:id`, `/cart`, `/checkout`, `/orders`, `/orders/:id`, `/admin`, `/admin/products`, `/admin/categories`, `/admin/orders`, `/admin/reviews`, and `/admin/reports`. Customer and admin routes use the existing authentication/role guards.
 
@@ -177,6 +178,19 @@ Order and payment endpoints require authentication. Order detail access is owner
 - `GET /admin/reports/order-summary`
 
 Report endpoints require an admin JWT. Revenue and best-selling calculations include completed orders with paid COD payments only.
+
+### Storefront Content
+
+- `GET /storefront/carousel` (public active slides)
+- `GET /storefront/navigation` (public active navigation)
+- `GET /admin/storefront/carousel` (admin)
+- `POST /admin/storefront/carousel` (admin)
+- `PUT /admin/storefront/carousel/:id` (admin)
+- `DELETE /admin/storefront/carousel/:id` (admin)
+- `GET /admin/storefront/navigation` (admin)
+- `POST /admin/storefront/navigation` (admin)
+- `PUT /admin/storefront/navigation/:id` (admin)
+- `DELETE /admin/storefront/navigation/:id` (admin)
 
 ## Verification Status and Known Manual Checks
 
