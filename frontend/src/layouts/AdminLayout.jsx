@@ -17,6 +17,7 @@ import {
 } from '@astryxdesign/core';
 import { useAuth } from '../contexts/AuthContext';
 import {
+  AdminIcon,
   CategoriesIcon,
   DashboardIcon,
   HomeIcon,
@@ -126,6 +127,13 @@ export const AdminLayout = () => {
           icon={<ReportsIcon />}
           as={Link}
           isSelected={location.pathname.startsWith('/admin/reports')}
+        />
+        <SideNavItem
+          label="Storefront"
+          href="/admin/storefront"
+          icon={<AdminIcon />}
+          as={Link}
+          isSelected={location.pathname.startsWith('/admin/storefront')}
         />
       </SideNavSection>
     </SideNav>
