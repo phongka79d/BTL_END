@@ -13,6 +13,27 @@ const serializeUser = (user) => {
 };
 
 const VALID_ROLES = ['customer', 'admin'];
+const ADMIN_EDITABLE_FIELDS = ['username', 'fullName', 'phone', 'address'];
+
+const normalizeEditableValue = (value) => {
+  if (value === null) {
+    return null;
+  }
+
+  return typeof value === 'string' ? value.trim() : value;
+};
+
+const getAdminUserUpdateData = (body) => {
+  const updateData = {};
+
+  ADMIN_EDITABLE_FIELDS.forEach((field) => {
+    if (body[field] !== undefined) {
+      updateData[field] = normalizeEditableValue(body[field]);
+    }
+  });
+
+  return updateData;
+};
 
 /**
  * Get current user profile
@@ -108,8 +129,8 @@ const updateUserRole = async (req, res, next) => {
       return errorResponse(res, 400, 'Role must be customer or admin');
     }
 
-    if (req.user?.id === id && role === 'customer') {
-      return errorResponse(res, 400, 'You cannot demote your own admin account');
+    if (req.user?.id === id) {
+      return errorResponse(res, 400, 'You cannot change your own admin role');
     }
 
     const user = await userModel.updateRole(id, role);
@@ -122,9 +143,65 @@ const updateUserRole = async (req, res, next) => {
   }
 };
 
+/**
+ * Update soft user profile fields for admin
+ * PUT /api/admin/users/:id
+ */
+const updateAdminUser = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const updateData = getAdminUserUpdateData(req.body);
+
+    if (updateData.username !== undefined && updateData.username === '') {
+      return errorResponse(res, 400, 'Username cannot be empty');
+    }
+
+    if (Object.keys(updateData).length === 0) {
+      return errorResponse(res, 400, 'No editable fields provided for update');
+    }
+
+    const user = await userModel.updateAdminProfile(id, updateData);
+
+    return successResponse(res, 200, 'User profile updated successfully', {
+      user: serializeUser(user)
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * Update user blocked status for admin
+ * PUT /api/admin/users/:id/block
+ */
+const updateUserBlocked = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const { isBlocked } = req.body;
+
+    if (typeof isBlocked !== 'boolean') {
+      return errorResponse(res, 400, 'Blocked status must be true or false');
+    }
+
+    if (req.user?.id === id && isBlocked) {
+      return errorResponse(res, 400, 'You cannot block your own admin account');
+    }
+
+    const user = await userModel.updateBlocked(id, isBlocked);
+
+    return successResponse(res, 200, isBlocked ? 'User blocked successfully' : 'User unblocked successfully', {
+      user: serializeUser(user)
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   getProfile,
   updateProfile,
   getUsers,
-  updateUserRole
+  updateUserRole,
+  updateAdminUser,
+  updateUserBlocked
 };

@@ -36,6 +36,10 @@ const protect = async (req, res, next) => {
       return errorResponse(res, 401, 'Not authorized, user not found');
     }
 
+    if (user.isBlocked) {
+      return errorResponse(res, 403, 'Your account has been blocked');
+    }
+
     // Remove passwordHash from user object before attaching to req
     const { passwordHash, ...userWithoutPassword } = user;
     req.user = userWithoutPassword;

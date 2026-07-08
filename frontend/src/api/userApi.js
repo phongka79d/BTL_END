@@ -43,10 +43,26 @@ export const userApi = {
   getAdminUsers: (filters = {}) => apiClient.get(`/admin/users${buildUserQuery(filters)}`),
 
   /**
+   * Update soft user details (Admin only)
+   * @param {string} userId
+   * @param {Object} payload
+   * @returns {Promise<Object>} Updated user
+   */
+  updateAdminUser: (userId, payload) => apiClient.put(`/admin/users/${userId}`, payload),
+
+  /**
    * Update a user's role (Admin only)
    * @param {string} userId
    * @param {'customer'|'admin'} role
    * @returns {Promise<Object>} Updated user
    */
   updateUserRole: (userId, role) => apiClient.put(`/admin/users/${userId}/role`, { role }),
+
+  /**
+   * Update a user's blocked status (Admin only)
+   * @param {string} userId
+   * @param {boolean} isBlocked
+   * @returns {Promise<Object>} Updated user
+   */
+  updateUserBlocked: (userId, isBlocked) => apiClient.put(`/admin/users/${userId}/block`, { isBlocked }),
 };

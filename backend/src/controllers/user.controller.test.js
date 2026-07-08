@@ -27,6 +27,7 @@ beforeEach(() => {
         username: 'Ada',
         email: 'ada@example.com',
         fullName: 'Ada Lovelace',
+        isBlocked: false,
         role: 'customer',
       },
     ],
@@ -42,6 +43,20 @@ beforeEach(() => {
     username: 'Ada',
     email: 'ada@example.com',
     role,
+  });
+  userModel.updateAdminProfile = async (id, data) => ({
+    id,
+    email: 'ada@example.com',
+    role: 'customer',
+    isBlocked: false,
+    ...data,
+  });
+  userModel.updateBlocked = async (id, isBlocked) => ({
+    id,
+    username: 'Ada',
+    email: 'ada@example.com',
+    role: 'customer',
+    isBlocked,
   });
 });
 
@@ -69,7 +84,7 @@ test('getUsers forwards admin search pagination query to model and returns items
   assert.equal(response.body.data.items[0].email, 'ada@example.com');
 });
 
-test('updateUserRole rejects invalid roles and current admin self-demotion', async () => {
+test('updateUserRole rejects invalid roles and any current admin self role change', async () => {
   const controller = require('./user.controller');
 
   const invalidResponse = createResponse();
@@ -83,12 +98,12 @@ test('updateUserRole rejects invalid roles and current admin self-demotion', asy
 
   const selfResponse = createResponse();
   await controller.updateUserRole(
-    { params: { id: 'admin-1' }, body: { role: 'customer' }, user: { id: 'admin-1', role: 'admin' } },
+    { params: { id: 'admin-1' }, body: { role: 'admin' }, user: { id: 'admin-1', role: 'admin' } },
     selfResponse,
     assert.fail
   );
   assert.equal(selfResponse.statusCode, 400);
-  assert.equal(selfResponse.body.message, 'You cannot demote your own admin account');
+  assert.equal(selfResponse.body.message, 'You cannot change your own admin role');
 });
 
 test('updateUserRole updates another user role through the model', async () => {
@@ -109,4 +124,94 @@ test('updateUserRole updates another user role through the model', async () => {
   assert.deepEqual(received, { id: 'user-1', role: 'admin' });
   assert.equal(response.statusCode, 200);
   assert.equal(response.body.data.user.role, 'admin');
+});
+
+test('updateAdminUser updates only soft profile fields and ignores role permission fields', async () => {
+  const controller = require('./user.controller');
+  let received = null;
+  userModel.updateAdminProfile = async (id, data) => {
+    received = { id, data };
+    return { id, email: 'ada@example.com', role: 'customer', isBlocked: false, ...data };
+  };
+
+  const response = createResponse();
+  await controller.updateAdminUser(
+    {
+      params: { id: 'user-1' },
+      body: {
+        username: ' ada ',
+        fullName: ' Ada Lovelace ',
+        phone: ' 123 ',
+        address: ' London ',
+        role: 'admin',
+        isBlocked: true,
+      },
+      user: { id: 'admin-1', role: 'admin' },
+    },
+    response,
+    assert.fail
+  );
+
+  assert.deepEqual(received, {
+    id: 'user-1',
+    data: {
+      username: 'ada',
+      fullName: 'Ada Lovelace',
+      phone: '123',
+      address: 'London',
+    },
+  });
+  assert.equal(response.statusCode, 200);
+  assert.equal(response.body.data.user.username, 'ada');
+});
+
+test('updateAdminUser rejects empty username and empty profile payload', async () => {
+  const controller = require('./user.controller');
+
+  const emptyUsernameResponse = createResponse();
+  await controller.updateAdminUser(
+    { params: { id: 'user-1' }, body: { username: ' ' }, user: { id: 'admin-1', role: 'admin' } },
+    emptyUsernameResponse,
+    assert.fail
+  );
+  assert.equal(emptyUsernameResponse.statusCode, 400);
+  assert.equal(emptyUsernameResponse.body.message, 'Username cannot be empty');
+
+  const emptyPayloadResponse = createResponse();
+  await controller.updateAdminUser(
+    { params: { id: 'user-1' }, body: { role: 'admin' }, user: { id: 'admin-1', role: 'admin' } },
+    emptyPayloadResponse,
+    assert.fail
+  );
+  assert.equal(emptyPayloadResponse.statusCode, 400);
+  assert.equal(emptyPayloadResponse.body.message, 'No editable fields provided for update');
+});
+
+test('updateUserBlocked blocks other users but rejects current admin self-block', async () => {
+  const controller = require('./user.controller');
+  let received = null;
+  userModel.updateBlocked = async (id, isBlocked) => {
+    received = { id, isBlocked };
+    return { id, username: 'Ada', email: 'ada@example.com', role: 'customer', isBlocked };
+  };
+
+  const selfResponse = createResponse();
+  await controller.updateUserBlocked(
+    { params: { id: 'admin-1' }, body: { isBlocked: true }, user: { id: 'admin-1', role: 'admin' } },
+    selfResponse,
+    assert.fail
+  );
+  assert.equal(selfResponse.statusCode, 400);
+  assert.equal(selfResponse.body.message, 'You cannot block your own admin account');
+
+  const response = createResponse();
+  await controller.updateUserBlocked(
+    { params: { id: 'user-1' }, body: { isBlocked: true }, user: { id: 'admin-1', role: 'admin' } },
+    response,
+    assert.fail
+  );
+
+  assert.deepEqual(received, { id: 'user-1', isBlocked: true });
+  assert.equal(response.statusCode, 200);
+  assert.equal(response.body.data.user.isBlocked, true);
 });

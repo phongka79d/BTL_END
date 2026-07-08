@@ -73,6 +73,10 @@ const login = async (req, res, next) => {
       return errorResponse(res, 401, 'Invalid email or password');
     }
 
+    if (user.isBlocked) {
+      return errorResponse(res, 403, 'Your account has been blocked');
+    }
+
     // Tạo token JWT
     const token = generateToken(user.id);
 
@@ -82,7 +86,8 @@ const login = async (req, res, next) => {
       username: user.username,
       email: user.email,
       fullName: user.fullName,
-      role: user.role
+      role: user.role,
+      isBlocked: user.isBlocked
     };
 
     return successResponse(res, 200, 'Login successful', {

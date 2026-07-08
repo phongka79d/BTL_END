@@ -8,6 +8,7 @@ const USER_SAFE_SELECT = {
   phone: true,
   address: true,
   role: true,
+  isBlocked: true,
   createdAt: true,
   updatedAt: true,
 };
@@ -122,6 +123,34 @@ const updateRole = async (id, role) => {
   });
 };
 
+/**
+ * Update admin-editable user profile fields.
+ * @param {string} id
+ * @param {Object} userData
+ * @returns {Promise<Object>}
+ */
+const updateAdminProfile = async (id, userData) => {
+  return prisma.user.update({
+    where: { id },
+    data: userData,
+    select: USER_SAFE_SELECT,
+  });
+};
+
+/**
+ * Update a user's blocked status.
+ * @param {string} id
+ * @param {boolean} isBlocked
+ * @returns {Promise<Object>}
+ */
+const updateBlocked = async (id, isBlocked) => {
+  return prisma.user.update({
+    where: { id },
+    data: { isBlocked },
+    select: USER_SAFE_SELECT,
+  });
+};
+
 module.exports = {
   findByEmail,
   findById,
@@ -129,4 +158,6 @@ module.exports = {
   update,
   findAll,
   updateRole,
+  updateAdminProfile,
+  updateBlocked,
 };

@@ -1,22 +1,19 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import {
-  Badge,
   Button,
   Heading,
   HStack,
   Text,
   TextInput,
   Toolbar,
-  VStack,
-  pixel,
-  proportional
+  VStack
 } from '@astryxdesign/core';
 import { userApi } from '../../api/userApi';
 import { useAuth } from '../../contexts/AuthContext';
-import AdminTable from '../../components/admin/AdminTable';
 import Alert from '../../components/common/Alert';
 import Pagination from '../../components/common/Pagination';
-import { formatDate } from '../../components/common/formatDate';
+import UserProfileDialog from '../../components/admin/UserProfileDialog';
+import UserManagementTable, { getUserDisplayName } from '../../components/admin/UserManagementTable';
 
 const DEFAULT_PAGINATION = {
   page: 1,
@@ -24,8 +21,6 @@ const DEFAULT_PAGINATION = {
   total: 0,
   totalPages: 1
 };
-
-const getDisplayName = (user) => user.fullName || user.username || user.email || 'User';
 
 export const AdminUserView = () => {
   const { user: currentUser } = useAuth();
@@ -38,6 +33,7 @@ export const AdminUserView = () => {
   const [isUpdating, setIsUpdating] = useState(false);
   const [loadError, setLoadError] = useState('');
   const [feedback, setFeedback] = useState(null);
+  const [editingUser, setEditingUser] = useState(null);
 
   const loadUsers = useCallback(async () => {
     setIsLoading(true);
@@ -92,7 +88,7 @@ export const AdminUserView = () => {
       )));
       setFeedback({
         title: 'Role updated',
-        description: `${getDisplayName(target)} is now ${nextRole}.`
+        description: `${getUserDisplayName(target)} is now ${nextRole}.`
       });
     } catch (error) {
       setFeedback({
@@ -104,77 +100,46 @@ export const AdminUserView = () => {
     }
   };
 
-  const columns = useMemo(() => [
-    {
-      key: 'user',
-      header: 'User',
-      width: proportional(1.7),
-      renderCell: (item) => (
-        <VStack gap={0}>
-          <Text weight="semibold">{getDisplayName(item)}</Text>
-          <Text size="supporting" color="secondary">
-            {item.email}
-          </Text>
-        </VStack>
-      )
-    },
-    {
-      key: 'contact',
-      header: 'Contact',
-      width: proportional(1.2),
-      renderCell: (item) => (
-        <VStack gap={0}>
-          <Text color={item.phone ? undefined : 'secondary'}>
-            {item.phone || 'No phone'}
-          </Text>
-          <Text size="supporting" color="secondary">
-            {item.address || 'No address'}
-          </Text>
-        </VStack>
-      )
-    },
-    {
-      key: 'role',
-      header: 'Role',
-      width: pixel(120),
-      renderCell: (item) => (
-        <Badge
-          variant={item.role === 'admin' ? 'blue' : 'neutral'}
-          label={item.role === 'admin' ? 'Admin' : 'Customer'}
-        />
-      )
-    },
-    {
-      key: 'createdAt',
-      header: 'Joined',
-      width: proportional(1),
-      renderCell: (item) => (
-        <Text size="supporting" color="secondary">
-          {formatDate(item.createdAt)}
-        </Text>
-      )
-    },
-    {
-      key: 'actions',
-      header: 'Actions',
-      width: pixel(180),
-      align: 'end',
-      renderCell: (item) => {
-        const nextRole = item.role === 'admin' ? 'customer' : 'admin';
-        const isSelfDemotion = currentUser?.id === item.id && nextRole === 'customer';
+  const handleBlockedChange = async (target, nextBlockedState) => {
+    if (!target || target.isBlocked === nextBlockedState) return;
 
-        return (
-          <Button
-            label={nextRole === 'admin' ? 'Change to admin' : 'Change to customer'}
-            variant="secondary"
-            size="sm"
-            onClick={() => handleRoleChange(item, nextRole)}
-            isDisabled={isUpdating || isSelfDemotion}
-          />
-        );
-      }
+    setIsUpdating(true);
+    setFeedback(null);
+
+    try {
+      const response = await userApi.updateUserBlocked(target.id, nextBlockedState);
+      const updatedUser = response?.data?.user;
+      setUsers((currentUsers) => currentUsers.map((item) => (
+        item.id === target.id ? { ...item, ...(updatedUser || {}), isBlocked: nextBlockedState } : item
+      )));
+      setFeedback({
+        title: nextBlockedState ? 'User blocked' : 'User unblocked',
+        description: `${getUserDisplayName(target)} is now ${nextBlockedState ? 'blocked' : 'active'}.`
+      });
+    } catch (error) {
+      setFeedback({
+        title: 'Unable to update blocked status',
+        description: error?.message || 'The user blocked status could not be updated.'
+      });
+    } finally {
+      setIsUpdating(false);
     }
-  ], [currentUser?.id, isUpdating]);
+  };
+
+  const handleProfileSave = async (payload) => {
+    if (!editingUser) return;
+
+    const response = await userApi.updateAdminUser(editingUser.id, payload);
+    const updatedUser = response?.data?.user;
+
+    setUsers((currentUsers) => currentUsers.map((item) => (
+      item.id === editingUser.id ? { ...item, ...(updatedUser || {}), ...payload } : item
+    )));
+    setFeedback({
+      title: 'Profile updated',
+      description: `${getUserDisplayName(editingUser)} was updated.`
+    });
+  };
 
   return (
     <VStack gap={6} width="100%">
@@ -232,26 +197,18 @@ export const AdminUserView = () => {
         )}
       />
 
-      <AdminTable
-        columns={columns}
-        data={users}
+      <UserManagementTable
+        currentUserId={currentUser?.id}
+        users={users}
         isLoading={isLoading}
+        isUpdating={isUpdating}
         error={loadError}
-        errorTitle="Unable to load users"
+        search={search}
+        onBlockedChange={handleBlockedChange}
+        onClearSearch={clearSearch}
+        onEdit={setEditingUser}
         onRetry={loadUsers}
-        emptyTitle={search ? 'No matching users' : 'No users yet'}
-        emptyDescription={
-          search
-            ? 'Clear the search or try another username, email, or name.'
-            : 'Registered customers and admins will appear here.'
-        }
-        emptyActions={search ? (
-          <Button
-            label="Clear search"
-            variant="secondary"
-            onClick={clearSearch}
-          />
-        ) : undefined}
+        onRoleChange={handleRoleChange}
       />
 
       {!isLoading && !loadError && users.length > 0 && (
@@ -261,6 +218,17 @@ export const AdminUserView = () => {
           onPageChange={setPage}
         />
       )}
+
+      <UserProfileDialog
+        isOpen={Boolean(editingUser)}
+        onOpenChange={(isOpen) => {
+          if (!isOpen) {
+            setEditingUser(null);
+          }
+        }}
+        onSubmit={handleProfileSave}
+        user={editingUser}
+      />
     </VStack>
   );
 };

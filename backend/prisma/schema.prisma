@@ -59,6 +59,7 @@ model User {
   phone        String?
   address      String?
   role         Role     @default(customer)
+  isBlocked    Boolean  @default(false) @map("is_blocked")
   cart         Cart?
   orders       Order[]
   reviews      Review[]
