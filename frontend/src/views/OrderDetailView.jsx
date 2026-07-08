@@ -240,15 +240,6 @@ export const OrderDetailView = () => {
       </HStack>
 
       <OrderDetailPanel order={order} />
-
-      <HStack style={{ justifyContent: 'flex-start' }}>
-        <Button
-          label="← Back to orders"
-          variant="ghost"
-          size="small"
-          onClick={() => navigate('/orders')}
-        />
-      </HStack>
     </VStack>
   );
 };
