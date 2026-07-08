@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { VStack } from '@astryxdesign/core';
 import { categoryApi } from '../api/categoryApi';
 import { productApi } from '../api/productApi';
+import { storefrontContentApi } from '../api/storefrontContentApi';
 import Alert from '../components/common/Alert';
 import HomeCategoryShowcase from '../components/home/HomeCategoryShowcase';
 import { homeProductQuery } from '../components/home/homeContent';
@@ -11,6 +12,7 @@ import HomeSkeleton from '../components/home/HomeSkeleton';
 export const HomeView = () => {
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
+  const [carouselSlides, setCarouselSlides] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -19,9 +21,10 @@ export const HomeView = () => {
     setError(null);
 
     try {
-      const [productResponse, categoryResponse] = await Promise.all([
+      const [productResponse, categoryResponse, carouselResponse] = await Promise.all([
         productApi.getProducts(homeProductQuery),
-        categoryApi.getCategories()
+        categoryApi.getCategories(),
+        storefrontContentApi.getCarousel().catch(() => ({ data: { slides: [] } }))
       ]);
 
       if (!isActive()) {
@@ -30,6 +33,7 @@ export const HomeView = () => {
 
       setProducts(productResponse?.data?.items || []);
       setCategories(categoryResponse?.data?.categories || []);
+      setCarouselSlides(carouselResponse?.data?.slides || []);
     } catch (err) {
       if (!isActive()) {
         return;
@@ -37,6 +41,7 @@ export const HomeView = () => {
 
       setProducts([]);
       setCategories([]);
+      setCarouselSlides([]);
       setError(err?.message || 'Unable to load storefront data.');
     } finally {
       if (isActive()) {
@@ -76,7 +81,7 @@ export const HomeView = () => {
         />
       ) : (
         <>
-          <HomeHero products={products} />
+          <HomeHero slides={carouselSlides} />
           <HomeCategoryShowcase categories={categories} products={products} />
         </>
       )}

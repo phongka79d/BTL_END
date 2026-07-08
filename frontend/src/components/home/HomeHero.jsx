@@ -11,24 +11,25 @@ import {
   Text,
   VStack
 } from '@astryxdesign/core';
-import { formatPrice, getProductImageSrc } from '../product/productUtils';
+import { resolveStorefrontHref } from '../storefront/storefrontLinkUtils';
 
-const heroProductsLimit = 4;
+const heroSlidesLimit = 6;
 const rotationDelayMs = 5000;
 const heroContentInset = 'clamp(calc(var(--spacing-8) + var(--spacing-4)), 7vw, calc(var(--spacing-8) * 3))';
 const heroControlInset = 'var(--spacing-5)';
 const progressAnimationName = 'home-hero-progress';
 
-const getNextIndex = (currentIndex, productCount) => (
-  productCount === 0 ? 0 : (currentIndex + 1) % productCount
+const getNextIndex = (currentIndex, slideCount) => (
+  slideCount === 0 ? 0 : (currentIndex + 1) % slideCount
 );
 
-const getPreviousIndex = (currentIndex, productCount) => (
-  productCount === 0 ? 0 : (currentIndex - 1 + productCount) % productCount
+const getPreviousIndex = (currentIndex, slideCount) => (
+  slideCount === 0 ? 0 : (currentIndex - 1 + slideCount) % slideCount
 );
 
-const HomeHeroSlide = ({ isActive, product }) => {
+const HomeHeroSlide = ({ isActive, slide }) => {
   const navigate = useNavigate();
+  const href = resolveStorefrontHref(slide.linkTarget);
 
   return (
     <VStack
@@ -41,7 +42,7 @@ const HomeHeroSlide = ({ isActive, product }) => {
         transform: isActive ? 'translateX(0)' : 'translateX(var(--spacing-4))',
         transition:
           'opacity var(--duration-medium) var(--ease-standard), transform var(--duration-medium) var(--ease-standard)',
-        backgroundImage: `linear-gradient(90deg, var(--color-background-surface) 0%, color-mix(in srgb, var(--color-background-surface) 84%, transparent) 44%, color-mix(in srgb, var(--color-background-surface) 22%, transparent) 100%), url("${getProductImageSrc(product.imageUrl)}")`,
+        backgroundImage: `linear-gradient(90deg, var(--color-background-surface) 0%, color-mix(in srgb, var(--color-background-surface) 84%, transparent) 44%, color-mix(in srgb, var(--color-background-surface) 22%, transparent) 100%), url("${slide.imageUrl}")`,
         backgroundPosition: 'center',
         backgroundSize: 'cover'
       }}
@@ -56,10 +57,7 @@ const HomeHeroSlide = ({ isActive, product }) => {
         }}
       >
         <VStack gap={3}>
-          <HStack gap={2} style={{ flexWrap: 'wrap' }}>
-            <Badge variant="blue" label={product.category?.name || 'Uncategorized'} />
-            <Badge variant="green" label={product.brand || 'Featured'} />
-          </HStack>
+          <Badge variant="blue" label="Featured" />
           <Heading
             level={1}
             style={{
@@ -67,21 +65,18 @@ const HomeHeroSlide = ({ isActive, product }) => {
               fontWeight: 'var(--font-weight-bold)'
             }}
           >
-            {product.name}
+            {slide.title}
           </Heading>
-          {product.description && (
-            <Text color="secondary">{product.description}</Text>
+          {slide.description && (
+            <Text color="secondary">{slide.description}</Text>
           )}
-          <Text color="accent" weight="semibold">
-            {formatPrice(product.price)}
-          </Text>
         </VStack>
 
         <HStack gap={3} style={{ flexWrap: 'wrap' }}>
           <Button
-            label="View product"
+            label={slide.primaryButtonLabel}
             variant="primary"
-            onClick={() => navigate(`/products/${product.id}`)}
+            onClick={() => navigate(href)}
           />
           <Button
             label="Browse catalog"
@@ -94,12 +89,12 @@ const HomeHeroSlide = ({ isActive, product }) => {
   );
 };
 
-export const HomeHero = ({ products = [] }) => {
+export const HomeHero = ({ slides = [] }) => {
   const navigate = useNavigate();
-  const heroProducts = products.slice(0, heroProductsLimit);
+  const heroSlides = slides.slice(0, heroSlidesLimit);
   const [activeIndex, setActiveIndex] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
-  const hasMultipleSlides = heroProducts.length > 1;
+  const hasMultipleSlides = heroSlides.length > 1;
 
   useEffect(() => {
     if (!hasMultipleSlides || isPaused) {
@@ -107,27 +102,27 @@ export const HomeHero = ({ products = [] }) => {
     }
 
     const intervalId = window.setInterval(() => {
-      setActiveIndex((currentIndex) => getNextIndex(currentIndex, heroProducts.length));
+      setActiveIndex((currentIndex) => getNextIndex(currentIndex, heroSlides.length));
     }, rotationDelayMs);
 
     return () => window.clearInterval(intervalId);
-  }, [hasMultipleSlides, heroProducts.length, isPaused]);
+  }, [hasMultipleSlides, heroSlides.length, isPaused]);
 
   useEffect(() => {
     setActiveIndex((currentIndex) => (
-      currentIndex >= heroProducts.length ? 0 : currentIndex
+      currentIndex >= heroSlides.length ? 0 : currentIndex
     ));
-  }, [heroProducts.length]);
+  }, [heroSlides.length]);
 
   const showPreviousSlide = useCallback(() => {
-    setActiveIndex((currentIndex) => getPreviousIndex(currentIndex, heroProducts.length));
-  }, [heroProducts.length]);
+    setActiveIndex((currentIndex) => getPreviousIndex(currentIndex, heroSlides.length));
+  }, [heroSlides.length]);
 
   const showNextSlide = useCallback(() => {
-    setActiveIndex((currentIndex) => getNextIndex(currentIndex, heroProducts.length));
-  }, [heroProducts.length]);
+    setActiveIndex((currentIndex) => getNextIndex(currentIndex, heroSlides.length));
+  }, [heroSlides.length]);
 
-  if (heroProducts.length === 0) {
+  if (heroSlides.length === 0) {
     return (
       <Card
         variant="muted"
@@ -137,13 +132,13 @@ export const HomeHero = ({ products = [] }) => {
         style={{ '--_card-radius': 'var(--radius-container)' }}
       >
         <VStack gap={4} style={{ height: '100%', justifyContent: 'center' }}>
-          <Heading level={1}>Catalog ready for your next feature product</Heading>
+          <Heading level={1}>Storefront carousel is ready for slides</Heading>
           <Text color="secondary">
-            Add products in the admin console to populate this storefront from live app data.
+            Add active slides in the admin Storefront manager to publish homepage carousel content.
           </Text>
           <HStack gap={3}>
             <Button label="Browse products" variant="primary" onClick={() => navigate('/products')} />
-            <Button label="Manage catalog" variant="secondary" onClick={() => navigate('/admin/products')} />
+            <Button label="Manage storefront" variant="secondary" onClick={() => navigate('/admin/storefront')} />
           </HStack>
         </VStack>
       </Card>
@@ -152,7 +147,7 @@ export const HomeHero = ({ products = [] }) => {
 
   return (
     <VStack
-      aria-label="Featured product carousel"
+      aria-label="Featured carousel"
       role="region"
       onBlurCapture={(event) => {
         if (!event.currentTarget.contains(event.relatedTarget)) {
@@ -181,11 +176,11 @@ export const HomeHero = ({ products = [] }) => {
         `}
       </style>
 
-      {heroProducts.map((product, index) => (
+      {heroSlides.map((slide, index) => (
         <HomeHeroSlide
-          key={product.id}
+          key={slide.id}
           isActive={index === activeIndex}
-          product={product}
+          slide={slide}
         />
       ))}
 
@@ -202,7 +197,7 @@ export const HomeHero = ({ products = [] }) => {
             }}
           >
             <IconButton
-              label="Previous featured product"
+              label="Previous slide"
               tooltip="Previous"
               variant="secondary"
               icon={<Icon icon="chevronLeft" size="sm" />}
@@ -210,7 +205,7 @@ export const HomeHero = ({ products = [] }) => {
               style={{ pointerEvents: 'auto' }}
             />
             <IconButton
-              label="Next featured product"
+              label="Next slide"
               tooltip="Next"
               variant="secondary"
               icon={<Icon icon="chevronRight" size="sm" />}
@@ -229,15 +224,15 @@ export const HomeHero = ({ products = [] }) => {
               justifyContent: 'center'
             }}
           >
-            {heroProducts.map((product, index) => {
+            {heroSlides.map((slide, index) => {
               const isActive = index === activeIndex;
 
               return (
                 <button
-                  key={product.id}
+                  key={slide.id}
                   type="button"
                   aria-current={isActive ? 'true' : undefined}
-                  aria-label={`Show ${product.name}`}
+                  aria-label={`Show ${slide.title}`}
                   onClick={() => setActiveIndex(index)}
                   style={{
                     appearance: 'none',
