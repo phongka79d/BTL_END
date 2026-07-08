@@ -39,6 +39,17 @@ enum ReviewStatus {
   hidden
 }
 
+enum StorefrontLinkType {
+  product
+  category
+  customUrl
+}
+
+enum StorefrontNavItemType {
+  link
+  mega_menu
+}
+
 model User {
   id           String   @id @default(uuid())
   username     String
@@ -56,29 +67,35 @@ model User {
 }
 
 model Category {
-  id          String    @id @default(uuid())
-  name        String    @unique
-  description String?
-  products    Product[]
-  createdAt   DateTime  @default(now()) @map("created_at")
-  updatedAt   DateTime  @updatedAt @map("updated_at")
+  id                         String              @id @default(uuid())
+  name                       String              @unique
+  description                String?
+  products                   Product[]
+  carouselSlides             CarouselSlide[]     @relation("CarouselSlideCategory")
+  storefrontNavItems         StorefrontNavItem[] @relation("StorefrontNavItemCategory")
+  storefrontNavFeaturedItems StorefrontNavItem[] @relation("StorefrontNavFeaturedCategory")
+  createdAt                  DateTime            @default(now()) @map("created_at")
+  updatedAt                  DateTime            @updatedAt @map("updated_at")
 }
 
 model Product {
-  id           String        @id @default(uuid())
-  name         String
-  brand        String
-  description  String?
-  price        Decimal       @db.Decimal(10, 2)
-  quantity     Int
-  imageUrl     String?       @map("image_url")
-  categoryId   String        @map("category_id")
-  category     Category      @relation(fields: [categoryId], references: [id])
-  cartItems    CartItem[]
-  orderDetails OrderDetail[]
-  reviews      Review[]
-  createdAt    DateTime      @default(now()) @map("created_at")
-  updatedAt    DateTime      @updatedAt @map("updated_at")
+  id                         String              @id @default(uuid())
+  name                       String
+  brand                      String
+  description                String?
+  price                      Decimal             @db.Decimal(10, 2)
+  quantity                   Int
+  imageUrl                   String?             @map("image_url")
+  categoryId                 String              @map("category_id")
+  category                   Category            @relation(fields: [categoryId], references: [id])
+  cartItems                  CartItem[]
+  orderDetails               OrderDetail[]
+  reviews                    Review[]
+  carouselSlides             CarouselSlide[]     @relation("CarouselSlideProduct")
+  storefrontNavItems         StorefrontNavItem[] @relation("StorefrontNavItemProduct")
+  storefrontNavFeaturedItems StorefrontNavItem[] @relation("StorefrontNavFeaturedProduct")
+  createdAt                  DateTime            @default(now()) @map("created_at")
+  updatedAt                  DateTime            @updatedAt @map("updated_at")
 }
 
 model Cart {
@@ -118,13 +135,13 @@ model Order {
 }
 
 model OrderDetail {
-  id        String   @id @default(uuid())
-  orderId   String   @map("order_id")
-  productId String   @map("product_id")
+  id        String  @id @default(uuid())
+  orderId   String  @map("order_id")
+  productId String  @map("product_id")
   quantity  Int
-  price     Decimal  @db.Decimal(10, 2)
-  order     Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  product   Product  @relation(fields: [productId], references: [id])
+  price     Decimal @db.Decimal(10, 2)
+  order     Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product   Product @relation(fields: [productId], references: [id])
 }
 
 model Payment {
@@ -148,4 +165,58 @@ model Review {
   product   Product      @relation(fields: [productId], references: [id], onDelete: Cascade)
   createdAt DateTime     @default(now()) @map("created_at")
   updatedAt DateTime     @updatedAt @map("updated_at")
+}
+
+model CarouselSlide {
+  id                 String             @id @default(uuid())
+  title              String
+  description        String?
+  imageUrl           String?            @map("image_url")
+  primaryButtonLabel String             @map("primary_button_label")
+  linkType           StorefrontLinkType @map("link_type")
+  productId          String?            @map("product_id")
+  product            Product?           @relation("CarouselSlideProduct", fields: [productId], references: [id], onDelete: SetNull)
+  categoryId         String?            @map("category_id")
+  category           Category?          @relation("CarouselSlideCategory", fields: [categoryId], references: [id], onDelete: SetNull)
+  customUrl          String?            @map("custom_url")
+  sortOrder          Int                @default(0) @map("sort_order")
+  isActive           Boolean            @default(true) @map("is_active")
+  createdAt          DateTime           @default(now()) @map("created_at")
+  updatedAt          DateTime           @updatedAt @map("updated_at")
+
+  @@index([isActive, sortOrder])
+}
+
+model StorefrontNavItem {
+  id                  String                @id @default(uuid())
+  parentId            String?               @map("parent_id")
+  parent              StorefrontNavItem?    @relation("StorefrontNavTree", fields: [parentId], references: [id], onDelete: Cascade)
+  children            StorefrontNavItem[]   @relation("StorefrontNavTree")
+  label               String
+  description         String?
+  itemType            StorefrontNavItemType @map("item_type")
+  icon                String?
+  linkType            StorefrontLinkType?   @map("link_type")
+  productId           String?               @map("product_id")
+  product             Product?              @relation("StorefrontNavItemProduct", fields: [productId], references: [id], onDelete: SetNull)
+  categoryId          String?               @map("category_id")
+  category            Category?             @relation("StorefrontNavItemCategory", fields: [categoryId], references: [id], onDelete: SetNull)
+  customUrl           String?               @map("custom_url")
+  featuredTitle       String?               @map("featured_title")
+  featuredDescription String?               @map("featured_description")
+  featuredImageUrl    String?               @map("featured_image_url")
+  featuredLinkLabel   String?               @map("featured_link_label")
+  featuredLinkType    StorefrontLinkType?   @map("featured_link_type")
+  featuredProductId   String?               @map("featured_product_id")
+  featuredProduct     Product?              @relation("StorefrontNavFeaturedProduct", fields: [featuredProductId], references: [id], onDelete: SetNull)
+  featuredCategoryId  String?               @map("featured_category_id")
+  featuredCategory    Category?             @relation("StorefrontNavFeaturedCategory", fields: [featuredCategoryId], references: [id], onDelete: SetNull)
+  featuredCustomUrl   String?               @map("featured_custom_url")
+  sortOrder           Int                   @default(0) @map("sort_order")
+  isActive            Boolean               @default(true) @map("is_active")
+  createdAt           DateTime              @default(now()) @map("created_at")
+  updatedAt           DateTime              @updatedAt @map("updated_at")
+
+  @@index([parentId])
+  @@index([isActive, sortOrder])
 }
