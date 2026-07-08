@@ -1,5 +1,6 @@
-﻿import React from 'react';
-import { Button, Card, Grid, HStack, NumberInput, Selector, VStack } from '@astryxdesign/core';
+import React from 'react';
+import { Link } from 'react-router-dom';
+import { Button, Card, Grid, HStack, NumberInput, Text, VStack } from '@astryxdesign/core';
 import SearchBar from './SearchBar';
 
 const toNumberValue = (value) => {
@@ -11,6 +12,30 @@ const toNumberValue = (value) => {
   return Number.isNaN(parsed) ? null : parsed;
 };
 
+const toCategoryHref = (categoryId, filters) => {
+  const params = new URLSearchParams();
+
+  if (filters.keyword.trim()) params.set('keyword', filters.keyword.trim());
+  if (categoryId) params.set('categoryId', categoryId);
+  if (filters.minPrice !== '') params.set('minPrice', filters.minPrice);
+  if (filters.maxPrice !== '') params.set('maxPrice', filters.maxPrice);
+
+  const query = params.toString();
+  return query ? `/products?${query}` : '/products';
+};
+
+const categoryLinkStyle = (isActive) => ({
+  display: 'inline-flex',
+  alignItems: 'center',
+  minHeight: 'var(--spacing-9)',
+  paddingInline: 'var(--spacing-3)',
+  border: `1px solid ${isActive ? 'var(--color-border-strong)' : 'var(--color-border-subtle)'}`,
+  borderRadius: 'var(--radius-full)',
+  background: isActive ? 'var(--color-surface-raised)' : 'var(--color-surface)',
+  color: 'var(--color-text-primary)',
+  textDecoration: 'none'
+});
+
 export const ProductFilter = ({
   filters,
   categories,
@@ -20,11 +45,6 @@ export const ProductFilter = ({
   onClear,
   isDisabled = false
 }) => {
-  const categoryOptions = categories.map((category) => ({
-    value: category.id,
-    label: category.name
-  }));
-
   return (
     <Card padding={4}>
       <form
@@ -41,17 +61,33 @@ export const ProductFilter = ({
             isDisabled={isDisabled}
           />
 
-          <Grid columns={{ minWidth: 220, max: 3 }} gap={3}>
-            <Selector
-              label="Category"
-              value={filters.categoryId}
-              onChange={(value) => onFieldChange('categoryId', value || '')}
-              options={categoryOptions}
-              placeholder={isCategoriesLoading ? 'Loading categories…' : 'All categories'}
-              hasClear
-              isDisabled={isDisabled || isCategoriesLoading}
-            />
+          <VStack gap={2}>
+            <Text weight="medium">Category</Text>
+            <HStack gap={2} style={{ flexWrap: 'wrap' }}>
+              <Link
+                to={toCategoryHref('', filters)}
+                aria-current={!filters.categoryId ? 'page' : undefined}
+                style={categoryLinkStyle(!filters.categoryId)}
+              >
+                All categories
+              </Link>
+              {isCategoriesLoading && (
+                <Text color="secondary" size="supporting">Loading categories...</Text>
+              )}
+              {!isCategoriesLoading && categories.map((category) => (
+                <Link
+                  key={category.id}
+                  to={toCategoryHref(category.id, filters)}
+                  aria-current={filters.categoryId === category.id ? 'page' : undefined}
+                  style={categoryLinkStyle(filters.categoryId === category.id)}
+                >
+                  {category.name}
+                </Link>
+              ))}
+            </HStack>
+          </VStack>
 
+          <Grid columns={{ minWidth: 220, max: 2 }} gap={3}>
             <NumberInput
               label="Minimum price"
               value={toNumberValue(filters.minPrice)}
