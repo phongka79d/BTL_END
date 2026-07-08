@@ -4,7 +4,6 @@ import {
   Badge,
   Button,
   Card,
-  ClickableCard,
   HStack,
   Heading,
   Icon,
@@ -234,22 +233,29 @@ export const HomeHero = ({ products = [] }) => {
               const isActive = index === activeIndex;
 
               return (
-                <ClickableCard
+                <button
                   key={product.id}
-                  label={`Show ${product.name}`}
+                  type="button"
+                  aria-current={isActive ? 'true' : undefined}
+                  aria-label={`Show ${product.name}`}
                   onClick={() => setActiveIndex(index)}
-                  padding={0}
-                  variant="transparent"
-                  width={isActive ? 'var(--spacing-6)' : 'var(--spacing-3)'}
-                  height="var(--spacing-3)"
                   style={{
-                    '--_card-radius': 'var(--radius-full)',
+                    appearance: 'none',
+                    padding: 0,
+                    width: isActive ? 'var(--spacing-6)' : 'var(--spacing-3)',
+                    minWidth: isActive ? 'var(--spacing-6)' : 'var(--spacing-3)',
+                    height: 'var(--spacing-3)',
                     position: 'relative',
+                    display: 'block',
                     overflow: 'hidden',
+                    borderRadius: 'var(--radius-full)',
                     backgroundColor: isActive
                       ? 'color-mix(in srgb, var(--color-text-primary) 42%, transparent)'
                       : 'color-mix(in srgb, var(--color-text-primary) 35%, transparent)',
-                    border: '1px solid color-mix(in srgb, var(--color-text-primary) 28%, transparent)'
+                    border: '1px solid color-mix(in srgb, var(--color-text-primary) 28%, transparent)',
+                    cursor: 'pointer',
+                    transition:
+                      'width var(--duration-short) var(--ease-standard), background-color var(--duration-short) var(--ease-standard)'
                   }}
                 >
                   {isActive && (
@@ -269,7 +275,7 @@ export const HomeHero = ({ products = [] }) => {
                       }}
                     />
                   )}
-                </ClickableCard>
+                </button>
               );
             })}
           </HStack>
