@@ -5,7 +5,7 @@ import test from 'node:test';
 const viewSource = readFileSync(new URL('./AdminReviewView.jsx', import.meta.url), 'utf8');
 const routesSource = readFileSync(new URL('../../routes/AppRoutes.jsx', import.meta.url), 'utf8');
 
-test('AdminReviewView searches products on demand, loads visible reviews, and hides selected reviews', () => {
+test('AdminReviewView loads all visible reviews by default and filters by selected product', () => {
   assert.match(viewSource, /import \{ useNavigate \} from 'react-router-dom';/);
   assert.match(viewSource, /import ProductPicker from '\.\.\/\.\.\/components\/admin\/ProductPicker';/);
   assert.match(viewSource, /import \{ reviewApi \} from '\.\.\/\.\.\/api\/reviewApi';/);
@@ -13,10 +13,12 @@ test('AdminReviewView searches products on demand, loads visible reviews, and hi
   assert.doesNotMatch(viewSource, /import \{ productApi \}/);
   assert.doesNotMatch(viewSource, /productApi\.getProducts\(\)/);
   assert.doesNotMatch(viewSource, /const getProductsFromResponse/);
-  assert.match(viewSource, /<ProductPicker[\s\S]*showInitialProducts[\s\S]*pageSize=\{10\}[\s\S]*value=\{selectedProductId \|\| undefined\}[\s\S]*onChange=\{handleProductChange\}/);
-  assert.match(viewSource, /reviewApi\.getProductReviews\(productId\)/);
-  assert.match(viewSource, /const loadReviews = useCallback\(async \(productId\) =>/);
-  assert.match(viewSource, /}, \[\]\);/);
+  assert.match(viewSource, /<ProductPicker[\s\S]*value=\{selectedProductId \|\| undefined\}[\s\S]*onChange=\{handleProductChange\}/);
+  assert.doesNotMatch(viewSource, /showInitialProducts/);
+  assert.doesNotMatch(viewSource, /pageSize=\{10\}/);
+  assert.match(viewSource, /reviewApi\.getAdminReviews\(productId \? \{ productId \} : \{\}\)/);
+  assert.match(viewSource, /const loadReviews = useCallback\(async \(productId = ''\) =>/);
+  assert.match(viewSource, /useEffect\(\(\) => \{\s*loadReviews\(\);\s*\}, \[loadReviews\]\);/s);
   assert.match(viewSource, /reviewApi\.hideReview\(target\.id\)/);
   assert.match(viewSource, /setIsHiding\(true\)/);
   assert.match(viewSource, /setReviews\(\(currentReviews\)\s*=>\s*currentReviews\.filter\(\(review\)\s*=>\s*review\.id !== target\.id\)\)/);
@@ -26,8 +28,9 @@ test('AdminReviewView searches products on demand, loads visible reviews, and hi
 test('AdminReviewView provides admin review moderation states and action UI', () => {
   assert.match(viewSource, /Manage Reviews/);
   assert.match(viewSource, /Product reviews/);
-  assert.match(viewSource, /Select a product to moderate its visible reviews\./);
-  assert.match(viewSource, /label="View product"[\s\S]*navigate\(`\/products\/\$\{selectedProductId\}`\)/);
+  assert.match(viewSource, /Showing all visible reviews\. Search and select a product to filter\./);
+  assert.match(viewSource, /const productId = review\.productId \|\| review\.product\?\.id \|\| selectedProductId;/);
+  assert.match(viewSource, /label="View product"[\s\S]*navigate\(`\/products\/\$\{productId\}`\)/);
   assert.match(viewSource, /Hide review/);
   assert.match(viewSource, /Unable to load reviews/);
   assert.match(viewSource, /No visible reviews/);

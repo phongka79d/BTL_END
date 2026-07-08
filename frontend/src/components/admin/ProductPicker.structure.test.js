@@ -31,3 +31,21 @@ test('ProductPicker presents searchable result context for admin selection', () 
   assert.match(source, /Stock/);
   assert.match(source, /onChange\(product\.id\)/);
 });
+
+test('ProductPicker uses compact selected entity state instead of keeping search controls open', () => {
+  assert.match(source, /const \[isLoadingSelected, setIsLoadingSelected\] = useState\(false\);/);
+  assert.match(source, /setIsLoadingSelected\(true\)/);
+  assert.match(source, /setIsLoadingSelected\(false\)/);
+  assert.match(source, /Loading selected product\.\.\./);
+  assert.match(source, /if \(isLoadingSelected\) \{/);
+  assert.match(source, /if \(selectedProduct\) \{/);
+  assert.match(source, /label="Change Product"/);
+  assert.match(source, /const handleChangeProduct = \(\) => \{/);
+  assert.match(source, /onChange\(''\)/);
+});
+
+test('ProductPicker constrains search results height inside admin modals', () => {
+  assert.match(source, /maxHeight: '280px'/);
+  assert.match(source, /overflowY: 'auto'/);
+  assert.match(source, /paddingRight: 'var\(--spacing-1\)'/);
+});

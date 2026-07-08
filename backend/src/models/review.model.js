@@ -7,6 +7,36 @@ const REVIEW_USER_SELECT = {
 };
 
 /**
+ * List visible reviews for admin moderation, newest first.
+ * @param {Object} filters
+ * @param {string} [filters.productId]
+ * @returns {Promise<Array>}
+ */
+const listVisibleForAdmin = async ({ productId } = {}) => {
+  return prisma.review.findMany({
+    where: {
+      status: 'visible',
+      ...(productId ? { productId } : {}),
+    },
+    orderBy: {
+      createdAt: 'desc',
+    },
+    include: {
+      user: {
+        select: REVIEW_USER_SELECT,
+      },
+      product: {
+        select: {
+          id: true,
+          name: true,
+          brand: true,
+        },
+      },
+    },
+  });
+};
+
+/**
  * List visible reviews for a product, newest first
  * @param {string} productId
  * @returns {Promise<Array>}
@@ -106,6 +136,7 @@ const hide = async (id) => {
 };
 
 module.exports = {
+  listVisibleForAdmin,
   listVisibleByProductId,
   findById,
   create,

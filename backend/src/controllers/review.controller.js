@@ -33,6 +33,20 @@ const parseReviewPayload = (body = {}) => {
 };
 
 /**
+ * Get visible reviews for admin moderation
+ * GET /api/admin/reviews
+ */
+const getAdminReviews = async (req, res, next) => {
+  try {
+    const { productId } = req.query;
+    const reviews = await reviewModel.listVisibleForAdmin({ productId });
+    return successResponse(res, 200, 'Reviews retrieved successfully', reviews);
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
  * Get visible reviews for a product
  * GET /api/products/:id/reviews
  */
@@ -107,6 +121,7 @@ const hideReview = async (req, res, next) => {
 };
 
 module.exports = {
+  getAdminReviews,
   getProductReviews,
   createProductReview,
   hideReview,

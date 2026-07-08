@@ -10,6 +10,9 @@ router.get('/products/:id/reviews', reviewController.getProductReviews);
 // Authenticated customer review creation
 router.post('/products/:id/reviews', protect, reviewController.createProductReview);
 
+// Admin visible review list for moderation
+router.get('/admin/reviews', protect, admin, reviewController.getAdminReviews);
+
 // Admin moderation hides the review instead of physically deleting it
 router.delete('/admin/reviews/:id', protect, admin, reviewController.hideReview);
 

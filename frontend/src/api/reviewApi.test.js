@@ -12,5 +12,6 @@ test('review API helper uses apiClient for customer review list and create calls
 });
 
 test('review API helper exposes admin hide action through apiClient', () => {
+  assert.match(source, /getAdminReviews:\s*\(filters = \{\}\)\s*=>\s*apiClient\.get\(`\/admin\/reviews\$\{buildReviewQuery\(filters\)\}`\)/);
   assert.match(source, /hideReview:\s*\(reviewId\)\s*=>\s*apiClient\.delete\(`\/admin\/reviews\/\$\{reviewId\}`\)/);
 });

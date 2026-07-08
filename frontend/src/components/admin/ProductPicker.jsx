@@ -63,6 +63,7 @@ export const ProductPicker = ({
   const [pagination, setPagination] = useState(defaultPagination);
   const [results, setResults] = useState([]);
   const [selectedProduct, setSelectedProduct] = useState(null);
+  const [isLoadingSelected, setIsLoadingSelected] = useState(false);
   const [isSearching, setIsSearching] = useState(false);
   const [searchError, setSearchError] = useState('');
   const searchKeyword = query.trim().length >= 2 && debouncedQuery.length >= 2
@@ -82,8 +83,16 @@ export const ProductPicker = ({
 
     if (!value) {
       setSelectedProduct(null);
+      setIsLoadingSelected(false);
       return undefined;
     }
+
+    if (selectedProduct?.id === value) {
+      setIsLoadingSelected(false);
+      return undefined;
+    }
+
+    setIsLoadingSelected(true);
 
     productApi.getProductById(value)
       .then((response) => {
@@ -95,15 +104,27 @@ export const ProductPicker = ({
         if (isActive) {
           setSelectedProduct(null);
         }
+      })
+      .finally(() => {
+        if (isActive) {
+          setIsLoadingSelected(false);
+        }
       });
 
     return () => {
       isActive = false;
     };
-  }, [value]);
+  }, [selectedProduct, value]);
 
   useEffect(() => {
     let isActive = true;
+
+    if (value) {
+      setResults([]);
+      setIsSearching(false);
+      setSearchError('');
+      return undefined;
+    }
 
     const shouldFetchProducts = showInitialProducts || searchKeyword.length >= 2;
 
@@ -144,17 +165,55 @@ export const ProductPicker = ({
     return () => {
       isActive = false;
     };
-  }, [pageSize, productPage, searchKeyword, showInitialProducts]);
+  }, [pageSize, productPage, searchKeyword, showInitialProducts, value]);
 
   const handleSelectProduct = (product) => {
     setSelectedProduct(product);
     onChange(product.id);
   };
 
+  const handleChangeProduct = () => {
+    setSelectedProduct(null);
+    setIsLoadingSelected(false);
+    setQuery('');
+    setDebouncedQuery('');
+    setProductPage(1);
+    onChange('');
+  };
+
   const handleSearchChange = (nextQuery) => {
     setQuery(nextQuery);
     setProductPage(1);
   };
+
+  if (isLoadingSelected) {
+    return (
+      <VStack gap={3}>
+        <Card padding={3} variant="muted">
+          <Text color="secondary" size="supporting">Loading selected product...</Text>
+        </Card>
+      </VStack>
+    );
+  }
+
+  if (selectedProduct) {
+    return (
+      <VStack gap={3}>
+        <Card padding={3} variant="muted">
+          <HStack gap={3} style={{ alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap' }}>
+            <ProductSummary product={selectedProduct} />
+            <Button
+              label="Change Product"
+              variant="secondary"
+              size="sm"
+              onClick={handleChangeProduct}
+              isDisabled={isDisabled}
+            />
+          </HStack>
+        </Card>
+      </VStack>
+    );
+  }
 
   return (
     <VStack gap={3}>
@@ -168,24 +227,6 @@ export const ProductPicker = ({
         width="100%"
       />
 
-      {selectedProduct && (
-        <Card padding={3} variant="muted">
-          <HStack gap={3} style={{ alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap' }}>
-            <ProductSummary product={selectedProduct} />
-            <Button
-              label="Clear"
-              variant="secondary"
-              size="sm"
-              onClick={() => {
-                setSelectedProduct(null);
-                onChange('');
-              }}
-              isDisabled={isDisabled}
-            />
-          </HStack>
-        </Card>
-      )}
-
       {searchError && <Text color="danger">{searchError}</Text>}
       {isSearching && <Text color="secondary" size="supporting">Searching products...</Text>}
       {!isSearching && (showInitialProducts || query.trim().length >= 2) && results.length === 0 && !searchError && (
@@ -194,7 +235,14 @@ export const ProductPicker = ({
         </Text>
       )}
       {!isSearching && results.length > 0 && (
-        <VStack gap={2}>
+        <VStack
+          gap={2}
+          style={{
+            maxHeight: '280px',
+            overflowY: 'auto',
+            paddingRight: 'var(--spacing-1)'
+          }}
+        >
           {results.map((product) => (
             <Card key={product.id} padding={3}>
               <HStack gap={3} style={{ alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap' }}>
