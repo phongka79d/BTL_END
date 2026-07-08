@@ -70,8 +70,7 @@ const CheckoutSkeleton = () => (
 
 export const CheckoutView = () => {
   const navigate = useNavigate();
-  const { items, subtotal, itemCount, loading, error, refreshCart } =
-    useCart();
+  const { items, subtotal, loading, error, refreshCart } = useCart();
 
   const [values, setValues] = useState(INITIAL_VALUES);
   const [errors, setErrors] = useState({});

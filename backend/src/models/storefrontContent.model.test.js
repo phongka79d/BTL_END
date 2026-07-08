@@ -284,3 +284,72 @@ test('findPublicNavigation groups active children under active mega menus', asyn
     },
   ]);
 });
+
+test('createNavigationItem allows simple links without featured card data', async () => {
+  prisma.product.findUnique = async (query) => {
+    assert.deepEqual(query, { where: { id: 'product-1' }, select: { id: true } });
+    return { id: 'product-1' };
+  };
+
+  prisma.storefrontNavItem.create = async (query) => {
+    assert.deepEqual(query, {
+      data: {
+        parentId: null,
+        label: 'Products',
+        description: null,
+        itemType: 'link',
+        icon: 'info',
+        linkType: 'product',
+        productId: 'product-1',
+        categoryId: null,
+        customUrl: null,
+        featuredTitle: null,
+        featuredDescription: null,
+        featuredImageUrl: null,
+        featuredLinkLabel: null,
+        featuredLinkType: null,
+        featuredProductId: null,
+        featuredCategoryId: null,
+        featuredCustomUrl: null,
+        sortOrder: 1,
+        isActive: true,
+      },
+    });
+    return { id: 'nav-products', ...query.data };
+  };
+
+  const result = await storefrontContentModel.createNavigationItem({
+    label: 'Products',
+    itemType: 'link',
+    icon: 'info',
+    linkType: 'product',
+    productId: 'product-1',
+    featuredLinkType: 'customUrl',
+    featuredCustomUrl: '',
+    sortOrder: 1,
+    isActive: true,
+  });
+
+  assert.equal(result.id, 'nav-products');
+});
+
+test('createNavigationItem allows top-level mega menus without featured card data', async () => {
+  prisma.storefrontNavItem.create = async (query) => {
+    assert.equal(query.data.itemType, 'mega_menu');
+    assert.equal(query.data.linkType, null);
+    assert.equal(query.data.featuredLinkType, null);
+    assert.equal(query.data.featuredCustomUrl, null);
+    return { id: 'nav-shop', ...query.data };
+  };
+
+  const result = await storefrontContentModel.createNavigationItem({
+    label: 'Shop',
+    itemType: 'mega_menu',
+    featuredLinkType: 'customUrl',
+    featuredCustomUrl: '',
+    sortOrder: 1,
+    isActive: true,
+  });
+
+  assert.equal(result.id, 'nav-shop');
+});

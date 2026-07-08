@@ -89,6 +89,16 @@ const normalizeLinkTargetData = ({ linkType, productId, categoryId, customUrl })
   customUrl: linkType === LINK_TYPES.CUSTOM_URL ? customUrl.trim() : null,
 });
 
+const hasFeaturedCardInput = (data) => (
+  isNonEmptyString(data.featuredTitle) ||
+  isNonEmptyString(data.featuredDescription) ||
+  isNonEmptyString(data.featuredImageUrl) ||
+  isNonEmptyString(data.featuredLinkLabel) ||
+  isNonEmptyString(data.featuredProductId) ||
+  isNonEmptyString(data.featuredCategoryId) ||
+  isNonEmptyString(data.featuredCustomUrl)
+);
+
 const validateCarouselPayload = async (data) => {
   if (!isNonEmptyString(data.title)) throw new Error('Carousel title is required.');
   if (data.isActive !== false && !isNonEmptyString(data.imageUrl)) throw new Error('Carousel image URL is required.');
@@ -174,7 +184,7 @@ const validateNavigationPayload = async (data) => {
     await validateLinkTarget(data);
   }
 
-  if (isNonEmptyString(data.featuredLinkLabel) || data.featuredLinkType) {
+  if (hasFeaturedCardInput(data)) {
     await validateLinkTarget({
       linkType: data.featuredLinkType,
       productId: data.featuredProductId,
@@ -189,6 +199,8 @@ const normalizeNavigationPayload = (data) => {
     ? { linkType: null, productId: null, categoryId: null, customUrl: null }
     : normalizeLinkTargetData(data);
 
+  const hasFeatured = hasFeaturedCardInput(data);
+
   return {
     parentId: toNullableString(data.parentId),
     label: data.label.trim(),
@@ -196,14 +208,14 @@ const normalizeNavigationPayload = (data) => {
     itemType: data.itemType,
     icon: toNullableString(data.icon),
     ...linkData,
-    featuredTitle: toNullableString(data.featuredTitle),
-    featuredDescription: toNullableString(data.featuredDescription),
-    featuredImageUrl: toNullableString(data.featuredImageUrl),
-    featuredLinkLabel: toNullableString(data.featuredLinkLabel),
-    featuredLinkType: data.featuredLinkType || null,
-    featuredProductId: data.featuredLinkType === LINK_TYPES.PRODUCT ? data.featuredProductId : null,
-    featuredCategoryId: data.featuredLinkType === LINK_TYPES.CATEGORY ? data.featuredCategoryId : null,
-    featuredCustomUrl: data.featuredLinkType === LINK_TYPES.CUSTOM_URL ? (data.featuredCustomUrl || '').trim() : null,
+    featuredTitle: hasFeatured ? toNullableString(data.featuredTitle) : null,
+    featuredDescription: hasFeatured ? toNullableString(data.featuredDescription) : null,
+    featuredImageUrl: hasFeatured ? toNullableString(data.featuredImageUrl) : null,
+    featuredLinkLabel: hasFeatured ? toNullableString(data.featuredLinkLabel) : null,
+    featuredLinkType: hasFeatured ? data.featuredLinkType : null,
+    featuredProductId: hasFeatured && data.featuredLinkType === LINK_TYPES.PRODUCT ? data.featuredProductId : null,
+    featuredCategoryId: hasFeatured && data.featuredLinkType === LINK_TYPES.CATEGORY ? data.featuredCategoryId : null,
+    featuredCustomUrl: hasFeatured && data.featuredLinkType === LINK_TYPES.CUSTOM_URL ? (data.featuredCustomUrl || '').trim() : null,
     sortOrder: Number.isInteger(Number(data.sortOrder)) ? Number(data.sortOrder) : 0,
     isActive: data.isActive !== false,
   };

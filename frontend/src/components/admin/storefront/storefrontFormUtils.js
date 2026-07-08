@@ -129,6 +129,18 @@ const normalizedLinkTarget = (values, prefix = '') => {
   };
 };
 
+const hasFeaturedCardInput = (values) => (
+  Boolean(
+    trim(values.featuredTitle || '') ||
+    trim(values.featuredDescription || '') ||
+    trim(values.featuredImageUrl || '') ||
+    trim(values.featuredLinkLabel || '') ||
+    values.featuredProductId ||
+    values.featuredCategoryId ||
+    trim(values.featuredCustomUrl || '')
+  )
+);
+
 export const createCarouselPayload = (values) => ({
   title: trim(values.title),
   description: trim(values.description || ''),
@@ -179,9 +191,18 @@ export const validateNavigationForm = (values) => {
 
 export const createNavigationPayload = (values) => {
   const isTopLevelMegaMenu = values.itemType === 'mega_menu' && !values.parentId;
+  const hasFeatured = hasFeaturedCardInput(values);
   const linkTarget = isTopLevelMegaMenu
     ? { linkType: null, productId: null, categoryId: null, customUrl: null }
     : normalizedLinkTarget(values);
+  const featuredTarget = hasFeatured
+    ? normalizedLinkTarget(values, 'featured')
+    : {
+        featuredLinkType: null,
+        featuredProductId: null,
+        featuredCategoryId: null,
+        featuredCustomUrl: null,
+      };
 
   return {
     label: trim(values.label),
@@ -194,7 +215,7 @@ export const createNavigationPayload = (values) => {
     featuredDescription: trim(values.featuredDescription || ''),
     featuredImageUrl: trim(values.featuredImageUrl || ''),
     featuredLinkLabel: trim(values.featuredLinkLabel || ''),
-    ...normalizedLinkTarget(values, 'featured'),
+    ...featuredTarget,
     sortOrder: asNumber(values.sortOrder),
     isActive: values.isActive !== false,
   };
