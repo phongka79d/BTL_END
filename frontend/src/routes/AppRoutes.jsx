@@ -23,6 +23,8 @@ import AdminStorefrontView from '../views/admin/AdminStorefrontView';
 import CheckoutView from '../views/CheckoutView';
 import OrderHistoryView from '../views/OrderHistoryView';
 import OrderDetailView from '../views/OrderDetailView';
+import ProfileView from '../views/ProfileView';
+import UnauthorizedView from '../views/UnauthorizedView';
 
 /**
  * Route guard for authenticated users (Customer/Admin).
@@ -120,7 +122,7 @@ export const AppRoutes = () => {
         <Route path="/" element={<HomeView />} />
         <Route path="/products" element={<ProductListView />} />
         <Route path="/products/:id" element={<ProductDetailView />} />
-        <Route path="/unauthorized" element={<div>Unauthorized Access (Placeholder)</div>} />
+        <Route path="/unauthorized" element={<UnauthorizedView />} />
 
         {/* Protected Customer Routes inside MainLayout */}
         <Route element={<PrivateRoute />}>
@@ -128,7 +130,7 @@ export const AppRoutes = () => {
           <Route path="/checkout" element={<CheckoutView />} />
           <Route path="/orders" element={<OrderHistoryView />} />
           <Route path="/orders/:id" element={<OrderDetailView />} />
-          <Route path="/profile" element={<div>Profile Page (Placeholder)</div>} />
+          <Route path="/profile" element={<ProfileView />} />
         </Route>
 
         {/* Fallback inside MainLayout */}
