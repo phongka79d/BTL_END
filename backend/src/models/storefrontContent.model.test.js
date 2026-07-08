@@ -5,6 +5,9 @@ const databasePath = require.resolve('../config/database');
 const originalDatabaseModule = require.cache[databasePath];
 
 const prisma = {
+  $transaction: async () => {
+    throw new Error('Unexpected $transaction call');
+  },
   carouselSlide: {
     findMany: async () => {
       throw new Error('Unexpected carouselSlide.findMany call');
@@ -101,6 +104,9 @@ beforeEach(() => {
   prisma.storefrontFeaturedProduct.findMany = async () => [];
   prisma.storefrontFeaturedProduct.findUnique = async () => null;
   prisma.storefrontSetting.findUnique = async () => null;
+  prisma.$transaction = async () => {
+    throw new Error('Unexpected $transaction call');
+  };
 });
 
 after(() => {
@@ -535,4 +541,90 @@ test('updateStorefrontSettings persists a bounded featured product limit', async
   assert.deepEqual(await storefrontContentModel.updateStorefrontSettings({ featuredProductLimit: 8 }), {
     featuredProductLimit: 8,
   });
+});
+
+test('createFeaturedProductsBulk skips duplicates and auto-indexes after the current featured order', async () => {
+  prisma.product.findMany = async (query) => {
+    assert.deepEqual(query, {
+      where: { id: { in: ['product-1', 'product-2', 'product-3'] } },
+      select: { id: true },
+    });
+    return [
+      { id: 'product-1' },
+      { id: 'product-2' },
+      { id: 'product-3' },
+    ];
+  };
+
+  let featuredFindManyCall = 0;
+  prisma.storefrontFeaturedProduct.findMany = async (query) => {
+    featuredFindManyCall += 1;
+    if (featuredFindManyCall === 1) {
+      assert.deepEqual(query, {
+        where: { productId: { in: ['product-1', 'product-2', 'product-3'] } },
+        select: { productId: true },
+      });
+      return [{ productId: 'product-2' }];
+    }
+
+    assert.deepEqual(query, {
+      orderBy: { sortOrder: 'desc' },
+      take: 1,
+      select: { sortOrder: true },
+    });
+    return [{ sortOrder: 4 }];
+  };
+
+  const createdRows = [];
+  prisma.storefrontFeaturedProduct.create = async (query) => {
+    createdRows.push(query.data);
+    return { id: `featured-${createdRows.length}`, ...query.data };
+  };
+
+  assert.deepEqual(await storefrontContentModel.createFeaturedProductsBulk({
+    productIds: ['product-1', 'product-2', 'product-1', 'product-3'],
+  }), {
+    items: [
+      { id: 'featured-1', productId: 'product-1', sortOrder: 5, isActive: true },
+      { id: 'featured-2', productId: 'product-3', sortOrder: 6, isActive: true },
+    ],
+    skippedProductIds: ['product-2'],
+  });
+});
+
+test('reorderFeaturedProducts renumbers submitted featured products to unique sequential order', async () => {
+  prisma.storefrontFeaturedProduct.findMany = async (query) => {
+    assert.deepEqual(query, {
+      where: { id: { in: ['featured-2', 'featured-1', 'featured-3'] } },
+      select: { id: true },
+    });
+    return [
+      { id: 'featured-1' },
+      { id: 'featured-2' },
+      { id: 'featured-3' },
+    ];
+  };
+
+  const updates = [];
+  prisma.storefrontFeaturedProduct.update = (query) => {
+    updates.push(query);
+    return Promise.resolve({ id: query.where.id, sortOrder: query.data.sortOrder });
+  };
+  prisma.$transaction = async (operations) => Promise.all(operations);
+
+  assert.deepEqual(await storefrontContentModel.reorderFeaturedProducts({
+    orderedIds: ['featured-2', 'featured-1', 'featured-2', 'featured-3'],
+  }), {
+    items: [
+      { id: 'featured-2', sortOrder: 1 },
+      { id: 'featured-1', sortOrder: 2 },
+      { id: 'featured-3', sortOrder: 3 },
+    ],
+  });
+
+  assert.deepEqual(updates, [
+    { where: { id: 'featured-2' }, data: { sortOrder: 1 } },
+    { where: { id: 'featured-1' }, data: { sortOrder: 2 } },
+    { where: { id: 'featured-3' }, data: { sortOrder: 3 } },
+  ]);
 });

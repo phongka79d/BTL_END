@@ -159,7 +159,6 @@ export const HomeSkeleton = () => (
   <VStack gap={10}>
     <HomeSkeletonHero />
     <HomeSkeletonSection />
-    <HomeSkeletonSection />
   </VStack>
 );
 

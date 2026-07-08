@@ -19,6 +19,8 @@ test('storefront content API helper uses apiClient for public and admin endpoint
   assert.match(source, /deleteNavigationItem:\s*\(id\)\s*=>\s*apiClient\.delete\(`\/admin\/storefront\/navigation\/\$\{id\}`\)/);
   assert.match(source, /getAdminFeaturedProducts:\s*\(\)\s*=>\s*apiClient\.get\('\/admin\/storefront\/featured-products'\)/);
   assert.match(source, /createFeaturedProduct:\s*\(payload\)\s*=>\s*apiClient\.post\('\/admin\/storefront\/featured-products', payload\)/);
+  assert.match(source, /createFeaturedProductsBulk:\s*\(payload\)\s*=>\s*apiClient\.post\('\/admin\/storefront\/featured-products\/bulk', payload\)/);
+  assert.match(source, /reorderFeaturedProducts:\s*\(orderedIds\)\s*=>\s*apiClient\.put\('\/admin\/storefront\/featured-products\/reorder', \{ orderedIds \}\)/);
   assert.match(source, /updateFeaturedProduct:\s*\(id, payload\)\s*=>\s*apiClient\.put\(`\/admin\/storefront\/featured-products\/\$\{id\}`, payload\)/);
   assert.match(source, /deleteFeaturedProduct:\s*\(id\)\s*=>\s*apiClient\.delete\(`\/admin\/storefront\/featured-products\/\$\{id\}`\)/);
   assert.match(source, /updateStorefrontSettings:\s*\(payload\)\s*=>\s*apiClient\.put\('\/admin\/storefront\/settings', payload\)/);

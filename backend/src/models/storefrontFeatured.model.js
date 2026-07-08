@@ -119,6 +119,14 @@ const normalizeFeaturedProductPayload = (data) => ({
   isActive: data.isActive !== false,
 });
 
+const toUniqueProductIds = (productIds = []) => {
+  const trimmedIds = productIds
+    .filter((productId) => typeof productId === 'string' && productId.trim() !== '')
+    .map((productId) => productId.trim());
+
+  return [...new Set(trimmedIds)];
+};
+
 const createFeaturedProduct = async (data) => {
   await validateProduct(data.productId);
   return prisma.storefrontFeaturedProduct.create({
@@ -134,6 +142,89 @@ const updateFeaturedProduct = async (id, data) => {
   });
 };
 
+const createFeaturedProductsBulk = async ({ productIds } = {}) => {
+  const uniqueProductIds = toUniqueProductIds(productIds);
+
+  if (!uniqueProductIds.length) {
+    throw new Error('Featured product is required.');
+  }
+
+  const existingProducts = await prisma.product.findMany({
+    where: { id: { in: uniqueProductIds } },
+    select: { id: true },
+  });
+  const existingProductIds = new Set(existingProducts.map((product) => product.id));
+
+  if (existingProductIds.size !== uniqueProductIds.length) {
+    throw new Error('Featured product was not found.');
+  }
+
+  const existingFeaturedProducts = await prisma.storefrontFeaturedProduct.findMany({
+    where: { productId: { in: uniqueProductIds } },
+    select: { productId: true },
+  });
+  const skippedProductIds = existingFeaturedProducts.map((item) => item.productId);
+  const skippedProductIdSet = new Set(skippedProductIds);
+  const productIdsToCreate = uniqueProductIds.filter((productId) => !skippedProductIdSet.has(productId));
+
+  if (!productIdsToCreate.length) {
+    return {
+      items: [],
+      skippedProductIds,
+    };
+  }
+
+  const [lastFeaturedProduct] = await prisma.storefrontFeaturedProduct.findMany({
+    orderBy: { sortOrder: 'desc' },
+    take: 1,
+    select: { sortOrder: true },
+  });
+  const startingSortOrder = Number(lastFeaturedProduct?.sortOrder || 0);
+
+  const items = await Promise.all(productIdsToCreate.map((productId, index) => (
+    prisma.storefrontFeaturedProduct.create({
+      data: {
+        productId,
+        sortOrder: startingSortOrder + index + 1,
+        isActive: true,
+      },
+    })
+  )));
+
+  return {
+    items,
+    skippedProductIds,
+  };
+};
+
+const reorderFeaturedProducts = async ({ orderedIds } = {}) => {
+  const uniqueOrderedIds = toUniqueProductIds(orderedIds);
+
+  if (!uniqueOrderedIds.length) {
+    throw new Error('Featured product order is required.');
+  }
+
+  const existingFeaturedProducts = await prisma.storefrontFeaturedProduct.findMany({
+    where: { id: { in: uniqueOrderedIds } },
+    select: { id: true },
+  });
+
+  if (existingFeaturedProducts.length !== uniqueOrderedIds.length) {
+    throw new Error('Featured product was not found.');
+  }
+
+  const updates = uniqueOrderedIds.map((id, index) => (
+    prisma.storefrontFeaturedProduct.update({
+      where: { id },
+      data: { sortOrder: index + 1 },
+    })
+  ));
+
+  const items = await prisma.$transaction(updates);
+
+  return { items };
+};
+
 const deleteFeaturedProduct = (id) => prisma.storefrontFeaturedProduct.delete({ where: { id } });
 
 module.exports = {
@@ -141,6 +232,8 @@ module.exports = {
   findAdminFeaturedProducts,
   updateStorefrontSettings,
   createFeaturedProduct,
+  createFeaturedProductsBulk,
+  reorderFeaturedProducts,
   updateFeaturedProduct,
   deleteFeaturedProduct,
 };

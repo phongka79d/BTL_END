@@ -139,6 +139,27 @@ const createAdminFeaturedProduct = async (req, res, next) => {
   }
 };
 
+const createAdminFeaturedProductsBulk = async (req, res, next) => {
+  try {
+    const result = await storefrontContentModel.createFeaturedProductsBulk(req.body);
+    return successResponse(res, 201, 'Featured products created successfully', result);
+  } catch (error) {
+    if (isValidationError(error)) return errorResponse(res, 400, error.message);
+    next(error);
+  }
+};
+
+const reorderAdminFeaturedProducts = async (req, res, next) => {
+  try {
+    const result = await storefrontContentModel.reorderFeaturedProducts(req.body);
+    return successResponse(res, 200, 'Featured products reordered successfully', result);
+  } catch (error) {
+    if (error.code === 'P2025') return errorResponse(res, 404, 'Featured product not found');
+    if (isValidationError(error)) return errorResponse(res, 400, error.message);
+    next(error);
+  }
+};
+
 const updateAdminFeaturedProduct = async (req, res, next) => {
   try {
     const item = await storefrontContentModel.updateFeaturedProduct(req.params.id, req.body);
@@ -184,6 +205,8 @@ module.exports = {
   deleteAdminNavigationItem,
   listAdminFeaturedProducts,
   createAdminFeaturedProduct,
+  createAdminFeaturedProductsBulk,
+  reorderAdminFeaturedProducts,
   updateAdminFeaturedProduct,
   deleteAdminFeaturedProduct,
   updateAdminStorefrontSettings,

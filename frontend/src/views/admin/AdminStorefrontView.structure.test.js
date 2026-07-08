@@ -46,5 +46,5 @@ test('storefront forms use product and category selectors instead of pasted inte
   assert.match(linkFieldsSource, /<ProductPicker/);
   assert.match(linkFieldsSource, /label="Category target"/);
   assert.match(linkFieldsSource, /placeholder="Select category"/);
-  assert.match(featuredManagerSource, /<ProductPicker/);
+  assert.match(featuredManagerSource, /<FeaturedProductBulkPicker/);
 });

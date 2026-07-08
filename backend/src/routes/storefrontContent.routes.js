@@ -19,7 +19,9 @@ storefrontContentAdminRouter.post('/navigation', protect, admin, controller.crea
 storefrontContentAdminRouter.put('/navigation/:id', protect, admin, controller.updateAdminNavigationItem);
 storefrontContentAdminRouter.delete('/navigation/:id', protect, admin, controller.deleteAdminNavigationItem);
 storefrontContentAdminRouter.get('/featured-products', protect, admin, controller.listAdminFeaturedProducts);
+storefrontContentAdminRouter.post('/featured-products/bulk', protect, admin, controller.createAdminFeaturedProductsBulk);
 storefrontContentAdminRouter.post('/featured-products', protect, admin, controller.createAdminFeaturedProduct);
+storefrontContentAdminRouter.put('/featured-products/reorder', protect, admin, controller.reorderAdminFeaturedProducts);
 storefrontContentAdminRouter.put('/featured-products/:id', protect, admin, controller.updateAdminFeaturedProduct);
 storefrontContentAdminRouter.delete('/featured-products/:id', protect, admin, controller.deleteAdminFeaturedProduct);
 storefrontContentAdminRouter.put('/settings', protect, admin, controller.updateAdminStorefrontSettings);

@@ -18,6 +18,8 @@ beforeEach(() => {
   storefrontModel.deleteNavigationItem = async () => ({ id: 'nav-1' });
   storefrontModel.findAdminFeaturedProducts = async () => ({ items: [], settings: { featuredProductLimit: 6 } });
   storefrontModel.createFeaturedProduct = async (payload) => ({ id: 'featured-1', ...payload });
+  storefrontModel.createFeaturedProductsBulk = async (payload) => ({ items: payload.productIds, skippedProductIds: [] });
+  storefrontModel.reorderFeaturedProducts = async (payload) => ({ items: payload.orderedIds });
   storefrontModel.updateFeaturedProduct = async (id, payload) => ({ id, ...payload });
   storefrontModel.deleteFeaturedProduct = async () => ({ id: 'featured-1' });
   storefrontModel.updateStorefrontSettings = async (payload) => payload;
@@ -104,6 +106,8 @@ test('storefront routes mount public and admin endpoints with protection', async
     }));
 
   assert.deepEqual(adminRoutes.map((route) => route.handlers.slice(0, 2)), [
+    [protect, admin],
+    [protect, admin],
     [protect, admin],
     [protect, admin],
     [protect, admin],

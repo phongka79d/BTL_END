@@ -5,6 +5,31 @@ const emptyReviewSummary = () => ({
   reviewCount: 0,
 });
 
+const productInclude = {
+  category: {
+    select: {
+      id: true,
+      name: true
+    }
+  }
+};
+
+const PRODUCT_SORTS = {
+  DEFAULT: 'default',
+  PRICE: 'price',
+  REVIEW: 'review',
+  ORDERS: 'orders',
+};
+
+const normalizeSort = (sort) => (
+  Object.values(PRODUCT_SORTS).includes(sort) ? sort : PRODUCT_SORTS.DEFAULT
+);
+
+const toTimestamp = (value) => {
+  const time = value ? new Date(value).getTime() : 0;
+  return Number.isNaN(time) ? 0 : time;
+};
+
 const attachReviewSummaries = async (items) => {
   if (!items.length) {
     return items;
@@ -42,6 +67,52 @@ const attachReviewSummaries = async (items) => {
     ...item,
     reviewSummary: summariesByProductId.get(item.id) || emptyReviewSummary(),
   }));
+};
+
+const sortByReviewSummary = (items) => [...items].sort((first, second) => {
+  const firstSummary = first.reviewSummary || emptyReviewSummary();
+  const secondSummary = second.reviewSummary || emptyReviewSummary();
+  const firstRating = firstSummary.averageRating ?? -1;
+  const secondRating = secondSummary.averageRating ?? -1;
+
+  if (firstRating !== secondRating) {
+    return secondRating - firstRating;
+  }
+
+  if (firstSummary.reviewCount !== secondSummary.reviewCount) {
+    return secondSummary.reviewCount - firstSummary.reviewCount;
+  }
+
+  return toTimestamp(second.createdAt) - toTimestamp(first.createdAt);
+});
+
+const sortByOrderedQuantity = async (items) => {
+  if (!items.length) {
+    return items;
+  }
+
+  const productIds = items.map((item) => item.id).filter(Boolean);
+  const orderGroups = await prisma.orderDetail.groupBy({
+    by: ['productId'],
+    where: {
+      productId: { in: productIds },
+    },
+    _sum: { quantity: true },
+  });
+  const orderedQuantityByProductId = new Map(
+    orderGroups.map((group) => [group.productId, Number(group._sum.quantity || 0)])
+  );
+
+  return [...items].sort((first, second) => {
+    const firstQuantity = orderedQuantityByProductId.get(first.id) || 0;
+    const secondQuantity = orderedQuantityByProductId.get(second.id) || 0;
+
+    if (firstQuantity !== secondQuantity) {
+      return secondQuantity - firstQuantity;
+    }
+
+    return toTimestamp(second.createdAt) - toTimestamp(first.createdAt);
+  });
 };
 
 /**
@@ -122,6 +193,7 @@ const findById = async (id) => {
  */
 const findAll = async (params = {}) => {
   const { keyword, categoryId, minPrice, maxPrice, page, limit } = params;
+  const sort = normalizeSort(params.sort);
   const where = {};
 
   if (keyword) {
@@ -157,21 +229,42 @@ const findAll = async (params = {}) => {
   const skip = (pageNum - 1) * limitNum;
   const take = limitNum;
 
+  if (sort === PRODUCT_SORTS.REVIEW || sort === PRODUCT_SORTS.ORDERS) {
+    // ponytail: aggregate sort pages after loading matching products; move to SQL/precomputed metrics when catalog size demands it.
+    const matchingItems = await prisma.product.findMany({
+      where,
+      include: productInclude,
+      orderBy: {
+        createdAt: 'desc'
+      }
+    });
+    const matchingItemsWithReviewSummaries = await attachReviewSummaries(matchingItems);
+    const sortedItems = sort === PRODUCT_SORTS.REVIEW
+      ? sortByReviewSummary(matchingItemsWithReviewSummaries)
+      : await sortByOrderedQuantity(matchingItemsWithReviewSummaries);
+    const totalPages = Math.ceil(total / limitNum);
+
+    return {
+      items: sortedItems.slice(skip, skip + take),
+      pagination: {
+        page: pageNum,
+        limit: limitNum,
+        total,
+        totalPages: totalPages === 0 ? 1 : totalPages
+      }
+    };
+  }
+
+  const orderBy = sort === PRODUCT_SORTS.PRICE
+    ? { price: 'asc' }
+    : { createdAt: 'desc' };
+
   const items = await prisma.product.findMany({
     where,
     skip,
     take,
-    include: {
-      category: {
-        select: {
-          id: true,
-          name: true
-        }
-      }
-    },
-    orderBy: {
-      createdAt: 'desc'
-    }
+    include: productInclude,
+    orderBy
   });
 
   const itemsWithReviewSummaries = await attachReviewSummaries(items);

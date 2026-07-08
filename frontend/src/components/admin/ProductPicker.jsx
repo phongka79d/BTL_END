@@ -12,7 +12,7 @@ const defaultPagination = {
   totalPages: 1
 };
 
-const ProductSummary = ({ product }) => (
+export const ProductSummary = ({ product }) => (
   <HStack gap={3} style={{ alignItems: 'center', minWidth: 0, width: '100%' }}>
     <VStack
       style={{

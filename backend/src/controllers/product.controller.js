@@ -7,14 +7,15 @@ const { successResponse, errorResponse } = require('../utils/response');
  */
 const getProducts = async (req, res, next) => {
   try {
-    const { keyword, categoryId, minPrice, maxPrice, page, limit } = req.query;
+    const { keyword, categoryId, minPrice, maxPrice, page, limit, sort } = req.query;
     const result = await productModel.findAll({
       keyword,
       categoryId,
       minPrice,
       maxPrice,
       page,
-      limit
+      limit,
+      sort
     });
     return successResponse(res, 200, 'Products retrieved successfully', result);
   } catch (error) {

@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   Badge,
   Button,
@@ -11,48 +11,40 @@ import {
   pixel,
   proportional
 } from '@astryxdesign/core';
-import ProductPicker from '../ProductPicker';
 import AdminTable from '../AdminTable';
-
-const toFeaturedProductPayload = (item, overrides = {}) => ({
-  productId: item.productId,
-  sortOrder: Number.isInteger(Number(item.sortOrder)) ? Number(item.sortOrder) : 0,
-  isActive: item.isActive !== false,
-  ...overrides,
-});
+import FeaturedProductBulkPicker from './FeaturedProductBulkPicker';
 
 export const FeaturedProductManager = ({
   error,
   featuredProducts,
   isLoading,
   isSaving,
-  onCreateFeaturedProduct,
+  onCreateFeaturedProductsBulk,
   onDeleteFeaturedProduct,
   onRetry,
+  onReorderFeaturedProducts,
   onSaveSettings,
   onToggleFeaturedProduct,
-  onUpdateFeaturedProduct,
   settings,
 }) => {
   const [featuredProductLimit, setFeaturedProductLimit] = useState(settings.featuredProductLimit || 6);
-  const [selectedProductId, setSelectedProductId] = useState('');
-  const [sortOrder, setSortOrder] = useState(0);
 
   useEffect(() => {
     setFeaturedProductLimit(settings.featuredProductLimit || 6);
   }, [settings.featuredProductLimit]);
 
-  const handleAddFeaturedProduct = async () => {
-    if (!selectedProductId) return;
+  const moveFeaturedProduct = useCallback((item, direction) => {
+    const currentIndex = featuredProducts.findIndex((product) => product.id === item.id);
+    const nextIndex = direction === 'up' ? currentIndex - 1 : currentIndex + 1;
 
-    await onCreateFeaturedProduct({
-      productId: selectedProductId,
-      sortOrder: Number.isInteger(Number(sortOrder)) ? Number(sortOrder) : 0,
-      isActive: true,
-    });
-    setSelectedProductId('');
-    setSortOrder(0);
-  };
+    if (currentIndex < 0 || nextIndex < 0 || nextIndex >= featuredProducts.length) {
+      return;
+    }
+
+    const nextProducts = [...featuredProducts];
+    [nextProducts[currentIndex], nextProducts[nextIndex]] = [nextProducts[nextIndex], nextProducts[currentIndex]];
+    onReorderFeaturedProducts(nextProducts.map((product) => product.id));
+  }, [featuredProducts, onReorderFeaturedProducts]);
 
   const columns = useMemo(() => [
     {
@@ -92,11 +84,11 @@ export const FeaturedProductManager = ({
           items={[
             {
               label: 'Move up',
-              onClick: () => onUpdateFeaturedProduct(item.id, toFeaturedProductPayload(item, { sortOrder: item.sortOrder - 1 })),
+              onClick: () => moveFeaturedProduct(item, 'up'),
             },
             {
               label: 'Move down',
-              onClick: () => onUpdateFeaturedProduct(item.id, toFeaturedProductPayload(item, { sortOrder: item.sortOrder + 1 })),
+              onClick: () => moveFeaturedProduct(item, 'down'),
             },
             {
               label: item.isActive ? 'Deactivate' : 'Activate',
@@ -107,7 +99,7 @@ export const FeaturedProductManager = ({
         />
       ),
     },
-  ], [isSaving, onDeleteFeaturedProduct, onToggleFeaturedProduct, onUpdateFeaturedProduct]);
+  ], [isSaving, moveFeaturedProduct, onDeleteFeaturedProduct, onToggleFeaturedProduct]);
 
   return (
     <VStack gap={4}>
@@ -130,24 +122,10 @@ export const FeaturedProductManager = ({
               onClick={() => onSaveSettings({ featuredProductLimit })}
             />
           </HStack>
-          <VStack gap={3}>
-            <ProductPicker value={selectedProductId} onChange={setSelectedProductId} pageSize={10} />
-            <HStack gap={3} align="end" wrap="wrap">
-              <NumberInput
-                label="Sort order"
-                value={sortOrder}
-                onChange={setSortOrder}
-                step={1}
-                isIntegerOnly
-              />
-              <Button
-                label="Add featured product"
-                variant="primary"
-                isDisabled={!selectedProductId || isSaving}
-                onClick={handleAddFeaturedProduct}
-              />
-            </HStack>
-          </VStack>
+          <FeaturedProductBulkPicker
+            isDisabled={isSaving}
+            onAddProducts={onCreateFeaturedProductsBulk}
+          />
         </VStack>
       </Card>
       <AdminTable

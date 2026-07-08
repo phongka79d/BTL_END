@@ -9,6 +9,10 @@ test('storefront controller exposes public and admin featured product actions', 
   assert.match(source, /storefrontContentModel\.findPublicFeaturedProducts\(\)/);
   assert.match(source, /const listAdminFeaturedProducts = async \(req, res, next\) => \{/);
   assert.match(source, /storefrontContentModel\.findAdminFeaturedProducts\(\)/);
+  assert.match(source, /const createAdminFeaturedProductsBulk = async \(req, res, next\) => \{/);
+  assert.match(source, /storefrontContentModel\.createFeaturedProductsBulk\(req\.body\)/);
+  assert.match(source, /const reorderAdminFeaturedProducts = async \(req, res, next\) => \{/);
+  assert.match(source, /storefrontContentModel\.reorderFeaturedProducts\(req\.body\)/);
   assert.match(source, /const updateAdminStorefrontSettings = async \(req, res, next\) => \{/);
   assert.match(source, /storefrontContentModel\.updateStorefrontSettings\(req\.body\)/);
 });

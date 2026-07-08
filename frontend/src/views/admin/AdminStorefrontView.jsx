@@ -141,14 +141,19 @@ export const AdminStorefrontView = () => {
     }
   };
 
-  const createFeaturedProduct = async (payload) => {
+  const createFeaturedProductsBulk = async (payload) => {
     setIsSavingFeatured(true);
     try {
-      await storefrontContentApi.createFeaturedProduct(payload);
-      setFeedback({ title: 'Featured product added', description: 'The product was added to the homepage featured list.' });
+      const response = await storefrontContentApi.createFeaturedProductsBulk(payload);
+      const createdCount = response?.data?.items?.length || 0;
+      const skippedCount = response?.data?.skippedProductIds?.length || 0;
+      setFeedback({
+        title: 'Featured products added',
+        description: `${createdCount} products were added${skippedCount ? ` and ${skippedCount} duplicates were skipped` : ''}.`
+      });
       await loadStorefront();
     } catch (error) {
-      setFeedback({ title: 'Unable to add featured product', description: error?.message || 'The product could not be featured.' });
+      setFeedback({ title: 'Unable to add featured products', description: error?.message || 'The selected products could not be featured.' });
     } finally {
       setIsSavingFeatured(false);
     }
@@ -161,6 +166,18 @@ export const AdminStorefrontView = () => {
       await loadStorefront();
     } catch (error) {
       setFeedback({ title: 'Unable to update featured product', description: error?.message || 'The featured product could not be updated.' });
+    } finally {
+      setIsSavingFeatured(false);
+    }
+  };
+
+  const reorderFeaturedProducts = async (orderedIds) => {
+    setIsSavingFeatured(true);
+    try {
+      await storefrontContentApi.reorderFeaturedProducts(orderedIds);
+      await loadStorefront();
+    } catch (error) {
+      setFeedback({ title: 'Unable to reorder featured products', description: error?.message || 'The featured product order could not be saved.' });
     } finally {
       setIsSavingFeatured(false);
     }
@@ -255,8 +272,8 @@ export const AdminStorefrontView = () => {
           isLoading={isLoading}
           isSaving={isSavingFeatured || isDeleting}
           error={loadError}
-          onCreateFeaturedProduct={createFeaturedProduct}
-          onUpdateFeaturedProduct={updateFeaturedProduct}
+          onCreateFeaturedProductsBulk={createFeaturedProductsBulk}
+          onReorderFeaturedProducts={reorderFeaturedProducts}
           onToggleFeaturedProduct={toggleFeaturedProduct}
           onDeleteFeaturedProduct={(item) => setDeleteTarget({ kind: 'featured', item })}
           onSaveSettings={saveFeaturedSettings}
