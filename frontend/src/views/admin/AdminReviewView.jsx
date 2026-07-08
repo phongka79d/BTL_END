@@ -1,32 +1,22 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   AlertDialog,
   Badge,
   Button,
   Heading,
   HStack,
-  Selector,
   Text,
   Toolbar,
   VStack,
   proportional,
   pixel
 } from '@astryxdesign/core';
-import { productApi } from '../../api/productApi';
 import { reviewApi } from '../../api/reviewApi';
 import AdminTable from '../../components/admin/AdminTable';
+import ProductPicker from '../../components/admin/ProductPicker';
 import Alert from '../../components/common/Alert';
 import { formatDate } from '../../components/common/formatDate';
-
-const getProductsFromResponse = (response) => {
-  const data = response?.data;
-
-  if (Array.isArray(data)) return data;
-  if (Array.isArray(data?.items)) return data.items;
-  if (Array.isArray(data?.products)) return data.products;
-
-  return [];
-};
 
 const getCustomerName = (review) => (
   review?.user?.username ||
@@ -36,23 +26,14 @@ const getCustomerName = (review) => (
 );
 
 export const AdminReviewView = () => {
-  const [products, setProducts] = useState([]);
+  const navigate = useNavigate();
   const [selectedProductId, setSelectedProductId] = useState('');
   const [reviews, setReviews] = useState([]);
-  const [isProductsLoading, setIsProductsLoading] = useState(true);
   const [isReviewsLoading, setIsReviewsLoading] = useState(false);
   const [loadError, setLoadError] = useState('');
   const [feedback, setFeedback] = useState(null);
   const [hideTarget, setHideTarget] = useState(null);
   const [isHiding, setIsHiding] = useState(false);
-
-  const productOptions = useMemo(
-    () => products.map((product) => ({
-      label: product.name || product.title || product.id,
-      value: product.id
-    })),
-    [products]
-  );
 
   const loadReviews = useCallback(async (productId) => {
     if (!productId) {
@@ -73,35 +54,6 @@ export const AdminReviewView = () => {
       setIsReviewsLoading(false);
     }
   }, []);
-
-  const loadProducts = useCallback(async () => {
-    setIsProductsLoading(true);
-    setLoadError('');
-
-    try {
-      const response = await productApi.getProducts();
-      const nextProducts = getProductsFromResponse(response);
-      setProducts(nextProducts);
-      const firstProductId = nextProducts[0]?.id || '';
-      setSelectedProductId(firstProductId);
-
-      if (firstProductId) {
-        await loadReviews(firstProductId);
-      } else {
-        setReviews([]);
-      }
-    } catch (error) {
-      setProducts([]);
-      setReviews([]);
-      setLoadError(error?.message || 'Unable to load products.');
-    } finally {
-      setIsProductsLoading(false);
-    }
-  }, [loadReviews]);
-
-  useEffect(() => {
-    loadProducts();
-  }, [loadProducts]);
 
   const handleProductChange = (productId) => {
     setSelectedProductId(productId);
@@ -184,23 +136,31 @@ export const AdminReviewView = () => {
       {
         key: 'actions',
         header: 'Actions',
-        width: pixel(150),
+        width: pixel(260),
         align: 'end',
         renderCell: (review) => (
-          <Button
-            label="Hide review"
-            variant="secondary"
-            size="sm"
-            onClick={() => setHideTarget(review)}
-          />
+          <HStack gap={2} style={{ justifyContent: 'flex-end', flexWrap: 'wrap' }}>
+            <Button
+              label="View product"
+              variant="secondary"
+              size="sm"
+              onClick={() => navigate(`/products/${selectedProductId}`)}
+              isDisabled={!selectedProductId}
+            />
+            <Button
+              label="Hide review"
+              variant="secondary"
+              size="sm"
+              onClick={() => setHideTarget(review)}
+            />
+          </HStack>
         )
       }
     ],
-    []
+    [navigate, selectedProductId]
   );
 
-  const selectedProduct = products.find((product) => product.id === selectedProductId);
-  const isLoading = isProductsLoading || isReviewsLoading;
+  const isLoading = isReviewsLoading;
 
   return (
     <VStack gap={6} width="100%">
@@ -221,13 +181,11 @@ export const AdminReviewView = () => {
       <Toolbar
         label="Product reviews"
         startContent={(
-          <Selector
-            label="Product"
-            value={selectedProductId}
+          <ProductPicker
+            showInitialProducts
+            pageSize={10}
+            value={selectedProductId || undefined}
             onChange={handleProductChange}
-            options={productOptions}
-            placeholder="Select product"
-            width="100%"
           />
         )}
         endContent={(
@@ -242,11 +200,9 @@ export const AdminReviewView = () => {
         )}
       />
 
-      {selectedProduct && (
-        <Text size="supporting" color="secondary">
-          Showing visible reviews for {selectedProduct.name || selectedProduct.title}.
-        </Text>
-      )}
+      <Text size="supporting" color="secondary">
+        Select a product to moderate its visible reviews.
+      </Text>
 
       <AdminTable
         key={reviews.map((review) => review.id).join(':')}
@@ -255,13 +211,13 @@ export const AdminReviewView = () => {
         isLoading={isLoading}
         error={loadError}
         errorTitle="Unable to load reviews"
-        emptyTitle={selectedProductId ? 'No visible reviews' : 'No products available'}
+        emptyTitle={selectedProductId ? 'No visible reviews' : 'Select a product'}
         emptyDescription={
           selectedProductId
             ? 'Visible reviews for the selected product will appear here.'
-            : 'Add products before moderating reviews.'
+            : 'Search and select a product before moderating reviews.'
         }
-        onRetry={loadProducts}
+        onRetry={() => loadReviews(selectedProductId)}
       />
 
       <AlertDialog

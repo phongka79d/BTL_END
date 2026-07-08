@@ -1,11 +1,7 @@
 import React from 'react';
 import { FormLayout, Selector, TextInput } from '@astryxdesign/core';
+import ProductPicker from '../ProductPicker';
 import { LINK_TYPE_OPTIONS } from './storefrontFormUtils';
-
-const toProductOptions = (products) => products.map((product) => ({
-  value: product.id,
-  label: product.name || product.title || product.id,
-}));
 
 const toCategoryOptions = (categories) => categories.map((category) => ({
   value: category.id,
@@ -20,7 +16,6 @@ export const LinkTargetFields = ({
   categories,
   errors,
   fieldPrefix = '',
-  products,
   updateField,
   values,
 }) => {
@@ -44,14 +39,10 @@ export const LinkTargetFields = ({
         width="100%"
       />
       {linkType === 'product' && (
-        <Selector
-          label="Product target"
-          options={toProductOptions(products)}
+        <ProductPicker
           value={values[productIdKey] || undefined}
           onChange={(value) => updateField(productIdKey, value)}
-          placeholder="Select product"
           status={fieldStatus(errors[productIdKey])}
-          width="100%"
         />
       )}
       {linkType === 'category' && (

@@ -11,7 +11,6 @@ import {
   VStack
 } from '@astryxdesign/core';
 import { categoryApi } from '../../api/categoryApi';
-import { productApi } from '../../api/productApi';
 import { storefrontContentApi } from '../../api/storefrontContentApi';
 import CarouselSlideForm from '../../components/admin/storefront/CarouselSlideForm';
 import CarouselSlideTable from '../../components/admin/storefront/CarouselSlideTable';
@@ -23,7 +22,6 @@ export const AdminStorefrontView = () => {
   const [activeTab, setActiveTab] = useState('carousel');
   const [slides, setSlides] = useState([]);
   const [navItems, setNavItems] = useState([]);
-  const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [loadError, setLoadError] = useState('');
@@ -40,20 +38,17 @@ export const AdminStorefrontView = () => {
     setIsLoading(true);
     setLoadError('');
     try {
-      const [slideResponse, navResponse, productResponse, categoryResponse] = await Promise.all([
+      const [slideResponse, navResponse, categoryResponse] = await Promise.all([
         storefrontContentApi.getAdminCarousel(),
         storefrontContentApi.getAdminNavigation(),
-        productApi.getProducts({ page: 1, limit: 100 }),
         categoryApi.getCategories(),
       ]);
       setSlides(slideResponse?.data?.slides || []);
       setNavItems(navResponse?.data?.items || []);
-      setProducts(productResponse?.data?.items || []);
       setCategories(categoryResponse?.data?.categories || []);
     } catch (error) {
       setSlides([]);
       setNavItems([]);
-      setProducts([]);
       setCategories([]);
       setLoadError(error?.message || 'Unable to load storefront content.');
     } finally {
@@ -196,7 +191,6 @@ export const AdminStorefrontView = () => {
         isOpen={isSlideFormOpen}
         onOpenChange={setIsSlideFormOpen}
         onSubmit={saveSlide}
-        products={products}
         slide={editingSlide}
       />
       <NavigationItemForm
@@ -206,7 +200,6 @@ export const AdminStorefrontView = () => {
         onOpenChange={setIsNavFormOpen}
         onSubmit={saveNavItem}
         parentOptions={topLevelMegaMenus}
-        products={products}
         item={editingNavItem}
       />
       <AlertDialog

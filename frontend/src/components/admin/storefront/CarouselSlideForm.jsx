@@ -31,7 +31,6 @@ export const CarouselSlideForm = ({
   isOpen,
   onOpenChange,
   onSubmit,
-  products,
   slide,
 }) => {
   const formId = useId();
@@ -99,7 +98,6 @@ export const CarouselSlideForm = ({
                 <LinkTargetFields
                   categories={categories}
                   errors={errors}
-                  products={products}
                   updateField={updateField}
                   values={values}
                 />

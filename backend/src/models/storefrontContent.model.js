@@ -127,7 +127,7 @@ const findPublicCarouselSlides = async () => {
   });
 
   return slides
-    .filter(hasResolvedTarget)
+    .filter((slide) => hasResolvedTarget(slide))
     .map((slide) => ({
       id: slide.id,
       title: slide.title,

@@ -4,11 +4,16 @@ import test from 'node:test';
 
 const source = readFileSync(new URL('./StorefrontMegaNav.jsx', import.meta.url), 'utf8');
 
-test('StorefrontMegaNav loads public navigation config and keeps a fallback', () => {
+test('StorefrontMegaNav loads public navigation config without hardcoded fallback items', () => {
   assert.match(source, /import \{ storefrontContentApi \} from '\.\.\/\.\.\/api\/storefrontContentApi';/);
-  assert.match(source, /fallbackStorefrontNavigation/);
   assert.match(source, /storefrontContentApi\.getNavigation\(\)/);
-  assert.match(source, /setNavigationItems\(response\?\.data\?\.items \|\| fallbackStorefrontNavigation\)/);
+  assert.match(source, /useState\(\[\]\)/);
+  assert.match(source, /setNavigationItems\(response\?\.data\?\.items \|\| \[\]\)/);
+  assert.match(source, /setNavigationItems\(\[\]\)/);
+  assert.doesNotMatch(source, /fallbackStorefrontNavigation/);
+  assert.doesNotMatch(source, /fallback-shop/);
+  assert.doesNotMatch(source, /New Arrivals/);
+  assert.doesNotMatch(source, /Sale/);
 });
 
 test('StorefrontMegaNav renders configured simple links and mega menu children', () => {

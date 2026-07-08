@@ -36,7 +36,6 @@ export const NavigationItemForm = ({
   onOpenChange,
   onSubmit,
   parentOptions,
-  products,
 }) => {
   const formId = useId();
   const [values, setValues] = useState(() => getNavigationFormValues(item));
@@ -160,7 +159,6 @@ export const NavigationItemForm = ({
                   <LinkTargetFields
                     categories={categories}
                     errors={errors}
-                    products={products}
                     updateField={updateField}
                     values={values}
                   />
@@ -175,7 +173,6 @@ export const NavigationItemForm = ({
                       categories={categories}
                       errors={errors}
                       fieldPrefix="featured"
-                      products={products}
                       updateField={updateField}
                       values={values}
                     />

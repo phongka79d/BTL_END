@@ -11,47 +11,6 @@ import {
 import { storefrontContentApi } from '../../api/storefrontContentApi';
 import { resolveStorefrontHref } from '../storefront/storefrontLinkUtils';
 
-export const fallbackStorefrontNavigation = [
-  {
-    id: 'fallback-shop',
-    label: 'Shop',
-    itemType: 'mega_menu',
-    sortOrder: 1,
-    featured: {
-      title: 'Featured products',
-      description: 'Browse the current catalog.',
-      imageUrl: 'https://lookaside.facebook.com/assets/astryx/texture-beige-horizontal-1.png',
-      linkLabel: 'Shop catalog',
-      linkTarget: { type: 'customUrl', customUrl: '/products' }
-    },
-    children: [
-      {
-        id: 'fallback-new',
-        label: 'New Arrivals',
-        description: 'Latest products',
-        icon: 'success',
-        linkTarget: { type: 'customUrl', customUrl: '/products' },
-        sortOrder: 1
-      },
-      {
-        id: 'fallback-sale',
-        label: 'Sale',
-        description: 'Browse current offers',
-        icon: 'warning',
-        linkTarget: { type: 'customUrl', customUrl: '/products' },
-        sortOrder: 2
-      }
-    ]
-  },
-  {
-    id: 'fallback-products',
-    label: 'Products',
-    itemType: 'link',
-    linkTarget: { type: 'customUrl', customUrl: '/products' },
-    sortOrder: 2
-  }
-];
-
 const MegaMenuItems = ({ items }) => (
   <Grid columns={{ minWidth: 220, max: 2 }} gap={2}>
     {items.map((item) => (
@@ -81,7 +40,7 @@ const MegaMenuFeatured = ({ featured }) => (
 );
 
 export const StorefrontMegaNav = () => {
-  const [navigationItems, setNavigationItems] = useState(fallbackStorefrontNavigation);
+  const [navigationItems, setNavigationItems] = useState([]);
 
   useEffect(() => {
     let isActive = true;
@@ -89,12 +48,12 @@ export const StorefrontMegaNav = () => {
     storefrontContentApi.getNavigation()
       .then((response) => {
         if (isActive) {
-          setNavigationItems(response?.data?.items || fallbackStorefrontNavigation);
+          setNavigationItems(response?.data?.items || []);
         }
       })
       .catch(() => {
         if (isActive) {
-          setNavigationItems(fallbackStorefrontNavigation);
+          setNavigationItems([]);
         }
       });
 

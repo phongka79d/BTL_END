@@ -159,6 +159,21 @@ test('findPublicCarouselSlides returns active sorted slides and hides broken tar
         sortOrder: 2,
         isActive: true,
       },
+      {
+        id: 'slide-category',
+        title: 'Phone deals',
+        description: 'Latest phone offers',
+        imageUrl: 'https://example.com/phones.jpg',
+        primaryButtonLabel: 'Shop phones',
+        linkType: 'category',
+        productId: null,
+        categoryId: 'category-1',
+        customUrl: null,
+        product: null,
+        category: { id: 'category-1', name: 'Phones' },
+        sortOrder: 3,
+        isActive: true,
+      },
     ];
   };
 
@@ -176,6 +191,20 @@ test('findPublicCarouselSlides returns active sorted slides and hides broken tar
         customUrl: null,
       },
       sortOrder: 1,
+    },
+    {
+      id: 'slide-category',
+      title: 'Phone deals',
+      description: 'Latest phone offers',
+      imageUrl: 'https://example.com/phones.jpg',
+      primaryButtonLabel: 'Shop phones',
+      linkTarget: {
+        type: 'category',
+        productId: null,
+        categoryId: 'category-1',
+        customUrl: null,
+      },
+      sortOrder: 3,
     },
   ]);
 });
