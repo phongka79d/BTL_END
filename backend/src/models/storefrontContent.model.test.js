@@ -36,9 +36,42 @@ const prisma = {
       throw new Error('Unexpected storefrontNavItem.delete call');
     },
   },
+  storefrontFeaturedProduct: {
+    findMany: async () => {
+      throw new Error('Unexpected storefrontFeaturedProduct.findMany call');
+    },
+    findUnique: async () => {
+      throw new Error('Unexpected storefrontFeaturedProduct.findUnique call');
+    },
+    create: async () => {
+      throw new Error('Unexpected storefrontFeaturedProduct.create call');
+    },
+    update: async () => {
+      throw new Error('Unexpected storefrontFeaturedProduct.update call');
+    },
+    delete: async () => {
+      throw new Error('Unexpected storefrontFeaturedProduct.delete call');
+    },
+  },
+  storefrontSetting: {
+    findUnique: async () => {
+      throw new Error('Unexpected storefrontSetting.findUnique call');
+    },
+    upsert: async () => {
+      throw new Error('Unexpected storefrontSetting.upsert call');
+    },
+  },
   product: {
     findUnique: async () => {
       throw new Error('Unexpected product.findUnique call');
+    },
+    findMany: async () => {
+      throw new Error('Unexpected product.findMany call');
+    },
+  },
+  review: {
+    groupBy: async () => {
+      throw new Error('Unexpected review.groupBy call');
     },
   },
   category: {
@@ -59,10 +92,15 @@ const storefrontContentModel = require('./storefrontContent.model');
 
 beforeEach(() => {
   prisma.product.findUnique = async () => null;
+  prisma.product.findMany = async () => [];
+  prisma.review.groupBy = async () => [];
   prisma.category.findUnique = async () => null;
   prisma.carouselSlide.findMany = async () => [];
   prisma.storefrontNavItem.findMany = async () => [];
   prisma.storefrontNavItem.findUnique = async () => null;
+  prisma.storefrontFeaturedProduct.findMany = async () => [];
+  prisma.storefrontFeaturedProduct.findUnique = async () => null;
+  prisma.storefrontSetting.findUnique = async () => null;
 });
 
 after(() => {
@@ -381,4 +419,120 @@ test('createNavigationItem allows top-level mega menus without featured card dat
   });
 
   assert.equal(result.id, 'nav-shop');
+});
+
+test('findPublicFeaturedProducts returns active configured products capped by storefront settings', async () => {
+  prisma.storefrontSetting.findUnique = async (query) => {
+    assert.deepEqual(query, {
+      where: { id: 'home' },
+      select: { featuredProductLimit: true },
+    });
+    return { featuredProductLimit: 2 };
+  };
+
+  prisma.storefrontFeaturedProduct.findMany = async (query) => {
+    assert.deepEqual(query, {
+      where: { isActive: true },
+      take: 2,
+      orderBy: [{ sortOrder: 'asc' }, { createdAt: 'asc' }],
+      include: {
+        product: {
+          include: {
+            category: {
+              select: {
+                id: true,
+                name: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    return [
+      {
+        id: 'featured-1',
+        product: { id: 'product-1', name: 'Featured mouse' },
+      },
+    ];
+  };
+
+  prisma.review.groupBy = async (query) => {
+    assert.deepEqual(query.where, {
+      productId: { in: ['product-1'] },
+      status: 'visible',
+    });
+    return [{ productId: 'product-1', _avg: { rating: 5 }, _count: { _all: 1 } }];
+  };
+
+  assert.deepEqual(await storefrontContentModel.findPublicFeaturedProducts(), {
+    items: [
+      {
+        id: 'product-1',
+        name: 'Featured mouse',
+        reviewSummary: {
+          averageRating: 5,
+          reviewCount: 1,
+        },
+      },
+    ],
+    settings: {
+      featuredProductLimit: 2,
+    },
+  });
+});
+
+test('findPublicFeaturedProducts falls back to latest products when none are configured', async () => {
+  prisma.storefrontSetting.findUnique = async () => ({ featuredProductLimit: 3 });
+  prisma.storefrontFeaturedProduct.findMany = async () => [];
+
+  prisma.product.findMany = async (query) => {
+    assert.deepEqual(query, {
+      take: 3,
+      include: {
+        category: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
+    });
+
+    return [{ id: 'latest-1', name: 'Latest keyboard' }];
+  };
+
+  assert.deepEqual(await storefrontContentModel.findPublicFeaturedProducts(), {
+    items: [
+      {
+        id: 'latest-1',
+        name: 'Latest keyboard',
+        reviewSummary: {
+          averageRating: null,
+          reviewCount: 0,
+        },
+      },
+    ],
+    settings: {
+      featuredProductLimit: 3,
+    },
+  });
+});
+
+test('updateStorefrontSettings persists a bounded featured product limit', async () => {
+  prisma.storefrontSetting.upsert = async (query) => {
+    assert.deepEqual(query, {
+      where: { id: 'home' },
+      update: { featuredProductLimit: 8 },
+      create: { id: 'home', featuredProductLimit: 8 },
+    });
+    return { id: 'home', featuredProductLimit: 8 };
+  };
+
+  assert.deepEqual(await storefrontContentModel.updateStorefrontSettings({ featuredProductLimit: 8 }), {
+    featuredProductLimit: 8,
+  });
 });

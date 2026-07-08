@@ -14,6 +14,7 @@ import {
   getStockVariant,
   truncateText
 } from './productUtils';
+import ProductRatingBadge from './ProductRatingBadge';
 
 export const ProductCard = ({ product }) => {
   const navigate = useNavigate();
@@ -56,6 +57,7 @@ export const ProductCard = ({ product }) => {
         <HStack gap={2} style={{ flexWrap: 'wrap' }}>
           <Badge variant="blue" label={categoryName} />
           <Badge variant={stockVariant} label={stockLabel} />
+          <ProductRatingBadge product={product} />
         </HStack>
 
         <VStack gap={1}>

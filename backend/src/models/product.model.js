@@ -1,5 +1,49 @@
 const prisma = require('../config/database');
 
+const emptyReviewSummary = () => ({
+  averageRating: null,
+  reviewCount: 0,
+});
+
+const attachReviewSummaries = async (items) => {
+  if (!items.length) {
+    return items;
+  }
+
+  const productIds = items.map((item) => item.id).filter(Boolean);
+  if (!productIds.length) {
+    return items.map((item) => ({
+      ...item,
+      reviewSummary: emptyReviewSummary(),
+    }));
+  }
+
+  const reviewGroups = await prisma.review.groupBy({
+    by: ['productId'],
+    where: {
+      productId: { in: productIds },
+      status: 'visible',
+    },
+    _avg: { rating: true },
+    _count: { _all: true },
+  });
+
+  const summariesByProductId = new Map(
+    reviewGroups.map((group) => [
+      group.productId,
+      {
+        averageRating: group._avg.rating === null ? null : Number(group._avg.rating),
+        reviewCount: group._count._all,
+      },
+    ])
+  );
+
+  return items.map((item) => ({
+    ...item,
+    reviewSummary: summariesByProductId.get(item.id) || emptyReviewSummary(),
+  }));
+};
+
 /**
  * Validate product creation data
  * @param {Object} data 
@@ -130,10 +174,11 @@ const findAll = async (params = {}) => {
     }
   });
 
+  const itemsWithReviewSummaries = await attachReviewSummaries(items);
   const totalPages = Math.ceil(total / limitNum);
 
   return {
-    items,
+    items: itemsWithReviewSummaries,
     pagination: {
       page: pageNum,
       limit: limitNum,
@@ -211,6 +256,7 @@ const destroy = async (id) => {
 module.exports = {
   findById,
   findAll,
+  attachReviewSummaries,
   create,
   update,
   destroy,

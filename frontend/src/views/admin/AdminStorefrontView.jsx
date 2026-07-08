@@ -17,11 +17,18 @@ import CarouselSlideTable from '../../components/admin/storefront/CarouselSlideT
 import NavigationItemForm from '../../components/admin/storefront/NavigationItemForm';
 import NavigationItemTable from '../../components/admin/storefront/NavigationItemTable';
 import Alert from '../../components/common/Alert';
+import FeaturedProductManager from '../../components/admin/storefront/FeaturedProductManager';
+
+const defaultFeaturedSettings = {
+  featuredProductLimit: 6
+};
 
 export const AdminStorefrontView = () => {
   const [activeTab, setActiveTab] = useState('carousel');
   const [slides, setSlides] = useState([]);
   const [navItems, setNavItems] = useState([]);
+  const [featuredProducts, setFeaturedProducts] = useState([]);
+  const [featuredSettings, setFeaturedSettings] = useState(defaultFeaturedSettings);
   const [categories, setCategories] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [loadError, setLoadError] = useState('');
@@ -33,22 +40,28 @@ export const AdminStorefrontView = () => {
   const [isNavFormOpen, setIsNavFormOpen] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isSavingFeatured, setIsSavingFeatured] = useState(false);
 
   const loadStorefront = useCallback(async () => {
     setIsLoading(true);
     setLoadError('');
     try {
-      const [slideResponse, navResponse, categoryResponse] = await Promise.all([
+      const [slideResponse, navResponse, featuredResponse, categoryResponse] = await Promise.all([
         storefrontContentApi.getAdminCarousel(),
         storefrontContentApi.getAdminNavigation(),
+        storefrontContentApi.getAdminFeaturedProducts(),
         categoryApi.getCategories(),
       ]);
       setSlides(slideResponse?.data?.slides || []);
       setNavItems(navResponse?.data?.items || []);
+      setFeaturedProducts(featuredResponse?.data?.items || []);
+      setFeaturedSettings(featuredResponse?.data?.settings || defaultFeaturedSettings);
       setCategories(categoryResponse?.data?.categories || []);
     } catch (error) {
       setSlides([]);
       setNavItems([]);
+      setFeaturedProducts([]);
+      setFeaturedSettings(defaultFeaturedSettings);
       setCategories([]);
       setLoadError(error?.message || 'Unable to load storefront content.');
     } finally {
@@ -115,14 +128,62 @@ export const AdminStorefrontView = () => {
     await loadStorefront();
   };
 
+  const saveFeaturedSettings = async (payload) => {
+    setIsSavingFeatured(true);
+    try {
+      await storefrontContentApi.updateStorefrontSettings(payload);
+      setFeedback({ title: 'Featured product count saved', description: 'Homepage featured product count was updated.' });
+      await loadStorefront();
+    } catch (error) {
+      setFeedback({ title: 'Unable to save featured count', description: error?.message || 'Storefront settings could not be saved.' });
+    } finally {
+      setIsSavingFeatured(false);
+    }
+  };
+
+  const createFeaturedProduct = async (payload) => {
+    setIsSavingFeatured(true);
+    try {
+      await storefrontContentApi.createFeaturedProduct(payload);
+      setFeedback({ title: 'Featured product added', description: 'The product was added to the homepage featured list.' });
+      await loadStorefront();
+    } catch (error) {
+      setFeedback({ title: 'Unable to add featured product', description: error?.message || 'The product could not be featured.' });
+    } finally {
+      setIsSavingFeatured(false);
+    }
+  };
+
+  const updateFeaturedProduct = async (id, payload) => {
+    setIsSavingFeatured(true);
+    try {
+      await storefrontContentApi.updateFeaturedProduct(id, payload);
+      await loadStorefront();
+    } catch (error) {
+      setFeedback({ title: 'Unable to update featured product', description: error?.message || 'The featured product could not be updated.' });
+    } finally {
+      setIsSavingFeatured(false);
+    }
+  };
+
+  const toggleFeaturedProduct = async (item) => {
+    await updateFeaturedProduct(item.id, {
+      productId: item.productId,
+      sortOrder: item.sortOrder,
+      isActive: !item.isActive,
+    });
+  };
+
   const confirmDelete = async () => {
     if (!deleteTarget) return;
     setIsDeleting(true);
     try {
       if (deleteTarget.kind === 'slide') {
         await storefrontContentApi.deleteCarouselSlide(deleteTarget.item.id);
-      } else {
+      } else if (deleteTarget.kind === 'nav') {
         await storefrontContentApi.deleteNavigationItem(deleteTarget.item.id);
+      } else {
+        await storefrontContentApi.deleteFeaturedProduct(deleteTarget.item.id);
       }
       setDeleteTarget(null);
       setFeedback({ title: 'Storefront content deleted', description: 'The item was removed from storefront configuration.' });
@@ -149,6 +210,7 @@ export const AdminStorefrontView = () => {
       <TabList value={activeTab} onChange={setActiveTab} aria-label="Storefront sections">
         <Tab value="carousel" label="Carousel" />
         <Tab value="navigation" label="Navigation" />
+        <Tab value="featuredProducts" label="Featured products" />
       </TabList>
 
       {activeTab === 'carousel' && (
@@ -186,6 +248,22 @@ export const AdminStorefrontView = () => {
         </VStack>
       )}
 
+      {activeTab === 'featuredProducts' && (
+        <FeaturedProductManager
+          featuredProducts={featuredProducts}
+          settings={featuredSettings}
+          isLoading={isLoading}
+          isSaving={isSavingFeatured || isDeleting}
+          error={loadError}
+          onCreateFeaturedProduct={createFeaturedProduct}
+          onUpdateFeaturedProduct={updateFeaturedProduct}
+          onToggleFeaturedProduct={toggleFeaturedProduct}
+          onDeleteFeaturedProduct={(item) => setDeleteTarget({ kind: 'featured', item })}
+          onSaveSettings={saveFeaturedSettings}
+          onRetry={loadStorefront}
+        />
+      )}
+
       <CarouselSlideForm
         categories={categories}
         isOpen={isSlideFormOpen}
@@ -208,7 +286,7 @@ export const AdminStorefrontView = () => {
           if (!isOpen && !isDeleting) setDeleteTarget(null);
         }}
         title="Delete storefront item?"
-        description={deleteTarget ? `${deleteTarget.item.label || deleteTarget.item.title} will be removed from storefront configuration.` : 'This item will be removed.'}
+        description={deleteTarget ? `${deleteTarget.item.label || deleteTarget.item.title || deleteTarget.item.product?.name || 'This item'} will be removed from storefront configuration.` : 'This item will be removed.'}
         actionLabel="Delete item"
         isActionLoading={isDeleting}
         onAction={confirmDelete}

@@ -7,9 +7,13 @@ const homeViewSource = readFileSync(new URL('../../views/HomeView.jsx', import.m
 
 test('HomeView loads storefront carousel slides from the storefront content API', () => {
   assert.match(homeViewSource, /import \{ storefrontContentApi \} from '\.\.\/api\/storefrontContentApi';/);
+  assert.doesNotMatch(homeViewSource, /homeProductQuery/);
+  assert.doesNotMatch(homeViewSource, /productApi\.getProducts/);
+  assert.match(homeViewSource, /storefrontContentApi\.getFeaturedProducts\(\)/);
   assert.match(homeViewSource, /storefrontContentApi\.getCarousel\(\)/);
   assert.match(homeViewSource, /catch\(\(\) => \(\{ data: \{ slides: \[\] \} \}\)\)/);
   assert.match(homeViewSource, /setCarouselSlides\(carouselResponse\?\.data\?\.slides \|\| \[\]\)/);
+  assert.match(homeViewSource, /setProducts\(featuredResponse\?\.data\?\.items \|\| \[\]\)/);
   assert.match(homeViewSource, /<HomeHero slides=\{carouselSlides\} \/>/);
 });
 

@@ -1,11 +1,9 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { VStack } from '@astryxdesign/core';
 import { categoryApi } from '../api/categoryApi';
-import { productApi } from '../api/productApi';
 import { storefrontContentApi } from '../api/storefrontContentApi';
 import Alert from '../components/common/Alert';
 import HomeCategoryShowcase from '../components/home/HomeCategoryShowcase';
-import { homeProductQuery } from '../components/home/homeContent';
 import HomeHero from '../components/home/HomeHero';
 import HomeSkeleton from '../components/home/HomeSkeleton';
 
@@ -21,8 +19,8 @@ export const HomeView = () => {
     setError(null);
 
     try {
-      const [productResponse, categoryResponse, carouselResponse] = await Promise.all([
-        productApi.getProducts(homeProductQuery),
+      const [featuredResponse, categoryResponse, carouselResponse] = await Promise.all([
+        storefrontContentApi.getFeaturedProducts(),
         categoryApi.getCategories(),
         storefrontContentApi.getCarousel().catch(() => ({ data: { slides: [] } }))
       ]);
@@ -31,7 +29,7 @@ export const HomeView = () => {
         return;
       }
 
-      setProducts(productResponse?.data?.items || []);
+      setProducts(featuredResponse?.data?.items || []);
       setCategories(categoryResponse?.data?.categories || []);
       setCarouselSlides(carouselResponse?.data?.slides || []);
     } catch (err) {

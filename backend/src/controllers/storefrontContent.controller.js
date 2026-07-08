@@ -8,7 +8,8 @@ const isValidationError = (error) => (
     error.message.includes('invalid') ||
     error.message.includes('not found') ||
     error.message.includes('must') ||
-    error.message.includes('belong')
+    error.message.includes('belong') ||
+    error.message.includes('between')
   )
 );
 
@@ -25,6 +26,15 @@ const getPublicNavigation = async (req, res, next) => {
   try {
     const items = await storefrontContentModel.findPublicNavigation();
     return successResponse(res, 200, 'Storefront navigation retrieved successfully', { items });
+  } catch (error) {
+    next(error);
+  }
+};
+
+const getPublicFeaturedProducts = async (req, res, next) => {
+  try {
+    const featuredProducts = await storefrontContentModel.findPublicFeaturedProducts();
+    return successResponse(res, 200, 'Storefront featured products retrieved successfully', featuredProducts);
   } catch (error) {
     next(error);
   }
@@ -110,9 +120,60 @@ const deleteAdminNavigationItem = async (req, res, next) => {
   }
 };
 
+const listAdminFeaturedProducts = async (req, res, next) => {
+  try {
+    const featuredProducts = await storefrontContentModel.findAdminFeaturedProducts();
+    return successResponse(res, 200, 'Admin storefront featured products retrieved successfully', featuredProducts);
+  } catch (error) {
+    next(error);
+  }
+};
+
+const createAdminFeaturedProduct = async (req, res, next) => {
+  try {
+    const item = await storefrontContentModel.createFeaturedProduct(req.body);
+    return successResponse(res, 201, 'Featured product created successfully', { item });
+  } catch (error) {
+    if (isValidationError(error)) return errorResponse(res, 400, error.message);
+    next(error);
+  }
+};
+
+const updateAdminFeaturedProduct = async (req, res, next) => {
+  try {
+    const item = await storefrontContentModel.updateFeaturedProduct(req.params.id, req.body);
+    return successResponse(res, 200, 'Featured product updated successfully', { item });
+  } catch (error) {
+    if (error.code === 'P2025') return errorResponse(res, 404, 'Featured product not found');
+    if (isValidationError(error)) return errorResponse(res, 400, error.message);
+    next(error);
+  }
+};
+
+const deleteAdminFeaturedProduct = async (req, res, next) => {
+  try {
+    await storefrontContentModel.deleteFeaturedProduct(req.params.id);
+    return successResponse(res, 200, 'Featured product deleted successfully');
+  } catch (error) {
+    if (error.code === 'P2025') return errorResponse(res, 404, 'Featured product not found');
+    next(error);
+  }
+};
+
+const updateAdminStorefrontSettings = async (req, res, next) => {
+  try {
+    const settings = await storefrontContentModel.updateStorefrontSettings(req.body);
+    return successResponse(res, 200, 'Storefront settings updated successfully', { settings });
+  } catch (error) {
+    if (isValidationError(error)) return errorResponse(res, 400, error.message);
+    next(error);
+  }
+};
+
 module.exports = {
   getPublicCarousel,
   getPublicNavigation,
+  getPublicFeaturedProducts,
   listAdminCarouselSlides,
   createAdminCarouselSlide,
   updateAdminCarouselSlide,
@@ -121,4 +182,9 @@ module.exports = {
   createAdminNavigationItem,
   updateAdminNavigationItem,
   deleteAdminNavigationItem,
+  listAdminFeaturedProducts,
+  createAdminFeaturedProduct,
+  updateAdminFeaturedProduct,
+  deleteAdminFeaturedProduct,
+  updateAdminStorefrontSettings,
 };

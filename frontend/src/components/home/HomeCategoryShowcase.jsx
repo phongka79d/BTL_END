@@ -8,6 +8,7 @@ import {
   getStockVariant,
   truncateText
 } from '../product/productUtils';
+import ProductRatingBadge from '../product/ProductRatingBadge';
 import { toCategoryProductCount } from './homeContent';
 
 const HomeProductTile = ({ product }) => {
@@ -47,6 +48,7 @@ const HomeProductTile = ({ product }) => {
           <HStack gap={2} style={{ flexWrap: 'wrap' }}>
             <Badge variant="blue" label={product.category?.name || 'Uncategorized'} />
             <Badge variant={getStockVariant(product.quantity)} label={getStockLabel(product.quantity)} />
+            <ProductRatingBadge product={product} />
           </HStack>
           <Text color="accent" size="supporting" weight="semibold">
             {formatPrice(product.price)}

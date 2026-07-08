@@ -1,4 +1,5 @@
 const prisma = require('../config/database');
+const storefrontFeaturedModel = require('./storefrontFeatured.model');
 
 const LINK_TYPES = {
   PRODUCT: 'product',
@@ -331,4 +332,5 @@ module.exports = {
   createNavigationItem,
   updateNavigationItem,
   deleteNavigationItem,
+  ...storefrontFeaturedModel,
 };

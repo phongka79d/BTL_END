@@ -7,6 +7,7 @@ const storefrontModel = require('../models/storefrontContent.model');
 beforeEach(() => {
   storefrontModel.findPublicCarouselSlides = async () => [];
   storefrontModel.findPublicNavigation = async () => [];
+  storefrontModel.findPublicFeaturedProducts = async () => ({ items: [], settings: { featuredProductLimit: 6 } });
   storefrontModel.findAdminCarouselSlides = async () => [];
   storefrontModel.createCarouselSlide = async (payload) => ({ id: 'slide-1', ...payload });
   storefrontModel.updateCarouselSlide = async (id, payload) => ({ id, ...payload });
@@ -15,6 +16,11 @@ beforeEach(() => {
   storefrontModel.createNavigationItem = async (payload) => ({ id: 'nav-1', ...payload });
   storefrontModel.updateNavigationItem = async (id, payload) => ({ id, ...payload });
   storefrontModel.deleteNavigationItem = async () => ({ id: 'nav-1' });
+  storefrontModel.findAdminFeaturedProducts = async () => ({ items: [], settings: { featuredProductLimit: 6 } });
+  storefrontModel.createFeaturedProduct = async (payload) => ({ id: 'featured-1', ...payload });
+  storefrontModel.updateFeaturedProduct = async (id, payload) => ({ id, ...payload });
+  storefrontModel.deleteFeaturedProduct = async () => ({ id: 'featured-1' });
+  storefrontModel.updateStorefrontSettings = async (payload) => payload;
 });
 
 const createResponse = () => {
@@ -86,6 +92,7 @@ test('storefront routes mount public and admin endpoints with protection', async
   assert.deepEqual(publicRoutes, [
     { path: '/carousel', method: 'get', handlers: [controller.getPublicCarousel] },
     { path: '/navigation', method: 'get', handlers: [controller.getPublicNavigation] },
+    { path: '/featured-products', method: 'get', handlers: [controller.getPublicFeaturedProducts] },
   ]);
 
   const adminRoutes = storefrontContentAdminRouter.stack
@@ -97,6 +104,11 @@ test('storefront routes mount public and admin endpoints with protection', async
     }));
 
   assert.deepEqual(adminRoutes.map((route) => route.handlers.slice(0, 2)), [
+    [protect, admin],
+    [protect, admin],
+    [protect, admin],
+    [protect, admin],
+    [protect, admin],
     [protect, admin],
     [protect, admin],
     [protect, admin],
