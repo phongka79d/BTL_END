@@ -11,6 +11,17 @@ import {
 } from '@astryxdesign/core';
 import { useAuth } from '../contexts/AuthContext';
 
+const BLOCKED_ACCOUNT_MESSAGE = 'Your account has been blocked';
+const INVALID_CREDENTIALS_MESSAGE = 'Invalid email or password';
+
+const getLoginErrorTitle = (message) => (
+  message === BLOCKED_ACCOUNT_MESSAGE ? 'Account Blocked' : 'Login Failed'
+);
+
+const getLoginErrorDescription = (message) => (
+  message === INVALID_CREDENTIALS_MESSAGE ? 'Incorrect email or password' : message
+);
+
 /**
  * LoginView Component
  * Renders the login page with email and password fields.
@@ -117,8 +128,8 @@ export const LoginView = () => {
       {apiError && (
         <Banner
           status="error"
-          title="Login Failed"
-          description={apiError}
+          title={getLoginErrorTitle(apiError)}
+          description={getLoginErrorDescription(apiError)}
           isDismissable
           onDismiss={() => setApiError(null)}
         />
