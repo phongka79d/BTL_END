@@ -8,6 +8,10 @@ const orderRoutes = require('./order.routes');
 const paymentRoutes = require('./payment.routes');
 const reviewRoutes = require('./review.routes');
 const reportRoutes = require('./report.routes');
+const {
+  storefrontContentPublicRouter,
+  storefrontContentAdminRouter,
+} = require('./storefrontContent.routes');
 
 // Mount routes under their path prefixes
 // Public product/category endpoints will match e.g. GET /api/products, GET /api/categories
@@ -34,5 +38,8 @@ router.use('/', reviewRoutes);
 
 // Admin-only report endpoints
 router.use('/admin/reports', reportRoutes);
+
+router.use('/storefront', storefrontContentPublicRouter);
+router.use('/admin/storefront', storefrontContentAdminRouter);
 
 module.exports = router;
