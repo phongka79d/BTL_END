@@ -11,6 +11,8 @@ test('HomeView loads storefront carousel slides from the storefront content API'
   assert.doesNotMatch(homeViewSource, /homeProductQuery/);
   assert.match(homeViewSource, /import \{ productApi \} from '\.\.\/api\/productApi';/);
   assert.match(homeViewSource, /productApi\.getProducts\(\{ page, limit: allProductsPageSize, sort: allProductSort \}\)/);
+  assert.match(homeViewSource, /const \[allProductsPage, setAllProductsPage\] = useState\(1\);/);
+  assert.match(homeViewSource, /setAllProductsPage\(1\);/);
   assert.match(homeViewSource, /storefrontContentApi\.getFeaturedProducts\(\)/);
   assert.match(homeViewSource, /storefrontContentApi\.getCarousel\(\)/);
   assert.match(homeViewSource, /catch\(\(\) => \(\{ data: \{ slides: \[\] \} \}\)\)/);
@@ -18,6 +20,9 @@ test('HomeView loads storefront carousel slides from the storefront content API'
   assert.match(homeViewSource, /setFeaturedProducts\(featuredResponse\?\.data\?\.items \|\| \[\]\)/);
   assert.match(homeViewSource, /<HomeHero slides=\{carouselSlides\} \/>/);
   assert.match(homeViewSource, /<HomeAllProductsSection/);
+  assert.match(homeViewSource, /onPageChange=\{setAllProductsPage\}/);
+  assert.doesNotMatch(homeViewSource, /append/);
+  assert.doesNotMatch(homeViewSource, /handleAllProductsLoadMore/);
 });
 
 test('HomeView does not render the removed homepage category section', () => {

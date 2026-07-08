@@ -14,6 +14,7 @@ export const HomeView = () => {
   const [featuredProducts, setFeaturedProducts] = useState([]);
   const [allProducts, setAllProducts] = useState([]);
   const [allProductsPagination, setAllProductsPagination] = useState({ page: 1, totalPages: 1, total: 0, limit: allProductsPageSize });
+  const [allProductsPage, setAllProductsPage] = useState(1);
   const [allProductSort, setAllProductSort] = useState('default');
   const [carouselSlides, setCarouselSlides] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -53,7 +54,7 @@ export const HomeView = () => {
     }
   }, []);
 
-  const loadAllProducts = useCallback(async ({ page = 1, append = false } = {}, isActive = () => true) => {
+  const loadAllProducts = useCallback(async (page = 1, isActive = () => true) => {
     setIsAllProductsLoading(true);
     setAllProductsError(null);
 
@@ -64,16 +65,14 @@ export const HomeView = () => {
       }
 
       const nextProducts = response?.data?.items || [];
-      setAllProducts((current) => (append ? [...current, ...nextProducts] : nextProducts));
+      setAllProducts(nextProducts);
       setAllProductsPagination(response?.data?.pagination || { page, totalPages: 1, total: 0, limit: allProductsPageSize });
     } catch (err) {
       if (!isActive()) {
         return;
       }
 
-      if (!append) {
-        setAllProducts([]);
-      }
+      setAllProducts([]);
       setAllProductsError(err?.message || 'Unable to load products.');
     } finally {
       if (isActive()) {
@@ -95,29 +94,22 @@ export const HomeView = () => {
   useEffect(() => {
     let isActive = true;
 
-    loadAllProducts({ page: 1 }, () => isActive);
+    loadAllProducts(allProductsPage, () => isActive);
 
     return () => {
       isActive = false;
     };
-  }, [allProductSort, allProductsReloadKey, loadAllProducts]);
+  }, [allProductSort, allProductsPage, allProductsReloadKey, loadAllProducts]);
 
   const handleAllProductSortChange = (nextSort) => {
     if (nextSort !== allProductSort) {
+      setAllProductsPage(1);
       setAllProductSort(nextSort);
     }
   };
 
   const handleAllProductsRetry = () => {
     setAllProductsReloadKey((current) => current + 1);
-  };
-
-  const handleAllProductsLoadMore = () => {
-    if (isAllProductsLoading || allProductsPagination.page >= allProductsPagination.totalPages) {
-      return;
-    }
-
-    loadAllProducts({ page: allProductsPagination.page + 1, append: true });
   };
 
   return (
@@ -150,7 +142,7 @@ export const HomeView = () => {
             error={allProductsError}
             pagination={allProductsPagination}
             onSortChange={handleAllProductSortChange}
-            onLoadMore={handleAllProductsLoadMore}
+            onPageChange={setAllProductsPage}
             onRetry={handleAllProductsRetry}
           />
         </>

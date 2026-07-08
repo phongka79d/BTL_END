@@ -15,6 +15,7 @@ import CartView from '../views/CartView';
 import AdminDashboardView from '../views/AdminDashboardView';
 import AdminProductView from '../views/admin/AdminProductView';
 import AdminCategoryView from '../views/admin/AdminCategoryView';
+import AdminUserView from '../views/admin/AdminUserView';
 import AdminOrderView from '../views/admin/AdminOrderView';
 import AdminReviewView from '../views/admin/AdminReviewView';
 import ReportView from '../views/admin/ReportView';
@@ -148,6 +149,7 @@ export const AppRoutes = () => {
           <Route path="/admin" element={<AdminDashboardView />} />
           <Route path="/admin/products" element={<AdminProductView />} />
           <Route path="/admin/categories" element={<AdminCategoryView />} />
+          <Route path="/admin/users" element={<AdminUserView />} />
           <Route path="/admin/orders" element={<AdminOrderView />} />
           <Route path="/admin/reviews" element={<AdminReviewView />} />
           <Route path="/admin/reports" element={<ReportView />} />

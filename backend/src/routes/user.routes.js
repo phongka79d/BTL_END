@@ -8,10 +8,12 @@ const { admin } = require('../middlewares/admin.middleware');
 router.get('/profile', protect, userController.getProfile);
 router.put('/profile', protect, userController.updateProfile);
 router.get('/', protect, admin, userController.getUsers);
+router.put('/:id/role', protect, admin, userController.updateUserRole);
 
 // Routes supporting mounting under /api directly
 router.get('/users/profile', protect, userController.getProfile);
 router.put('/users/profile', protect, userController.updateProfile);
 router.get('/admin/users', protect, admin, userController.getUsers);
+router.put('/admin/users/:id/role', protect, admin, userController.updateUserRole);
 
 module.exports = router;
