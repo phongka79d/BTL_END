@@ -39,6 +39,7 @@ const findLatestActiveOtp = async (userId) => {
     where: {
       userId,
       usedAt: null,
+      expiresAt: { gt: new Date() },
     },
     orderBy: {
       createdAt: 'desc',
@@ -59,26 +60,24 @@ const incrementOtpAttempts = async (id) => {
 
 const completePasswordChange = async ({ otpId, userId, passwordHash }) => {
   return prisma.$transaction(async (tx) => {
-    const otp = await tx.passwordChangeOtp.findFirst({
+    const now = new Date();
+    const claimResult = await tx.passwordChangeOtp.updateMany({
       where: {
         id: otpId,
         userId,
         usedAt: null,
+        expiresAt: { gt: now },
       },
+      data: { usedAt: now },
     });
 
-    if (!otp) {
+    if (claimResult.count !== 1) {
       throw new Error('OTP is no longer valid');
     }
 
     await tx.user.update({
       where: { id: userId },
       data: { passwordHash },
-    });
-
-    await tx.passwordChangeOtp.update({
-      where: { id: otpId },
-      data: { usedAt: new Date() },
     });
   });
 };

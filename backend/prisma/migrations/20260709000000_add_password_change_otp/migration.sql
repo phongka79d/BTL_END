@@ -18,5 +18,8 @@ CREATE INDEX "PasswordChangeOtp_user_id_used_at_expires_at_idx" ON "PasswordChan
 -- CreateIndex
 CREATE INDEX "PasswordChangeOtp_created_at_idx" ON "PasswordChangeOtp"("created_at");
 
+-- Create a database-level guard so concurrent requests cannot leave multiple active OTPs for one user.
+CREATE UNIQUE INDEX "PasswordChangeOtp_one_active_per_user_key" ON "PasswordChangeOtp"("user_id") WHERE "used_at" IS NULL;
+
 -- AddForeignKey
 ALTER TABLE "PasswordChangeOtp" ADD CONSTRAINT "PasswordChangeOtp_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
