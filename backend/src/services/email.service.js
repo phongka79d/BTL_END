@@ -38,11 +38,19 @@ const getSmtpConfig = () => {
     throw new Error('SMTP_PORT must be a positive integer');
   }
 
+  if (port > 65535) {
+    throw new Error('SMTP_PORT must be an integer between 1 and 65535');
+  }
+
   const user = process.env.SMTP_USER || '';
   const pass = process.env.SMTP_PASS || '';
 
   if ((user && !pass) || (!user && pass)) {
     throw new Error('SMTP_USER and SMTP_PASS must both be set or both be empty');
+  }
+
+  if (!user && !pass) {
+    throw new Error('SMTP_USER and SMTP_PASS are required for SMTP password OTP delivery');
   }
 
   return {

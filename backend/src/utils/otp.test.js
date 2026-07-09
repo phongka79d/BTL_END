@@ -1,4 +1,5 @@
 const assert = require('node:assert/strict');
+const crypto = require('crypto');
 const { test } = require('node:test');
 const { compareOtp, generateOtp, getOtpExpiry, hashOtp } = require('./otp');
 
@@ -6,6 +7,23 @@ test('generateOtp returns a six digit string', () => {
   const otp = generateOtp();
 
   assert.match(otp, /^\d{6}$/);
+});
+
+test('generateOtp uses six digit random range and pads leading zeros', () => {
+  const originalRandomInt = crypto.randomInt;
+  const calls = [];
+
+  crypto.randomInt = (min, max) => {
+    calls.push([min, max]);
+    return 7;
+  };
+
+  try {
+    assert.equal(generateOtp(), '000007');
+    assert.deepEqual(calls, [[0, 1000000]]);
+  } finally {
+    crypto.randomInt = originalRandomInt;
+  }
 });
 
 test('hashOtp validates matching otp without storing plain text', async () => {

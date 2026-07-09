@@ -175,6 +175,30 @@ test('smtp mode fails clearly when smtp port is invalid', async () => {
   assert.equal(createTransportCalls.length, 0);
 });
 
+test('smtp mode fails clearly when smtp port is outside tcp range', async () => {
+  const createTransportCalls = [];
+  const { sendPasswordChangeOtpEmail } = loadEmailServiceWithNodemailer({
+    createTransport: (...args) => {
+      createTransportCalls.push(args);
+      return { sendMail: async () => {} };
+    },
+  });
+  setEnv({
+    PASSWORD_OTP_DELIVERY_MODE: 'smtp',
+    SMTP_HOST: 'smtp.example.com',
+    SMTP_PORT: '999999',
+    SMTP_USER: 'smtp-user',
+    SMTP_PASS: 'smtp-pass',
+    SMTP_FROM: 'no-reply@example.com',
+  });
+
+  await assert.rejects(
+    sendPasswordChangeOtpEmail({ to: 'user@example.com', otp: '123456' }),
+    /SMTP_PORT must be an integer between 1 and 65535/
+  );
+  assert.equal(createTransportCalls.length, 0);
+});
+
 test('smtp mode fails clearly when smtp credentials are partial', async () => {
   const createTransportCalls = [];
   const { sendPasswordChangeOtpEmail } = loadEmailServiceWithNodemailer({
@@ -194,6 +218,28 @@ test('smtp mode fails clearly when smtp credentials are partial', async () => {
   await assert.rejects(
     sendPasswordChangeOtpEmail({ to: 'user@example.com', otp: '123456' }),
     /SMTP_USER and SMTP_PASS must both be set or both be empty/
+  );
+  assert.equal(createTransportCalls.length, 0);
+});
+
+test('smtp mode fails clearly when smtp credentials are missing', async () => {
+  const createTransportCalls = [];
+  const { sendPasswordChangeOtpEmail } = loadEmailServiceWithNodemailer({
+    createTransport: (...args) => {
+      createTransportCalls.push(args);
+      return { sendMail: async () => {} };
+    },
+  });
+  setEnv({
+    PASSWORD_OTP_DELIVERY_MODE: 'smtp',
+    SMTP_HOST: 'smtp.example.com',
+    SMTP_PORT: '587',
+    SMTP_FROM: 'no-reply@example.com',
+  });
+
+  await assert.rejects(
+    sendPasswordChangeOtpEmail({ to: 'user@example.com', otp: '123456' }),
+    /SMTP_USER and SMTP_PASS are required for SMTP password OTP delivery/
   );
   assert.equal(createTransportCalls.length, 0);
 });
