@@ -2,56 +2,52 @@
 
 ## Overview
 
-tsshop is a full-stack electronics e-commerce app for browsing products, managing a cart, completing cash-on-delivery checkout, submitting reviews, and managing store data from an admin panel.
+tsshop is a full-stack electronics commerce application. It includes a customer storefront, account and cart flows, cash-on-delivery checkout, product reviews, and an admin console for catalog, user, order, report, and storefront-content management.
 
-Runtime parts:
+The repository is split into two runtime apps:
 
-- `backend/`: Express API, Prisma models, PostgreSQL persistence, JWT auth, admin authorization.
-- `frontend/`: Vite React app with customer pages, admin pages, shared API clients, and Astryx UI components.
-- Database: PostgreSQL through Prisma. Supabase can provide the hosted PostgreSQL database.
+- `backend/`: Express API with Prisma-backed PostgreSQL persistence, JWT authentication, role checks, email OTP delivery, and transactional domain logic.
+- `frontend/`: Vite React application using React Router, Astryx Design System components, context providers, and feature API wrappers.
 
-The frontend only talks to the backend API. It does not use Prisma, SQL, or Supabase directly.
+The frontend talks to the backend through HTTP API clients only. It must not access Prisma, SQL, Supabase, or database credentials directly.
 
 ## Stack
 
-- Backend: Node.js, Express 5, Prisma 6, bcrypt, JWT
-- Frontend: React 19, React Router 6, Vite 5, Astryx Design System
-- Database: PostgreSQL
-- Payment mode: simulated cash on delivery only
+- Backend: Node.js, Express 5, Prisma 6, PostgreSQL, bcrypt, JSON Web Tokens, Nodemailer.
+- Frontend: React 19, React Router 6, Vite 5, Astryx Design System.
+- Persistence: PostgreSQL through Prisma. Supabase may be used as the hosted PostgreSQL provider.
+- Payments: cash-on-delivery workflow only; there is no online payment gateway in the current runtime.
 
 ## Project Map
 
 ### Model
 
-- `backend/prisma/schema.prisma`: database schema, enums, relations, indexes, datasource config.
-- `backend/src/models/`: Prisma query helpers and transactions.
-- `backend/src/config/database.js`: shared `PrismaClient` instance.
-- `backend/prisma/seed.js`: demo users, categories, and products.
-- `backend/prisma/seedProducts.js`: product seed dataset.
+The model layer is the backend persistence boundary. It owns Prisma queries, transactions, and database-facing behavior.
 
-Main model files:
+- `backend/prisma/schema.prisma`: canonical database schema, enums, relationships, indexes, and datasource configuration.
+- `backend/src/config/database.js`: single shared Prisma client export.
+- `backend/src/models/`: model helpers used by controllers.
+- `backend/prisma/seed.js`: demo users, categories, and product seed entrypoint.
+- `backend/prisma/seedProducts.js`: product seed data.
 
-- `user.model.js`
-- `product.model.js`
-- `category.model.js`
-- `cart.model.js`
-- `order.model.js`
-- `payment.model.js`
-- `review.model.js`
-- `report.model.js`
-- `passwordChangeOtp.model.js`
-- `storefrontContent.model.js`
-- `storefrontFeatured.model.js`
+Important model files:
+
+- `user.model.js`: user lookup, profile updates, admin user management.
+- `product.model.js`: product listing, sorting, filtering, and admin catalog mutations.
+- `category.model.js`: category reads and admin category mutations.
+- `cart.model.js` and `cartItem.model.js`: authenticated cart state and item mutations.
+- `order.model.js`: checkout transaction, order listing, status changes.
+- `payment.model.js`: COD payment records and paid-state updates.
+- `review.model.js`: customer product reviews and admin moderation visibility.
+- `report.model.js`: revenue, order summary, and best-selling product calculations.
+- `passwordChangeOtp.model.js`: hashed OTP storage, invalidation, attempt tracking, and atomic password update.
+- `storefrontContent.model.js` and `storefrontFeatured.model.js`: carousel, navigation, settings, and featured products.
 
 ### View
 
-- `frontend/src/views/`: route-level React screens.
-- `frontend/src/views/admin/`: admin screens.
-- `frontend/src/layouts/MainLayout.jsx`: customer storefront shell.
-- `frontend/src/layouts/AuthLayout.jsx`: login/register shell.
-- `frontend/src/layouts/AdminLayout.jsx`: admin console shell.
+The view layer is the route-level React UI under `frontend/src/views/`.
 
-Customer views:
+Customer and auth views:
 
 - `HomeView.jsx`
 - `ProductListView.jsx`
@@ -60,8 +56,10 @@ Customer views:
 - `CheckoutView.jsx`
 - `OrderHistoryView.jsx`
 - `OrderDetailView.jsx`
+- `ProfileView.jsx`
 - `LoginView.jsx`
 - `RegisterView.jsx`
+- `UnauthorizedView.jsx`
 
 Admin views:
 
@@ -74,14 +72,23 @@ Admin views:
 - `ReportView.jsx`
 - `AdminStorefrontView.jsx`
 
+Layouts wrap these route views:
+
+- `frontend/src/layouts/MainLayout.jsx`: customer shell with storefront navigation, account menu, cart action, and footer.
+- `frontend/src/layouts/AuthLayout.jsx`: login/register shell.
+- `frontend/src/layouts/AdminLayout.jsx`: protected admin shell.
+
 ### Controller
 
-- `backend/src/controllers/`: HTTP input validation, model orchestration, response shaping.
-- `backend/src/routes/`: endpoint declarations and middleware wiring.
-- `backend/src/middlewares/auth.middleware.js`: JWT authentication.
-- `backend/src/middlewares/admin.middleware.js`: admin-only access guard.
-- `backend/src/middlewares/error.middleware.js`: global error response handler.
-- `backend/src/utils/response.js`: shared success/error response format.
+Controllers are the backend HTTP orchestration layer. They validate request intent, call model helpers, and return responses through the shared response helpers.
+
+- `backend/src/controllers/`: controller modules per feature.
+- `backend/src/routes/`: Express route definitions and middleware wiring.
+- `backend/src/middlewares/auth.middleware.js`: JWT verification and blocked-user protection.
+- `backend/src/middlewares/admin.middleware.js`: admin role guard.
+- `backend/src/middlewares/validation.middleware.js`: required-body and opt-in registration password policy validation.
+- `backend/src/middlewares/error.middleware.js`: global error formatting.
+- `backend/src/utils/response.js`: shared success/error JSON envelope.
 
 Main controller files:
 
@@ -98,25 +105,31 @@ Main controller files:
 
 ### Component
 
-- `frontend/src/components/common/`: shared alerts, loading states, pagination, formatting, icons.
-- `frontend/src/components/layout/`: storefront navigation.
-- `frontend/src/components/home/`: homepage hero, featured products, category showcase, all-products section.
-- `frontend/src/components/product/`: product cards, filters, reviews, purchase panel, detail media.
-- `frontend/src/components/cart/`: cart item list, cart item, cart summary.
-- `frontend/src/components/checkout/`: checkout form, order summary, success dialog.
-- `frontend/src/components/order/`: order detail panel and status badges.
-- `frontend/src/components/profile/`: account security controls.
-- `frontend/src/components/admin/`: reusable admin table/forms/dialogs.
-- `frontend/src/components/admin/storefront/`: carousel, navigation, featured-product admin controls.
-- `frontend/src/components/report/`: revenue, order summary, and best-selling-product report components.
+Reusable frontend UI lives under `frontend/src/components/`.
+
+- `common/`: shared loading, alert/toast bridge, pagination, icons, and formatting helpers.
+- `layout/`: storefront mega navigation.
+- `home/`: homepage hero, featured products, category and product sections.
+- `product/`: product cards, filters, detail media, purchase panel, reviews, and rating badges.
+- `cart/`: cart item rows, list, and summary.
+- `checkout/`: checkout form, order summary, and success dialog.
+- `order/`: order detail panel and status badges.
+- `profile/`: account profile and password-change controls.
+- `admin/`: admin table, dialogs, forms, pickers, and admin feature components.
+- `admin/storefront/`: carousel, navigation, settings, and featured product managers.
+- `report/`: report display components.
+- `auth/`: forgot-password OTP form.
 
 ### UI
 
+Frontend app wiring:
+
 - `frontend/src/main.jsx`: imports Astryx reset/theme CSS and mounts React.
-- `frontend/src/App.jsx`: installs router, auth context, and cart context.
-- `frontend/src/routes/AppRoutes.jsx`: customer, auth, and admin route tree.
+- `frontend/src/App.jsx`: installs router plus auth, cart, and notification providers.
+- `frontend/src/routes/AppRoutes.jsx`: route tree and route guards.
 - `frontend/src/contexts/AuthContext.jsx`: login/register/logout/session state.
 - `frontend/src/contexts/CartContext.jsx`: cart loading and mutation state.
+- `frontend/src/contexts/NotificationContext.jsx`: Astryx toast notification system.
 - `frontend/src/api/apiClient.js`: shared fetch wrapper with bearer token support.
 - `frontend/src/config.js`: reads `VITE_API_BASE_URL`, defaulting to `http://localhost:5000/api`.
 
@@ -126,16 +139,22 @@ Main controller files:
 .
 |-- backend/
 |   |-- prisma/
+|   |   |-- migrations/
+|   |   |-- schema.prisma
+|   |   |-- seed.js
+|   |   `-- seedProducts.js
 |   |-- src/
 |   |   |-- config/
 |   |   |-- controllers/
 |   |   |-- middlewares/
 |   |   |-- models/
 |   |   |-- routes/
+|   |   |-- services/
 |   |   |-- utils/
 |   |   |-- app.js
 |   |   `-- server.js
 |   |-- .env.example
+|   |-- package-lock.json
 |   |-- package.json
 |   `-- prisma.config.ts
 |-- frontend/
@@ -145,20 +164,25 @@ Main controller files:
 |   |   |-- contexts/
 |   |   |-- layouts/
 |   |   |-- routes/
+|   |   |-- utils/
 |   |   |-- views/
 |   |   |-- App.jsx
 |   |   |-- config.js
 |   |   `-- main.jsx
 |   |-- .env.example
+|   |-- package-lock.json
 |   |-- package.json
 |   `-- vite.config.js
+|-- AGENTS.md
 |-- .gitignore
 `-- README.md
 ```
 
+Use `backend/` for API, persistence, email, and auth behavior. Use `frontend/` for route screens, API calls, state contexts, and Astryx UI. Treat `README.md` and `AGENTS.md` as important onboarding and agent guidance files.
+
 ## Backend API
 
-All endpoints below are mounted under `/api`. For example, `POST /auth/login` means `POST http://localhost:5000/api/auth/login`.
+All endpoints are mounted under `/api`. For example, `POST /auth/login` means `POST http://localhost:5000/api/auth/login`.
 
 ### Health
 
@@ -174,8 +198,8 @@ All endpoints below are mounted under `/api`. For example, `POST /auth/login` me
 - `POST /auth/forgot-password/reset`
 - `POST /auth/change-password/request-otp` (authenticated)
 - `POST /auth/change-password/confirm` (authenticated)
-- `GET /users/profile`
-- `PUT /users/profile`
+- `GET /users/profile` (authenticated)
+- `PUT /users/profile` (authenticated)
 - `GET /admin/users` (admin)
 - `PUT /admin/users/:id` (admin)
 - `PUT /admin/users/:id/role` (admin)
@@ -200,7 +224,7 @@ All endpoints below are mounted under `/api`. For example, `POST /auth/login` me
 - `PUT /cart/items/:id`
 - `DELETE /cart/items/:id`
 
-Cart endpoints require authentication.
+Cart endpoints require a valid JWT.
 
 ### Orders and COD Payment
 
@@ -212,16 +236,16 @@ Cart endpoints require authentication.
 - `PUT /admin/orders/:id/status` (admin)
 - `POST /payments/cod`
 
-Order and payment endpoints require authentication. Order detail access is owner/admin scoped.
+Order and payment endpoints require authentication. Order detail access is scoped to the order owner or an admin.
 
 ### Reviews
 
 - `GET /products/:id/reviews`
-- `POST /products/:id/reviews`
+- `POST /products/:id/reviews` (authenticated)
 - `GET /admin/reviews` (admin)
 - `DELETE /admin/reviews/:id` (admin)
 
-Admin review delete hides a review from public results.
+Admin review deletion hides a review from public product review results.
 
 ### Reports
 
@@ -229,7 +253,7 @@ Admin review delete hides a review from public results.
 - `GET /admin/reports/best-selling-products` (admin)
 - `GET /admin/reports/order-summary` (admin)
 
-Reports are calculated from completed orders with paid COD payments.
+Reports are calculated by the backend from completed orders and paid COD payments.
 
 ### Storefront Content
 
@@ -279,73 +303,76 @@ Reports are calculated from completed orders with paid COD payments.
 - `/admin/reports`
 - `/admin/storefront`
 
-Admin routes require an authenticated admin user.
+Admin routes are behind `AdminRoute` in `frontend/src/routes/AppRoutes.jsx`. Non-admin users are redirected to `/unauthorized`.
 
 ## Main Runtime Flows
 
 ### Login Session
 
-1. UI calls `frontend/src/api/authApi.js`.
-2. `apiClient.js` sends JSON requests to the backend.
-3. `auth.controller.js` validates credentials and returns a JWT.
-4. `AuthContext.jsx` stores the token in `localStorage`.
-5. `apiClient.js` attaches the token to protected requests.
-6. `auth.middleware.js` verifies the token and loads `req.user`.
+1. `LoginView.jsx` collects email and password.
+2. `frontend/src/api/authApi.js` calls `POST /auth/login` through `apiClient.js`.
+3. `auth.controller.js` finds the user and checks the submitted password with `bcrypt.compare`.
+4. Blocked users are rejected before a token is issued.
+5. Successful login returns a JWT and safe user payload.
+6. `AuthContext.jsx` stores the token in `localStorage`.
+7. Later API calls attach the token through `apiClient.js`.
+8. `auth.middleware.js` verifies the token and loads `req.user` for protected endpoints.
 
 ### Profile Change Password with Email OTP
 
-1. The authenticated user opens `/profile`.
+1. The logged-in user opens `/profile`.
 2. `ProfileView.jsx` renders `ChangePasswordPanel`.
-3. The user enters their current password and clicks `Send OTP`.
+3. The user enters the current password and clicks `Send OTP`.
 4. The frontend calls `POST /auth/change-password/request-otp`.
-5. `protect` verifies the JWT and blocks unauthenticated or blocked users.
-6. `auth.controller.js` reloads the user and verifies the current password with bcrypt.
-7. The backend generates a six-digit OTP, stores only the hashed OTP in `PasswordChangeOtp`, invalidates previous active OTPs for the user, and sends the OTP email.
-8. The user enters OTP, new password, and new password confirmation.
-9. The frontend checks the shared password policy and confirms that the new password and confirmation match before submitting.
-10. The frontend calls `POST /auth/change-password/confirm`.
-11. The backend re-verifies the current password, validates the shared password policy, validates OTP existence, expiry, attempts, and hash match, then updates `User.passwordHash` and marks the OTP used in one Prisma transaction.
-12. If any check fails, the backend returns an error and does not update `User.passwordHash`.
+5. The backend verifies the JWT, reloads the user, rejects blocked users, and checks the current password.
+6. The backend generates a six-digit OTP, hashes it, stores it in `PasswordChangeOtp`, invalidates previous active OTPs, and sends the OTP through `email.service.js`.
+7. The user enters OTP, new password, and confirmation.
+8. The frontend checks the shared password policy and confirmation match.
+9. The frontend calls `POST /auth/change-password/confirm`.
+10. The backend re-checks current password, validates OTP state and hash, enforces the new-password policy, hashes the new password, and atomically marks the OTP used while updating `User.passwordHash`.
+11. If any step fails, the password is not changed.
 
 ### Forgot Password with Email OTP
 
-1. The user opens the login page and clicks `Forgot Password?`.
-2. `LoginView.jsx` swaps to `ForgotPasswordForm`.
-3. The user enters an email address and clicks `Send OTP`.
-4. The frontend validates the email format and calls `POST /auth/forgot-password/request-otp`.
-5. The backend looks up the email. If an unblocked account exists, it generates a six-digit OTP, stores only the hashed OTP in `PasswordChangeOtp`, invalidates previous unused OTPs for that user, and sends the OTP email.
-6. The request endpoint returns the same success message whether or not an account exists, so it does not reveal registered emails.
+1. The user opens `/login` and clicks `Forgot Password?`.
+2. `LoginView.jsx` renders `ForgotPasswordForm`.
+3. The user enters an email and clicks `Send OTP`.
+4. The frontend validates email format and calls `POST /auth/forgot-password/request-otp`.
+5. The backend returns a generic success message for both known and unknown emails.
+6. If the account exists and is not blocked, the backend creates and emails a hashed OTP.
 7. The user enters the OTP and clicks `Verify OTP`.
 8. The frontend calls `POST /auth/forgot-password/verify-otp`.
-9. The backend validates OTP existence, expiry, attempt count, and hash match. Invalid OTPs increment the attempt counter. Expired or over-attempt OTPs are invalidated.
-10. After a valid OTP, the frontend shows `New Password` and `Confirm New Password`.
-11. The frontend checks the shared password policy, confirms that both password fields match, and calls `POST /auth/forgot-password/reset`.
-12. The backend re-validates the OTP, password policy, and password confirmation, then updates `User.passwordHash` and marks the OTP used in one Prisma transaction.
-13. If any check fails, the backend returns an error and does not update `User.passwordHash`.
-14. After success, the frontend shows a toast notification and returns the user to the normal login form.
+9. The backend validates OTP existence, expiry, attempts, and hash match.
+10. After a valid OTP, the frontend shows new-password and confirmation fields.
+11. The frontend checks shared password policy and confirmation match.
+12. The frontend calls `POST /auth/forgot-password/reset`.
+13. The backend re-validates the OTP and password policy, then atomically updates `User.passwordHash` and marks the OTP used.
+14. On success, a toast notification is shown and the user returns to the login form.
 
 ### Product Browsing
 
-1. UI routes render `ProductListView.jsx`, `ProductDetailView.jsx`, or `HomeView.jsx`.
-2. API wrappers call `/products`, `/categories`, or `/storefront/*`.
-3. Backend routes call controllers.
-4. Controllers call Prisma model helpers.
-5. Responses return through the shared response envelope.
+1. Customer route views call feature API wrappers in `frontend/src/api/`.
+2. `apiClient.js` sends requests to `/products`, `/categories`, or `/storefront/*`.
+3. Express routes dispatch to controllers.
+4. Controllers call model helpers for Prisma reads.
+5. Data returns in the shared backend response envelope and is rendered by product/home components.
 
 ### Cart and Checkout
 
-1. `CartContext.jsx` loads the authenticated cart from `/cart`.
-2. Cart views mutate items through `/cart/items`.
+1. `CartContext.jsx` loads cart state from `/cart` for authenticated users.
+2. Cart UI mutates items through `/cart/items`.
 3. Checkout submits `POST /orders`.
-4. `order.model.js` runs one Prisma transaction for order creation, stock decrement, COD payment creation, and cart clearing.
-5. Order history/detail pages read `/orders/my-orders` and `/orders/:id`.
+4. `order.model.js` creates the order inside a Prisma transaction that also decrements stock, creates a COD payment, and clears the cart.
+5. Order history and detail pages read `/orders/my-orders` and `/orders/:id`.
+6. Admins can update order status through `/admin/orders/:id/status`.
 
 ### Admin Management
 
-1. `AdminRoute` in `AppRoutes.jsx` checks auth and admin role.
-2. Admin pages call feature API wrappers.
+1. `AdminRoute` checks authentication and admin role in `frontend/src/routes/AppRoutes.jsx`.
+2. Admin pages use feature API wrappers for users, products, categories, orders, reviews, reports, and storefront content.
 3. Backend admin endpoints use `protect` and `admin` middleware.
-4. Admin writes update products, categories, users, orders, reviews, reports, and storefront content through model helpers.
+4. Controllers validate request intent and call model helpers.
+5. Admin changes are persisted through Prisma and reflected in the admin UI after reload or local state update.
 
 ## Database
 
@@ -369,15 +396,14 @@ Primary Prisma models:
 Important behavior:
 
 - User roles are `customer` and `admin`.
-- Blocked users cannot log in or continue using protected endpoints.
+- Blocked users cannot log in and cannot keep using protected endpoints with an old token.
+- Registration, profile password changes, and forgot-password resets share the password policy: at least 12 characters with uppercase, lowercase, number, and special character.
+- Login does not apply the password policy to existing passwords; it only checks the submitted password against the stored hash.
+- Password-change and forgot-password OTPs are stored hashed, expire after the configured window, track attempts, and are invalidated after use.
 - Checkout is transactional.
-- Payment method is COD only.
-- Completed orders update COD payment status to `paid`.
+- The only payment method currently implemented is COD.
+- Completed orders update COD payment state to `paid`.
 - Storefront carousel, navigation, and featured products use `isActive` and `sortOrder`.
-- Registration, profile password changes, and forgot-password resets all use the shared password policy: at least 12 characters with uppercase, lowercase, number, and special character.
-- Login does not apply the password policy to existing passwords; it only verifies the submitted password against the stored hash.
-- Password changes require a valid logged-in JWT, current password verification, a valid unexpired email OTP, shared password policy validation, and matching new password confirmation.
-- Password-change OTPs are hashed, expire after the configured window, track failed attempts, and are invalidated after use.
 
 ## Environment Variables
 
@@ -386,19 +412,19 @@ Backend variables in `backend/.env`:
 | Variable | Required | Purpose |
 | --- | --- | --- |
 | `PORT` | No | Backend HTTP port. Defaults to `5000`. |
-| `DATABASE_URL` | Yes | Prisma runtime PostgreSQL connection. |
-| `DIRECT_URL` | Yes | Prisma direct PostgreSQL connection for migrations. |
+| `DATABASE_URL` | Yes | Prisma runtime PostgreSQL connection string. |
+| `DIRECT_URL` | Yes | Direct PostgreSQL connection for Prisma migrations. |
 | `JWT_SECRET` | Yes | JWT signing and verification secret. |
-| `JWT_EXPIRES_IN` | No | JWT expiration. |
-| `NODE_ENV` | No | Node environment. |
-| `PASSWORD_OTP_EXPIRES_MINUTES` | No | Password-change OTP lifetime. Defaults to `10`. |
-| `PASSWORD_OTP_MAX_ATTEMPTS` | No | Maximum failed OTP attempts before invalidation. Defaults to `5`. |
-| `PASSWORD_OTP_DELIVERY_MODE` | No | `console` for local development or `smtp` for real email delivery. |
-| `SMTP_HOST` | For SMTP | SMTP host for password-change OTP email. |
+| `JWT_EXPIRES_IN` | No | JWT expiration duration. |
+| `NODE_ENV` | No | Runtime environment. Production changes OTP email delivery expectations. |
+| `PASSWORD_OTP_EXPIRES_MINUTES` | No | OTP lifetime. Defaults to `10`. |
+| `PASSWORD_OTP_MAX_ATTEMPTS` | No | Failed OTP attempt limit. Defaults to `5`. |
+| `PASSWORD_OTP_DELIVERY_MODE` | No | `console` for local development or `smtp` for email delivery. |
+| `SMTP_HOST` | For SMTP | SMTP host. |
 | `SMTP_PORT` | For SMTP | SMTP port. Defaults to `587`. |
 | `SMTP_USER` | For SMTP | SMTP username. |
-| `SMTP_PASS` | For SMTP | SMTP password. |
-| `SMTP_FROM` | For SMTP | Sender address for OTP emails. |
+| `SMTP_PASS` | For SMTP | SMTP password or app password. |
+| `SMTP_FROM` | For SMTP | Sender email address. |
 
 Frontend variables in `frontend/.env`:
 
@@ -406,11 +432,11 @@ Frontend variables in `frontend/.env`:
 | --- | --- | --- |
 | `VITE_API_BASE_URL` | No | Backend API base URL. Defaults to `http://localhost:5000/api`. |
 
-Use the tracked `.env.example` files as variable lists. Do not commit real `.env` files, database passwords, JWT secrets, or live credentials.
+Use `.env.example` files as variable lists only. Never commit real `.env` files, database credentials, JWT secrets, SMTP passwords, or provider keys.
 
 ## Setup
 
-Backend:
+Backend install and database preparation:
 
 ```powershell
 cd backend
@@ -420,14 +446,14 @@ npx prisma migrate deploy
 npm run prisma:seed
 ```
 
-Frontend:
+Frontend install:
 
 ```powershell
 cd frontend
 npm install
 ```
 
-For local schema development:
+For local schema development, create migrations with:
 
 ```powershell
 cd backend
@@ -436,7 +462,7 @@ npm run prisma:migrate -- --name <migration-name>
 
 ## Running the Project
 
-Backend:
+Backend development server:
 
 ```powershell
 cd backend
@@ -455,7 +481,7 @@ Health check:
 http://localhost:5000/api/health
 ```
 
-Frontend:
+Frontend development server:
 
 ```powershell
 cd frontend
@@ -468,7 +494,7 @@ Vite usually serves:
 http://localhost:5173
 ```
 
-Frontend build:
+Frontend production build:
 
 ```powershell
 cd frontend
@@ -477,14 +503,14 @@ npm run build
 
 ## Seeded Demo Accounts
 
-`backend/prisma/seed.js` creates demo-only accounts:
+`backend/prisma/seed.js` creates demo accounts for local testing:
 
 | Role | Email | Password |
 | --- | --- | --- |
 | Customer | `customer@example.com` | `customer123` |
 | Admin | `admin@example.com` | `admin123` |
 
-Do not reuse these credentials outside local/demo environments.
+These credentials are for local/demo environments only.
 
 ## Testing and Validation
 
@@ -495,7 +521,7 @@ cd backend
 npx prisma validate
 ```
 
-Focused backend test:
+Focused backend auth test:
 
 ```powershell
 cd backend
@@ -531,7 +557,7 @@ All backend test files:
 
 ```powershell
 cd backend
-Get-ChildItem .\src, .\prisma -Recurse -Filter *.test.js | ForEach-Object { node --test $_.FullName }
+node --test
 ```
 
 Frontend lint and build:
@@ -542,7 +568,7 @@ npm run lint
 npm run build
 ```
 
-Focused frontend test:
+Focused frontend storefront test:
 
 ```powershell
 cd frontend
@@ -562,24 +588,28 @@ All frontend test files:
 
 ```powershell
 cd frontend
-Get-ChildItem .\src -Recurse -Filter *.test.js | ForEach-Object { node --test $_.FullName }
+node --test
 ```
 
 ## Development Notes
 
-- Backend behavior should stay in the route/controller/model split.
-- Prisma access should go through `backend/src/models/` and the shared client in `backend/src/config/database.js`.
-- Frontend API calls should go through `frontend/src/api/apiClient.js` and feature-specific API wrappers.
-- Frontend state should stay in `AuthContext.jsx` and `CartContext.jsx` where applicable.
-- Route changes belong in `frontend/src/routes/AppRoutes.jsx`.
-- Do not add direct database, Prisma, or Supabase access to `frontend/src`.
-- Report calculations belong in `backend/src/models/report.model.js`, not in the frontend.
-- Checkout stock, order, payment, and cart-clearing behavior belongs in the backend transaction.
+- Read `AGENTS.md` before frontend or architecture work. It requires Astryx layout/components for UI work and forbids raw div/Tailwind-style shortcuts in new UI.
+- Keep backend changes inside the existing route/controller/model split.
+- Keep Prisma usage in `backend/src/models/` or explicitly backend-only services. Do not add Prisma or database access to `frontend/src`.
+- Use `backend/src/config/database.js` as the shared Prisma client source.
+- Use `frontend/src/api/apiClient.js` plus feature API wrappers for frontend API calls.
+- Coordinate auth changes across backend controllers, route middleware, `AuthContext.jsx`, API wrappers, and login/profile UI.
+- Coordinate password-policy changes across backend `passwordPolicy.js`, frontend `passwordPolicy.js`, registration, forgot-password, and profile password-change flows.
+- Use `NotificationContext.jsx` and the shared toast system for user-facing success/error/warning/info messages.
+- Checkout behavior belongs in backend transactions, not frontend-only calculations.
+- Report calculations belong in `backend/src/models/report.model.js`.
+- Run focused tests first, then broader backend/frontend validation before claiming completion.
 
 ## Known Gaps
 
-- `backend/package.json` still has a placeholder `npm test` script, so use `node --test` directly.
-- `/unauthorized` and not-found UI are placeholder-level screens.
-- Runtime database checks require a configured private backend `.env` and reachable PostgreSQL database.
-- Browser walkthrough checks require both servers, seed data, and valid login flow.
-- There is no online payment gateway, shipping-provider integration, Supabase Auth, direct frontend database access, or realtime feature in the current runtime source.
+- `backend/package.json` still has a placeholder `npm test` script; use `node --test` directly.
+- The not-found route renders placeholder-level UI.
+- Runtime database checks require a private backend `.env` and a reachable PostgreSQL database.
+- Browser walkthrough validation requires both servers, seed data, and valid accounts.
+- SMTP OTP delivery requires real SMTP environment variables; console delivery is for local development.
+- Online payment, shipping-provider integration, Supabase Auth, direct frontend database access, and realtime features are not implemented in the current runtime source.
