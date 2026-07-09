@@ -7,7 +7,7 @@ const { validateBody } = require('../middlewares/validation.middleware');
 // POST /api/auth/register
 router.post(
   '/register',
-  validateBody(['username', 'email', 'password']),
+  validateBody(['username', 'email', 'password'], { validatePasswordPolicy: true }),
   authController.register
 );
 

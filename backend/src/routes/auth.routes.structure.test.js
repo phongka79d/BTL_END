@@ -3,6 +3,15 @@ const { readFileSync } = require('node:fs');
 const path = require('node:path');
 const { test } = require('node:test');
 
+test('auth routes apply password policy to registration but not login', () => {
+  const source = readFileSync(path.join(__dirname, 'auth.routes.js'), 'utf8');
+
+  assert.match(source, /\/register/);
+  assert.match(source, /validateBody\(\['username', 'email', 'password'\],\s*\{\s*validatePasswordPolicy:\s*true\s*\}\)/);
+  assert.match(source, /\/login/);
+  assert.match(source, /validateBody\(\['email', 'password'\]\),\s*authController\.login/);
+});
+
 test('password change routes are protected and validate required bodies', () => {
   const source = readFileSync(path.join(__dirname, 'auth.routes.js'), 'utf8');
 

@@ -19,11 +19,33 @@ const createResponse = () => {
   return response;
 };
 
-test('validateBody applies shared password policy to registration passwords', () => {
+test('validateBody does not apply password policy unless requested', () => {
   const response = createResponse();
   let nextCalled = false;
 
-  validateBody(['username', 'email', 'password'])(
+  validateBody(['email', 'password'])(
+    {
+      body: {
+        email: 'ada@example.com',
+        password: 'old123',
+      },
+    },
+    response,
+    () => {
+      nextCalled = true;
+    }
+  );
+
+  assert.equal(response.statusCode, null);
+  assert.equal(response.body, null);
+  assert.equal(nextCalled, true);
+});
+
+test('validateBody applies shared password policy to registration passwords when requested', () => {
+  const response = createResponse();
+  let nextCalled = false;
+
+  validateBody(['username', 'email', 'password'], { validatePasswordPolicy: true })(
     {
       body: {
         username: 'ada',

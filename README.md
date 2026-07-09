@@ -375,6 +375,7 @@ Important behavior:
 - Completed orders update COD payment status to `paid`.
 - Storefront carousel, navigation, and featured products use `isActive` and `sortOrder`.
 - Registration, profile password changes, and forgot-password resets all use the shared password policy: at least 12 characters with uppercase, lowercase, number, and special character.
+- Login does not apply the password policy to existing passwords; it only verifies the submitted password against the stored hash.
 - Password changes require a valid logged-in JWT, current password verification, a valid unexpired email OTP, shared password policy validation, and matching new password confirmation.
 - Password-change OTPs are hashed, expire after the configured window, track failed attempts, and are invalidated after use.
 

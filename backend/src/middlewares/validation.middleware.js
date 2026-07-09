@@ -8,7 +8,7 @@ const { validatePasswordPolicy } = require('../utils/passwordPolicy');
  * @param {string[]} requiredFields - Danh sách các trường bắt buộc phải có trong req.body.
  * @returns {Function} Express middleware function.
  */
-const validateBody = (requiredFields) => {
+const validateBody = (requiredFields, options = {}) => {
   return (req, res, next) => {
     const errors = [];
     const body = req.body || {};
@@ -34,7 +34,7 @@ const validateBody = (requiredFields) => {
     }
 
     // Validate độ dài password nếu có trường password
-    if (body.password && typeof body.password === 'string') {
+    if (options.validatePasswordPolicy && body.password && typeof body.password === 'string') {
       const passwordPolicy = validatePasswordPolicy(body.password);
       if (!passwordPolicy.isValid) {
         errors.push({

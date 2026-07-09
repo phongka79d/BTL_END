@@ -61,6 +61,55 @@ test('login rejects blocked users before issuing a token', async () => {
   assert.equal(response.body.data, undefined);
 });
 
+test('login accepts existing weak passwords when the hash matches', async () => {
+  const controller = require('./auth.controller');
+  const passwordHash = await bcrypt.hash('old123', 4);
+  userModel.findByEmail = async () => ({
+    id: 'user-1',
+    username: 'legacy',
+    email: 'legacy@example.com',
+    fullName: 'Legacy User',
+    passwordHash,
+    role: 'customer',
+    isBlocked: false,
+  });
+
+  const response = createResponse();
+  await controller.login(
+    { body: { email: 'legacy@example.com', password: 'old123' } },
+    response,
+    assert.fail
+  );
+
+  assert.equal(response.statusCode, 200);
+  assert.equal(response.body.message, 'Login successful');
+  assert.equal(response.body.data.user.email, 'legacy@example.com');
+});
+
+test('login rejects existing weak passwords when the hash does not match', async () => {
+  const controller = require('./auth.controller');
+  const passwordHash = await bcrypt.hash('old123', 4);
+  userModel.findByEmail = async () => ({
+    id: 'user-1',
+    username: 'legacy',
+    email: 'legacy@example.com',
+    fullName: 'Legacy User',
+    passwordHash,
+    role: 'customer',
+    isBlocked: false,
+  });
+
+  const response = createResponse();
+  await controller.login(
+    { body: { email: 'legacy@example.com', password: 'wrong123' } },
+    response,
+    assert.fail
+  );
+
+  assert.equal(response.statusCode, 401);
+  assert.equal(response.body.message, 'Invalid email or password');
+});
+
 test('requestPasswordChangeOtp rejects unauthenticated users', async () => {
   const controller = require('./auth.controller');
   const response = createResponse();
