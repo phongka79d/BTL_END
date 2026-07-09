@@ -4,21 +4,37 @@ const authController = require('../controllers/auth.controller');
 const { protect } = require('../middlewares/auth.middleware');
 const { validateBody } = require('../middlewares/validation.middleware');
 
-// POST /api/auth/register - Đăng ký
+// POST /api/auth/register
 router.post(
   '/register',
   validateBody(['username', 'email', 'password']),
   authController.register
 );
 
-// POST /api/auth/login - Đăng nhập
+// POST /api/auth/login
 router.post(
   '/login',
   validateBody(['email', 'password']),
   authController.login
 );
 
-// GET /api/auth/me - Lấy thông tin tài khoản hiện tại
+// POST /api/auth/change-password/request-otp
+router.post(
+  '/change-password/request-otp',
+  protect,
+  validateBody(['currentPassword']),
+  authController.requestPasswordChangeOtp
+);
+
+// POST /api/auth/change-password/confirm
+router.post(
+  '/change-password/confirm',
+  protect,
+  validateBody(['currentPassword', 'otp', 'newPassword', 'confirmPassword']),
+  authController.confirmPasswordChange
+);
+
+// GET /api/auth/me
 router.get(
   '/me',
   protect,
