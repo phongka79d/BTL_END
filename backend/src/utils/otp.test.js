@@ -22,3 +22,18 @@ test('getOtpExpiry returns a future date using provided minutes', () => {
 
   assert.equal(expiry.toISOString(), '2026-07-09T00:10:00.000Z');
 });
+
+test('getOtpExpiry rejects invalid expiry minutes', () => {
+  const now = new Date('2026-07-09T00:00:00.000Z');
+
+  assert.throws(() => getOtpExpiry('abc', now), /OTP expiry minutes must be a positive number/);
+  assert.throws(() => getOtpExpiry(Number.NaN, now), /OTP expiry minutes must be a positive number/);
+  assert.throws(() => getOtpExpiry(Number.POSITIVE_INFINITY, now), /OTP expiry minutes must be a positive number/);
+});
+
+test('getOtpExpiry rejects zero or negative expiry minutes', () => {
+  const now = new Date('2026-07-09T00:00:00.000Z');
+
+  assert.throws(() => getOtpExpiry(0, now), /OTP expiry minutes must be a positive number/);
+  assert.throws(() => getOtpExpiry(-1, now), /OTP expiry minutes must be a positive number/);
+});

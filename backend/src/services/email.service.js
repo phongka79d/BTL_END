@@ -1,20 +1,71 @@
 const nodemailer = require('nodemailer');
 
-const getDeliveryMode = () => process.env.PASSWORD_OTP_DELIVERY_MODE || 'console';
+const isProduction = () => process.env.NODE_ENV === 'production';
 
-const createSmtpTransport = () => {
+const getDeliveryMode = () => {
+  const mode = (process.env.PASSWORD_OTP_DELIVERY_MODE || '').trim().toLowerCase();
+
+  if (!mode) {
+    if (isProduction()) {
+      throw new Error('PASSWORD_OTP_DELIVERY_MODE=smtp is required in production');
+    }
+
+    return 'console';
+  }
+
+  if (isProduction() && mode !== 'smtp') {
+    throw new Error('PASSWORD_OTP_DELIVERY_MODE=smtp is required in production');
+  }
+
+  if (mode !== 'console' && mode !== 'smtp') {
+    throw new Error('Unsupported password OTP delivery mode');
+  }
+
+  return mode;
+};
+
+const getSmtpConfig = () => {
+  const host = (process.env.SMTP_HOST || '').trim();
+  const from = (process.env.SMTP_FROM || '').trim();
+
+  if (!host || !from) {
+    throw new Error('SMTP password OTP delivery is not configured');
+  }
+
   const port = Number(process.env.SMTP_PORT || 587);
 
-  return nodemailer.createTransport({
-    host: process.env.SMTP_HOST,
+  if (!Number.isFinite(port) || !Number.isInteger(port) || port <= 0) {
+    throw new Error('SMTP_PORT must be a positive integer');
+  }
+
+  const user = process.env.SMTP_USER || '';
+  const pass = process.env.SMTP_PASS || '';
+
+  if ((user && !pass) || (!user && pass)) {
+    throw new Error('SMTP_USER and SMTP_PASS must both be set or both be empty');
+  }
+
+  return {
+    host,
     port,
-    secure: port === 465,
-    auth: process.env.SMTP_USER && process.env.SMTP_PASS
+    from,
+    auth: user && pass
       ? {
-          user: process.env.SMTP_USER,
-          pass: process.env.SMTP_PASS,
+          user,
+          pass,
         }
       : undefined,
+  };
+};
+
+const createSmtpTransport = (config) => {
+  const { host, port, auth } = config;
+
+  return nodemailer.createTransport({
+    host,
+    port,
+    secure: port === 465,
+    auth,
   });
 };
 
@@ -30,13 +81,11 @@ const sendPasswordChangeOtpEmail = async ({ to, otp }) => {
     throw new Error('Unsupported password OTP delivery mode');
   }
 
-  if (!process.env.SMTP_HOST || !process.env.SMTP_FROM) {
-    throw new Error('SMTP password OTP delivery is not configured');
-  }
+  const smtpConfig = getSmtpConfig();
+  const transporter = createSmtpTransport(smtpConfig);
 
-  const transporter = createSmtpTransport();
   await transporter.sendMail({
-    from: process.env.SMTP_FROM,
+    from: smtpConfig.from,
     to,
     subject: 'Your TechMart password change OTP',
     text: `Your password change OTP is ${otp}. It expires in ${process.env.PASSWORD_OTP_EXPIRES_MINUTES || 10} minutes.`,

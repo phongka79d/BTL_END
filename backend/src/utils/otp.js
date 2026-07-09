@@ -18,7 +18,13 @@ const compareOtp = async (otp, otpHash) => {
 };
 
 const getOtpExpiry = (minutes = DEFAULT_OTP_EXPIRY_MINUTES, now = new Date()) => {
-  return new Date(now.getTime() + Number(minutes) * 60 * 1000);
+  const expiryMinutes = Number(minutes);
+
+  if (!Number.isFinite(expiryMinutes) || expiryMinutes <= 0) {
+    throw new Error('OTP expiry minutes must be a positive number');
+  }
+
+  return new Date(now.getTime() + expiryMinutes * 60 * 1000);
 };
 
 module.exports = {
