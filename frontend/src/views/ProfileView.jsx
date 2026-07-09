@@ -15,6 +15,7 @@ import {
 } from '@astryxdesign/core';
 import { userApi } from '../api/userApi';
 import Alert from '../components/common/Alert';
+import ChangePasswordPanel from '../components/profile/ChangePasswordPanel';
 import { useAuth } from '../contexts/AuthContext';
 
 const EMPTY_PROFILE = {
@@ -273,6 +274,8 @@ export const ProfileView = () => {
           </form>
         </Card>
       </Grid>
+
+      <ChangePasswordPanel />
     </VStack>
   );
 };

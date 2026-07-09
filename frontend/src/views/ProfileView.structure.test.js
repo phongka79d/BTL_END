@@ -19,5 +19,7 @@ test('profile view provides an authenticated editable profile page', () => {
   assert.match(source, /TextArea[\s\S]*label="Address"/);
   assert.match(source, /label="Save profile"/);
   assert.match(source, /label="Order history"/);
+  assert.match(source, /import ChangePasswordPanel from '\.\.\/components\/profile\/ChangePasswordPanel';/);
+  assert.match(source, /<ChangePasswordPanel \/>/);
   assert.doesNotMatch(source, /fetch\(|supabase|DATABASE_URL|PrismaClient/);
 });
