@@ -1,8 +1,8 @@
-# TechMart Electronics E-Commerce
+# tsshop
 
 ## Overview
 
-TechMart is a full-stack electronics e-commerce app for browsing products, managing a cart, completing cash-on-delivery checkout, submitting reviews, and managing store data from an admin panel.
+tsshop is a full-stack electronics e-commerce app for browsing products, managing a cart, completing cash-on-delivery checkout, submitting reviews, and managing store data from an admin panel.
 
 Runtime parts:
 

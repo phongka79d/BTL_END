@@ -38,10 +38,10 @@ export const AuthLayout = () => {
           <VStack style={{ alignItems: 'center', gap: 'var(--spacing-1)' }}>
             <HStack style={{ alignItems: 'center', gap: 'var(--spacing-2)' }}>
               <Icon icon="wrench" color="accent" size="lg" />
-              <Text size="large" weight="semibold">TechMart</Text>
+              <Text size="large" weight="semibold">tsshop</Text>
             </HStack>
             <Text size="supporting" color="secondary">
-              Electronics E-Commerce website
+              Account access
             </Text>
           </VStack>
 

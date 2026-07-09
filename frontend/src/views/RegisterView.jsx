@@ -132,7 +132,7 @@ export const RegisterView = () => {
       if (res.success) {
         notification.success({
           title: 'Account Created',
-          description: 'Account created successfully! Welcome to TechMart.',
+          description: 'Account created successfully! Welcome to tsshop.',
         });
         // Small delay to allow user to read success message before routing
         setTimeout(() => {
@@ -161,7 +161,7 @@ export const RegisterView = () => {
           Create Account
         </Heading>
         <Text size="supporting" color="secondary">
-          Join TechMart to start shopping
+          Join tsshop to start shopping
         </Text>
       </VStack>
 

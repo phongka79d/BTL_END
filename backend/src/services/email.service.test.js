@@ -148,7 +148,7 @@ test('smtp mode builds expected sendMail payload', async () => {
   assert.deepEqual(sendMailCalls, [{
     from: 'no-reply@example.com',
     to: 'user@example.com',
-    subject: 'Your TechMart password change OTP',
+    subject: 'Your tsshop password change OTP',
     text: 'Your password change OTP is 123456. It expires in 15 minutes.',
   }]);
 });

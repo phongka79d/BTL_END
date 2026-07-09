@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import test from 'node:test';
 
+const readRoot = (path) => readFileSync(new URL(`../../${path}`, import.meta.url), 'utf8');
 const readView = (name) => readFileSync(new URL(`./${name}`, import.meta.url), 'utf8');
 const readLayout = (name) => readFileSync(
   new URL(`../layouts/${name}`, import.meta.url),
@@ -61,6 +62,19 @@ test('auth card remains constrained to the mobile viewport', () => {
     /<Card\s+width="100%"\s+maxWidth="calc\(var\(--spacing-10\) \* 10\)"\s+padding=\{6\}/
   );
   assert.match(authLayout, /minWidth: 0/);
+});
+
+test('customer and auth shells use the tsshop title', () => {
+  const index = readRoot('index.html');
+  const authLayout = readLayout('AuthLayout.jsx');
+  const mainLayout = readLayout('MainLayout.jsx');
+
+  assert.match(index, /<title>tsshop<\/title>/);
+  assert.match(authLayout, />tsshop<\/Text>/);
+  assert.match(mainLayout, /label="tsshop storefront navigation"/);
+  assert.match(mainLayout, /heading="tsshop"/);
+  assert.match(mainLayout, /2026 tsshop/);
+  assert.doesNotMatch(`${index}\n${authLayout}\n${mainLayout}`, /TechMart|Lumen|Electronics E-Commerce/);
 });
 
 test('customer and admin order tables are constrained scroll containers', () => {

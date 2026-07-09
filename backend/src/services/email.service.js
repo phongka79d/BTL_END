@@ -95,7 +95,7 @@ const sendPasswordChangeOtpEmail = async ({ to, otp }) => {
   await transporter.sendMail({
     from: smtpConfig.from,
     to,
-    subject: 'Your TechMart password change OTP',
+    subject: 'Your tsshop password change OTP',
     text: `Your password change OTP is ${otp}. It expires in ${process.env.PASSWORD_OTP_EXPIRES_MINUTES || 10} minutes.`,
   });
 

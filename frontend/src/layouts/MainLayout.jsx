@@ -93,11 +93,11 @@ export const MainLayout = () => {
 
   const topNav = (
     <TopNav
-      label="TechMart storefront navigation"
+      label="tsshop storefront navigation"
       heading={
         <TopNavHeading
           logo={<NavIcon icon={<Icon icon="wrench" size="sm" />} />}
-          heading="Lumen"
+          heading="tsshop"
           headingHref="/"
           as={Link}
         />
@@ -170,7 +170,7 @@ export const MainLayout = () => {
           }}
         >
           <Text size="supporting" color="secondary">
-            © 2026 TechMart Electronics E-Commerce. All rights reserved.
+            © 2026 tsshop. All rights reserved.
           </Text>
           <HStack gap={4}>
             <Link
