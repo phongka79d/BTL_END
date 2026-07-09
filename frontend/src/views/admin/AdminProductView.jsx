@@ -100,10 +100,10 @@ export const AdminProductView = () => {
   const handleSave = async (payload) => {
     if (editingProduct) {
       await productApi.updateProduct(editingProduct.id, payload);
-      setFeedback({ title: 'Product updated', description: `${payload.name} was updated successfully.` });
+      setFeedback({ title: 'Product updated', description: `${payload.name} was updated successfully.`, status: 'success' });
     } else {
       await productApi.createProduct(payload);
-      setFeedback({ title: 'Product created', description: `${payload.name} was added successfully.` });
+      setFeedback({ title: 'Product created', description: `${payload.name} was added successfully.`, status: 'success' });
     }
 
     await loadProducts();
@@ -121,7 +121,8 @@ export const AdminProductView = () => {
       setDeleteTarget(null);
       setFeedback({
         title: 'Product deleted',
-        description: `${deleteTarget.name} was deleted successfully.`
+        description: `${deleteTarget.name} was deleted successfully.`,
+        status: 'success'
       });
 
       if (products.length === 1 && page > 1) {
@@ -132,7 +133,8 @@ export const AdminProductView = () => {
     } catch (error) {
       setFeedback({
         title: 'Unable to delete product',
-        description: error?.message || 'The product could not be deleted.'
+        description: error?.message || 'The product could not be deleted.',
+        status: 'error'
       });
     } finally {
       setIsDeleting(false);
@@ -172,6 +174,7 @@ export const AdminProductView = () => {
         <Alert
           title={feedback.title}
           description={feedback.description}
+          status={feedback.status}
         />
       )}
 

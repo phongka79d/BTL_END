@@ -1,12 +1,11 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { Selector, Text, VStack } from '@astryxdesign/core';
+import React, { useCallback, useState } from 'react';
+import { Selector, VStack } from '@astryxdesign/core';
 import { orderApi } from '../../api/orderApi';
+import { useNotification } from '../../contexts/NotificationContext';
 import {
   ORDER_STATUS_VALUES,
   ORDER_STATUS_LABELS,
 } from '../../constants/orderConstants';
-
-const FEEDBACK_CLEAR_MS = 4000;
 
 /**
  * Maps order status values to Selector option objects consumed by the
@@ -43,34 +42,14 @@ const STATUS_OPTIONS = ORDER_STATUS_VALUES.map((value) => ({
  *           AlertDialog gate here before calling the API.
  */
 export const OrderStatusSelect = ({ order, onStatusUpdated }) => {
+  const notification = useNotification();
   const [isUpdating, setIsUpdating] = useState(false);
-  const [feedback, setFeedback] = useState(null);
-  const feedbackTimerRef = useRef(null);
-
-  const clearFeedbackTimer = useCallback(() => {
-    if (feedbackTimerRef.current) {
-      clearTimeout(feedbackTimerRef.current);
-      feedbackTimerRef.current = null;
-    }
-  }, []);
-
-  const scheduleFeedbackClear = useCallback(() => {
-    clearFeedbackTimer();
-    feedbackTimerRef.current = setTimeout(() => {
-      setFeedback(null);
-    }, FEEDBACK_CLEAR_MS);
-  }, [clearFeedbackTimer]);
-
-  useEffect(() => {
-    return () => clearFeedbackTimer();
-  }, [clearFeedbackTimer]);
 
   const handleStatusChange = useCallback(
     async (newStatus) => {
       if (!newStatus || newStatus === order.status) return;
 
       setIsUpdating(true);
-      setFeedback(null);
 
       try {
         const response = await orderApi.updateOrderStatus(
@@ -79,26 +58,24 @@ export const OrderStatusSelect = ({ order, onStatusUpdated }) => {
         );
         const updatedOrder = response?.data || response;
 
-        setFeedback({
-          type: 'success',
-          message:
+        notification.success({
+          title: 'Status updated',
+          description:
             updatedOrder?.payment?.paymentStatus === 'paid'
               ? 'Status updated. Payment marked as paid.'
               : `Status updated to ${ORDER_STATUS_LABELS[newStatus] || newStatus}.`,
         });
-        scheduleFeedbackClear();
         onStatusUpdated?.(updatedOrder || order);
       } catch (err) {
-        setFeedback({
-          type: 'error',
-          message: err?.message || 'Unable to update status. Please try again.',
+        notification.error({
+          title: 'Unable to update status',
+          description: err?.message || 'Unable to update status. Please try again.',
         });
-        scheduleFeedbackClear();
       } finally {
         setIsUpdating(false);
       }
     },
-    [order, onStatusUpdated, scheduleFeedbackClear]
+    [notification, order, onStatusUpdated]
   );
 
   return (
@@ -113,14 +90,6 @@ export const OrderStatusSelect = ({ order, onStatusUpdated }) => {
         width="148px"
       />
 
-      {feedback && (
-        <Text
-          size="supporting"
-          color={feedback.type === 'success' ? 'success' : 'danger'}
-        >
-          {feedback.message}
-        </Text>
-      )}
     </VStack>
   );
 };

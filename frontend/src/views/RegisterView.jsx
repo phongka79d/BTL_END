@@ -7,10 +7,10 @@ import {
   Heading,
   Button,
   TextInput,
-  TextArea,
-  Banner
+  TextArea
 } from '@astryxdesign/core';
 import { useAuth } from '../contexts/AuthContext';
+import { useNotification } from '../contexts/NotificationContext';
 
 /**
  * RegisterView Component
@@ -20,6 +20,7 @@ import { useAuth } from '../contexts/AuthContext';
  */
 export const RegisterView = () => {
   const { register } = useAuth();
+  const notification = useNotification();
   const navigate = useNavigate();
 
   // Field states
@@ -42,8 +43,6 @@ export const RegisterView = () => {
 
   // Form submission and API feedback states
   const [isLoading, setIsLoading] = useState(false);
-  const [apiError, setApiError] = useState(null);
-  const [successMsg, setSuccessMsg] = useState(null);
 
   /**
    * Helper to validate email format
@@ -57,8 +56,6 @@ export const RegisterView = () => {
    */
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setApiError(null);
-    setSuccessMsg(null);
     
     let hasError = false;
 
@@ -129,16 +126,25 @@ export const RegisterView = () => {
       });
 
       if (res.success) {
-        setSuccessMsg('Account created successfully! Welcome to TechMart.');
+        notification.success({
+          title: 'Account Created',
+          description: 'Account created successfully! Welcome to TechMart.',
+        });
         // Small delay to allow user to read success message before routing
         setTimeout(() => {
           navigate('/');
         }, 1200);
       } else {
-        setApiError(res.error || 'Registration failed. Email or username might already be in use.');
+        notification.error({
+          title: 'Registration Failed',
+          description: res.error || 'Registration failed. Email or username might already be in use.',
+        });
       }
     } catch (err) {
-      setApiError('An unexpected error occurred. Please try again.');
+      notification.error({
+        title: 'Registration Failed',
+        description: 'An unexpected error occurred. Please try again.',
+      });
     } finally {
       setIsLoading(false);
     }
@@ -154,26 +160,6 @@ export const RegisterView = () => {
           Join TechMart to start shopping
         </Text>
       </VStack>
-
-      {/* Success Banner */}
-      {successMsg && (
-        <Banner
-          status="success"
-          title="Account Created"
-          description={successMsg}
-        />
-      )}
-
-      {/* Error Banner */}
-      {apiError && (
-        <Banner
-          status="error"
-          title="Registration Failed"
-          description={apiError}
-          isDismissable
-          onDismiss={() => setApiError(null)}
-        />
-      )}
 
       <form onSubmit={handleSubmit} style={{ width: '100%' }}>
         <VStack gap={4}>

@@ -25,10 +25,10 @@ test('product review form captures rating and optional comment with local valida
 });
 
 test('product review form handles error and success feedback without data access', () => {
-  assert.match(source, /submitError/);
-  assert.match(source, /successMessage/);
-  assert.match(source, /<Banner\s+status="error"/);
-  assert.match(source, /<Banner\s+status="success"/);
+  assert.match(source, /useNotification\(\)/);
+  assert.match(source, /notification\.error\(\{/);
+  assert.match(source, /notification\.success\(\{/);
+  assert.doesNotMatch(source, /<Banner/);
   assert.match(source, /comment\.trim\(\)/);
   assert.equal(source.includes('reviewApi'), false);
   assert.equal(source.includes('apiClient'), false);

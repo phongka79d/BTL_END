@@ -4,12 +4,15 @@ import test from 'node:test';
 
 const source = readFileSync(new URL('./LoginView.jsx', import.meta.url), 'utf8');
 
-test('LoginView announces blocked accounts with a specific banner title', () => {
+test('LoginView announces blocked accounts with a specific toast title', () => {
   assert.match(source, /const BLOCKED_ACCOUNT_MESSAGE = 'Your account has been blocked';/);
   assert.match(source, /const getLoginErrorTitle = \(message\) => \(/);
   assert.match(source, /message === BLOCKED_ACCOUNT_MESSAGE/);
   assert.match(source, /'Account Blocked'/);
-  assert.match(source, /title=\{getLoginErrorTitle\(apiError\)\}/);
+  assert.match(source, /useNotification\(\)/);
+  assert.match(source, /notification\.error\(\{/);
+  assert.match(source, /title: getLoginErrorTitle\(message\)/);
+  assert.doesNotMatch(source, /<Banner/);
 });
 
 test('LoginView maps invalid credentials to clear secure feedback', () => {
@@ -17,5 +20,5 @@ test('LoginView maps invalid credentials to clear secure feedback', () => {
   assert.match(source, /const getLoginErrorDescription = \(message\) => \(/);
   assert.match(source, /message === INVALID_CREDENTIALS_MESSAGE/);
   assert.match(source, /'Incorrect email or password'/);
-  assert.match(source, /description=\{getLoginErrorDescription\(apiError\)\}/);
+  assert.match(source, /description: getLoginErrorDescription\(message\)/);
 });

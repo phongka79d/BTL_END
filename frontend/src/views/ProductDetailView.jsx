@@ -313,7 +313,7 @@ export const ProductDetailView = () => {
 
     if (result.success) {
       setFeedback({
-        type: 'success',
+        status: 'success',
         title: 'Added to cart',
         description: `${quantity} ${quantity === 1 ? 'unit' : 'units'} of ${product.name} was added to your cart.`,
         actionLabel: 'View cart',
@@ -324,7 +324,7 @@ export const ProductDetailView = () => {
 
     const signInRequired = !isAuthenticated;
     setFeedback({
-      type: 'error',
+      status: 'error',
       title: signInRequired ? 'Sign in required' : 'Unable to add to cart',
       description: result.error || 'The item could not be added to the cart.',
       actionLabel: signInRequired ? 'Sign in' : undefined,
@@ -414,6 +414,7 @@ export const ProductDetailView = () => {
         <Alert
           title={feedback.title}
           description={feedback.description}
+          status={feedback.status}
           actionLabel={feedback.actionLabel}
           onAction={feedback.onAction}
         />

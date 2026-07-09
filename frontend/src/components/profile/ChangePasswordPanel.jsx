@@ -67,11 +67,13 @@ export const ChangePasswordPanel = () => {
       setFeedback({
         title: 'OTP sent',
         description: 'Check your email for the password change code.',
+        status: 'success',
       });
     } catch (error) {
       setFeedback({
         title: 'Unable to send OTP',
         description: error?.message || 'Current password could not be verified.',
+        status: 'error',
       });
     } finally {
       setIsSendingOtp(false);
@@ -125,11 +127,13 @@ export const ChangePasswordPanel = () => {
       setFeedback({
         title: 'Password changed',
         description: 'Use your new password the next time you sign in.',
+        status: 'success',
       });
     } catch (error) {
       setFeedback({
         title: 'Unable to change password',
         description: error?.message || 'The password was not changed.',
+        status: 'error',
       });
     } finally {
       setIsSubmitting(false);
@@ -161,7 +165,7 @@ export const ChangePasswordPanel = () => {
           )}
         </HStack>
 
-        {feedback && <Alert title={feedback.title} description={feedback.description} />}
+        {feedback && <Alert title={feedback.title} description={feedback.description} status={feedback.status} />}
 
         {isOpen && (
           <form onSubmit={handleSubmit}>

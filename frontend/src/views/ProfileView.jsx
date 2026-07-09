@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
+  Avatar,
   Badge,
   Button,
   Card,
@@ -25,6 +26,40 @@ const EMPTY_PROFILE = {
   address: '',
 };
 
+const profileIconStyle = {
+  width: 'var(--spacing-4)',
+  height: 'var(--spacing-4)',
+  color: 'var(--color-text-secondary)',
+  flexShrink: 0,
+};
+
+const EmailIcon = () => (
+  <svg aria-hidden="true" focusable="false" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round" style={profileIconStyle}>
+    <path d="M4 6h16v12H4z" />
+    <path d="m4 7 8 6 8-6" />
+  </svg>
+);
+
+const RoleIcon = () => (
+  <svg aria-hidden="true" focusable="false" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round" style={profileIconStyle}>
+    <path d="M12 3 5 6v5c0 4.2 2.9 8.1 7 10 4.1-1.9 7-5.8 7-10V6l-7-3Z" />
+    <path d="m9 12 2 2 4-4" />
+  </svg>
+);
+
+const PhoneIcon = () => (
+  <svg aria-hidden="true" focusable="false" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round" style={profileIconStyle}>
+    <path d="M6.5 4h3l1.5 4-2 1.2a11 11 0 0 0 5.8 5.8l1.2-2 4 1.5v3A2.5 2.5 0 0 1 17.2 20 13.2 13.2 0 0 1 4 6.8 2.5 2.5 0 0 1 6.5 4Z" />
+  </svg>
+);
+
+const AddressIcon = () => (
+  <svg aria-hidden="true" focusable="false" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round" style={profileIconStyle}>
+    <path d="M12 21s7-5.2 7-11a7 7 0 0 0-14 0c0 5.8 7 11 7 11Z" />
+    <path d="M12 12.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5Z" />
+  </svg>
+);
+
 const toProfileValues = (profile) => ({
   username: profile?.username || '',
   fullName: profile?.fullName || '',
@@ -46,6 +81,16 @@ const getAccountName = (profile, fallbackUser) => (
   fallbackUser?.username ||
   fallbackUser?.email ||
   'Your account'
+);
+
+const ProfileInfoRow = ({ icon, label, children }) => (
+  <HStack gap={3} align="center" wrap="wrap" width="100%">
+    {icon}
+    <VStack gap={0}>
+      <Text weight="semibold">{label}</Text>
+      {children}
+    </VStack>
+  </HStack>
 );
 
 export const ProfileView = () => {
@@ -118,11 +163,13 @@ export const ProfileView = () => {
       setFeedback({
         title: 'Profile saved',
         description: 'Your account details were updated.',
+        status: 'success',
       });
     } catch (error) {
       setFeedback({
         title: 'Unable to save profile',
         description: error?.message || 'Your profile could not be updated.',
+        status: 'error',
       });
     } finally {
       setIsSaving(false);
@@ -180,34 +227,40 @@ export const ProfileView = () => {
         <Alert
           title={feedback.title}
           description={feedback.description}
+          status={feedback.status}
         />
       )}
 
-      <Grid columns={{ minWidth: 280, max: 2 }} gap={4} style={{ alignItems: 'start' }}>
-        <Card padding={4}>
-          <VStack gap={4}>
-            <VStack gap={1}>
-              <Heading level={2}>Account summary</Heading>
-              <Text color="secondary">{accountName}</Text>
-            </VStack>
-            <VStack gap={3}>
-              <HStack gap={2} align="center" wrap="wrap">
-                <Text weight="semibold">Email</Text>
-                <Text color="secondary">{profile?.email || user?.email || 'Not available'}</Text>
+      <Grid columns={{ minWidth: 320, max: 2 }} gap={4} style={{ alignItems: 'start' }}>
+        <VStack gap={4}>
+          <Card padding={4}>
+            <VStack gap={4}>
+              <HStack justify="center" width="100%">
+                <Avatar name={accountName} size="large" />
               </HStack>
-              <HStack gap={2} align="center" wrap="wrap">
-                <Text weight="semibold">Role</Text>
-                <Badge label={profile?.role || user?.role || 'customer'} />
-              </HStack>
-              {profile?.isBlocked && (
-                <Alert
-                  title="Account blocked"
-                  description="This account cannot place protected requests until an admin unblocks it."
-                />
-              )}
+              <VStack gap={1}>
+                <Heading level={2}>Account summary</Heading>
+                <Text color="secondary">{accountName}</Text>
+              </VStack>
+              <VStack gap={4}>
+                <ProfileInfoRow icon={<EmailIcon />} label="Email">
+                  <Text color="secondary">{profile?.email || user?.email || 'Not available'}</Text>
+                </ProfileInfoRow>
+                <ProfileInfoRow icon={<RoleIcon />} label="Role">
+                  <Badge label={profile?.role || user?.role || 'customer'} />
+                </ProfileInfoRow>
+                {profile?.isBlocked && (
+                  <Alert
+                    title="Account blocked"
+                    description="This account cannot place protected requests until an admin unblocks it."
+                  />
+                )}
+              </VStack>
             </VStack>
-          </VStack>
-        </Card>
+          </Card>
+
+          <ChangePasswordPanel />
+        </VStack>
 
         <Card padding={4}>
           <form onSubmit={handleSubmit}>
@@ -239,6 +292,7 @@ export const ProfileView = () => {
                 />
                 <TextInput
                   label="Phone"
+                  startIcon={<PhoneIcon />}
                   value={values.phone}
                   onChange={(value) => updateField('phone', value)}
                   isOptional
@@ -247,6 +301,7 @@ export const ProfileView = () => {
                 />
                 <TextArea
                   label="Address"
+                  startIcon={<AddressIcon />}
                   value={values.address}
                   onChange={(value) => updateField('address', value)}
                   rows={4}
@@ -256,10 +311,10 @@ export const ProfileView = () => {
                 />
               </FormLayout>
 
-              <HStack gap={2} justify="end" wrap="wrap">
+              <HStack gap={3} justify="end" wrap="wrap" style={{ paddingTop: 'var(--spacing-2)' }}>
                 <Button
                   label="Reset"
-                  variant="secondary"
+                  variant="ghost"
                   onClick={resetForm}
                   isDisabled={isSaving}
                 />
@@ -274,8 +329,6 @@ export const ProfileView = () => {
           </form>
         </Card>
       </Grid>
-
-      <ChangePasswordPanel />
     </VStack>
   );
 };

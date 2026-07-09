@@ -58,13 +58,15 @@ export const AdminCategoryView = () => {
       await categoryApi.updateCategory(editingCategory.id, payload);
       setFeedback({
         title: 'Category updated',
-        description: `${payload.name} was updated successfully.`
+        description: `${payload.name} was updated successfully.`,
+        status: 'success'
       });
     } else {
       await categoryApi.createCategory(payload);
       setFeedback({
         title: 'Category created',
-        description: `${payload.name} was added successfully.`
+        description: `${payload.name} was added successfully.`,
+        status: 'success'
       });
     }
 
@@ -83,13 +85,15 @@ export const AdminCategoryView = () => {
       setDeleteTarget(null);
       setFeedback({
         title: 'Category deleted',
-        description: `${deleteTarget.name} was deleted successfully.`
+        description: `${deleteTarget.name} was deleted successfully.`,
+        status: 'success'
       });
       await loadCategories();
     } catch (error) {
       setFeedback({
         title: 'Unable to delete category',
-        description: error?.message || 'The category could not be deleted.'
+        description: error?.message || 'The category could not be deleted.',
+        status: 'error'
       });
     } finally {
       setIsDeleting(false);
@@ -109,6 +113,7 @@ export const AdminCategoryView = () => {
         <Alert
           title={feedback.title}
           description={feedback.description}
+          status={feedback.status}
         />
       )}
 

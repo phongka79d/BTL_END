@@ -79,14 +79,16 @@ export const AdminReviewView = () => {
     setReviews((currentReviews) => currentReviews.filter((review) => review.id !== target.id));
     setFeedback({
       title: 'Review hidden',
-      description: 'The review was removed from public product detail.'
+      description: 'The review was removed from public product detail.',
+      status: 'success'
     });
 
     reviewApi.hideReview(target.id)
       .catch((error) => {
         setFeedback({
           title: 'Unable to hide review',
-          description: error?.message || 'The review could not be hidden.'
+          description: error?.message || 'The review could not be hidden.',
+          status: 'error'
         });
         loadReviews(selectedProductId);
       })
@@ -197,6 +199,7 @@ export const AdminReviewView = () => {
         <Alert
           title={feedback.title}
           description={feedback.description}
+          status={feedback.status}
         />
       )}
 

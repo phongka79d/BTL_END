@@ -98,10 +98,10 @@ export const AdminStorefrontView = () => {
   const saveSlide = async (payload) => {
     if (editingSlide?.id) {
       await storefrontContentApi.updateCarouselSlide(editingSlide.id, payload);
-      setFeedback({ title: 'Slide updated', description: `${payload.title} was updated.` });
+      setFeedback({ title: 'Slide updated', description: `${payload.title} was updated.`, status: 'success' });
     } else {
       await storefrontContentApi.createCarouselSlide(payload);
-      setFeedback({ title: 'Slide created', description: `${payload.title} was created.` });
+      setFeedback({ title: 'Slide created', description: `${payload.title} was created.`, status: 'success' });
     }
     await loadStorefront();
   };
@@ -110,10 +110,10 @@ export const AdminStorefrontView = () => {
     const nextPayload = childParent ? { ...payload, parentId: childParent.id, itemType: 'link' } : payload;
     if (editingNavItem?.id) {
       await storefrontContentApi.updateNavigationItem(editingNavItem.id, nextPayload);
-      setFeedback({ title: 'Navigation item updated', description: `${nextPayload.label} was updated.` });
+      setFeedback({ title: 'Navigation item updated', description: `${nextPayload.label} was updated.`, status: 'success' });
     } else {
       await storefrontContentApi.createNavigationItem(nextPayload);
-      setFeedback({ title: 'Navigation item created', description: `${nextPayload.label} was created.` });
+      setFeedback({ title: 'Navigation item created', description: `${nextPayload.label} was created.`, status: 'success' });
     }
     await loadStorefront();
   };
@@ -132,10 +132,10 @@ export const AdminStorefrontView = () => {
     setIsSavingFeatured(true);
     try {
       await storefrontContentApi.updateStorefrontSettings(payload);
-      setFeedback({ title: 'Featured product count saved', description: 'Homepage featured product count was updated.' });
+      setFeedback({ title: 'Featured product count saved', description: 'Homepage featured product count was updated.', status: 'success' });
       await loadStorefront();
     } catch (error) {
-      setFeedback({ title: 'Unable to save featured count', description: error?.message || 'Storefront settings could not be saved.' });
+      setFeedback({ title: 'Unable to save featured count', description: error?.message || 'Storefront settings could not be saved.', status: 'error' });
     } finally {
       setIsSavingFeatured(false);
     }
@@ -149,11 +149,12 @@ export const AdminStorefrontView = () => {
       const skippedCount = response?.data?.skippedProductIds?.length || 0;
       setFeedback({
         title: 'Featured products added',
-        description: `${createdCount} products were added${skippedCount ? ` and ${skippedCount} duplicates were skipped` : ''}.`
+        description: `${createdCount} products were added${skippedCount ? ` and ${skippedCount} duplicates were skipped` : ''}.`,
+        status: 'success'
       });
       await loadStorefront();
     } catch (error) {
-      setFeedback({ title: 'Unable to add featured products', description: error?.message || 'The selected products could not be featured.' });
+      setFeedback({ title: 'Unable to add featured products', description: error?.message || 'The selected products could not be featured.', status: 'error' });
     } finally {
       setIsSavingFeatured(false);
     }
@@ -165,7 +166,7 @@ export const AdminStorefrontView = () => {
       await storefrontContentApi.updateFeaturedProduct(id, payload);
       await loadStorefront();
     } catch (error) {
-      setFeedback({ title: 'Unable to update featured product', description: error?.message || 'The featured product could not be updated.' });
+      setFeedback({ title: 'Unable to update featured product', description: error?.message || 'The featured product could not be updated.', status: 'error' });
     } finally {
       setIsSavingFeatured(false);
     }
@@ -177,7 +178,7 @@ export const AdminStorefrontView = () => {
       await storefrontContentApi.reorderFeaturedProducts(orderedIds);
       await loadStorefront();
     } catch (error) {
-      setFeedback({ title: 'Unable to reorder featured products', description: error?.message || 'The featured product order could not be saved.' });
+      setFeedback({ title: 'Unable to reorder featured products', description: error?.message || 'The featured product order could not be saved.', status: 'error' });
     } finally {
       setIsSavingFeatured(false);
     }
@@ -203,10 +204,10 @@ export const AdminStorefrontView = () => {
         await storefrontContentApi.deleteFeaturedProduct(deleteTarget.item.id);
       }
       setDeleteTarget(null);
-      setFeedback({ title: 'Storefront content deleted', description: 'The item was removed from storefront configuration.' });
+      setFeedback({ title: 'Storefront content deleted', description: 'The item was removed from storefront configuration.', status: 'success' });
       await loadStorefront();
     } catch (error) {
-      setFeedback({ title: 'Unable to delete item', description: error?.message || 'The storefront item could not be deleted.' });
+      setFeedback({ title: 'Unable to delete item', description: error?.message || 'The storefront item could not be deleted.', status: 'error' });
     } finally {
       setIsDeleting(false);
     }
@@ -222,7 +223,7 @@ export const AdminStorefrontView = () => {
         <Button label="Refresh" variant="secondary" onClick={loadStorefront} isDisabled={isLoading} />
       </HStack>
 
-      {feedback && <Alert title={feedback.title} description={feedback.description} />}
+      {feedback && <Alert title={feedback.title} description={feedback.description} status={feedback.status} />}
 
       <TabList value={activeTab} onChange={setActiveTab} aria-label="Storefront sections">
         <Tab value="carousel" label="Carousel" />

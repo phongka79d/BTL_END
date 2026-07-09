@@ -6,10 +6,10 @@ import {
   Text,
   Heading,
   Button,
-  TextInput,
-  Banner
+  TextInput
 } from '@astryxdesign/core';
 import { useAuth } from '../contexts/AuthContext';
+import { useNotification } from '../contexts/NotificationContext';
 
 const BLOCKED_ACCOUNT_MESSAGE = 'Your account has been blocked';
 const INVALID_CREDENTIALS_MESSAGE = 'Invalid email or password';
@@ -29,6 +29,7 @@ const getLoginErrorDescription = (message) => (
  */
 export const LoginView = () => {
   const { login } = useAuth();
+  const notification = useNotification();
   const navigate = useNavigate();
 
   // Field states
@@ -41,8 +42,6 @@ export const LoginView = () => {
 
   // Form submission and API feedback states
   const [isLoading, setIsLoading] = useState(false);
-  const [apiError, setApiError] = useState(null);
-  const [successMsg, setSuccessMsg] = useState(null);
 
   /**
    * Helper to validate email format
@@ -56,8 +55,6 @@ export const LoginView = () => {
    */
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setApiError(null);
-    setSuccessMsg(null);
     
     let hasError = false;
 
@@ -85,7 +82,10 @@ export const LoginView = () => {
     try {
       const res = await login(email, password);
       if (res.success) {
-        setSuccessMsg('Login successful! Redirecting...');
+        notification.success({
+          title: 'Success',
+          description: 'Login successful! Redirecting...',
+        });
         // Small delay to allow the user to see the success message
         setTimeout(() => {
           if (res.user.role === 'admin') {
@@ -95,10 +95,17 @@ export const LoginView = () => {
           }
         }, 1000);
       } else {
-        setApiError(res.error || 'Failed to sign in. Please verify your credentials.');
+        const message = res.error || 'Failed to sign in. Please verify your credentials.';
+        notification.error({
+          title: getLoginErrorTitle(message),
+          description: getLoginErrorDescription(message),
+        });
       }
     } catch (err) {
-      setApiError('An unexpected error occurred. Please try again.');
+      notification.error({
+        title: 'Login Failed',
+        description: 'An unexpected error occurred. Please try again.',
+      });
     } finally {
       setIsLoading(false);
     }
@@ -114,26 +121,6 @@ export const LoginView = () => {
           Enter your details to access your account
         </Text>
       </VStack>
-
-      {/* Success Banner */}
-      {successMsg && (
-        <Banner
-          status="success"
-          title="Success"
-          description={successMsg}
-        />
-      )}
-
-      {/* Error Banner */}
-      {apiError && (
-        <Banner
-          status="error"
-          title={getLoginErrorTitle(apiError)}
-          description={getLoginErrorDescription(apiError)}
-          isDismissable
-          onDismiss={() => setApiError(null)}
-        />
-      )}
 
       <form onSubmit={handleSubmit} style={{ width: '100%' }}>
         <VStack gap={4}>

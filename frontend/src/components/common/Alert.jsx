@@ -1,31 +1,29 @@
-﻿import React from 'react';
-import { Button, Card, Text, VStack } from '@astryxdesign/core';
+import { useEffect } from 'react';
+import { useNotification } from '../../contexts/NotificationContext';
 
 export const Alert = ({
   title,
   description,
+  status = 'error',
   actionLabel,
   onAction
 }) => {
-  return (
-    <Card padding={4}>
-      <VStack gap={3}>
-        <VStack gap={1}>
-          <Text weight="semibold">{title}</Text>
-          {description && (
-            <Text color="secondary">{description}</Text>
-          )}
-        </VStack>
-        {actionLabel && onAction && (
-          <Button
-            label={actionLabel}
-            variant="secondary"
-            onClick={onAction}
-          />
-        )}
-      </VStack>
-    </Card>
-  );
+  const notification = useNotification();
+
+  useEffect(() => {
+    const normalizedStatus = ['success', 'error', 'warning', 'info'].includes(status) ? status : 'error';
+    const dismiss = notification[normalizedStatus]({
+      title,
+      description,
+      actionLabel,
+      onAction,
+      uniqueID: `${normalizedStatus}:${title}:${description || ''}`,
+    });
+
+    return dismiss;
+  }, [actionLabel, description, notification, onAction, status, title]);
+
+  return null;
 };
 
 export default Alert;

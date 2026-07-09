@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import {
-  Banner,
   Button,
   Card,
   FormLayout,
@@ -10,6 +9,7 @@ import {
   TextArea,
   VStack
 } from '@astryxdesign/core';
+import { useNotification } from '../../contexts/NotificationContext';
 
 const fieldStatus = (message) => (
   message ? { type: 'error', message } : undefined
@@ -31,24 +31,19 @@ export const ProductReviewForm = ({
   isDisabled = false,
   title = 'Write a review'
 }) => {
+  const notification = useNotification();
   const [rating, setRating] = useState(5);
   const [comment, setComment] = useState('');
   const [ratingError, setRatingError] = useState('');
-  const [submitError, setSubmitError] = useState('');
-  const [successMessage, setSuccessMessage] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleRatingChange = (value) => {
     setRating(value);
     setRatingError('');
-    setSubmitError('');
-    setSuccessMessage('');
   };
 
   const handleCommentChange = (value) => {
     setComment(value);
-    setSubmitError('');
-    setSuccessMessage('');
   };
 
   const handleSubmit = async (event) => {
@@ -56,15 +51,16 @@ export const ProductReviewForm = ({
 
     const nextRatingError = validateRating(rating);
     setRatingError(nextRatingError);
-    setSubmitError('');
-    setSuccessMessage('');
 
     if (nextRatingError) {
       return;
     }
 
     if (!onSubmit) {
-      setSubmitError('Review submission is not available yet.');
+      notification.error({
+        title: 'Unable to submit review',
+        description: 'Review submission is not available yet.',
+      });
       return;
     }
 
@@ -76,9 +72,15 @@ export const ProductReviewForm = ({
       });
       setComment('');
       setRating(5);
-      setSuccessMessage('Your review was submitted.');
+      notification.success({
+        title: 'Review submitted',
+        description: 'Your review was submitted.',
+      });
     } catch (error) {
-      setSubmitError(error?.message || 'Unable to submit your review.');
+      notification.error({
+        title: 'Unable to submit review',
+        description: error?.message || 'Unable to submit your review.',
+      });
     } finally {
       setIsSubmitting(false);
     }
@@ -96,22 +98,6 @@ export const ProductReviewForm = ({
               Rating is required. Comment is optional.
             </Text>
           </VStack>
-
-          {submitError && (
-            <Banner
-              status="error"
-              title="Unable to submit review"
-              description={submitError}
-            />
-          )}
-
-          {successMessage && (
-            <Banner
-              status="success"
-              title="Review submitted"
-              description={successMessage}
-            />
-          )}
 
           <FormLayout>
             <NumberInput

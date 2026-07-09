@@ -38,7 +38,8 @@ export const CartView = () => {
     if (result.success) {
       setFeedback({
         title: 'Cart updated',
-        description: 'The item quantity and backend subtotal were refreshed.'
+        description: 'The item quantity and backend subtotal were refreshed.',
+        status: 'success'
       });
     }
 
@@ -56,7 +57,8 @@ export const CartView = () => {
     if (result.success) {
       setFeedback({
         title: 'Item removed',
-        description: 'The cart totals were refreshed from the backend.'
+        description: 'The cart totals were refreshed from the backend.',
+        status: 'success'
       });
     }
 
@@ -85,6 +87,7 @@ export const CartView = () => {
         <Alert
           title={feedback.title}
           description={feedback.description}
+          status={feedback.status}
         />
       )}
 

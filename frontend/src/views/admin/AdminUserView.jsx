@@ -88,12 +88,14 @@ export const AdminUserView = () => {
       )));
       setFeedback({
         title: 'Role updated',
-        description: `${getUserDisplayName(target)} is now ${nextRole}.`
+        description: `${getUserDisplayName(target)} is now ${nextRole}.`,
+        status: 'success'
       });
     } catch (error) {
       setFeedback({
         title: 'Unable to update role',
-        description: error?.message || 'The user role could not be updated.'
+        description: error?.message || 'The user role could not be updated.',
+        status: 'error'
       });
     } finally {
       setIsUpdating(false);
@@ -114,12 +116,14 @@ export const AdminUserView = () => {
       )));
       setFeedback({
         title: nextBlockedState ? 'User blocked' : 'User unblocked',
-        description: `${getUserDisplayName(target)} is now ${nextBlockedState ? 'blocked' : 'active'}.`
+        description: `${getUserDisplayName(target)} is now ${nextBlockedState ? 'blocked' : 'active'}.`,
+        status: 'success'
       });
     } catch (error) {
       setFeedback({
         title: 'Unable to update blocked status',
-        description: error?.message || 'The user blocked status could not be updated.'
+        description: error?.message || 'The user blocked status could not be updated.',
+        status: 'error'
       });
     } finally {
       setIsUpdating(false);
@@ -137,7 +141,8 @@ export const AdminUserView = () => {
     )));
     setFeedback({
       title: 'Profile updated',
-      description: `${getUserDisplayName(editingUser)} was updated.`
+      description: `${getUserDisplayName(editingUser)} was updated.`,
+      status: 'success'
     });
   };
 
@@ -154,6 +159,7 @@ export const AdminUserView = () => {
         <Alert
           title={feedback.title}
           description={feedback.description}
+          status={feedback.status}
         />
       )}
 
