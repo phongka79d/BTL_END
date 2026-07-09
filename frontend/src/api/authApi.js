@@ -25,4 +25,18 @@ export const authApi = {
    * @returns {Promise<Object>} The current user profile
    */
   getMe: () => apiClient.get('/auth/me'),
+
+  /**
+   * Request an email OTP for an authenticated password change.
+   * @param {Object} payload - currentPassword
+   * @returns {Promise<Object>} OTP request result
+   */
+  requestPasswordChangeOtp: (payload) => apiClient.post('/auth/change-password/request-otp', payload),
+
+  /**
+   * Confirm an authenticated password change with current password, OTP, and matching new password fields.
+   * @param {Object} payload - currentPassword, otp, newPassword, confirmPassword
+   * @returns {Promise<Object>} Password change result
+   */
+  confirmPasswordChange: (payload) => apiClient.post('/auth/change-password/confirm', payload),
 };
