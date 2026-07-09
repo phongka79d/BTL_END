@@ -39,6 +39,7 @@ Main model files:
 - `payment.model.js`
 - `review.model.js`
 - `report.model.js`
+- `passwordChangeOtp.model.js`
 - `storefrontContent.model.js`
 - `storefrontFeatured.model.js`
 
@@ -104,6 +105,7 @@ Main controller files:
 - `frontend/src/components/cart/`: cart item list, cart item, cart summary.
 - `frontend/src/components/checkout/`: checkout form, order summary, success dialog.
 - `frontend/src/components/order/`: order detail panel and status badges.
+- `frontend/src/components/profile/`: account security controls.
 - `frontend/src/components/admin/`: reusable admin table/forms/dialogs.
 - `frontend/src/components/admin/storefront/`: carousel, navigation, featured-product admin controls.
 - `frontend/src/components/report/`: revenue, order summary, and best-selling-product report components.
@@ -167,6 +169,8 @@ All endpoints below are mounted under `/api`. For example, `POST /auth/login` me
 - `POST /auth/register`
 - `POST /auth/login`
 - `GET /auth/me`
+- `POST /auth/change-password/request-otp` (authenticated)
+- `POST /auth/change-password/confirm` (authenticated)
 - `GET /users/profile`
 - `PUT /users/profile`
 - `GET /admin/users` (admin)
@@ -258,7 +262,7 @@ Reports are calculated from completed orders with paid COD payments.
 - `/checkout` (authenticated)
 - `/orders` (authenticated)
 - `/orders/:id` (authenticated)
-- `/profile` (authenticated placeholder)
+- `/profile` (authenticated)
 - `/unauthorized`
 
 ### Admin UI
@@ -284,6 +288,21 @@ Admin routes require an authenticated admin user.
 4. `AuthContext.jsx` stores the token in `localStorage`.
 5. `apiClient.js` attaches the token to protected requests.
 6. `auth.middleware.js` verifies the token and loads `req.user`.
+
+### Profile Change Password with Email OTP
+
+1. The authenticated user opens `/profile`.
+2. `ProfileView.jsx` renders `ChangePasswordPanel`.
+3. The user enters their current password and clicks `Send OTP`.
+4. The frontend calls `POST /auth/change-password/request-otp`.
+5. `protect` verifies the JWT and blocks unauthenticated or blocked users.
+6. `auth.controller.js` reloads the user and verifies the current password with bcrypt.
+7. The backend generates a six-digit OTP, stores only the hashed OTP in `PasswordChangeOtp`, invalidates previous active OTPs for the user, and sends the OTP email.
+8. The user enters OTP, new password, and new password confirmation.
+9. The frontend checks that the new password and confirmation match before submitting.
+10. The frontend calls `POST /auth/change-password/confirm`.
+11. The backend re-verifies the current password, validates OTP existence, expiry, attempts, and hash match, then updates `User.passwordHash` and marks the OTP used in one Prisma transaction.
+12. If any check fails, the backend returns an error and does not update `User.passwordHash`.
 
 ### Product Browsing
 
@@ -321,6 +340,7 @@ Primary Prisma models:
 - `OrderDetail`
 - `Payment`
 - `Review`
+- `PasswordChangeOtp`
 - `CarouselSlide`
 - `StorefrontNavItem`
 - `StorefrontSetting`
@@ -334,6 +354,8 @@ Important behavior:
 - Payment method is COD only.
 - Completed orders update COD payment status to `paid`.
 - Storefront carousel, navigation, and featured products use `isActive` and `sortOrder`.
+- Password changes require a valid logged-in JWT, current password verification, a valid unexpired email OTP, and matching new password confirmation.
+- Password-change OTPs are hashed, expire after the configured window, track failed attempts, and are invalidated after use.
 
 ## Environment Variables
 
@@ -347,6 +369,14 @@ Backend variables in `backend/.env`:
 | `JWT_SECRET` | Yes | JWT signing and verification secret. |
 | `JWT_EXPIRES_IN` | No | JWT expiration. |
 | `NODE_ENV` | No | Node environment. |
+| `PASSWORD_OTP_EXPIRES_MINUTES` | No | Password-change OTP lifetime. Defaults to `10`. |
+| `PASSWORD_OTP_MAX_ATTEMPTS` | No | Maximum failed OTP attempts before invalidation. Defaults to `5`. |
+| `PASSWORD_OTP_DELIVERY_MODE` | No | `console` for local development or `smtp` for real email delivery. |
+| `SMTP_HOST` | For SMTP | SMTP host for password-change OTP email. |
+| `SMTP_PORT` | For SMTP | SMTP port. Defaults to `587`. |
+| `SMTP_USER` | For SMTP | SMTP username. |
+| `SMTP_PASS` | For SMTP | SMTP password. |
+| `SMTP_FROM` | For SMTP | Sender address for OTP emails. |
 
 Frontend variables in `frontend/.env`:
 
@@ -450,6 +480,17 @@ cd backend
 node --test .\src\controllers\auth.controller.test.js
 ```
 
+Password-change backend tests:
+
+```powershell
+cd backend
+node --test .\src\utils\otp.test.js
+node --test .\src\services\email.service.test.js
+node --test .\src\models\passwordChangeOtp.model.test.js
+node --test .\src\routes\auth.routes.structure.test.js
+node --test .\src\controllers\auth.controller.test.js
+```
+
 All backend test files:
 
 ```powershell
@@ -470,6 +511,15 @@ Focused frontend test:
 ```powershell
 cd frontend
 node --test .\src\api\storefrontContentApi.test.js
+```
+
+Password-change frontend tests:
+
+```powershell
+cd frontend
+node --test .\src\api\authApi.structure.test.js
+node --test .\src\components\profile\ChangePasswordPanel.structure.test.js
+node --test .\src\views\ProfileView.structure.test.js
 ```
 
 All frontend test files:
@@ -493,7 +543,7 @@ Get-ChildItem .\src -Recurse -Filter *.test.js | ForEach-Object { node --test $_
 ## Known Gaps
 
 - `backend/package.json` still has a placeholder `npm test` script, so use `node --test` directly.
-- `/profile`, `/unauthorized`, and not-found UI are placeholder-level screens.
+- `/unauthorized` and not-found UI are placeholder-level screens.
 - Runtime database checks require a configured private backend `.env` and reachable PostgreSQL database.
 - Browser walkthrough checks require both servers, seed data, and valid login flow.
 - There is no online payment gateway, shipping-provider integration, Supabase Auth, direct frontend database access, or realtime feature in the current runtime source.
