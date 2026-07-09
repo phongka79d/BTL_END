@@ -169,6 +169,9 @@ All endpoints below are mounted under `/api`. For example, `POST /auth/login` me
 - `POST /auth/register`
 - `POST /auth/login`
 - `GET /auth/me`
+- `POST /auth/forgot-password/request-otp`
+- `POST /auth/forgot-password/verify-otp`
+- `POST /auth/forgot-password/reset`
 - `POST /auth/change-password/request-otp` (authenticated)
 - `POST /auth/change-password/confirm` (authenticated)
 - `GET /users/profile`
@@ -299,10 +302,27 @@ Admin routes require an authenticated admin user.
 6. `auth.controller.js` reloads the user and verifies the current password with bcrypt.
 7. The backend generates a six-digit OTP, stores only the hashed OTP in `PasswordChangeOtp`, invalidates previous active OTPs for the user, and sends the OTP email.
 8. The user enters OTP, new password, and new password confirmation.
-9. The frontend checks that the new password and confirmation match before submitting.
+9. The frontend checks the shared password policy and confirms that the new password and confirmation match before submitting.
 10. The frontend calls `POST /auth/change-password/confirm`.
-11. The backend re-verifies the current password, validates OTP existence, expiry, attempts, and hash match, then updates `User.passwordHash` and marks the OTP used in one Prisma transaction.
+11. The backend re-verifies the current password, validates the shared password policy, validates OTP existence, expiry, attempts, and hash match, then updates `User.passwordHash` and marks the OTP used in one Prisma transaction.
 12. If any check fails, the backend returns an error and does not update `User.passwordHash`.
+
+### Forgot Password with Email OTP
+
+1. The user opens the login page and clicks `Forgot Password?`.
+2. `LoginView.jsx` swaps to `ForgotPasswordForm`.
+3. The user enters an email address and clicks `Send OTP`.
+4. The frontend validates the email format and calls `POST /auth/forgot-password/request-otp`.
+5. The backend looks up the email. If an unblocked account exists, it generates a six-digit OTP, stores only the hashed OTP in `PasswordChangeOtp`, invalidates previous unused OTPs for that user, and sends the OTP email.
+6. The request endpoint returns the same success message whether or not an account exists, so it does not reveal registered emails.
+7. The user enters the OTP and clicks `Verify OTP`.
+8. The frontend calls `POST /auth/forgot-password/verify-otp`.
+9. The backend validates OTP existence, expiry, attempt count, and hash match. Invalid OTPs increment the attempt counter. Expired or over-attempt OTPs are invalidated.
+10. After a valid OTP, the frontend shows `New Password` and `Confirm New Password`.
+11. The frontend checks the shared password policy, confirms that both password fields match, and calls `POST /auth/forgot-password/reset`.
+12. The backend re-validates the OTP, password policy, and password confirmation, then updates `User.passwordHash` and marks the OTP used in one Prisma transaction.
+13. If any check fails, the backend returns an error and does not update `User.passwordHash`.
+14. After success, the frontend shows a toast notification and returns the user to the normal login form.
 
 ### Product Browsing
 
@@ -354,7 +374,8 @@ Important behavior:
 - Payment method is COD only.
 - Completed orders update COD payment status to `paid`.
 - Storefront carousel, navigation, and featured products use `isActive` and `sortOrder`.
-- Password changes require a valid logged-in JWT, current password verification, a valid unexpired email OTP, and matching new password confirmation.
+- Registration, profile password changes, and forgot-password resets all use the shared password policy: at least 12 characters with uppercase, lowercase, number, and special character.
+- Password changes require a valid logged-in JWT, current password verification, a valid unexpired email OTP, shared password policy validation, and matching new password confirmation.
 - Password-change OTPs are hashed, expire after the configured window, track failed attempts, and are invalidated after use.
 
 ## Environment Variables
@@ -485,10 +506,24 @@ Password-change backend tests:
 ```powershell
 cd backend
 node --test .\src\utils\otp.test.js
+node --test .\src\utils\passwordPolicy.test.js
+node --test .\src\middlewares\validation.middleware.test.js
 node --test .\src\services\email.service.test.js
 node --test .\src\models\passwordChangeOtp.model.test.js
 node --test .\src\routes\auth.routes.structure.test.js
 node --test .\src\controllers\auth.controller.test.js
+```
+
+Forgot-password frontend tests:
+
+```powershell
+cd frontend
+node --test .\src\api\authApi.structure.test.js
+node --test .\src\views\LoginView.structure.test.js
+node --test .\src\views\RegisterView.structure.test.js
+node --test .\src\utils\passwordPolicy.test.js
+node --test .\src\components\auth\ForgotPasswordForm.structure.test.js
+node --test .\src\components\profile\ChangePasswordPanel.structure.test.js
 ```
 
 All backend test files:

@@ -10,6 +10,7 @@ import {
   VStack
 } from '@astryxdesign/core';
 import { authApi } from '../../api/authApi';
+import { validatePasswordPolicy } from '../../utils/passwordPolicy';
 import Alert from '../common/Alert';
 
 const EMPTY_VALUES = {
@@ -89,8 +90,12 @@ export const ChangePasswordPanel = () => {
     if (!values.otp.trim()) {
       nextStatus.otp = { type: 'error', message: 'OTP is required' };
     }
-    if (values.newPassword.length < 6) {
-      nextStatus.newPassword = { type: 'error', message: 'New password must be at least 6 characters long' };
+    const passwordPolicy = validatePasswordPolicy(values.newPassword);
+    if (!passwordPolicy.isValid) {
+      nextStatus.newPassword = {
+        type: 'error',
+        message: passwordPolicy.message.replace('Password', 'New password'),
+      };
     }
     if (!values.confirmPassword) {
       nextStatus.confirmPassword = { type: 'error', message: 'Confirm new password is required' };

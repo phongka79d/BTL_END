@@ -22,3 +22,11 @@ test('LoginView maps invalid credentials to clear secure feedback', () => {
   assert.match(source, /'Incorrect email or password'/);
   assert.match(source, /description: getLoginErrorDescription\(message\)/);
 });
+
+test('LoginView exposes forgot password flow with OTP and toast feedback', () => {
+  assert.match(source, /import ForgotPasswordForm from '\.\.\/components\/auth\/ForgotPasswordForm';/);
+  assert.match(source, /Forgot Password\?/);
+  assert.match(source, /setMode\('forgot-password'\)/);
+  assert.match(source, /<ForgotPasswordForm/);
+  assert.match(source, /onBackToLogin=\{\(\) => setMode\('login'\)\}/);
+});

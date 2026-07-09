@@ -18,6 +18,27 @@ router.post(
   authController.login
 );
 
+// POST /api/auth/forgot-password/request-otp
+router.post(
+  '/forgot-password/request-otp',
+  validateBody(['email']),
+  authController.requestForgotPasswordOtp
+);
+
+// POST /api/auth/forgot-password/verify-otp
+router.post(
+  '/forgot-password/verify-otp',
+  validateBody(['email', 'otp']),
+  authController.verifyForgotPasswordOtp
+);
+
+// POST /api/auth/forgot-password/reset
+router.post(
+  '/forgot-password/reset',
+  validateBody(['email', 'otp', 'newPassword', 'confirmPassword']),
+  authController.resetForgotPassword
+);
+
 // POST /api/auth/change-password/request-otp
 router.post(
   '/change-password/request-otp',

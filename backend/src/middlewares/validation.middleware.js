@@ -1,4 +1,5 @@
 const { errorResponse } = require('../utils/response');
+const { validatePasswordPolicy } = require('../utils/passwordPolicy');
 
 /**
  * Factory tạo middleware kiểm tra các trường bắt buộc trong request body.
@@ -34,10 +35,11 @@ const validateBody = (requiredFields) => {
 
     // Validate độ dài password nếu có trường password
     if (body.password && typeof body.password === 'string') {
-      if (body.password.length < 6) {
+      const passwordPolicy = validatePasswordPolicy(body.password);
+      if (!passwordPolicy.isValid) {
         errors.push({
           field: 'password',
-          message: 'Password must be at least 6 characters long'
+          message: passwordPolicy.message
         });
       }
     }

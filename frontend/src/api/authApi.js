@@ -39,4 +39,25 @@ export const authApi = {
    * @returns {Promise<Object>} Password change result
    */
   confirmPasswordChange: (payload) => apiClient.post('/auth/change-password/confirm', payload),
+
+  /**
+   * Request a public forgot password email OTP.
+   * @param {Object} payload - email
+   * @returns {Promise<Object>} OTP request result
+   */
+  requestForgotPasswordOtp: (payload) => apiClient.post('/auth/forgot-password/request-otp', payload),
+
+  /**
+   * Verify a public forgot password OTP before showing reset fields.
+   * @param {Object} payload - email, otp
+   * @returns {Promise<Object>} OTP verification result
+   */
+  verifyForgotPasswordOtp: (payload) => apiClient.post('/auth/forgot-password/verify-otp', payload),
+
+  /**
+   * Reset a password using a valid public forgot password OTP.
+   * @param {Object} payload - email, otp, newPassword, confirmPassword
+   * @returns {Promise<Object>} Password reset result
+   */
+  resetForgotPassword: (payload) => apiClient.post('/auth/forgot-password/reset', payload),
 };

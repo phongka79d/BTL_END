@@ -10,6 +10,7 @@ import {
 } from '@astryxdesign/core';
 import { useAuth } from '../contexts/AuthContext';
 import { useNotification } from '../contexts/NotificationContext';
+import ForgotPasswordForm from '../components/auth/ForgotPasswordForm';
 
 const BLOCKED_ACCOUNT_MESSAGE = 'Your account has been blocked';
 const INVALID_CREDENTIALS_MESSAGE = 'Invalid email or password';
@@ -42,6 +43,7 @@ export const LoginView = () => {
 
   // Form submission and API feedback states
   const [isLoading, setIsLoading] = useState(false);
+  const [mode, setMode] = useState('login');
 
   /**
    * Helper to validate email format
@@ -111,6 +113,15 @@ export const LoginView = () => {
     }
   };
 
+  if (mode === 'forgot-password') {
+    return (
+      <ForgotPasswordForm
+        onBackToLogin={() => setMode('login')}
+        onResetComplete={() => setMode('login')}
+      />
+    );
+  }
+
   return (
     <VStack gap={4} style={{ width: '100%' }}>
       <VStack gap={1} style={{ alignItems: 'center' }}>
@@ -151,6 +162,16 @@ export const LoginView = () => {
             isRequired
             placeholder="••••••••"
           />
+
+          <HStack justify="end">
+            <Button
+              label="Forgot Password?"
+              variant="ghost"
+              type="button"
+              onClick={() => setMode('forgot-password')}
+              isDisabled={isLoading}
+            />
+          </HStack>
 
           <Button
             label={isLoading ? 'Signing In...' : 'Sign In'}

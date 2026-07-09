@@ -47,6 +47,18 @@ const findLatestActiveOtp = async (userId) => {
   });
 };
 
+const findLatestUnusedOtp = async (userId) => {
+  return prisma.passwordChangeOtp.findFirst({
+    where: {
+      userId,
+      usedAt: null,
+    },
+    orderBy: {
+      createdAt: 'desc',
+    },
+  });
+};
+
 const incrementOtpAttempts = async (id) => {
   return prisma.passwordChangeOtp.update({
     where: { id },
@@ -86,6 +98,7 @@ module.exports = {
   invalidateActiveOtps,
   createPasswordChangeOtp,
   findLatestActiveOtp,
+  findLatestUnusedOtp,
   incrementOtpAttempts,
   completePasswordChange,
 };

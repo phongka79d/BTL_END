@@ -11,6 +11,7 @@ import {
 } from '@astryxdesign/core';
 import { useAuth } from '../contexts/AuthContext';
 import { useNotification } from '../contexts/NotificationContext';
+import { validatePasswordPolicy } from '../utils/passwordPolicy';
 
 /**
  * RegisterView Component
@@ -88,9 +89,12 @@ export const RegisterView = () => {
     if (!password) {
       setPasswordStatus({ type: 'error', message: 'Password is required' });
       hasError = true;
-    } else if (password.length < 6) {
-      setPasswordStatus({ type: 'error', message: 'Password must be at least 6 characters' });
-      hasError = true;
+    } else {
+      const passwordPolicy = validatePasswordPolicy(password);
+      if (!passwordPolicy.isValid) {
+        setPasswordStatus({ type: 'error', message: passwordPolicy.message });
+        hasError = true;
+      }
     }
 
     if (!confirmPassword) {
@@ -227,7 +231,7 @@ export const RegisterView = () => {
             status={passwordStatus}
             isDisabled={isLoading}
             isRequired
-            placeholder="At least 6 characters"
+            placeholder="At least 12 characters"
           />
 
           <TextInput

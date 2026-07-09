@@ -4,10 +4,12 @@ const passwordChangeOtpModel = require('../models/passwordChangeOtp.model');
 const emailService = require('../services/email.service');
 const generateToken = require('../utils/generateToken');
 const { compareOtp, generateOtp, getOtpExpiry, hashOtp } = require('../utils/otp');
+const { validatePasswordPolicy } = require('../utils/passwordPolicy');
 const { successResponse, errorResponse } = require('../utils/response');
 
 const SALT_ROUNDS = 10;
 const DEFAULT_PASSWORD_OTP_MAX_ATTEMPTS = 5;
+const FORGOT_PASSWORD_GENERIC_MESSAGE = 'If an account exists, a password reset OTP has been sent';
 
 const getPasswordOtpMaxAttempts = () => {
   const attempts = Number(process.env.PASSWORD_OTP_MAX_ATTEMPTS || DEFAULT_PASSWORD_OTP_MAX_ATTEMPTS);
@@ -41,6 +43,77 @@ const findAuthenticatedUserWithPassword = async (req, res) => {
 
 const verifyCurrentPassword = async (user, currentPassword) => {
   return bcrypt.compare(currentPassword, user.passwordHash);
+};
+
+const normalizeEmail = (email) => String(email || '').trim();
+
+const validateNewPassword = (res, newPassword, confirmPassword) => {
+  if (newPassword !== confirmPassword) {
+    errorResponse(res, 400, 'New password and confirmation password must match');
+    return false;
+  }
+
+  const passwordPolicy = validatePasswordPolicy(newPassword);
+  if (!passwordPolicy.isValid) {
+    errorResponse(res, 400, passwordPolicy.message.replace('Password', 'New password'));
+    return false;
+  }
+
+  return true;
+};
+
+const validateOtpForUser = async ({ user, otp, res, requiredMessage }) => {
+  const passwordChangeOtp = await passwordChangeOtpModel.findLatestUnusedOtp(user.id);
+  if (!passwordChangeOtp) {
+    errorResponse(res, 400, requiredMessage);
+    return null;
+  }
+
+  if (passwordChangeOtp.usedAt) {
+    errorResponse(res, 400, 'OTP has already been used');
+    return null;
+  }
+
+  if (passwordChangeOtp.expiresAt <= new Date()) {
+    await passwordChangeOtpModel.invalidateActiveOtps(user.id);
+    errorResponse(res, 400, 'OTP has expired');
+    return null;
+  }
+
+  const maxAttempts = getPasswordOtpMaxAttempts();
+  if (passwordChangeOtp.attempts >= maxAttempts) {
+    await passwordChangeOtpModel.invalidateActiveOtps(user.id);
+    errorResponse(res, 400, 'Too many OTP attempts. Request a new OTP');
+    return null;
+  }
+
+  const otpMatches = await compareOtp(otp, passwordChangeOtp.otpHash);
+  if (!otpMatches) {
+    await passwordChangeOtpModel.incrementOtpAttempts(passwordChangeOtp.id);
+    errorResponse(res, 400, 'Invalid OTP');
+    return null;
+  }
+
+  return passwordChangeOtp;
+};
+
+const createAndSendPasswordOtp = async (user) => {
+  const otp = generateOtp();
+  const otpHash = await hashOtp(otp);
+  const expiresAt = getOtpExpiry(process.env.PASSWORD_OTP_EXPIRES_MINUTES);
+
+  await passwordChangeOtpModel.createPasswordChangeOtp({
+    userId: user.id,
+    otpHash,
+    expiresAt,
+  });
+
+  await emailService.sendPasswordChangeOtpEmail({
+    to: user.email,
+    otp,
+  });
+
+  return expiresAt;
 };
 
 /**
@@ -182,20 +255,7 @@ const requestPasswordChangeOtp = async (req, res, next) => {
       return errorResponse(res, 400, 'Current password is incorrect');
     }
 
-    const otp = generateOtp();
-    const otpHash = await hashOtp(otp);
-    const expiresAt = getOtpExpiry(process.env.PASSWORD_OTP_EXPIRES_MINUTES);
-
-    await passwordChangeOtpModel.createPasswordChangeOtp({
-      userId: user.id,
-      otpHash,
-      expiresAt,
-    });
-
-    await emailService.sendPasswordChangeOtpEmail({
-      to: user.email,
-      otp,
-    });
+    const expiresAt = await createAndSendPasswordOtp(user);
 
     return successResponse(res, 200, 'Password change OTP sent', {
       expiresAt,
@@ -213,12 +273,8 @@ const confirmPasswordChange = async (req, res, next) => {
   try {
     const { currentPassword, otp, newPassword, confirmPassword } = req.body;
 
-    if (newPassword !== confirmPassword) {
-      return errorResponse(res, 400, 'New password and confirmation password must match');
-    }
-
-    if (typeof newPassword !== 'string' || newPassword.length < 6) {
-      return errorResponse(res, 400, 'New password must be at least 6 characters');
+    if (!validateNewPassword(res, newPassword, confirmPassword)) {
+      return null;
     }
 
     const user = await findAuthenticatedUserWithPassword(req, res);
@@ -270,10 +326,103 @@ const confirmPasswordChange = async (req, res, next) => {
   }
 };
 
+/**
+ * Send email OTP for public forgot password flow.
+ * POST /api/auth/forgot-password/request-otp
+ */
+const requestForgotPasswordOtp = async (req, res, next) => {
+  try {
+    const email = normalizeEmail(req.body.email);
+    const user = await userModel.findByEmail(email);
+
+    if (user && !user.isBlocked) {
+      await createAndSendPasswordOtp(user);
+    }
+
+    return successResponse(res, 200, FORGOT_PASSWORD_GENERIC_MESSAGE);
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * Verify forgot password OTP before showing the new password form.
+ * POST /api/auth/forgot-password/verify-otp
+ */
+const verifyForgotPasswordOtp = async (req, res, next) => {
+  try {
+    const email = normalizeEmail(req.body.email);
+    const { otp } = req.body;
+    const user = await userModel.findByEmail(email);
+
+    if (!user || user.isBlocked) {
+      return errorResponse(res, 400, 'Invalid or expired OTP');
+    }
+
+    const passwordChangeOtp = await validateOtpForUser({
+      user,
+      otp,
+      res,
+      requiredMessage: 'Password reset OTP is required',
+    });
+    if (!passwordChangeOtp) {
+      return null;
+    }
+
+    return successResponse(res, 200, 'OTP verified successfully');
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * Reset password using a valid forgot password OTP.
+ * POST /api/auth/forgot-password/reset
+ */
+const resetForgotPassword = async (req, res, next) => {
+  try {
+    const email = normalizeEmail(req.body.email);
+    const { otp, newPassword, confirmPassword } = req.body;
+
+    if (!validateNewPassword(res, newPassword, confirmPassword)) {
+      return null;
+    }
+
+    const user = await userModel.findByEmail(email);
+    if (!user || user.isBlocked) {
+      return errorResponse(res, 400, 'Invalid or expired OTP');
+    }
+
+    const passwordChangeOtp = await validateOtpForUser({
+      user,
+      otp,
+      res,
+      requiredMessage: 'Password reset OTP is required',
+    });
+    if (!passwordChangeOtp) {
+      return null;
+    }
+
+    const passwordHash = await bcrypt.hash(newPassword, SALT_ROUNDS);
+    await passwordChangeOtpModel.completePasswordChange({
+      otpId: passwordChangeOtp.id,
+      userId: user.id,
+      passwordHash,
+    });
+
+    return successResponse(res, 200, 'Password reset successfully');
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   register,
   login,
   getMe,
   requestPasswordChangeOtp,
-  confirmPasswordChange
+  confirmPasswordChange,
+  requestForgotPasswordOtp,
+  verifyForgotPasswordOtp,
+  resetForgotPassword
 };

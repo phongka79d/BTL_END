@@ -10,6 +10,7 @@ test('change password panel implements current password otp and confirmation flo
   const source = readFileSync(panelUrl, 'utf8');
 
   assert.match(source, /import \{ authApi \} from '\.\.\/\.\.\/api\/authApi';/);
+  assert.match(source, /import \{ validatePasswordPolicy \} from '\.\.\/\.\.\/utils\/passwordPolicy';/);
   assert.match(source, /label="Change Password"/);
   assert.match(source, /label="Current password"/);
   assert.match(source, /type="password"/);
@@ -18,7 +19,9 @@ test('change password panel implements current password otp and confirmation flo
   assert.match(source, /label="OTP"/);
   assert.match(source, /label="New password"/);
   assert.match(source, /label="Confirm new password"/);
+  assert.match(source, /validatePasswordPolicy\(values\.newPassword\)/);
   assert.match(source, /authApi\.confirmPasswordChange/);
   assert.match(source, /New password and confirmation password must match/);
+  assert.doesNotMatch(source, /newPassword\.length < 6|6 characters/);
   assert.doesNotMatch(source, /fetch\(|supabase|PrismaClient|DATABASE_URL/);
 });
