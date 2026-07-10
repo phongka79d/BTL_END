@@ -1,15 +1,24 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Button, Card, Grid, HStack, NumberInput, Text, VStack } from '@astryxdesign/core';
+import { Button, Card, Grid, HStack, NumberInput, Slider, Text, VStack } from '@astryxdesign/core';
 import SearchBar from './SearchBar';
+import { formatPrice } from './productUtils';
+
+// ponytail: Current catalog ceiling; replace with an API-provided bound if prices grow.
+const PRICE_SLIDER_MAX = 2000;
 
 const toNumberValue = (value) => {
-  if (value === '' || value === null || value === undefined) {
-    return null;
-  }
+  if (value === '' || value === null || value === undefined) return null;
 
   const parsed = Number(value);
   return Number.isNaN(parsed) ? null : parsed;
+};
+
+const toSliderValue = (value, fallback) => {
+  const parsed = Number(value);
+  return value === '' || Number.isNaN(parsed)
+    ? fallback
+    : Math.min(Math.max(parsed, 0), PRICE_SLIDER_MAX);
 };
 
 const toCategoryHref = (categoryId, filters) => {
@@ -27,14 +36,19 @@ const toCategoryHref = (categoryId, filters) => {
 const categoryLinkStyle = (isActive) => ({
   display: 'inline-flex',
   alignItems: 'center',
+  gap: 'var(--spacing-2)',
   minHeight: 'var(--spacing-9)',
   paddingInline: 'var(--spacing-3)',
-  border: `1px solid ${isActive ? 'var(--color-border-strong)' : 'var(--color-border-subtle)'}`,
+  border: `1px solid ${isActive ? 'var(--color-accent)' : 'var(--color-border-emphasized)'}`,
   borderRadius: 'var(--radius-full)',
-  background: isActive ? 'var(--color-surface-raised)' : 'var(--color-surface)',
-  color: 'var(--color-text-primary)',
-  textDecoration: 'none'
+  background: isActive ? 'var(--color-accent)' : 'transparent',
+  color: isActive ? 'var(--color-on-accent)' : 'var(--color-text-primary)',
+  fontWeight: isActive ? 600 : 400,
+  textDecoration: 'none',
+  transition: 'background-color var(--duration-short) var(--ease-standard), border-color var(--duration-short) var(--ease-standard)'
 });
+
+const SelectedIndicator = () => <span aria-hidden="true"></span>;
 
 export const ProductFilter = ({
   filters,
@@ -69,7 +83,8 @@ export const ProductFilter = ({
                 aria-current={!filters.categoryId ? 'page' : undefined}
                 style={categoryLinkStyle(!filters.categoryId)}
               >
-                All categories
+                {!filters.categoryId && <SelectedIndicator />}
+                Toàn bộ
               </Link>
               {isCategoriesLoading && (
                 <Text color="secondary" size="supporting">Đang tải danh mục...</Text>
@@ -81,6 +96,7 @@ export const ProductFilter = ({
                   aria-current={filters.categoryId === category.id ? 'page' : undefined}
                   style={categoryLinkStyle(filters.categoryId === category.id)}
                 >
+                  {filters.categoryId === category.id && <SelectedIndicator />}
                   {category.name}
                 </Link>
               ))}
@@ -112,6 +128,26 @@ export const ProductFilter = ({
               isDisabled={isDisabled}
             />
           </Grid>
+
+          <Slider
+            label="Điều chỉnh khoảng giá"
+            isLabelHidden
+            value={[
+              toSliderValue(filters.minPrice, 0),
+              toSliderValue(filters.maxPrice, PRICE_SLIDER_MAX)
+            ]}
+            min={0}
+            max={PRICE_SLIDER_MAX}
+            step={10}
+            valueDisplay="text"
+            formatValue={formatPrice}
+            isDisabled={isDisabled}
+            width="100%"
+            onChange={([minPrice, maxPrice]) => {
+              onFieldChange('minPrice', minPrice === 0 ? '' : String(minPrice));
+              onFieldChange('maxPrice', maxPrice === PRICE_SLIDER_MAX ? '' : String(maxPrice));
+            }}
+          />
 
           <HStack gap={3} style={{ flexWrap: 'wrap' }}>
             <Button

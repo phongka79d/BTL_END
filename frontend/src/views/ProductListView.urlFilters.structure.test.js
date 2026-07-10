@@ -23,3 +23,16 @@ test('ProductFilter renders category filters as links instead of a category sele
   assert.match(productFilterSource, /to=\{toCategoryHref\('', filters\)\}/);
   assert.doesNotMatch(productFilterSource, /label="Category"[\s\S]*<Selector/);
 });
+
+test('ProductFilter visibly indicates the selected category', () => {
+  assert.match(productFilterSource, /aria-current=.*'page'/);
+  assert.match(productFilterSource, /const SelectedIndicator/);
+  assert.match(productFilterSource, /background: isActive \? 'var\(--color-accent\)' : 'transparent'/);
+});
+
+test('ProductFilter keeps both price inputs with one range slider below them', () => {
+  assert.match(productFilterSource, /<NumberInput[\s\S]*label="Giá tối thiểu"/);
+  assert.match(productFilterSource, /<NumberInput[\s\S]*label="Giá tối đa"/);
+  assert.match(productFilterSource, /label="Điều chỉnh khoảng giá"/);
+  assert.match(productFilterSource, /onChange=\{\(\[minPrice, maxPrice\]\)/);
+});
