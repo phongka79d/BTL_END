@@ -193,10 +193,78 @@ const addItem = async (userId, productId, quantity) => {
   });
 };
 
+/**
+ * Atomically update a user's cart item quantities and return the refreshed cart.
+ * @param {string} userId
+ * @param {Array<{id: string, quantity: number}>} updates
+ * @returns {Promise<Object>}
+ */
+const updateItems = async (userId, updates) => {
+  if (!Array.isArray(updates) || updates.length === 0) {
+    throw new Error('Cart item updates are required.');
+  }
+
+  const seenCartItemIds = new Set();
+  const normalizedUpdates = updates.map((update) => {
+    const cartItemId = update?.id;
+    const quantity = Number(update?.quantity);
+
+    if (!cartItemId || typeof cartItemId !== 'string') {
+      throw new Error('Cart item ID must be a string.');
+    }
+    if (seenCartItemIds.has(cartItemId)) {
+      throw new Error('Cart item updates must not contain duplicate IDs.');
+    }
+    if (!Number.isInteger(quantity) || quantity < 1) {
+      throw new Error('Quantity must be an integer of at least 1.');
+    }
+
+    seenCartItemIds.add(cartItemId);
+    return { id: cartItemId, quantity };
+  });
+
+  return prisma.$transaction(async (transaction) => {
+    const cart = await getOrCreateCart(userId, transaction);
+    const cartItemIds = normalizedUpdates.map((update) => update.id);
+    const cartItems = await transaction.cartItem.findMany({
+      where: {
+        cartId: cart.id,
+        id: { in: cartItemIds }
+      },
+      include: {
+        product: true
+      }
+    });
+
+    if (cartItems.length !== normalizedUpdates.length) {
+      throw new Error('One or more cart items were not found.');
+    }
+
+    const cartItemsById = new Map(cartItems.map((cartItem) => [cartItem.id, cartItem]));
+
+    for (const update of normalizedUpdates) {
+      const cartItem = cartItemsById.get(update.id);
+      if (!cartItem.product) {
+        throw new Error(`Product with ID ${cartItem.productId} not found.`);
+      }
+      if (update.quantity > cartItem.product.quantity) {
+        throw new Error(`Requested quantity exceeds available stock (${cartItem.product.quantity})`);
+      }
+
+      await transaction.cartItem.update({
+        where: { id: cartItem.id },
+        data: { quantity: update.quantity }
+      });
+    }
+
+    return getOrCreateCart(userId, transaction);
+  });
+};
+
 module.exports = {
   findByUserId,
   getOrCreateCart,
   calculateSubtotal,
   addItem,
+  updateItems,
 };
-

@@ -8,18 +8,31 @@ const { successResponse, errorResponse } = require('../utils/response');
 const checkout = async (req, res, next) => {
   try {
     const userId = req.user.id;
-    const { shippingAddress } = req.body;
+    const { shippingAddress, cartItemIds } = req.body;
 
     // Validate shippingAddress payload
     if (!shippingAddress || typeof shippingAddress !== 'string' || shippingAddress.trim() === '') {
       return errorResponse(res, 400, 'Shipping address is required');
     }
+    if (cartItemIds !== undefined) {
+      if (!Array.isArray(cartItemIds) || cartItemIds.length === 0) {
+        return errorResponse(res, 400, 'At least one cart item must be selected');
+      }
+      if (cartItemIds.some((cartItemId) => !cartItemId || typeof cartItemId !== 'string')) {
+        return errorResponse(res, 400, 'Selected cart item IDs must be strings');
+      }
+      if (new Set(cartItemIds).size !== cartItemIds.length) {
+        return errorResponse(res, 400, 'Selected cart item IDs must be unique');
+      }
+    }
 
-    const order = await orderModel.checkout(userId, shippingAddress.trim());
+    const order = await orderModel.checkout(userId, shippingAddress.trim(), cartItemIds);
     return successResponse(res, 201, 'Order created successfully', order);
   } catch (error) {
     if (
       error.message === 'Cart is empty.' ||
+      error.message === 'No cart items selected.' ||
+      error.message === 'Selected cart items are unavailable.' ||
       error.message === 'Shipping address is required.' ||
       error.message.includes('exceeds available stock')
     ) {

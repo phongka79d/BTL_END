@@ -15,8 +15,9 @@ const findById = async (id) => {
 /**
  * Perform atomic checkout transaction:
  * 1. Load the user's cart with items and product data.
- * 2. Reject missing/empty carts before creating any order rows.
- * 3. Validate every cart item quantity against current product quantity.
+ * 2. Select the requested cart items, or every item for backwards-compatible checkout.
+ * 3. Reject missing/empty selections before creating any order rows.
+ * 4. Validate every selected cart item quantity against current product quantity.
  * 4. Calculate total from cart item unitPrice times quantity using Decimal-safe Prisma values.
  * 5. Create the Order with status "pending" and the provided shippingAddress.
  * 6. Create matching OrderDetail records.
@@ -26,10 +27,11 @@ const findById = async (id) => {
  * 10. Return the order shape with details, product summaries, and payment data.
  * 
  * @param {string} userId 
- * @param {string} shippingAddress 
+ * @param {string} shippingAddress
+ * @param {string[]|undefined} cartItemIds
  * @returns {Promise<Object>}
  */
-const checkout = async (userId, shippingAddress) => {
+const checkout = async (userId, shippingAddress, cartItemIds) => {
   if (!shippingAddress || typeof shippingAddress !== 'string' || shippingAddress.trim() === '') {
     throw new Error('Shipping address is required.');
   }
@@ -52,9 +54,21 @@ const checkout = async (userId, shippingAddress) => {
       throw new Error('Cart is empty.');
     }
 
-    // 3. Validate every cart item quantity against current product quantity and calculate total
+    const selectedCartItemIds = cartItemIds ? new Set(cartItemIds) : null;
+    const selectedItems = selectedCartItemIds
+      ? cart.items.filter((item) => selectedCartItemIds.has(item.id))
+      : cart.items;
+
+    if (selectedCartItemIds && selectedItems.length !== selectedCartItemIds.size) {
+      throw new Error('Selected cart items are unavailable.');
+    }
+    if (selectedItems.length === 0) {
+      throw new Error('No cart items selected.');
+    }
+
+    // 3. Validate every selected cart item quantity against current product quantity and calculate total
     let total = new Prisma.Decimal(0);
-    for (const item of cart.items) {
+    for (const item of selectedItems) {
       if (!item.product) {
         throw new Error(`Product with ID ${item.productId} not found.`);
       }
@@ -78,7 +92,7 @@ const checkout = async (userId, shippingAddress) => {
     });
 
     // 5. Create matching OrderDetail records and decrement product stock
-    for (const item of cart.items) {
+    for (const item of selectedItems) {
       await tx.orderDetail.create({
         data: {
           orderId: order.id,
@@ -111,7 +125,10 @@ const checkout = async (userId, shippingAddress) => {
 
     // 7. Delete cart items only after order/detail/payment/stock writes are ready to commit
     await tx.cartItem.deleteMany({
-      where: { cartId: cart.id }
+      where: {
+        cartId: cart.id,
+        id: { in: selectedItems.map((item) => item.id) }
+      }
     });
 
     // 8. Return an order shape that includes details, product summaries, and payment data for the controller response
@@ -373,4 +390,3 @@ module.exports = {
   listForAdmin,
   updateStatus,
 };
-

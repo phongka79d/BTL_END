@@ -107,7 +107,7 @@ export const CartProvider = ({ children }) => {
     refreshCart().catch(() => {});
   }, [authLoading, clearCart, isAuthenticated, refreshCart]);
 
-  const runCartMutation = useCallback(async (mutation) => {
+  const runCartMutation = useCallback(async (mutation, options = {}) => {
     if (authLoading) {
       const message = 'Cart is not ready yet';
       setError(message);
@@ -125,7 +125,17 @@ export const CartProvider = ({ children }) => {
 
     try {
       const response = await mutation();
-      const nextCart = await refreshCart();
+      const responseData = getResponseData(response);
+      const returnedCart = options.useReturnedCart ? responseData?.cart : null;
+      const nextCart = returnedCart
+        ? normalizeCart(returnedCart)
+        : await refreshCart();
+
+      if (returnedCart) {
+        requestIdRef.current += 1;
+        setCart(nextCart);
+      }
+
       return { success: true, data: nextCart, response };
     } catch (err) {
       const message = getErrorMessage(err, 'Unable to update cart');
@@ -142,6 +152,13 @@ export const CartProvider = ({ children }) => {
 
   const updateItem = useCallback((cartItemId, quantity) => {
     return runCartMutation(() => cartApi.updateCartItem(cartItemId, quantity));
+  }, [runCartMutation]);
+
+  const updateItems = useCallback((items) => {
+    return runCartMutation(
+      () => cartApi.updateCartItems(items),
+      { useReturnedCart: true }
+    );
   }, [runCartMutation]);
 
   const removeItem = useCallback((cartItemId) => {
@@ -164,6 +181,7 @@ export const CartProvider = ({ children }) => {
     refreshCart,
     addItem,
     updateItem,
+    updateItems,
     removeItem,
     clearCart
   }), [
@@ -176,7 +194,8 @@ export const CartProvider = ({ children }) => {
     loading,
     refreshCart,
     removeItem,
-    updateItem
+    updateItem,
+    updateItems
   ]);
 
   return (

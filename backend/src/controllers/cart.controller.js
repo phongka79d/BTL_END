@@ -124,6 +124,35 @@ const updateCartItem = async (req, res, next) => {
 };
 
 /**
+ * Update multiple cart item quantities in one request.
+ * PUT /api/cart/items
+ */
+const updateCartItems = async (req, res, next) => {
+  try {
+    const userId = req.user.id;
+    const { items } = req.body;
+    const cart = await cartModel.updateItems(userId, items);
+
+    return successResponse(res, 200, 'Cart items updated successfully', { cart });
+  } catch (error) {
+    if (error.message && error.message.includes('not found')) {
+      return errorResponse(res, 404, error.message);
+    }
+    if (
+      error.message && (
+        error.message.includes('Cart item updates') ||
+        error.message.includes('Cart item ID') ||
+        error.message.includes('Quantity must be') ||
+        error.message.includes('exceeds available stock')
+      )
+    ) {
+      return errorResponse(res, 400, error.message);
+    }
+    next(error);
+  }
+};
+
+/**
  * Remove item from cart
  * DELETE /api/cart/items/:id
  */
@@ -159,6 +188,7 @@ const deleteCartItem = async (req, res, next) => {
 module.exports = {
   getCart,
   addCartItem,
+  updateCartItems,
   updateCartItem,
   deleteCartItem
 };

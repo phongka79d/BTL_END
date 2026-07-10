@@ -1,10 +1,8 @@
 import React from 'react';
 import { Button, Card, Heading, HStack, Text, VStack } from '@astryxdesign/core';
-import { useAuth } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 
-export const UnauthorizedView = () => {
-  const { isAuthenticated, isAdmin } = useAuth();
+export const NotFoundView = () => {
   const navigate = useNavigate();
 
   return (
@@ -20,25 +18,18 @@ export const UnauthorizedView = () => {
       <Card padding={6} style={{ width: '100%' }}>
         <VStack gap={4} style={{ alignItems: 'center', textAlign: 'center' }}>
           <Text size="supporting" color="accent" weight="semibold">
-            Access restricted
+            404 · Page not found
           </Text>
           <VStack gap={2} style={{ alignItems: 'center' }}>
-            <Heading level={1}>You do not have permission to view this page</Heading>
+            <Heading level={1}>We could not find that page</Heading>
             <Text color="secondary">
-              This area is available only to accounts with the required role.
-              Choose a safe destination below to continue.
+              The address may be incorrect, or the page may have moved. Use one of
+              the options below to continue browsing tsshop.
             </Text>
           </VStack>
           <HStack gap={3} style={{ justifyContent: 'center', flexWrap: 'wrap' }}>
             <Button label="Back to store" variant="primary" onClick={() => navigate('/')} />
-            <Button
-              label={isAuthenticated ? 'My profile' : 'Sign in'}
-              variant="secondary"
-              onClick={() => navigate(isAuthenticated ? '/profile' : '/login')}
-            />
-            {isAdmin && (
-              <Button label="Admin dashboard" variant="secondary" onClick={() => navigate('/admin')} />
-            )}
+            <Button label="Browse products" variant="secondary" onClick={() => navigate('/products')} />
           </HStack>
         </VStack>
       </Card>
@@ -46,4 +37,4 @@ export const UnauthorizedView = () => {
   );
 };
 
-export default UnauthorizedView;
+export default NotFoundView;

@@ -1,5 +1,5 @@
-import React, { useCallback, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useCallback, useMemo, useState } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import {
   Button,
   EmptyState,
@@ -70,7 +70,34 @@ const CheckoutSkeleton = () => (
 
 export const CheckoutView = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { items, subtotal, loading, error, refreshCart } = useCart();
+
+  const selectedCartItemIds = useMemo(() => {
+    return Array.isArray(location.state?.cartItemIds)
+      ? location.state.cartItemIds
+      : null;
+  }, [location.state]);
+
+  const selectedItems = useMemo(() => {
+    if (!selectedCartItemIds) {
+      return items;
+    }
+
+    const selectedItemIdSet = new Set(selectedCartItemIds);
+    return items.filter((item) => selectedItemIdSet.has(item.id));
+  }, [items, selectedCartItemIds]);
+
+  const selectedSubtotal = useMemo(() => {
+    if (!selectedCartItemIds) {
+      return subtotal;
+    }
+
+    return selectedItems.reduce(
+      (total, item) => total + (Number(item.unitPrice) || 0) * (Number(item.quantity) || 0),
+      0
+    );
+  }, [selectedCartItemIds, selectedItems, subtotal]);
 
   const [values, setValues] = useState(INITIAL_VALUES);
   const [errors, setErrors] = useState({});
@@ -137,7 +164,8 @@ export const CheckoutView = () => {
         fullName: values.fullName.trim(),
         phone: values.phone.trim(),
         shippingAddress: values.shippingAddress.trim(),
-        note: values.note.trim() || undefined
+        note: values.note.trim() || undefined,
+        cartItemIds: selectedItems.map((item) => item.id)
       };
 
       const response = await orderApi.createOrder(payload);
@@ -161,7 +189,7 @@ export const CheckoutView = () => {
     } finally {
       setIsSubmitting(false);
     }
-  }, [refreshCart, values]);
+  }, [refreshCart, selectedItems, values]);
 
   const handleViewOrder = useCallback(() => {
     if (placedOrderId) {
@@ -245,6 +273,32 @@ export const CheckoutView = () => {
     );
   }
 
+  if (!selectedItems.length) {
+    return (
+      <VStack
+        style={{
+          width: '100%',
+          maxWidth: '800px',
+          marginInline: 'auto',
+          paddingBlock: 'var(--spacing-6)',
+          gap: 'var(--spacing-4)'
+        }}
+      >
+        <EmptyState
+          title="No products selected"
+          description="Return to your cart and select at least one product before checkout."
+          icon={<CartIcon />}
+          actions={(
+            <HStack gap={3} style={{ justifyContent: 'center', flexWrap: 'wrap' }}>
+              <Button label="Return to cart" variant="primary" onClick={() => navigate('/cart')} />
+              <Button label="Browse products" variant="secondary" onClick={() => navigate('/products')} />
+            </HStack>
+          )}
+        />
+      </VStack>
+    );
+  }
+
   return (
     <VStack
       style={{
@@ -286,8 +340,8 @@ export const CheckoutView = () => {
         />
 
         <CheckoutOrderSummary
-          items={items}
-          subtotal={subtotal}
+          items={selectedItems}
+          subtotal={selectedSubtotal}
           isSubmitting={isSubmitting}
           onSubmit={handleSubmit}
         />

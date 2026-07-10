@@ -25,6 +25,7 @@ import OrderHistoryView from '../views/OrderHistoryView';
 import OrderDetailView from '../views/OrderDetailView';
 import ProfileView from '../views/ProfileView';
 import UnauthorizedView from '../views/UnauthorizedView';
+import NotFoundView from '../views/NotFoundView';
 
 /**
  * Route guard for authenticated users (Customer/Admin).
@@ -133,8 +134,7 @@ export const AppRoutes = () => {
           <Route path="/profile" element={<ProfileView />} />
         </Route>
 
-        {/* Fallback inside MainLayout */}
-        <Route path="*" element={<div>Page Not Found (Placeholder)</div>} />
+        <Route path="*" element={<NotFoundView />} />
       </Route>
 
       {/* Guest Only Routes: Wrapped in AuthLayout */}

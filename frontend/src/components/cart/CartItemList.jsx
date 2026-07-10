@@ -1,5 +1,5 @@
 import React from 'react';
-import { Button, Card, EmptyState, Grid, Heading, HStack, Skeleton, Text, VStack } from '@astryxdesign/core';
+import { Button, Card, CheckboxInput, EmptyState, Grid, Heading, HStack, Skeleton, Text, VStack } from '@astryxdesign/core';
 import Alert from '../common/Alert';
 import { CartIcon } from '../common/LayoutIcons';
 import CartItem from './CartItem';
@@ -7,7 +7,7 @@ import CartItem from './CartItem';
 const CartItemSkeleton = () => (
   <Card padding={4}>
     <VStack gap={4}>
-      <Grid columns={{ minWidth: 220, max: 2 }} gap={4} style={{ alignItems: 'start' }}>
+      <Grid columns={{ minWidth: 220, max: 3 }} gap={4} style={{ alignItems: 'center' }}>
         <HStack gap={3} style={{ alignItems: 'flex-start' }}>
           <VStack
             style={{
@@ -45,11 +45,23 @@ export const CartItemList = ({
   onRetry,
   onBrowseProducts,
   onQuantityChange,
+  draftQuantities = {},
+  selectedItemIds = [],
+  onSelectAll,
+  onSelectionChange,
   onRemove,
   pendingItemId = null,
   pendingAction = null,
   isBusy = false
 }) => {
+  const selectedItemIdSet = new Set(selectedItemIds);
+  const selectedProductCount = items.filter((item) => selectedItemIdSet.has(item.id)).length;
+  const selectAllValue = selectedProductCount === 0
+    ? false
+    : selectedProductCount === items.length
+      ? true
+      : 'indeterminate';
+
   if (isLoading) {
     return (
       <VStack gap={4}>
@@ -97,9 +109,18 @@ export const CartItemList = ({
   return (
     <VStack gap={4}>
       <VStack gap={1}>
-        <Heading level={2}>Cart items</Heading>
+        <HStack gap={3} style={{ alignItems: 'center', flexWrap: 'wrap' }}>
+          <CheckboxInput
+            label="Select all products"
+            value={selectAllValue}
+            onChange={onSelectAll}
+            size="sm"
+            isDisabled={isBusy}
+          />
+          <Heading level={2}>Cart items</Heading>
+        </HStack>
         <Text color="secondary">
-          Update quantities or remove items. The backend will refresh the subtotal after each change.
+          {selectedProductCount} of {items.length} products selected for checkout. Save quantity changes before checkout.
         </Text>
       </VStack>
 
@@ -108,6 +129,9 @@ export const CartItemList = ({
           <CartItem
             key={item.id}
             item={item}
+            quantity={draftQuantities[item.id] ?? item.quantity}
+            isSelected={selectedItemIdSet.has(item.id)}
+            onSelectionChange={(isSelected) => onSelectionChange?.(item.id, isSelected)}
             onQuantityChange={onQuantityChange}
             onRemove={onRemove}
             isBusy={isBusy && pendingItemId === item.id}

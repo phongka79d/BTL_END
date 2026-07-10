@@ -12,6 +12,9 @@ router.get('/', cartController.getCart);
 // POST /api/cart/items
 router.post('/items', cartController.addCartItem);
 
+// PUT /api/cart/items
+router.put('/items', cartController.updateCartItems);
+
 // PUT /api/cart/items/:id
 router.put('/items/:id', cartController.updateCartItem);
 
