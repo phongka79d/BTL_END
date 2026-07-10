@@ -1,7 +1,7 @@
 const prisma = require('../config/database');
 
 /**
- * Calculate subtotal from cart items and captured unit prices
+ * Tính tạm tính từ các mục trong giỏ hàng và đơn giá đã chốt.
  * @param {Array<Object>} items 
  * @returns {string}
  */
@@ -15,7 +15,7 @@ const calculateSubtotal = (items) => {
 };
 
 /**
- * Find cart by User ID with items, products, and subtotal
+ * Tìm giỏ hàng theo ID người dùng, kèm các mục, sản phẩm và tạm tính.
  * @param {string} userId 
  * @returns {Promise<Object|null>}
  */
@@ -47,9 +47,9 @@ const findByUserId = async (userId) => {
 };
 
 /**
- * Fetch or create the authenticated user's cart
+ * Lấy hoặc tạo giỏ hàng của người dùng đã xác thực.
  * @param {string} userId 
- * @param {Object} [tx] Optional prisma transaction client
+ * @param {Object} [tx] Client giao dịch Prisma tùy chọn.
  * @returns {Promise<Object>}
  */
 const getOrCreateCart = async (userId, tx = prisma) => {
@@ -100,12 +100,12 @@ const getOrCreateCart = async (userId, tx = prisma) => {
 };
 
 /**
- * Add product to cart, creating cart if needed, incrementing quantity if existing.
- * Captured unitPrice is captured from current product price when first added.
+ * Thêm sản phẩm vào giỏ hàng, tạo giỏ khi cần và tăng số lượng nếu đã tồn tại.
+ * `unitPrice` được chốt theo giá sản phẩm hiện tại ở lần thêm đầu tiên.
  * @param {string} userId 
  * @param {string} productId 
  * @param {number} quantity 
- * @returns {Promise<Object>} The added/updated cart item
+ * @returns {Promise<Object>} Mục giỏ hàng đã được thêm hoặc cập nhật.
  */
 const addItem = async (userId, productId, quantity) => {
   if (!productId || typeof productId !== 'string') {
@@ -118,10 +118,10 @@ const addItem = async (userId, productId, quantity) => {
   }
 
   return prisma.$transaction(async (tx) => {
-    // 1. Fetch or create cart
+    // 1. Lấy hoặc tạo giỏ hàng.
     const cart = await getOrCreateCart(userId, tx);
 
-    // 2. Fetch the product to capture current price and verify stock
+    // 2. Lấy sản phẩm để chốt giá hiện tại và kiểm tra tồn kho.
     const product = await tx.product.findUnique({
       where: { id: productId }
     });
@@ -130,7 +130,7 @@ const addItem = async (userId, productId, quantity) => {
       throw new Error('Product not found');
     }
 
-    // 3. Find if cart item already exists
+    // 3. Kiểm tra mục giỏ hàng đã tồn tại hay chưa.
     const existingItem = await tx.cartItem.findUnique({
       where: {
         cartId_productId: {
@@ -142,13 +142,13 @@ const addItem = async (userId, productId, quantity) => {
 
     const newQuantity = existingItem ? (existingItem.quantity + parsedQuantity) : parsedQuantity;
 
-    // Reject total cart quantity above product stock
+    // Từ chối khi tổng số lượng trong giỏ vượt quá tồn kho sản phẩm.
     if (newQuantity > product.quantity) {
       throw new Error(`Requested quantity exceeds available stock (${product.quantity})`);
     }
 
     if (existingItem) {
-      // Increment existing quantity
+      // Tăng số lượng của mục đã có.
       return tx.cartItem.update({
         where: { id: existingItem.id },
         data: {
@@ -168,7 +168,7 @@ const addItem = async (userId, productId, quantity) => {
         }
       });
     } else {
-      // Create new cart item and capture product price as unitPrice
+      // Tạo mục giỏ hàng mới và chốt giá sản phẩm làm `unitPrice`.
       return tx.cartItem.create({
         data: {
           cartId: cart.id,
@@ -194,7 +194,7 @@ const addItem = async (userId, productId, quantity) => {
 };
 
 /**
- * Atomically update a user's cart item quantities and return the refreshed cart.
+ * Cập nhật nguyên tử số lượng các mục trong giỏ và trả về giỏ đã làm mới.
  * @param {string} userId
  * @param {Array<{id: string, quantity: number}>} updates
  * @returns {Promise<Object>}

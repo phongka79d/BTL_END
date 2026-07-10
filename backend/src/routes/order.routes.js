@@ -4,7 +4,7 @@ const orderController = require('../controllers/order.controller');
 const { protect } = require('../middlewares/auth.middleware');
 const { admin } = require('../middlewares/admin.middleware');
 
-// Customer routes — all require authentication
+// Route khách hàng — tất cả đều yêu cầu xác thực.
 // POST /api/orders
 router.post('/', protect, orderController.checkout);
 
@@ -14,7 +14,7 @@ router.get('/my-orders', protect, orderController.getMyOrders);
 // GET /api/orders/:id
 router.get('/:id', protect, orderController.getOrderById);
 
-// Admin routes — require authentication and admin role
+// Route quản trị — yêu cầu xác thực và vai trò quản trị viên.
 // GET /api/admin/orders
 router.get('/', protect, admin, orderController.getAdminOrders);
 

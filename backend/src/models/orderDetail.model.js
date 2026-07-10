@@ -1,7 +1,7 @@
 const prisma = require('../config/database');
 
 /**
- * Find order detail by ID
+ * Tìm chi tiết đơn hàng theo ID.
  * @param {string} id 
  * @returns {Promise<Object|null>}
  */

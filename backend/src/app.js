@@ -8,11 +8,11 @@ const { successResponse } = require('./utils/response');
 
 const app = express();
 
-// Configure CORS and JSON body parsing
+// Cấu hình CORS và phân tích body JSON.
 app.use(cors());
 app.use(express.json());
 
-// Safe health/root JSON response for startup verification
+// Phản hồi JSON an toàn tại health/root để kiểm tra khởi động.
 app.get('/api/health', (req, res) => {
   successResponse(res, 200, 'Backend is healthy', {
     uptime: process.uptime(),
@@ -20,20 +20,20 @@ app.get('/api/health', (req, res) => {
   });
 });
 
-// Mount routes under /api
+// Gắn các route dưới tiền tố /api.
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/admin/users', userRoutes);
 app.use('/api', apiRoutes);
 
-// Register not-found middleware
+// Đăng ký middleware xử lý route không tồn tại.
 app.use((req, res, next) => {
   const error = new Error(`Not Found - ${req.originalUrl}`);
   error.status = 404;
   next(error);
 });
 
-// Global Error Handler
+// Middleware xử lý lỗi toàn cục.
 app.use(errorMiddleware);
 
 module.exports = app;

@@ -1,7 +1,7 @@
 const prisma = require('../config/database');
 
 /**
- * Find payment by Order ID
+ * Tìm thanh toán theo ID đơn hàng.
  * @param {string} orderId 
  * @returns {Promise<Object|null>}
  */
@@ -12,15 +12,15 @@ const findByOrderId = async (orderId) => {
 };
 
 /**
- * Get an existing payment for the order, or create a new COD payment if none exists.
- * Returns the payment record.
+ * Lấy thanh toán hiện có của đơn hàng hoặc tạo thanh toán COD mới nếu chưa tồn tại.
+ * Trả về bản ghi thanh toán.
  * 
  * @param {string} orderId 
- * @returns {Promise<Object>} Payment record
+ * @returns {Promise<Object>} Bản ghi thanh toán.
  */
 const createOrGetCODPayment = async (orderId) => {
   return prisma.$transaction(async (tx) => {
-    // 1. Check if payment already exists
+    // 1. Kiểm tra thanh toán đã tồn tại hay chưa.
     const existingPayment = await tx.payment.findUnique({
       where: { orderId }
     });
@@ -29,7 +29,7 @@ const createOrGetCODPayment = async (orderId) => {
       return existingPayment;
     }
 
-    // 2. Check if the order exists and is valid
+    // 2. Kiểm tra đơn hàng tồn tại và hợp lệ.
     const order = await tx.order.findUnique({
       where: { id: orderId }
     });
@@ -38,7 +38,7 @@ const createOrGetCODPayment = async (orderId) => {
       throw new Error(`Order with ID ${orderId} not found.`);
     }
 
-    // Create a new COD payment
+    // Tạo thanh toán COD mới.
     return tx.payment.create({
       data: {
         orderId,

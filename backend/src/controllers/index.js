@@ -1,1 +1,1 @@
-// Placeholder for controllers
+// Tệp chờ để bổ sung controller dùng chung.

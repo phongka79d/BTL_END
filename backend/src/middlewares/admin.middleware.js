@@ -1,8 +1,8 @@
 const { errorResponse } = require('../utils/response');
 
 /**
- * Middleware to authorize admin users
- * Requires req.user to be set (by protect middleware) and user.role to be 'admin'.
+ * Middleware cấp quyền cho người dùng quản trị.
+ * Yêu cầu `req.user` đã được gán bởi middleware `protect` và `user.role` là `admin`.
  */
 const admin = (req, res, next) => {
   if (req.user && req.user.role === 'admin') {

@@ -1,7 +1,7 @@
 const prisma = require('../config/database');
 
 /**
- * Find cart item by ID
+ * Tìm mục giỏ hàng theo ID.
  * @param {string} id 
  * @returns {Promise<Object|null>}
  */
@@ -12,11 +12,11 @@ const findById = async (id) => {
 };
 
 /**
- * Update cart item quantity scoped to the user's cart
+ * Cập nhật số lượng mục giỏ hàng trong phạm vi giỏ của người dùng.
  * @param {string} userId 
  * @param {string} cartItemId 
  * @param {number} quantity 
- * @returns {Promise<Object>} The updated cart item
+ * @returns {Promise<Object>} Mục giỏ hàng đã được cập nhật.
  */
 const updateQuantity = async (userId, cartItemId, quantity) => {
   const parsedQuantity = parseInt(quantity, 10);
@@ -40,7 +40,7 @@ const updateQuantity = async (userId, cartItemId, quantity) => {
     throw new Error('Unauthorized access to cart item');
   }
 
-  // Reject total cart quantity above product stock
+  // Từ chối khi tổng số lượng trong giỏ vượt quá tồn kho sản phẩm.
   if (parsedQuantity > cartItem.product.quantity) {
     throw new Error(`Requested quantity exceeds available stock (${cartItem.product.quantity})`);
   }
@@ -64,10 +64,10 @@ const updateQuantity = async (userId, cartItemId, quantity) => {
 };
 
 /**
- * Remove cart item scoped to the user's cart
+ * Xóa mục giỏ hàng trong phạm vi giỏ của người dùng.
  * @param {string} userId 
  * @param {string} cartItemId 
- * @returns {Promise<Object>} The deleted cart item
+ * @returns {Promise<Object>} Mục giỏ hàng đã bị xóa.
  */
 const removeItem = async (userId, cartItemId) => {
   const cartItem = await prisma.cartItem.findUnique({
@@ -107,4 +107,3 @@ module.exports = {
   updateQuantity,
   removeItem,
 };
-

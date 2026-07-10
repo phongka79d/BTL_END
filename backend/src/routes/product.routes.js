@@ -4,11 +4,11 @@ const productController = require('../controllers/product.controller');
 const { protect } = require('../middlewares/auth.middleware');
 const { admin } = require('../middlewares/admin.middleware');
 
-// Public routes
+// Route công khai.
 router.get('/', productController.getProducts);
 router.get('/:id', productController.getProductById);
 
-// Admin routes (mutations)
+// Route thay đổi dữ liệu dành cho quản trị viên.
 router.post('/', protect, admin, productController.createProduct);
 router.put('/:id', protect, admin, productController.updateProduct);
 router.delete('/:id', protect, admin, productController.deleteProduct);

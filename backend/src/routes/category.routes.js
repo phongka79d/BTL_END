@@ -4,10 +4,10 @@ const categoryController = require('../controllers/category.controller');
 const { protect } = require('../middlewares/auth.middleware');
 const { admin } = require('../middlewares/admin.middleware');
 
-// Public routes
+// Route công khai.
 router.get('/', categoryController.getCategories);
 
-// Admin routes (mutations)
+// Route thay đổi dữ liệu dành cho quản trị viên.
 router.post('/', protect, admin, categoryController.createCategory);
 router.put('/:id', protect, admin, categoryController.updateCategory);
 router.delete('/:id', protect, admin, categoryController.deleteCategory);

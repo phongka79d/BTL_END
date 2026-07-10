@@ -3,7 +3,7 @@ const router = express.Router();
 const cartController = require('../controllers/cart.controller');
 const { protect } = require('../middlewares/auth.middleware');
 
-// Apply auth middleware to every cart route
+// Áp dụng middleware xác thực cho mọi route giỏ hàng.
 router.use(protect);
 
 // GET /api/cart

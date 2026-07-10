@@ -3,9 +3,9 @@ const userModel = require('../models/user.model');
 const { errorResponse } = require('../utils/response');
 
 /**
- * Middleware to authenticate requests via JWT
- * Reads 'Authorization: Bearer <token>' header, verifies it,
- * loads the user without passwordHash, and attaches it to req.user.
+ * Middleware xác thực request bằng JWT.
+ * Đọc header `Authorization: Bearer <token>`, xác minh token,
+ * tải người dùng không kèm `passwordHash` và gán vào `req.user`.
  */
 const protect = async (req, res, next) => {
   try {
@@ -27,10 +27,10 @@ const protect = async (req, res, next) => {
       return errorResponse(res, 500, 'JWT secret is not configured');
     }
 
-    // Verify token
+    // Xác minh token.
     const decoded = jwt.verify(token, secret);
 
-    // Load user from database
+    // Tải người dùng từ database.
     const user = await userModel.findById(decoded.id);
     if (!user) {
       return errorResponse(res, 401, 'Not authorized, user not found');
@@ -40,7 +40,7 @@ const protect = async (req, res, next) => {
       return errorResponse(res, 403, 'Your account has been blocked');
     }
 
-    // Remove passwordHash from user object before attaching to req
+    // Loại bỏ `passwordHash` trước khi gán người dùng vào request.
     const { passwordHash, ...userWithoutPassword } = user;
     req.user = userWithoutPassword;
 

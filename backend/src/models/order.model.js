@@ -2,7 +2,7 @@ const prisma = require('../config/database');
 const { Prisma } = require('@prisma/client');
 
 /**
- * Find order by ID
+ * Tìm đơn hàng theo ID.
  * @param {string} id 
  * @returns {Promise<Object|null>}
  */
@@ -13,18 +13,18 @@ const findById = async (id) => {
 };
 
 /**
- * Perform atomic checkout transaction:
- * 1. Load the user's cart with items and product data.
- * 2. Select the requested cart items, or every item for backwards-compatible checkout.
- * 3. Reject missing/empty selections before creating any order rows.
- * 4. Validate every selected cart item quantity against current product quantity.
- * 4. Calculate total from cart item unitPrice times quantity using Decimal-safe Prisma values.
- * 5. Create the Order with status "pending" and the provided shippingAddress.
- * 6. Create matching OrderDetail records.
- * 7. Decrement each product's quantity.
- * 8. Create one Payment with paymentMethod "COD", paymentStatus "unpaid", amount equal to the order total, and paymentDate null.
- * 9. Delete cart items.
- * 10. Return the order shape with details, product summaries, and payment data.
+ * Thực hiện giao dịch checkout nguyên tử:
+ * 1. Tải giỏ hàng của người dùng cùng các mục và dữ liệu sản phẩm.
+ * 2. Chọn các mục giỏ hàng được yêu cầu, hoặc toàn bộ mục để tương thích ngược.
+ * 3. Từ chối lựa chọn thiếu/rỗng trước khi tạo bất kỳ dòng đơn hàng nào.
+ * 4. Kiểm tra số lượng từng mục được chọn so với tồn kho sản phẩm hiện tại.
+ * 5. Tính tổng từ `unitPrice` nhân số lượng bằng giá trị Prisma Decimal an toàn.
+ * 6. Tạo `Order` có trạng thái "pending" và địa chỉ giao hàng được cung cấp.
+ * 7. Tạo các bản ghi `OrderDetail` tương ứng.
+ * 8. Giảm số lượng tồn của từng sản phẩm.
+ * 9. Tạo một `Payment` COD chưa thanh toán, có tổng tiền đơn hàng và `paymentDate` là null.
+ * 10. Xóa các mục giỏ hàng đã đặt.
+ * 11. Trả về đơn hàng gồm chi tiết, tóm tắt sản phẩm và dữ liệu thanh toán.
  * 
  * @param {string} userId 
  * @param {string} shippingAddress
@@ -37,7 +37,7 @@ const checkout = async (userId, shippingAddress, cartItemIds) => {
   }
 
   return prisma.$transaction(async (tx) => {
-    // 1. Load the user's cart with items and product data inside the transaction
+    // 1. Tải giỏ hàng, các mục và dữ liệu sản phẩm bên trong giao dịch.
     const cart = await tx.cart.findUnique({
       where: { userId },
       include: {
@@ -49,7 +49,7 @@ const checkout = async (userId, shippingAddress, cartItemIds) => {
       }
     });
 
-    // 2. Reject missing/empty carts before creating any order rows
+    // 2. Từ chối giỏ hàng thiếu/rỗng trước khi tạo bất kỳ dòng đơn hàng nào.
     if (!cart || !cart.items || cart.items.length === 0) {
       throw new Error('Cart is empty.');
     }
@@ -66,7 +66,7 @@ const checkout = async (userId, shippingAddress, cartItemIds) => {
       throw new Error('No cart items selected.');
     }
 
-    // 3. Validate every selected cart item quantity against current product quantity and calculate total
+    // 3. Kiểm tra số lượng từng mục được chọn so với tồn kho hiện tại và tính tổng.
     let total = new Prisma.Decimal(0);
     for (const item of selectedItems) {
       if (!item.product) {
@@ -81,7 +81,7 @@ const checkout = async (userId, shippingAddress, cartItemIds) => {
       total = total.plus(itemPrice.times(itemQuantity));
     }
 
-    // 4. Create the Order with status: "pending" and the provided shippingAddress
+    // 4. Tạo đơn hàng trạng thái "pending" với địa chỉ giao hàng được cung cấp.
     const order = await tx.order.create({
       data: {
         userId,
@@ -91,7 +91,7 @@ const checkout = async (userId, shippingAddress, cartItemIds) => {
       }
     });
 
-    // 5. Create matching OrderDetail records and decrement product stock
+    // 5. Tạo các bản ghi `OrderDetail` tương ứng và giảm tồn kho sản phẩm.
     for (const item of selectedItems) {
       await tx.orderDetail.create({
         data: {
@@ -112,7 +112,7 @@ const checkout = async (userId, shippingAddress, cartItemIds) => {
       });
     }
 
-    // 6. Create one Payment with paymentMethod: "COD", paymentStatus: "unpaid", amount equal to the order total, and paymentDate: null
+    // 6. Tạo một thanh toán COD chưa thanh toán với tổng tiền đơn hàng và ngày thanh toán null.
     await tx.payment.create({
       data: {
         orderId: order.id,
@@ -123,7 +123,7 @@ const checkout = async (userId, shippingAddress, cartItemIds) => {
       }
     });
 
-    // 7. Delete cart items only after order/detail/payment/stock writes are ready to commit
+    // 7. Chỉ xóa mục giỏ hàng khi các thay đổi đơn hàng/chi tiết/thanh toán/tồn kho đã sẵn sàng commit.
     await tx.cartItem.deleteMany({
       where: {
         cartId: cart.id,
@@ -131,7 +131,7 @@ const checkout = async (userId, shippingAddress, cartItemIds) => {
       }
     });
 
-    // 8. Return an order shape that includes details, product summaries, and payment data for the controller response
+    // 8. Trả về đơn hàng gồm chi tiết, tóm tắt sản phẩm và dữ liệu thanh toán cho controller.
     return tx.order.findUnique({
       where: { id: order.id },
       include: {
@@ -160,8 +160,8 @@ const checkout = async (userId, shippingAddress, cartItemIds) => {
 
 
 /**
- * List orders for a specific user, sorted by newest first.
- * Includes order details with product brand/name summary, and payment data.
+ * Liệt kê đơn hàng của một người dùng, sắp xếp mới nhất trước.
+ * Bao gồm chi tiết đơn hàng, tóm tắt thương hiệu/tên sản phẩm và dữ liệu thanh toán.
  * 
  * @param {string} userId 
  * @returns {Promise<Array>}
@@ -196,8 +196,8 @@ const listByUser = async (userId) => {
 };
 
 /**
- * Find order by ID if owned by user or if requester is admin.
- * Includes order details, product brand/name summary, payment, and customer details (no secrets).
+ * Tìm đơn hàng theo ID nếu thuộc người dùng hoặc người yêu cầu là quản trị viên.
+ * Bao gồm chi tiết đơn hàng, tóm tắt thương hiệu/tên sản phẩm, thanh toán và thông tin khách hàng không nhạy cảm.
  * 
  * @param {string} id 
  * @param {string} userId 
@@ -245,9 +245,9 @@ const findOwnedOrAdminVisible = async (id, userId, isAdmin) => {
 };
 
 /**
- * List all orders for admin, sorted by newest first.
- * Supports a simple optional status filter for valid status values.
- * Includes order details, product brand/name summary, payment, and customer details (no secrets).
+ * Liệt kê toàn bộ đơn hàng cho quản trị viên, sắp xếp mới nhất trước.
+ * Hỗ trợ bộ lọc trạng thái tùy chọn với các giá trị hợp lệ.
+ * Bao gồm chi tiết đơn hàng, tóm tắt thương hiệu/tên sản phẩm, thanh toán và thông tin khách hàng không nhạy cảm.
  * 
  * @param {string} [status] 
  * @returns {Promise<Array>}
@@ -302,11 +302,11 @@ const listForAdmin = async (status) => {
 };
 
 /**
- * Update order status and handle side effects (payment update) in a transaction.
- * Rejects unknown status values.
+ * Cập nhật trạng thái đơn hàng và xử lý tác dụng phụ (cập nhật thanh toán) trong giao dịch.
+ * Từ chối giá trị trạng thái không xác định.
  * 
- * @param {string} id - Order ID
- * @param {string} status - New order status
+ * @param {string} id - ID đơn hàng.
+ * @param {string} status - Trạng thái đơn hàng mới.
  * @returns {Promise<Object>}
  */
 const updateStatus = async (id, status) => {
@@ -325,13 +325,13 @@ const updateStatus = async (id, status) => {
       throw new Error(`Order with ID ${id} not found.`);
     }
 
-    // Update status
+    // Cập nhật trạng thái.
     await tx.order.update({
       where: { id },
       data: { status }
     });
 
-    // Side effect: completed status updates payment to paid
+    // Tác dụng phụ: trạng thái hoàn thành sẽ chuyển thanh toán sang đã trả.
     if (status === 'completed' && order.payment) {
       await tx.payment.update({
         where: { orderId: id },
@@ -342,7 +342,7 @@ const updateStatus = async (id, status) => {
       });
     }
 
-    // Return the updated order shape
+    // Trả về cấu trúc đơn hàng đã cập nhật.
     return tx.order.findUnique({
       where: { id },
       include: {

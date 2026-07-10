@@ -1,7 +1,7 @@
 const prisma = require('../config/database');
 
 /**
- * Validate category data for creation
+ * Kiểm tra dữ liệu danh mục trước khi tạo.
  * @param {Object} data 
  */
 const validateCategoryData = async (data) => {
@@ -19,7 +19,7 @@ const validateCategoryData = async (data) => {
 };
 
 /**
- * Validate category data for update
+ * Kiểm tra dữ liệu danh mục trước khi cập nhật.
  * @param {string} id
  * @param {Object} data 
  */
@@ -40,7 +40,7 @@ const validateCategoryUpdateData = async (id, data) => {
 };
 
 /**
- * Find category by ID
+ * Tìm danh mục theo ID.
  * @param {string} id 
  * @returns {Promise<Object|null>}
  */
@@ -51,7 +51,7 @@ const findById = async (id) => {
 };
 
 /**
- * Find category by name
+ * Tìm danh mục theo tên.
  * @param {string} name 
  * @returns {Promise<Object|null>}
  */
@@ -63,7 +63,7 @@ const findByName = async (name) => {
 };
 
 /**
- * Find all categories returning only id, name, and description
+ * Tìm tất cả danh mục, chỉ trả về ID, tên và mô tả.
  * @returns {Promise<Array<Object>>}
  */
 const findAll = async () => {
@@ -80,7 +80,7 @@ const findAll = async () => {
 };
 
 /**
- * Create a new category (admin)
+ * Tạo danh mục mới (quản trị viên).
  * @param {Object} data 
  * @returns {Promise<Object>}
  */
@@ -96,7 +96,7 @@ const create = async (data) => {
 };
 
 /**
- * Update an existing category (admin)
+ * Cập nhật danh mục hiện có (quản trị viên).
  * @param {string} id 
  * @param {Object} data 
  * @returns {Promise<Object>}
@@ -117,7 +117,7 @@ const update = async (id, data) => {
 };
 
 /**
- * Check if category has associated products
+ * Kiểm tra danh mục có sản phẩm liên kết hay không.
  * @param {string} id 
  * @returns {Promise<boolean>}
  */
@@ -129,7 +129,7 @@ const hasProducts = async (id) => {
 };
 
 /**
- * Delete a category (admin)
+ * Xóa danh mục (quản trị viên).
  * @param {string} id 
  * @returns {Promise<Object>}
  */

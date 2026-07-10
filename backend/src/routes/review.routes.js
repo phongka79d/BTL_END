@@ -4,16 +4,16 @@ const reviewController = require('../controllers/review.controller');
 const { protect } = require('../middlewares/auth.middleware');
 const { admin } = require('../middlewares/admin.middleware');
 
-// Public review list
+// Danh sách đánh giá công khai.
 router.get('/products/:id/reviews', reviewController.getProductReviews);
 
-// Authenticated customer review creation
+// Khách hàng đã xác thực tạo đánh giá.
 router.post('/products/:id/reviews', protect, reviewController.createProductReview);
 
-// Admin visible review list for moderation
+// Danh sách đánh giá hiển thị cho quản trị viên kiểm duyệt.
 router.get('/admin/reviews', protect, admin, reviewController.getAdminReviews);
 
-// Admin moderation hides the review instead of physically deleting it
+// Kiểm duyệt của quản trị viên sẽ ẩn đánh giá thay vì xóa vật lý.
 router.delete('/admin/reviews/:id', protect, admin, reviewController.hideReview);
 
 module.exports = router;
