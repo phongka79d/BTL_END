@@ -45,7 +45,7 @@ export const AdminLayout = () => {
       header={
         <SideNavHeading
           logo={<Icon icon="wrench" color="accent" />}
-          heading="Admin Panel"
+          heading="Trang quản trị"
           headingHref="/admin"
           as={Link}
         />
@@ -53,24 +53,24 @@ export const AdminLayout = () => {
       footerIcons={
         <DropdownMenu
           button={{
-            icon: <Avatar name={user?.username || 'Admin'} size="xsmall" />,
-            label: user?.username || 'Admin',
+            icon: <Avatar name={user?.username || 'Quản trị viên'} size="xsmall" />,
+            label: user?.username || 'Quản trị viên',
             variant: 'secondary',
             size: 'sm'
           }}
           items={[
             {
-              label: 'Back to Store',
+              label: 'Quay lại cửa hàng',
               onClick: () => navigate('/'),
               icon: HomeIcon
             },
             {
-              label: 'Profile',
+              label: 'Hồ sơ',
               onClick: () => navigate('/profile'),
               icon: UserIcon
             },
             {
-              label: 'Logout',
+              label: 'Đăng xuất',
               onClick: logout,
               icon: LogOutIcon
             }
@@ -78,58 +78,58 @@ export const AdminLayout = () => {
         />
       }
     >
-      <SideNavSection title="Management">
+      <SideNavSection title="Quản lý">
         <SideNavItem
-          label="Dashboard"
+          label="Bảng điều khiển"
           href="/admin"
           icon={<DashboardIcon />}
           as={Link}
           isSelected={location.pathname === '/admin'}
         />
         <SideNavItem
-          label="Products"
+          label="Sản phẩm"
           href="/admin/products"
           icon={<ProductsIcon />}
           as={Link}
           isSelected={location.pathname.startsWith('/admin/products')}
         />
         <SideNavItem
-          label="Categories"
+          label="Danh mục"
           href="/admin/categories"
           icon={<CategoriesIcon />}
           as={Link}
           isSelected={location.pathname.startsWith('/admin/categories')}
         />
         <SideNavItem
-          label="Users"
+          label="Người dùng"
           href="/admin/users"
           icon={<UsersIcon />}
           as={Link}
           isSelected={location.pathname.startsWith('/admin/users')}
         />
         <SideNavItem
-          label="Orders"
+          label="Đơn hàng"
           href="/admin/orders"
           icon={<OrderBagIcon />}
           as={Link}
           isSelected={location.pathname.startsWith('/admin/orders')}
         />
         <SideNavItem
-          label="Reviews"
+          label="Đánh giá"
           href="/admin/reviews"
           icon={<ReviewsIcon />}
           as={Link}
           isSelected={location.pathname.startsWith('/admin/reviews')}
         />
         <SideNavItem
-          label="Reports"
+          label="Báo cáo"
           href="/admin/reports"
           icon={<ReportsIcon />}
           as={Link}
           isSelected={location.pathname.startsWith('/admin/reports')}
         />
         <SideNavItem
-          label="Storefront"
+          label="Cửa hàng"
           href="/admin/storefront"
           icon={<AdminIcon />}
           as={Link}
@@ -141,11 +141,11 @@ export const AdminLayout = () => {
 
   const topNav = (
     <TopNav
-      heading={<TopNavHeading heading="Admin Console" />}
+      heading={<TopNavHeading heading="Bảng điều khiển quản trị" />}
       endContent={
         <HStack gap={2}>
           <Button
-            label="View Store"
+            label="Xem cửa hàng"
             variant="secondary"
             size="sm"
             onClick={() => navigate('/')}

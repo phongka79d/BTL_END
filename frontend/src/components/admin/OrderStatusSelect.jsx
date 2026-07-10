@@ -59,17 +59,17 @@ export const OrderStatusSelect = ({ order, onStatusUpdated }) => {
         const updatedOrder = response?.data || response;
 
         notification.success({
-          title: 'Status updated',
+          title: 'Đã cập nhật trạng thái',
           description:
             updatedOrder?.payment?.paymentStatus === 'paid'
-              ? 'Status updated. Payment marked as paid.'
-              : `Status updated to ${ORDER_STATUS_LABELS[newStatus] || newStatus}.`,
+              ? 'Đã cập nhật trạng thái. Thanh toán được đánh dấu là đã thanh toán.'
+              : `Đã cập nhật trạng thái thành ${ORDER_STATUS_LABELS[newStatus] || newStatus}.`,
         });
         onStatusUpdated?.(updatedOrder || order);
       } catch (err) {
         notification.error({
-          title: 'Unable to update status',
-          description: err?.message || 'Unable to update status. Please try again.',
+          title: 'Không thể cập nhật trạng thái',
+          description: err?.message || 'Không thể cập nhật trạng thái. Vui lòng thử lại.',
         });
       } finally {
         setIsUpdating(false);
@@ -81,7 +81,7 @@ export const OrderStatusSelect = ({ order, onStatusUpdated }) => {
   return (
     <VStack gap={1} align="start" style={{ minWidth: 140 }}>
       <Selector
-        label={`Status for order ${order.id?.slice(0, 8) || ''}\u2026`}
+        label={`Trạng thái đơn hàng ${order.id?.slice(0, 8) || ''}\u2026`}
         isLabelHidden
         value={order.status}
         onChange={handleStatusChange}

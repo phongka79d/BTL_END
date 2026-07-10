@@ -7,14 +7,14 @@ const prisma = require('../config/database');
 const validateCategoryData = async (data) => {
   const { name } = data;
   if (!name || typeof name !== 'string' || name.trim() === '') {
-    throw new Error('Category name is required.');
+    throw new Error('Tên danh mục là bắt buộc.');
   }
 
   const existing = await prisma.category.findUnique({
     where: { name: name.trim() },
   });
   if (existing) {
-    throw new Error('Category name must be unique.');
+    throw new Error('Tên danh mục phải là duy nhất.');
   }
 };
 
@@ -27,14 +27,14 @@ const validateCategoryUpdateData = async (id, data) => {
   const { name } = data;
   if (name !== undefined) {
     if (!name || typeof name !== 'string' || name.trim() === '') {
-      throw new Error('Category name cannot be empty.');
+    throw new Error('Tên danh mục không được để trống.');
     }
 
     const existing = await prisma.category.findUnique({
       where: { name: name.trim() },
     });
     if (existing && existing.id !== id) {
-      throw new Error('Category name must be unique.');
+    throw new Error('Tên danh mục phải là duy nhất.');
     }
   }
 };
@@ -136,7 +136,7 @@ const hasProducts = async (id) => {
 const destroy = async (id) => {
   const referenced = await hasProducts(id);
   if (referenced) {
-    throw new Error('Cannot delete category: it is referenced by existing products.');
+    throw new Error('Không thể xóa danh mục: danh mục đang được sản phẩm hiện có tham chiếu.');
   }
   return prisma.category.delete({
     where: { id },

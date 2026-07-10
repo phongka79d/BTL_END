@@ -17,16 +17,16 @@ export const CarouselSlideTable = ({
   const columns = useMemo(() => [
     {
       key: 'order',
-      header: 'Order',
+      header: 'Thứ tự',
       width: pixel(80),
       renderCell: (slide) => <Text hasTabularNumbers>{slide.sortOrder}</Text>,
     },
     {
       key: 'status',
-      header: 'Status',
+      header: 'Trạng thái',
       width: pixel(110),
       renderCell: (slide) => (
-        <Badge variant={slide.isActive ? 'green' : 'gray'} label={slide.isActive ? 'Active' : 'Inactive'} />
+        <Badge variant={slide.isActive ? 'green' : 'gray'} label={slide.isActive ? 'Đang hoạt động' : 'Không hoạt động'} />
       ),
     },
     {
@@ -36,13 +36,13 @@ export const CarouselSlideTable = ({
       renderCell: (slide) => (
         <VStack gap={0.5}>
           <Text weight="semibold">{slide.title}</Text>
-          <Text type="supporting">{slide.description || 'No description'}</Text>
+          <Text type="supporting">{slide.description || 'Chưa có mô tả'}</Text>
         </VStack>
       ),
     },
     {
       key: 'target',
-      header: 'Link target',
+      header: 'Đích liên kết',
       width: proportional(1.4),
       renderCell: (slide) => describeLinkTarget({
         type: slide.linkType,
@@ -53,17 +53,17 @@ export const CarouselSlideTable = ({
     },
     {
       key: 'actions',
-      header: 'Actions',
+      header: 'Thao tác',
       width: pixel(120),
       align: 'end',
       renderCell: (slide) => (
         <MoreMenu
-          label={`Actions for ${slide.title}`}
+          label={`Thao tác với ${slide.title}`}
           isDisabled={isDeleting}
           items={[
-            { label: 'Edit', onClick: () => onEdit(slide) },
-            { label: slide.isActive ? 'Deactivate' : 'Activate', onClick: () => onToggleActive(slide) },
-            { label: 'Delete', onClick: () => onDelete(slide) },
+            { label: 'Chỉnh sửa', onClick: () => onEdit(slide) },
+            { label: slide.isActive ? 'Tắt kích hoạt' : 'Kích hoạt', onClick: () => onToggleActive(slide) },
+            { label: 'Xóa', onClick: () => onDelete(slide) },
           ]}
         />
       ),
@@ -76,13 +76,13 @@ export const CarouselSlideTable = ({
       data={slides}
       isLoading={isLoading}
       error={error}
-      errorTitle="Unable to load carousel slides"
+      errorTitle="Không thể tải slide băng chuyền"
       onRetry={onRetry}
-      emptyTitle="No carousel slides yet"
-      emptyDescription="Create the first slide to publish homepage carousel content."
+      emptyTitle="Chưa có slide băng chuyền"
+      emptyDescription="Hãy tạo slide đầu tiên để xuất bản nội dung băng chuyền trang chủ."
       emptyActions={(
         <HStack gap={2}>
-          <Button label="Create slide" variant="primary" onClick={onCreate} />
+          <Button label="Tạo slide" variant="primary" onClick={onCreate} />
         </HStack>
       )}
     />

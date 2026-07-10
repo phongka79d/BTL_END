@@ -49,52 +49,52 @@ export const FeaturedProductManager = ({
   const columns = useMemo(() => [
     {
       key: 'order',
-      header: 'Order',
+      header: 'Thứ tự',
       width: pixel(80),
       renderCell: (item) => <Text hasTabularNumbers>{item.sortOrder}</Text>,
     },
     {
       key: 'status',
-      header: 'Status',
+      header: 'Trạng thái',
       width: pixel(110),
       renderCell: (item) => (
-        <Badge variant={item.isActive ? 'green' : 'gray'} label={item.isActive ? 'Active' : 'Inactive'} />
+        <Badge variant={item.isActive ? 'green' : 'gray'} label={item.isActive ? 'Đang hoạt động' : 'Không hoạt động'} />
       ),
     },
     {
       key: 'product',
-      header: 'Product',
+      header: 'Sản phẩm',
       width: proportional(2),
       renderCell: (item) => (
         <VStack gap={0.5}>
-          <Text weight="semibold">{item.product?.name || 'Deleted product'}</Text>
-          <Text type="supporting">{item.product?.brand || 'No brand'}</Text>
+          <Text weight="semibold">{item.product?.name || 'Sản phẩm đã bị xóa'}</Text>
+          <Text type="supporting">{item.product?.brand || 'Chưa có thương hiệu'}</Text>
         </VStack>
       ),
     },
     {
       key: 'actions',
-      header: 'Actions',
+      header: 'Thao tác',
       width: pixel(120),
       align: 'end',
       renderCell: (item) => (
         <MoreMenu
-          label={`Actions for ${item.product?.name || 'featured product'}`}
+          label={`Thao tác với ${item.product?.name || 'sản phẩm nổi bật'}`}
           isDisabled={isSaving}
           items={[
             {
-              label: 'Move up',
+              label: 'Di chuyển lên',
               onClick: () => moveFeaturedProduct(item, 'up'),
             },
             {
-              label: 'Move down',
+              label: 'Di chuyển xuống',
               onClick: () => moveFeaturedProduct(item, 'down'),
             },
             {
-              label: item.isActive ? 'Deactivate' : 'Activate',
+              label: item.isActive ? 'Tắt kích hoạt' : 'Kích hoạt',
               onClick: () => onToggleFeaturedProduct(item),
             },
-            { label: 'Delete', onClick: () => onDeleteFeaturedProduct(item) },
+            { label: 'Xóa', onClick: () => onDeleteFeaturedProduct(item) },
           ]}
         />
       ),
@@ -107,7 +107,7 @@ export const FeaturedProductManager = ({
         <VStack gap={4}>
           <HStack gap={3} align="end" wrap="wrap">
             <NumberInput
-              label="Featured product count"
+              label="Số lượng sản phẩm nổi bật"
               value={featuredProductLimit}
               onChange={setFeaturedProductLimit}
               min={1}
@@ -116,7 +116,7 @@ export const FeaturedProductManager = ({
               isIntegerOnly
             />
             <Button
-              label="Save count"
+              label="Lưu số lượng"
               variant="primary"
               isLoading={isSaving}
               onClick={() => onSaveSettings({ featuredProductLimit })}
@@ -135,8 +135,8 @@ export const FeaturedProductManager = ({
         error={error}
         errorTitle="Unable to load featured products"
         onRetry={onRetry}
-        emptyTitle="No featured products yet"
-        emptyDescription="Choose products to control what appears on the homepage."
+        emptyTitle="Chưa có sản phẩm nổi bật"
+        emptyDescription="Chọn sản phẩm để kiểm soát nội dung hiển thị trên trang chủ."
       />
     </VStack>
   );

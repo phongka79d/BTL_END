@@ -20,24 +20,24 @@ export const UnauthorizedView = () => {
       <Card padding={6} style={{ width: '100%' }}>
         <VStack gap={4} style={{ alignItems: 'center', textAlign: 'center' }}>
           <Text size="supporting" color="accent" weight="semibold">
-            Access restricted
+            Quyền truy cập bị hạn chế
           </Text>
           <VStack gap={2} style={{ alignItems: 'center' }}>
-            <Heading level={1}>You do not have permission to view this page</Heading>
+            <Heading level={1}>Bạn không có quyền xem trang này</Heading>
             <Text color="secondary">
-              This area is available only to accounts with the required role.
-              Choose a safe destination below to continue.
+              Khu vực này chỉ dành cho tài khoản có vai trò phù hợp.
+              Hãy chọn một điểm đến bên dưới để tiếp tục.
             </Text>
           </VStack>
           <HStack gap={3} style={{ justifyContent: 'center', flexWrap: 'wrap' }}>
-            <Button label="Back to store" variant="primary" onClick={() => navigate('/')} />
+            <Button label="Quay lại cửa hàng" variant="primary" onClick={() => navigate('/')} />
             <Button
-              label={isAuthenticated ? 'My profile' : 'Sign in'}
+              label={isAuthenticated ? 'Hồ sơ của tôi' : 'Đăng nhập'}
               variant="secondary"
               onClick={() => navigate(isAuthenticated ? '/profile' : '/login')}
             />
             {isAdmin && (
-              <Button label="Admin dashboard" variant="secondary" onClick={() => navigate('/admin')} />
+              <Button label="Bảng điều khiển quản trị" variant="secondary" onClick={() => navigate('/admin')} />
             )}
           </HStack>
         </VStack>

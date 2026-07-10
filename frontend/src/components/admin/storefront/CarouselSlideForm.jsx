@@ -65,7 +65,7 @@ export const CarouselSlideForm = ({
       await onSubmit(createCarouselPayload(values));
       onOpenChange(false);
     } catch (error) {
-      setSubmitError(error?.message || 'Unable to save the carousel slide.');
+      setSubmitError(error?.message || 'Không thể lưu slide băng chuyền.');
     } finally {
       setIsSubmitting(false);
     }
@@ -76,8 +76,8 @@ export const CarouselSlideForm = ({
       <Layout
         header={(
           <DialogHeader
-            title={slide ? 'Edit carousel slide' : 'Create carousel slide'}
-            subtitle="Saved active slides publish immediately."
+            title={slide ? 'Chỉnh sửa slide băng chuyền' : 'Tạo slide băng chuyền'}
+            subtitle="Các slide đang kích hoạt sẽ được xuất bản ngay lập tức."
             onOpenChange={onOpenChange}
             hasDivider
           />
@@ -86,14 +86,14 @@ export const CarouselSlideForm = ({
           <LayoutContent isScrollable>
             <form id={formId} onSubmit={handleSubmit}>
               <VStack gap={4}>
-                {submitError && <Alert title="Unable to save slide" description={submitError} />}
+                {submitError && <Alert title="Không thể lưu slide" description={submitError} />}
                 <FormLayout>
-                  <TextInput label="Title" value={values.title} onChange={(value) => updateField('title', value)} status={fieldStatus(errors.title)} isRequired width="100%" />
-                  <TextArea label="Description" value={values.description} onChange={(value) => updateField('description', value)} rows={3} isOptional width="100%" />
-                  <TextInput label="Image URL" value={values.imageUrl} onChange={(value) => updateField('imageUrl', value)} status={fieldStatus(errors.imageUrl)} placeholder="https://example.com/hero.jpg" isRequired={values.isActive} width="100%" />
-                  <TextInput label="Button label" value={values.primaryButtonLabel} onChange={(value) => updateField('primaryButtonLabel', value)} status={fieldStatus(errors.primaryButtonLabel)} isRequired width="100%" />
-                  <NumberInput label="Sort order" value={values.sortOrder} onChange={(value) => updateField('sortOrder', value)} step={1} isIntegerOnly width="100%" />
-                  <Switch label="Active" value={values.isActive} onChange={(checked) => updateField('isActive', checked)} />
+                  <TextInput label="Tiêu đề" value={values.title} onChange={(value) => updateField('title', value)} status={fieldStatus(errors.title)} isRequired width="100%" />
+                  <TextArea label="Mô tả" value={values.description} onChange={(value) => updateField('description', value)} rows={3} isOptional width="100%" />
+                  <TextInput label="URL hình ảnh" value={values.imageUrl} onChange={(value) => updateField('imageUrl', value)} status={fieldStatus(errors.imageUrl)} placeholder="https://example.com/hero.jpg" isRequired={values.isActive} width="100%" />
+                  <TextInput label="Nhãn nút" value={values.primaryButtonLabel} onChange={(value) => updateField('primaryButtonLabel', value)} status={fieldStatus(errors.primaryButtonLabel)} isRequired width="100%" />
+                  <NumberInput label="Thứ tự sắp xếp" value={values.sortOrder} onChange={(value) => updateField('sortOrder', value)} step={1} isIntegerOnly width="100%" />
+                  <Switch label="Kích hoạt" value={values.isActive} onChange={(checked) => updateField('isActive', checked)} />
                 </FormLayout>
                 <LinkTargetFields
                   categories={categories}
@@ -108,8 +108,8 @@ export const CarouselSlideForm = ({
         footer={(
           <LayoutFooter hasDivider>
             <HStack gap={2} justify="end">
-              <Button label="Cancel" variant="secondary" onClick={() => onOpenChange(false)} isDisabled={isSubmitting} />
-              <Button label={slide ? 'Save changes' : 'Create slide'} type="submit" form={formId} variant="primary" isLoading={isSubmitting} />
+              <Button label="Hủy" variant="secondary" onClick={() => onOpenChange(false)} isDisabled={isSubmitting} />
+              <Button label={slide ? 'Lưu thay đổi' : 'Tạo slide'} type="submit" form={formId} variant="primary" isLoading={isSubmitting} />
             </HStack>
           </LayoutFooter>
         )}

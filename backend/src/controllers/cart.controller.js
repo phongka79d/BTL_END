@@ -11,7 +11,7 @@ const getCart = async (req, res, next) => {
   try {
     const userId = req.user.id;
     const cart = await cartModel.getOrCreateCart(userId);
-    return successResponse(res, 200, 'Cart retrieved successfully', cart);
+    return successResponse(res, 200, 'Đã lấy giỏ hàng thành công', cart);
   } catch (error) {
     next(error);
   }
@@ -28,20 +28,20 @@ const addCartItem = async (req, res, next) => {
 
     // Validate productId and quantity payloads before mutation
     if (!productId || typeof productId !== 'string') {
-      return errorResponse(res, 400, 'Product ID is required and must be a string');
+      return errorResponse(res, 400, 'Product ID là bắt buộc và phải là chuỗi');
     }
     if (quantity === undefined || quantity === null) {
-      return errorResponse(res, 400, 'Quantity is required');
+      return errorResponse(res, 400, 'Số lượng là bắt buộc');
     }
     const parsedQuantity = parseInt(quantity, 10);
     if (isNaN(parsedQuantity) || parsedQuantity < 1) {
-      return errorResponse(res, 400, 'Quantity must be at least 1');
+      return errorResponse(res, 400, 'Số lượng phải ít nhất là 1');
     }
 
     // Load the product record needed for price and stock checks
     const product = await productModel.findById(productId);
     if (!product) {
-      return errorResponse(res, 404, 'Product not found');
+      return errorResponse(res, 404, 'Không tìm thấy sản phẩm');
     }
 
     // Load the cart to check total quantity
@@ -51,11 +51,11 @@ const addCartItem = async (req, res, next) => {
 
     // Reject total cart quantity above product stock
     if (newQuantity > product.quantity) {
-      return errorResponse(res, 400, `Requested quantity exceeds available stock (${product.quantity})`);
+      return errorResponse(res, 400, `Số lượng yêu cầu vượt quá tồn kho (${product.quantity})`);
     }
 
     const cartItem = await cartModel.addItem(userId, productId, parsedQuantity);
-    return successResponse(res, 201, 'Item added to cart successfully', { cartItem });
+    return successResponse(res, 201, 'Đã thêm sản phẩm vào giỏ hàng thành công', { cartItem });
   } catch (error) {
     if (error.message === 'Product not found') {
       return errorResponse(res, 404, error.message);
@@ -78,37 +78,37 @@ const updateCartItem = async (req, res, next) => {
     const { quantity } = req.body;
 
     if (quantity === undefined || quantity === null) {
-      return errorResponse(res, 400, 'Quantity is required');
+      return errorResponse(res, 400, 'Số lượng là bắt buộc');
     }
     const parsedQuantity = parseInt(quantity, 10);
     if (isNaN(parsedQuantity) || parsedQuantity < 1) {
-      return errorResponse(res, 400, 'Quantity must be at least 1');
+      return errorResponse(res, 400, 'Số lượng phải ít nhất là 1');
     }
 
     // Pre-check existence and ownership for precise 404/403 response
     const cartItem = await cartItemModel.findById(id);
     if (!cartItem) {
-      return errorResponse(res, 404, 'Cart item not found');
+      return errorResponse(res, 404, 'Không tìm thấy sản phẩm trong giỏ hàng');
     }
 
     // Retrieve cart to check ownership
     const cart = await cartModel.getOrCreateCart(userId);
     if (cartItem.cartId !== cart.id) {
-      return errorResponse(res, 403, 'Unauthorized access to cart item');
+      return errorResponse(res, 403, 'Không được phép truy cập sản phẩm trong giỏ hàng');
     }
 
     // Load product for stock check
     const product = await productModel.findById(cartItem.productId);
     if (!product) {
-      return errorResponse(res, 404, 'Product not found');
+      return errorResponse(res, 404, 'Không tìm thấy sản phẩm');
     }
 
     if (parsedQuantity > product.quantity) {
-      return errorResponse(res, 400, `Requested quantity exceeds available stock (${product.quantity})`);
+      return errorResponse(res, 400, `Số lượng yêu cầu vượt quá tồn kho (${product.quantity})`);
     }
 
     const updatedItem = await cartItemModel.updateQuantity(userId, id, parsedQuantity);
-    return successResponse(res, 200, 'Cart item updated successfully', { cartItem: updatedItem });
+    return successResponse(res, 200, 'Đã cập nhật sản phẩm trong giỏ hàng thành công', { cartItem: updatedItem });
   } catch (error) {
     if (error.message === 'Cart item not found') {
       return errorResponse(res, 404, error.message);
@@ -133,7 +133,7 @@ const updateCartItems = async (req, res, next) => {
     const { items } = req.body;
     const cart = await cartModel.updateItems(userId, items);
 
-    return successResponse(res, 200, 'Cart items updated successfully', { cart });
+    return successResponse(res, 200, 'Đã cập nhật các sản phẩm trong giỏ hàng thành công', { cart });
   } catch (error) {
     if (error.message && error.message.includes('not found')) {
       return errorResponse(res, 404, error.message);
@@ -163,17 +163,17 @@ const deleteCartItem = async (req, res, next) => {
 
     const cartItem = await cartItemModel.findById(id);
     if (!cartItem) {
-      return errorResponse(res, 404, 'Cart item not found');
+      return errorResponse(res, 404, 'Không tìm thấy sản phẩm trong giỏ hàng');
     }
 
     // Retrieve cart to check ownership
     const cart = await cartModel.getOrCreateCart(userId);
     if (cartItem.cartId !== cart.id) {
-      return errorResponse(res, 403, 'Unauthorized access to cart item');
+      return errorResponse(res, 403, 'Không được phép truy cập sản phẩm trong giỏ hàng');
     }
 
     await cartItemModel.removeItem(userId, id);
-    return successResponse(res, 200, 'Item removed from cart successfully');
+    return successResponse(res, 200, 'Đã xóa sản phẩm khỏi giỏ hàng thành công');
   } catch (error) {
     if (error.message === 'Cart item not found') {
       return errorResponse(res, 404, error.message);

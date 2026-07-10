@@ -32,49 +32,49 @@ export const CartSummary = ({
       <VStack gap={4}>
         <VStack gap={1}>
           <Text size="supporting" color="accent" weight="semibold">
-            Order summary
+            Tổng quan giỏ hàng
           </Text>
           <Text color="secondary">
-            Checkout includes only selected products. Save quantity changes before continuing.
+            Thanh toán chỉ bao gồm các sản phẩm đã chọn. Hãy lưu thay đổi số lượng trước khi tiếp tục.
           </Text>
         </VStack>
 
         <VStack gap={3}>
-          <SummaryRow label="Selected products" value={selectedProductCount} />
-          <SummaryRow label="Selected units" value={itemCount} />
-          <SummaryRow label="Selected subtotal" value={formatPrice(subtotal)} />
+          <SummaryRow label="Sản phẩm đã chọn" value={selectedProductCount} />
+          <SummaryRow label="Số lượng đã chọn" value={itemCount} />
+          <SummaryRow label="Tạm tính đã chọn" value={formatPrice(subtotal)} />
         </VStack>
 
         <Divider />
 
         <VStack gap={3}>
           <HStack style={{ justifyContent: 'space-between', alignItems: 'center', gap: 'var(--spacing-4)' }}>
-            <Text weight="bold">Current total</Text>
+            <Text weight="bold">Tổng hiện tại</Text>
             <Text weight="bold" color="accent" style={{ fontSize: 'var(--text-title-3-size)' }}>
               {formatPrice(subtotal)}
             </Text>
           </HStack>
           <HStack gap={2} style={{ justifyContent: 'flex-end' }}>
             <Badge variant="info">COD</Badge>
-            <Text size="supporting" color="secondary">Cash on Delivery</Text>
+            <Text size="supporting" color="secondary">Thanh toán khi nhận hàng</Text>
           </HStack>
           {hasUnsavedChanges && (
             <Text size="supporting" color="accent">
-              Save quantity changes before checkout.
+              Hãy lưu thay đổi số lượng trước khi thanh toán.
             </Text>
           )}
           {selectedProductCount === 0 && (
             <Text size="supporting" color="accent">
-              Select at least one product to continue.
+              Chọn ít nhất một sản phẩm để tiếp tục.
             </Text>
           )}
           <ButtonGroup
-            label="Cart actions"
+          label="Thao tác giỏ hàng"
             size="md"
             style={{ width: '100%' }}
           >
             <Button
-              label="Save changes"
+              label="Lưu thay đổi"
               variant="secondary"
               isDisabled={!hasUnsavedChanges || isDisabled}
               isLoading={isSaving}
@@ -82,14 +82,14 @@ export const CartSummary = ({
               width="100%"
             />
             <Button
-              label="Checkout"
+              label="Thanh toán"
               variant="secondary"
               isDisabled={checkoutDisabled}
               onClick={onCheckout}
               width="100%"
             />
             <Button
-              label="Continue shopping"
+            label="Tiếp tục mua sắm"
               variant="secondary"
               isDisabled={isDisabled || hasUnsavedChanges}
               onClick={onContinueShopping}

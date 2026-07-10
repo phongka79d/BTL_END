@@ -15,14 +15,14 @@ export const AdminTable = ({
   emptyDescription,
   emptyTitle,
   error,
-  errorTitle = 'Unable to load data',
+  errorTitle = 'Không thể tải dữ liệu',
   isLoading,
   onRetry
 }) => {
   if (isLoading) {
     return (
       <Card padding={4}>
-        <VStack gap={3} aria-label="Loading table">
+        <VStack gap={3} aria-label="Đang tải bảng">
           {[0, 1, 2, 3].map((index) => (
             <Skeleton
               key={index}
@@ -41,7 +41,7 @@ export const AdminTable = ({
       <Alert
         title={errorTitle}
         description={error}
-        actionLabel="Retry"
+        actionLabel="Thử lại"
         onAction={onRetry}
       />
     );

@@ -37,8 +37,8 @@ export const AdminDashboardView = () => {
       setOrderSummary({});
       setError(
         err?.status === 403
-          ? 'You do not have permission to access admin report metrics.'
-          : err?.message || 'Unable to load dashboard metrics. Please try again.'
+          ? 'Bạn không có quyền truy cập số liệu báo cáo quản trị.'
+          : err?.message || 'Không thể tải số liệu bảng điều khiển. Vui lòng thử lại.'
       );
     } finally {
       setIsLoading(false);
@@ -59,22 +59,22 @@ export const AdminDashboardView = () => {
         width="100%"
       >
         <VStack gap={1}>
-          <Heading level={1}>Dashboard</Heading>
+          <Heading level={1}>Bảng điều khiển</Heading>
           <Text color="secondary">
-            Welcome back, {user?.fullName || user?.username || 'admin'}.
+            Chào mừng bạn quay trở lại, {user?.fullName || user?.username || 'quản trị viên'}.
           </Text>
         </VStack>
 
         <HStack gap={2} wrap="wrap">
           <Button
-            label="Refresh data"
+            label="Làm mới dữ liệu"
             variant="secondary"
             size="sm"
             onClick={fetchMetrics}
             disabled={isLoading}
           />
           <Button
-            label="View reports"
+            label="Xem báo cáo"
             variant="primary"
             size="sm"
             onClick={() => navigate('/admin/reports')}
@@ -84,9 +84,9 @@ export const AdminDashboardView = () => {
 
       {error ? (
         <Alert
-          title="Unable to load dashboard metrics"
+          title="Không thể tải số liệu bảng điều khiển"
           description={error}
-          actionLabel="Retry"
+          actionLabel="Thử lại"
           onAction={fetchMetrics}
         />
       ) : (

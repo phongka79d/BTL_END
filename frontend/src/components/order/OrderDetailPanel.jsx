@@ -47,7 +47,7 @@ export const OrderDetailPanel = ({ order }) => {
   const columns = [
     {
       key: 'product',
-      header: 'Product',
+      header: 'Sản phẩm',
       renderCell: (detail) => (
         <VStack gap={0}>
           <Text weight="semibold">{detail.product?.name || '—'}</Text>
@@ -59,7 +59,7 @@ export const OrderDetailPanel = ({ order }) => {
     },
     {
       key: 'quantity',
-      header: 'Qty',
+      header: 'SL',
       align: 'end',
       renderCell: (detail) => (
         <Text hasTabularNumbers>×{detail.quantity}</Text>
@@ -67,7 +67,7 @@ export const OrderDetailPanel = ({ order }) => {
     },
     {
       key: 'price',
-      header: 'Unit Price',
+      header: 'Đơn giá',
       align: 'end',
       renderCell: (detail) => (
         <Text hasTabularNumbers>{formatPrice(detail.price)}</Text>
@@ -75,7 +75,7 @@ export const OrderDetailPanel = ({ order }) => {
     },
     {
       key: 'subtotal',
-      header: 'Subtotal',
+      header: 'Tạm tính',
       align: 'end',
       renderCell: (detail) => (
         <Text weight="semibold" hasTabularNumbers>
@@ -94,14 +94,14 @@ export const OrderDetailPanel = ({ order }) => {
             Order Information
           </Text>
           <HStack gap={2} style={{ flexWrap: 'wrap', alignItems: 'center' }}>
-            <Text color="secondary">Order</Text>
+            <Text color="secondary">Đơn hàng</Text>
             <Text weight="semibold" hasTabularNumbers>
               #{id.slice(0, 8)}…
             </Text>
             <OrderStatusBadge status={status} />
           </HStack>
           <HStack gap={1}>
-            <Text color="secondary">Placed on</Text>
+            <Text color="secondary">Ngày đặt</Text>
             <Text>{formatDate(createdAt)}</Text>
           </HStack>
         </VStack>
@@ -125,16 +125,16 @@ export const OrderDetailPanel = ({ order }) => {
               Payment Information
             </Text>
             <HStack gap={2} style={{ flexWrap: 'wrap', alignItems: 'center' }}>
-              <Text color="secondary">Method</Text>
+              <Text color="secondary">Phương thức</Text>
               <Text weight="semibold">{payment.paymentMethod}</Text>
             </HStack>
             <HStack gap={2} style={{ flexWrap: 'wrap', alignItems: 'center' }}>
-              <Text color="secondary">Status</Text>
+              <Text color="secondary">Trạng thái</Text>
               <PaymentStatusBadge status={payment.paymentStatus} />
             </HStack>
             {payment.paymentDate && (
               <HStack gap={1}>
-                <Text color="secondary">Paid on</Text>
+                <Text color="secondary">Ngày thanh toán</Text>
                 <Text>{formatDate(payment.paymentDate)}</Text>
               </HStack>
             )}

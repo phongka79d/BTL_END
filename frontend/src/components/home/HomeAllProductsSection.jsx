@@ -4,10 +4,10 @@ import ProductList from '../product/ProductList';
 import { HomeSection } from './HomeCategoryShowcase';
 
 const sortOptions = [
-  { value: 'default', label: 'Default' },
-  { value: 'price', label: 'Price' },
-  { value: 'review', label: 'Good review' },
-  { value: 'orders', label: 'Order number' },
+  { value: 'default', label: 'Mặc định' },
+  { value: 'price', label: 'Giá' },
+  { value: 'review', label: 'Đánh giá tốt' },
+  { value: 'orders', label: 'Số đơn hàng' },
 ];
 
 export const HomeAllProductsSection = ({
@@ -20,7 +20,7 @@ export const HomeAllProductsSection = ({
   products = [],
   sort,
 }) => (
-  <HomeSection title="All products">
+  <HomeSection title="Tất cả sản phẩm">
     <VStack gap={4}>
       <HStack gap={2} wrap="wrap">
         {sortOptions.map((option) => (
@@ -39,8 +39,8 @@ export const HomeAllProductsSection = ({
         isLoading={isLoading}
         error={error}
         onRetry={onRetry}
-        emptyTitle="No products available"
-        emptyDescription="Products will appear here when the catalog is available."
+        emptyTitle="Chưa có sản phẩm"
+        emptyDescription="Sản phẩm sẽ xuất hiện tại đây khi danh mục khả dụng."
         pagination={pagination}
         onPageChange={onPageChange}
       />

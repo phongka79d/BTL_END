@@ -8,7 +8,7 @@ const { successResponse, errorResponse } = require('../utils/response');
 const getCategories = async (req, res, next) => {
   try {
     const categories = await categoryModel.findAll();
-    return successResponse(res, 200, 'Categories retrieved successfully', { categories });
+    return successResponse(res, 200, 'Đã lấy danh mục thành công', { categories });
   } catch (error) {
     next(error);
   }
@@ -22,7 +22,7 @@ const createCategory = async (req, res, next) => {
   try {
     const { name, description } = req.body;
     const category = await categoryModel.create({ name, description });
-    return successResponse(res, 201, 'Category created successfully', { category });
+    return successResponse(res, 201, 'Đã tạo danh mục thành công', { category });
   } catch (error) {
     if (error.message && (
       error.message.includes('required') || 
@@ -44,14 +44,14 @@ const updateCategory = async (req, res, next) => {
     // Pre-check existence for precise 404 response
     const existing = await categoryModel.findById(id);
     if (!existing) {
-      return errorResponse(res, 404, 'Category not found');
+      return errorResponse(res, 404, 'Không tìm thấy danh mục');
     }
 
     const category = await categoryModel.update(id, req.body);
-    return successResponse(res, 200, 'Category updated successfully', { category });
+    return successResponse(res, 200, 'Đã cập nhật danh mục thành công', { category });
   } catch (error) {
     if (error.code === 'P2025') {
-      return errorResponse(res, 404, 'Category not found');
+      return errorResponse(res, 404, 'Không tìm thấy danh mục');
     }
     if (error.message && (
       error.message.includes('cannot be') || 
@@ -73,14 +73,14 @@ const deleteCategory = async (req, res, next) => {
     // Pre-check existence for precise 404 response
     const existing = await categoryModel.findById(id);
     if (!existing) {
-      return errorResponse(res, 404, 'Category not found');
+      return errorResponse(res, 404, 'Không tìm thấy danh mục');
     }
 
     await categoryModel.destroy(id);
-    return successResponse(res, 200, 'Category deleted successfully');
+    return successResponse(res, 200, 'Đã xóa danh mục thành công');
   } catch (error) {
     if (error.code === 'P2025') {
-      return errorResponse(res, 404, 'Category not found');
+      return errorResponse(res, 404, 'Không tìm thấy danh mục');
     }
     if (error.message && error.message.includes('referenced')) {
       return errorResponse(res, 400, error.message);

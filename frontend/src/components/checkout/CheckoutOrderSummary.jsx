@@ -82,7 +82,7 @@ export const CheckoutOrderSummary = ({
               >
                 <VStack gap={0} style={{ minWidth: 0, flex: 1 }}>
                   <Text weight="medium" style={{ wordBreak: 'break-word' }}>
-                    {item.product?.name || 'Product'}
+                    {item.product?.name || 'Sản phẩm'}
                   </Text>
                   <Text size="supporting" color="secondary">
                     {item.product?.brand && `${item.product.brand} · `}
@@ -100,15 +100,15 @@ export const CheckoutOrderSummary = ({
         <Divider />
 
         <VStack gap={2}>
-          <SummaryRow label="Items" value={itemCount} />
-          <SummaryRow label="Subtotal" value={formatPrice(subtotal)} />
+          <SummaryRow label="Sản phẩm" value={itemCount} />
+          <SummaryRow label="Tạm tính" value={formatPrice(subtotal)} />
         </VStack>
 
         <Divider />
 
         <VStack gap={3}>
           <SummaryRow
-            label="Total"
+            label="Tổng cộng"
             value={formatPrice(subtotal)}
             isTotal
           />
@@ -116,13 +116,13 @@ export const CheckoutOrderSummary = ({
           <HStack gap={2} style={{ justifyContent: 'flex-end' }}>
             <Badge variant="info">COD</Badge>
             <Text size="supporting" color="secondary">
-              Cash on Delivery
+              Thanh toán khi nhận hàng
             </Text>
           </HStack>
         </VStack>
 
         <Button
-          label="Place order"
+          label="Đặt hàng"
           variant="primary"
           isDisabled={isSubmitting}
           isLoading={isSubmitting}

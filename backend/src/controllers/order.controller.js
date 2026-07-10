@@ -12,22 +12,22 @@ const checkout = async (req, res, next) => {
 
     // Validate shippingAddress payload
     if (!shippingAddress || typeof shippingAddress !== 'string' || shippingAddress.trim() === '') {
-      return errorResponse(res, 400, 'Shipping address is required');
+      return errorResponse(res, 400, 'Địa chỉ giao hàng là bắt buộc');
     }
     if (cartItemIds !== undefined) {
       if (!Array.isArray(cartItemIds) || cartItemIds.length === 0) {
-        return errorResponse(res, 400, 'At least one cart item must be selected');
+        return errorResponse(res, 400, 'Phải chọn ít nhất một sản phẩm trong giỏ hàng');
       }
       if (cartItemIds.some((cartItemId) => !cartItemId || typeof cartItemId !== 'string')) {
-        return errorResponse(res, 400, 'Selected cart item IDs must be strings');
+        return errorResponse(res, 400, 'ID sản phẩm trong giỏ hàng đã chọn phải là chuỗi');
       }
       if (new Set(cartItemIds).size !== cartItemIds.length) {
-        return errorResponse(res, 400, 'Selected cart item IDs must be unique');
+        return errorResponse(res, 400, 'ID sản phẩm trong giỏ hàng đã chọn phải là duy nhất');
       }
     }
 
     const order = await orderModel.checkout(userId, shippingAddress.trim(), cartItemIds);
-    return successResponse(res, 201, 'Order created successfully', order);
+    return successResponse(res, 201, 'Đã tạo đơn hàng thành công', order);
   } catch (error) {
     if (
       error.message === 'Cart is empty.' ||
@@ -53,7 +53,7 @@ const getMyOrders = async (req, res, next) => {
   try {
     const userId = req.user.id;
     const orders = await orderModel.listByUser(userId);
-    return successResponse(res, 200, 'Orders retrieved successfully', orders);
+    return successResponse(res, 200, 'Đã lấy đơn hàng thành công', orders);
   } catch (error) {
     next(error);
   }
@@ -72,17 +72,17 @@ const getOrderById = async (req, res, next) => {
     // Verify order exists
     const order = await orderModel.findById(id);
     if (!order) {
-      return errorResponse(res, 404, 'Order not found');
+      return errorResponse(res, 404, 'Không tìm thấy đơn hàng');
     }
 
     // Verify access permission
     if (order.userId !== userId && !isAdmin) {
-      return errorResponse(res, 403, 'Unauthorized access to this order');
+      return errorResponse(res, 403, 'Không được phép truy cập đơn hàng này');
     }
 
     // Retrieve full order details using helper
     const detailedOrder = await orderModel.findOwnedOrAdminVisible(id, userId, isAdmin);
-    return successResponse(res, 200, 'Order retrieved successfully', detailedOrder);
+    return successResponse(res, 200, 'Đã lấy đơn hàng thành công', detailedOrder);
   } catch (error) {
     next(error);
   }
@@ -97,7 +97,7 @@ const getAdminOrders = async (req, res, next) => {
     const { status } = req.query;
 
     const orders = await orderModel.listForAdmin(status || undefined);
-    return successResponse(res, 200, 'Admin orders retrieved successfully', orders);
+    return successResponse(res, 200, 'Đã lấy đơn hàng quản trị thành công', orders);
   } catch (error) {
     if (error.message && error.message.startsWith('Invalid status filter')) {
       return errorResponse(res, 400, error.message);
@@ -116,11 +116,11 @@ const updateOrderStatus = async (req, res, next) => {
     const { status } = req.body;
 
     if (!status || typeof status !== 'string') {
-      return errorResponse(res, 400, 'Status is required');
+      return errorResponse(res, 400, 'Trạng thái là bắt buộc');
     }
 
     const updatedOrder = await orderModel.updateStatus(id, status.trim().toLowerCase());
-    return successResponse(res, 200, 'Order status updated successfully', updatedOrder);
+    return successResponse(res, 200, 'Đã cập nhật trạng thái đơn hàng thành công', updatedOrder);
   } catch (error) {
     if (error.message && error.message.startsWith('Invalid status')) {
       return errorResponse(res, 400, error.message);

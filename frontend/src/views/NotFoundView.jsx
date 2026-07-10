@@ -18,18 +18,18 @@ export const NotFoundView = () => {
       <Card padding={6} style={{ width: '100%' }}>
         <VStack gap={4} style={{ alignItems: 'center', textAlign: 'center' }}>
           <Text size="supporting" color="accent" weight="semibold">
-            404 · Page not found
+            404 · Không tìm thấy trang
           </Text>
           <VStack gap={2} style={{ alignItems: 'center' }}>
-            <Heading level={1}>We could not find that page</Heading>
+            <Heading level={1}>Không tìm thấy trang này</Heading>
             <Text color="secondary">
-              The address may be incorrect, or the page may have moved. Use one of
-              the options below to continue browsing tsshop.
+              Địa chỉ có thể không chính xác hoặc trang đã được chuyển. Hãy chọn một
+              trong các tùy chọn bên dưới để tiếp tục duyệt tsshop.
             </Text>
           </VStack>
           <HStack gap={3} style={{ justifyContent: 'center', flexWrap: 'wrap' }}>
-            <Button label="Back to store" variant="primary" onClick={() => navigate('/')} />
-            <Button label="Browse products" variant="secondary" onClick={() => navigate('/products')} />
+            <Button label="Quay lại cửa hàng" variant="primary" onClick={() => navigate('/')} />
+            <Button label="Xem sản phẩm" variant="secondary" onClick={() => navigate('/products')} />
           </HStack>
         </VStack>
       </Card>

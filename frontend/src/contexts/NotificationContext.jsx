@@ -10,25 +10,25 @@ import { ToastViewport, useToast } from '@astryxdesign/core/Toast';
 
 const NOTIFICATION_CONFIG = {
   success: {
-    label: 'Success',
+    label: 'Thành công',
     badgeVariant: 'success',
     toastType: 'info',
     autoHideDuration: 6000,
   },
   error: {
-    label: 'Error',
+    label: 'Lỗi',
     badgeVariant: 'error',
     toastType: 'info',
     autoHideDuration: 10000,
   },
   warning: {
-    label: 'Warning',
+    label: 'Cảnh báo',
     badgeVariant: 'warning',
     toastType: 'info',
     autoHideDuration: 8000,
   },
   info: {
-    label: 'Info',
+    label: 'Thông tin',
     badgeVariant: 'info',
     toastType: 'info',
     autoHideDuration: 6000,

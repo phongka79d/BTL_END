@@ -12,15 +12,15 @@ import { useAuth } from '../contexts/AuthContext';
 import { useNotification } from '../contexts/NotificationContext';
 import ForgotPasswordForm from '../components/auth/ForgotPasswordForm';
 
-const BLOCKED_ACCOUNT_MESSAGE = 'Your account has been blocked';
-const INVALID_CREDENTIALS_MESSAGE = 'Invalid email or password';
+const BLOCKED_ACCOUNT_MESSAGE = 'Tài khoản của bạn đã bị khóa';
+const INVALID_CREDENTIALS_MESSAGE = 'Email hoặc mật khẩu không hợp lệ';
 
 const getLoginErrorTitle = (message) => (
-  message === BLOCKED_ACCOUNT_MESSAGE ? 'Account Blocked' : 'Login Failed'
+  message === BLOCKED_ACCOUNT_MESSAGE ? 'Tài khoản bị khóa' : 'Đăng nhập thất bại'
 );
 
 const getLoginErrorDescription = (message) => (
-  message === INVALID_CREDENTIALS_MESSAGE ? 'Incorrect email or password' : message
+  message === INVALID_CREDENTIALS_MESSAGE ? 'Email hoặc mật khẩu không chính xác' : message
 );
 
 /**
@@ -66,15 +66,15 @@ export const LoginView = () => {
 
     // Client-side validations
     if (!email) {
-      setEmailStatus({ type: 'error', message: 'Email is required' });
+      setEmailStatus({ type: 'error', message: 'Vui lòng nhập email' });
       hasError = true;
     } else if (!isValidEmail(email)) {
-      setEmailStatus({ type: 'error', message: 'Please enter a valid email address' });
+      setEmailStatus({ type: 'error', message: 'Vui lòng nhập địa chỉ email hợp lệ' });
       hasError = true;
     }
 
     if (!password) {
-      setPasswordStatus({ type: 'error', message: 'Password is required' });
+      setPasswordStatus({ type: 'error', message: 'Vui lòng nhập mật khẩu' });
       hasError = true;
     }
 
@@ -85,8 +85,8 @@ export const LoginView = () => {
       const res = await login(email, password);
       if (res.success) {
         notification.success({
-          title: 'Success',
-          description: 'Login successful! Redirecting...',
+          title: 'Thành công',
+          description: 'Đăng nhập thành công! Đang chuyển hướng...',
         });
         // Small delay to allow the user to see the success message
         setTimeout(() => {
@@ -97,7 +97,7 @@ export const LoginView = () => {
           }
         }, 1000);
       } else {
-        const message = res.error || 'Failed to sign in. Please verify your credentials.';
+        const message = res.error || 'Đăng nhập thất bại. Vui lòng kiểm tra thông tin đăng nhập.';
         notification.error({
           title: getLoginErrorTitle(message),
           description: getLoginErrorDescription(message),
@@ -105,8 +105,8 @@ export const LoginView = () => {
       }
     } catch (err) {
       notification.error({
-        title: 'Login Failed',
-        description: 'An unexpected error occurred. Please try again.',
+        title: 'Đăng nhập thất bại',
+        description: 'Đã xảy ra lỗi không mong muốn. Vui lòng thử lại.',
       });
     } finally {
       setIsLoading(false);
@@ -126,17 +126,17 @@ export const LoginView = () => {
     <VStack gap={4} style={{ width: '100%' }}>
       <VStack gap={1} style={{ alignItems: 'center' }}>
         <Heading level={2} style={{ fontSize: 'var(--text-title-2-size)' }}>
-          Welcome Back
+          Chào mừng bạn quay trở lại
         </Heading>
         <Text size="supporting" color="secondary">
-          Enter your details to access your account
+          Nhập thông tin để truy cập tài khoản của bạn
         </Text>
       </VStack>
 
       <form onSubmit={handleSubmit} style={{ width: '100%' }}>
         <VStack gap={4}>
           <TextInput
-            label="Email Address"
+            label="Địa chỉ email"
             type="email"
             value={email}
             onChange={(val) => {
@@ -150,7 +150,7 @@ export const LoginView = () => {
           />
 
           <TextInput
-            label="Password"
+            label="Mật khẩu"
             type="password"
             value={password}
             onChange={(val) => {
@@ -165,7 +165,7 @@ export const LoginView = () => {
 
           <HStack justify="end">
             <Button
-              label="Forgot Password?"
+              label="Quên mật khẩu?"
               variant="ghost"
               type="button"
               onClick={() => setMode('forgot-password')}
@@ -174,7 +174,7 @@ export const LoginView = () => {
           </HStack>
 
           <Button
-            label={isLoading ? 'Signing In...' : 'Sign In'}
+            label={isLoading ? 'Đang đăng nhập...' : 'Đăng nhập'}
             variant="primary"
             type="submit"
             isLoading={isLoading}
@@ -186,7 +186,7 @@ export const LoginView = () => {
 
       <HStack style={{ justifyContent: 'center', gap: 'var(--spacing-1)' }}>
         <Text size="supporting" color="secondary">
-          Don't have an account?
+          Chưa có tài khoản?
         </Text>
         <Link
           to="/register"
@@ -197,7 +197,7 @@ export const LoginView = () => {
             fontWeight: 'var(--font-weight-medium)'
           }}
         >
-          Register here
+          Đăng ký tại đây
         </Link>
       </HStack>
     </VStack>

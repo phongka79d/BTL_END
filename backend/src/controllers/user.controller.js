@@ -42,15 +42,15 @@ const getAdminUserUpdateData = (body) => {
 const getProfile = async (req, res, next) => {
   try {
     if (!req.user || !req.user.id) {
-      return errorResponse(res, 401, 'User not authenticated');
+      return errorResponse(res, 401, 'Người dùng chưa được xác thực');
     }
 
     const user = await userModel.findById(req.user.id);
     if (!user) {
-      return errorResponse(res, 404, 'User not found');
+      return errorResponse(res, 404, 'Không tìm thấy người dùng');
     }
 
-    return successResponse(res, 200, 'User profile retrieved successfully', {
+    return successResponse(res, 200, 'Đã lấy hồ sơ người dùng thành công', {
       user: serializeUser(user)
     });
   } catch (error) {
@@ -65,7 +65,7 @@ const getProfile = async (req, res, next) => {
 const updateProfile = async (req, res, next) => {
   try {
     if (!req.user || !req.user.id) {
-      return errorResponse(res, 401, 'User not authenticated');
+      return errorResponse(res, 401, 'Người dùng chưa được xác thực');
     }
 
     const { username, fullName, phone, address } = req.body;
@@ -74,7 +74,7 @@ const updateProfile = async (req, res, next) => {
     // Validate and limit updates to Plan 1 fields
     if (username !== undefined) {
       if (username === null || String(username).trim() === '') {
-        return errorResponse(res, 400, 'Username cannot be empty');
+        return errorResponse(res, 400, 'Tên người dùng không được để trống');
       }
       updateData.username = username;
     }
@@ -84,12 +84,12 @@ const updateProfile = async (req, res, next) => {
 
     // Check if there is anything to update
     if (Object.keys(updateData).length === 0) {
-      return errorResponse(res, 400, 'No fields provided for update');
+      return errorResponse(res, 400, 'Chưa cung cấp trường nào để cập nhật');
     }
 
     const updatedUser = await userModel.update(req.user.id, updateData);
 
-    return successResponse(res, 200, 'User profile updated successfully', {
+    return successResponse(res, 200, 'Đã cập nhật hồ sơ người dùng thành công', {
       user: serializeUser(updatedUser)
     });
   } catch (error) {
@@ -107,7 +107,7 @@ const getUsers = async (req, res, next) => {
     const result = await userModel.findAll({ keyword, page, limit });
     const safeUsers = result.items.map(user => serializeUser(user));
 
-    return successResponse(res, 200, 'Users retrieved successfully', {
+    return successResponse(res, 200, 'Đã lấy danh sách người dùng thành công', {
       items: safeUsers,
       pagination: result.pagination
     });
@@ -126,16 +126,16 @@ const updateUserRole = async (req, res, next) => {
     const { role } = req.body;
 
     if (!VALID_ROLES.includes(role)) {
-      return errorResponse(res, 400, 'Role must be customer or admin');
+      return errorResponse(res, 400, 'Vai trò phải là customer hoặc admin');
     }
 
     if (req.user?.id === id) {
-      return errorResponse(res, 400, 'You cannot change your own admin role');
+      return errorResponse(res, 400, 'Bạn không thể thay đổi vai trò quản trị viên của chính mình');
     }
 
     const user = await userModel.updateRole(id, role);
 
-    return successResponse(res, 200, 'User role updated successfully', {
+    return successResponse(res, 200, 'Đã cập nhật vai trò người dùng thành công', {
       user: serializeUser(user)
     });
   } catch (error) {
@@ -153,16 +153,16 @@ const updateAdminUser = async (req, res, next) => {
     const updateData = getAdminUserUpdateData(req.body);
 
     if (updateData.username !== undefined && updateData.username === '') {
-      return errorResponse(res, 400, 'Username cannot be empty');
+        return errorResponse(res, 400, 'Tên người dùng không được để trống');
     }
 
     if (Object.keys(updateData).length === 0) {
-      return errorResponse(res, 400, 'No editable fields provided for update');
+      return errorResponse(res, 400, 'Chưa cung cấp trường có thể chỉnh sửa để cập nhật');
     }
 
     const user = await userModel.updateAdminProfile(id, updateData);
 
-    return successResponse(res, 200, 'User profile updated successfully', {
+    return successResponse(res, 200, 'Đã cập nhật hồ sơ người dùng thành công', {
       user: serializeUser(user)
     });
   } catch (error) {
@@ -180,16 +180,16 @@ const updateUserBlocked = async (req, res, next) => {
     const { isBlocked } = req.body;
 
     if (typeof isBlocked !== 'boolean') {
-      return errorResponse(res, 400, 'Blocked status must be true or false');
+      return errorResponse(res, 400, 'Trạng thái khóa phải là true hoặc false');
     }
 
     if (req.user?.id === id && isBlocked) {
-      return errorResponse(res, 400, 'You cannot block your own admin account');
+      return errorResponse(res, 400, 'Bạn không thể khóa tài khoản quản trị viên của chính mình');
     }
 
     const user = await userModel.updateBlocked(id, isBlocked);
 
-    return successResponse(res, 200, isBlocked ? 'User blocked successfully' : 'User unblocked successfully', {
+    return successResponse(res, 200, isBlocked ? 'Đã khóa người dùng thành công' : 'Đã mở khóa người dùng thành công', {
       user: serializeUser(user)
     });
   } catch (error) {

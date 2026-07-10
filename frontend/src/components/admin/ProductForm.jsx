@@ -66,7 +66,7 @@ export const ProductForm = ({
       await onSubmit(createProductPayload(values));
       onOpenChange(false);
     } catch (error) {
-      setSubmitError(error?.message || 'Unable to save the product.');
+      setSubmitError(error?.message || 'Không thể lưu sản phẩm.');
     } finally {
       setIsSubmitting(false);
     }
@@ -87,8 +87,8 @@ export const ProductForm = ({
       <Layout
         header={(
           <DialogHeader
-            title={product ? 'Edit product' : 'Create product'}
-            subtitle="Required fields are validated here and again by the backend."
+            title={product ? 'Chỉnh sửa sản phẩm' : 'Tạo sản phẩm'}
+            subtitle="Các trường bắt buộc được kiểm tra tại đây và một lần nữa ở backend."
             onOpenChange={onOpenChange}
             hasDivider
           />
@@ -99,13 +99,13 @@ export const ProductForm = ({
               <VStack gap={4}>
                 {submitError && (
                   <Alert
-                    title="Unable to save product"
+                    title="Không thể lưu sản phẩm"
                     description={submitError}
                   />
                 )}
                 <FormLayout>
                   <TextInput
-                    label="Product name"
+                    label="Tên sản phẩm"
                     value={values.name}
                     onChange={(value) => updateField('name', value)}
                     status={fieldStatus(errors.name)}
@@ -113,7 +113,7 @@ export const ProductForm = ({
                     width="100%"
                   />
                   <TextInput
-                    label="Brand"
+                    label="Thương hiệu"
                     value={values.brand}
                     onChange={(value) => updateField('brand', value)}
                     status={fieldStatus(errors.brand)}
@@ -121,7 +121,7 @@ export const ProductForm = ({
                     width="100%"
                   />
                   <TextArea
-                    label="Description"
+                    label="Mô tả"
                     value={values.description}
                     onChange={(value) => updateField('description', value)}
                     rows={4}
@@ -130,7 +130,7 @@ export const ProductForm = ({
                   />
                   <FormLayout direction="horizontal">
                     <NumberInput
-                      label="Price"
+                      label="Giá"
                       value={values.price}
                       onChange={(value) => updateField('price', value)}
                       min={0}
@@ -141,7 +141,7 @@ export const ProductForm = ({
                       width="100%"
                     />
                     <NumberInput
-                      label="Quantity"
+                      label="Số lượng"
                       value={values.quantity}
                       onChange={(value) => updateField('quantity', value)}
                       min={0}
@@ -154,7 +154,7 @@ export const ProductForm = ({
                     />
                   </FormLayout>
                   <TextInput
-                    label="Image URL"
+                    label="URL hình ảnh"
                     value={values.imageUrl}
                     onChange={(value) => updateField('imageUrl', value)}
                     placeholder="https://example.com/product.jpg"
@@ -162,11 +162,11 @@ export const ProductForm = ({
                     width="100%"
                   />
                   <Selector
-                    label="Category"
+                    label="Danh mục"
                     options={categoryOptions}
                     value={values.categoryId || undefined}
                     onChange={(value) => updateField('categoryId', value)}
-                    placeholder="Select a category"
+                    placeholder="Chọn danh mục"
                     status={fieldStatus(errors.categoryId)}
                     isRequired
                     width="100%"
@@ -180,13 +180,13 @@ export const ProductForm = ({
           <LayoutFooter hasDivider>
             <HStack gap={2} justify="end">
               <Button
-                label="Cancel"
+                label="Hủy"
                 variant="secondary"
                 onClick={() => onOpenChange(false)}
                 isDisabled={isSubmitting}
               />
               <Button
-                label={product ? 'Save changes' : 'Create product'}
+              label={product ? 'Lưu thay đổi' : 'Tạo sản phẩm'}
                 type="submit"
                 form={formId}
                 variant="primary"

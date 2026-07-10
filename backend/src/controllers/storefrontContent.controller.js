@@ -16,7 +16,7 @@ const isValidationError = (error) => (
 const getPublicCarousel = async (req, res, next) => {
   try {
     const slides = await storefrontContentModel.findPublicCarouselSlides();
-    return successResponse(res, 200, 'Storefront carousel retrieved successfully', { slides });
+    return successResponse(res, 200, 'Đã lấy băng chuyền cửa hàng thành công', { slides });
   } catch (error) {
     next(error);
   }
@@ -25,7 +25,7 @@ const getPublicCarousel = async (req, res, next) => {
 const getPublicNavigation = async (req, res, next) => {
   try {
     const items = await storefrontContentModel.findPublicNavigation();
-    return successResponse(res, 200, 'Storefront navigation retrieved successfully', { items });
+    return successResponse(res, 200, 'Đã lấy điều hướng cửa hàng thành công', { items });
   } catch (error) {
     next(error);
   }
@@ -34,7 +34,7 @@ const getPublicNavigation = async (req, res, next) => {
 const getPublicFeaturedProducts = async (req, res, next) => {
   try {
     const featuredProducts = await storefrontContentModel.findPublicFeaturedProducts();
-    return successResponse(res, 200, 'Storefront featured products retrieved successfully', featuredProducts);
+    return successResponse(res, 200, 'Đã lấy sản phẩm nổi bật của cửa hàng thành công', featuredProducts);
   } catch (error) {
     next(error);
   }
@@ -43,7 +43,7 @@ const getPublicFeaturedProducts = async (req, res, next) => {
 const listAdminCarouselSlides = async (req, res, next) => {
   try {
     const slides = await storefrontContentModel.findAdminCarouselSlides();
-    return successResponse(res, 200, 'Admin storefront carousel retrieved successfully', { slides });
+    return successResponse(res, 200, 'Đã lấy băng chuyền cửa hàng quản trị thành công', { slides });
   } catch (error) {
     next(error);
   }
@@ -52,7 +52,7 @@ const listAdminCarouselSlides = async (req, res, next) => {
 const createAdminCarouselSlide = async (req, res, next) => {
   try {
     const slide = await storefrontContentModel.createCarouselSlide(req.body);
-    return successResponse(res, 201, 'Carousel slide created successfully', { slide });
+    return successResponse(res, 201, 'Đã tạo slide băng chuyền thành công', { slide });
   } catch (error) {
     if (isValidationError(error)) return errorResponse(res, 400, error.message);
     next(error);
@@ -62,9 +62,9 @@ const createAdminCarouselSlide = async (req, res, next) => {
 const updateAdminCarouselSlide = async (req, res, next) => {
   try {
     const slide = await storefrontContentModel.updateCarouselSlide(req.params.id, req.body);
-    return successResponse(res, 200, 'Carousel slide updated successfully', { slide });
+    return successResponse(res, 200, 'Đã cập nhật slide băng chuyền thành công', { slide });
   } catch (error) {
-    if (error.code === 'P2025') return errorResponse(res, 404, 'Carousel slide not found');
+    if (error.code === 'P2025') return errorResponse(res, 404, 'Không tìm thấy slide băng chuyền');
     if (isValidationError(error)) return errorResponse(res, 400, error.message);
     next(error);
   }
@@ -73,9 +73,9 @@ const updateAdminCarouselSlide = async (req, res, next) => {
 const deleteAdminCarouselSlide = async (req, res, next) => {
   try {
     await storefrontContentModel.deleteCarouselSlide(req.params.id);
-    return successResponse(res, 200, 'Carousel slide deleted successfully');
+    return successResponse(res, 200, 'Đã xóa slide băng chuyền thành công');
   } catch (error) {
-    if (error.code === 'P2025') return errorResponse(res, 404, 'Carousel slide not found');
+    if (error.code === 'P2025') return errorResponse(res, 404, 'Không tìm thấy slide băng chuyền');
     next(error);
   }
 };
@@ -83,7 +83,7 @@ const deleteAdminCarouselSlide = async (req, res, next) => {
 const listAdminNavigation = async (req, res, next) => {
   try {
     const items = await storefrontContentModel.findAdminNavigation();
-    return successResponse(res, 200, 'Admin storefront navigation retrieved successfully', { items });
+    return successResponse(res, 200, 'Đã lấy điều hướng cửa hàng quản trị thành công', { items });
   } catch (error) {
     next(error);
   }
@@ -92,7 +92,7 @@ const listAdminNavigation = async (req, res, next) => {
 const createAdminNavigationItem = async (req, res, next) => {
   try {
     const item = await storefrontContentModel.createNavigationItem(req.body);
-    return successResponse(res, 201, 'Navigation item created successfully', { item });
+    return successResponse(res, 201, 'Đã tạo mục điều hướng thành công', { item });
   } catch (error) {
     if (isValidationError(error)) return errorResponse(res, 400, error.message);
     next(error);
@@ -102,9 +102,9 @@ const createAdminNavigationItem = async (req, res, next) => {
 const updateAdminNavigationItem = async (req, res, next) => {
   try {
     const item = await storefrontContentModel.updateNavigationItem(req.params.id, req.body);
-    return successResponse(res, 200, 'Navigation item updated successfully', { item });
+    return successResponse(res, 200, 'Đã cập nhật mục điều hướng thành công', { item });
   } catch (error) {
-    if (error.code === 'P2025') return errorResponse(res, 404, 'Navigation item not found');
+    if (error.code === 'P2025') return errorResponse(res, 404, 'Không tìm thấy mục điều hướng');
     if (isValidationError(error)) return errorResponse(res, 400, error.message);
     next(error);
   }
@@ -113,9 +113,9 @@ const updateAdminNavigationItem = async (req, res, next) => {
 const deleteAdminNavigationItem = async (req, res, next) => {
   try {
     await storefrontContentModel.deleteNavigationItem(req.params.id);
-    return successResponse(res, 200, 'Navigation item deleted successfully');
+    return successResponse(res, 200, 'Đã xóa mục điều hướng thành công');
   } catch (error) {
-    if (error.code === 'P2025') return errorResponse(res, 404, 'Navigation item not found');
+    if (error.code === 'P2025') return errorResponse(res, 404, 'Không tìm thấy mục điều hướng');
     next(error);
   }
 };
@@ -123,7 +123,7 @@ const deleteAdminNavigationItem = async (req, res, next) => {
 const listAdminFeaturedProducts = async (req, res, next) => {
   try {
     const featuredProducts = await storefrontContentModel.findAdminFeaturedProducts();
-    return successResponse(res, 200, 'Admin storefront featured products retrieved successfully', featuredProducts);
+    return successResponse(res, 200, 'Đã lấy sản phẩm nổi bật của cửa hàng quản trị thành công', featuredProducts);
   } catch (error) {
     next(error);
   }
@@ -132,7 +132,7 @@ const listAdminFeaturedProducts = async (req, res, next) => {
 const createAdminFeaturedProduct = async (req, res, next) => {
   try {
     const item = await storefrontContentModel.createFeaturedProduct(req.body);
-    return successResponse(res, 201, 'Featured product created successfully', { item });
+    return successResponse(res, 201, 'Đã tạo sản phẩm nổi bật thành công', { item });
   } catch (error) {
     if (isValidationError(error)) return errorResponse(res, 400, error.message);
     next(error);
@@ -142,7 +142,7 @@ const createAdminFeaturedProduct = async (req, res, next) => {
 const createAdminFeaturedProductsBulk = async (req, res, next) => {
   try {
     const result = await storefrontContentModel.createFeaturedProductsBulk(req.body);
-    return successResponse(res, 201, 'Featured products created successfully', result);
+    return successResponse(res, 201, 'Đã tạo sản phẩm nổi bật thành công', result);
   } catch (error) {
     if (isValidationError(error)) return errorResponse(res, 400, error.message);
     next(error);
@@ -152,9 +152,9 @@ const createAdminFeaturedProductsBulk = async (req, res, next) => {
 const reorderAdminFeaturedProducts = async (req, res, next) => {
   try {
     const result = await storefrontContentModel.reorderFeaturedProducts(req.body);
-    return successResponse(res, 200, 'Featured products reordered successfully', result);
+    return successResponse(res, 200, 'Đã sắp xếp sản phẩm nổi bật thành công', result);
   } catch (error) {
-    if (error.code === 'P2025') return errorResponse(res, 404, 'Featured product not found');
+    if (error.code === 'P2025') return errorResponse(res, 404, 'Không tìm thấy sản phẩm nổi bật');
     if (isValidationError(error)) return errorResponse(res, 400, error.message);
     next(error);
   }
@@ -163,9 +163,9 @@ const reorderAdminFeaturedProducts = async (req, res, next) => {
 const updateAdminFeaturedProduct = async (req, res, next) => {
   try {
     const item = await storefrontContentModel.updateFeaturedProduct(req.params.id, req.body);
-    return successResponse(res, 200, 'Featured product updated successfully', { item });
+    return successResponse(res, 200, 'Đã cập nhật sản phẩm nổi bật thành công', { item });
   } catch (error) {
-    if (error.code === 'P2025') return errorResponse(res, 404, 'Featured product not found');
+    if (error.code === 'P2025') return errorResponse(res, 404, 'Không tìm thấy sản phẩm nổi bật');
     if (isValidationError(error)) return errorResponse(res, 400, error.message);
     next(error);
   }
@@ -174,9 +174,9 @@ const updateAdminFeaturedProduct = async (req, res, next) => {
 const deleteAdminFeaturedProduct = async (req, res, next) => {
   try {
     await storefrontContentModel.deleteFeaturedProduct(req.params.id);
-    return successResponse(res, 200, 'Featured product deleted successfully');
+    return successResponse(res, 200, 'Đã xóa sản phẩm nổi bật thành công');
   } catch (error) {
-    if (error.code === 'P2025') return errorResponse(res, 404, 'Featured product not found');
+    if (error.code === 'P2025') return errorResponse(res, 404, 'Không tìm thấy sản phẩm nổi bật');
     next(error);
   }
 };
@@ -184,7 +184,7 @@ const deleteAdminFeaturedProduct = async (req, res, next) => {
 const updateAdminStorefrontSettings = async (req, res, next) => {
   try {
     const settings = await storefrontContentModel.updateStorefrontSettings(req.body);
-    return successResponse(res, 200, 'Storefront settings updated successfully', { settings });
+    return successResponse(res, 200, 'Đã cập nhật cài đặt cửa hàng thành công', { settings });
   } catch (error) {
     if (isValidationError(error)) return errorResponse(res, 400, error.message);
     next(error);

@@ -14,7 +14,7 @@ app.use(express.json());
 
 // Phản hồi JSON an toàn tại health/root để kiểm tra khởi động.
 app.get('/api/health', (req, res) => {
-  successResponse(res, 200, 'Backend is healthy', {
+  successResponse(res, 200, 'Backend đang hoạt động bình thường', {
     uptime: process.uptime(),
     timestamp: new Date()
   });

@@ -19,7 +19,7 @@ const validateRating = (rating) => {
   const numericRating = Number(rating);
 
   if (!Number.isInteger(numericRating) || numericRating < 1 || numericRating > 5) {
-    return 'Choose a whole-number rating from 1 to 5.';
+    return 'Hãy chọn xếp hạng là số nguyên từ 1 đến 5.';
   }
 
   return '';
@@ -29,7 +29,7 @@ export const ProductReviewForm = ({
   onSubmit,
   isSubmitting: isSubmitPending = false,
   isDisabled = false,
-  title = 'Write a review'
+  title = 'Viết đánh giá'
 }) => {
   const notification = useNotification();
   const [rating, setRating] = useState(5);
@@ -58,8 +58,8 @@ export const ProductReviewForm = ({
 
     if (!onSubmit) {
       notification.error({
-        title: 'Unable to submit review',
-        description: 'Review submission is not available yet.',
+        title: 'Không thể gửi đánh giá',
+        description: 'Chức năng gửi đánh giá hiện chưa khả dụng.',
       });
       return;
     }
@@ -73,13 +73,13 @@ export const ProductReviewForm = ({
       setComment('');
       setRating(5);
       notification.success({
-        title: 'Review submitted',
-        description: 'Your review was submitted.',
+        title: 'Đã gửi đánh giá',
+        description: 'Đánh giá của bạn đã được gửi.',
       });
     } catch (error) {
       notification.error({
-        title: 'Unable to submit review',
-        description: error?.message || 'Unable to submit your review.',
+        title: 'Không thể gửi đánh giá',
+        description: error?.message || 'Không thể gửi đánh giá của bạn.',
       });
     } finally {
       setIsSubmitting(false);
@@ -101,7 +101,7 @@ export const ProductReviewForm = ({
 
           <FormLayout>
             <NumberInput
-              label="Rating"
+              label="Xếp hạng"
               value={rating}
               onChange={handleRatingChange}
               min={1}
@@ -115,21 +115,21 @@ export const ProductReviewForm = ({
             />
 
             <TextArea
-              label="Comment"
+              label="Nhận xét"
               value={comment}
               onChange={handleCommentChange}
               rows={3}
               maxLength={500}
               isOptional
               isDisabled={isDisabled || isFormBusy}
-              placeholder="Share what stood out about this product."
+              placeholder="Chia sẻ điều bạn ấn tượng về sản phẩm này."
               width="100%"
             />
           </FormLayout>
 
           <HStack gap={2} style={{ justifyContent: 'flex-end', flexWrap: 'wrap' }}>
             <Button
-              label="Submit review"
+              label="Gửi đánh giá"
               type="submit"
               variant="primary"
               isLoading={isSubmitting || isSubmitPending}

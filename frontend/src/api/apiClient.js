@@ -37,7 +37,7 @@ const request = async (endpoint, options = {}) => {
     const result = await response.json().catch(() => ({}));
 
     if (!response.ok) {
-      const error = new Error(result.message || 'An error occurred while fetching data');
+      const error = new Error(result.message || 'Đã xảy ra lỗi khi tải dữ liệu');
       error.status = response.status;
       error.errors = result.errors || [];
       error.success = false;
@@ -48,7 +48,7 @@ const request = async (endpoint, options = {}) => {
   } catch (error) {
     // Handle network errors or server downtime
     if (!error.status) {
-      error.message = 'Network error: Unable to connect to the server';
+      error.message = 'Lỗi mạng: Không thể kết nối đến máy chủ';
     }
     throw error;
   }

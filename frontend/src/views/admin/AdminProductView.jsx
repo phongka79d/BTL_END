@@ -59,7 +59,7 @@ export const AdminProductView = () => {
     } catch (error) {
       setProducts([]);
       setPagination({ ...DEFAULT_PAGINATION, page });
-      setLoadError(error?.message || 'Unable to load products.');
+        setLoadError(error?.message || 'Không thể tải sản phẩm.');
     } finally {
       setIsLoading(false);
     }
@@ -73,7 +73,7 @@ export const AdminProductView = () => {
       setCategories(response?.data?.categories || []);
     } catch (error) {
       setCategories([]);
-      setCategoryError(error?.message || 'Unable to load categories.');
+      setCategoryError(error?.message || 'Không thể tải danh mục.');
     }
   }, []);
 
@@ -100,10 +100,10 @@ export const AdminProductView = () => {
   const handleSave = async (payload) => {
     if (editingProduct) {
       await productApi.updateProduct(editingProduct.id, payload);
-      setFeedback({ title: 'Product updated', description: `${payload.name} was updated successfully.`, status: 'success' });
+      setFeedback({ title: 'Đã cập nhật sản phẩm', description: `${payload.name} đã được cập nhật thành công.`, status: 'success' });
     } else {
       await productApi.createProduct(payload);
-      setFeedback({ title: 'Product created', description: `${payload.name} was added successfully.`, status: 'success' });
+      setFeedback({ title: 'Đã tạo sản phẩm', description: `${payload.name} đã được thêm thành công.`, status: 'success' });
     }
 
     await loadProducts();
@@ -120,8 +120,8 @@ export const AdminProductView = () => {
       await productApi.deleteProduct(deleteTarget.id);
       setDeleteTarget(null);
       setFeedback({
-        title: 'Product deleted',
-        description: `${deleteTarget.name} was deleted successfully.`,
+        title: 'Đã xóa sản phẩm',
+        description: `${deleteTarget.name} đã được xóa thành công.`,
         status: 'success'
       });
 
@@ -132,8 +132,8 @@ export const AdminProductView = () => {
       }
     } catch (error) {
       setFeedback({
-        title: 'Unable to delete product',
-        description: error?.message || 'The product could not be deleted.',
+        title: 'Không thể xóa sản phẩm',
+        description: error?.message || 'Không thể xóa sản phẩm.',
         status: 'error'
       });
     } finally {
@@ -155,17 +155,17 @@ export const AdminProductView = () => {
   return (
     <VStack gap={6} width="100%">
       <VStack gap={1}>
-        <Heading level={1}>Products</Heading>
+        <Heading level={1}>Sản phẩm</Heading>
         <Text color="secondary">
-          Create, update, and remove catalog products.
+          Tạo, cập nhật và xóa sản phẩm trong danh mục.
         </Text>
       </VStack>
 
       {categoryError && (
         <Alert
-          title="Categories unavailable"
+          title="Danh mục không khả dụng"
           description={categoryError}
-          actionLabel="Retry categories"
+          actionLabel="Thử lại danh mục"
           onAction={loadCategories}
         />
       )}
@@ -179,15 +179,15 @@ export const AdminProductView = () => {
       )}
 
       <Toolbar
-        label="Product management"
+        label="Quản lý sản phẩm"
         startContent={(
           <TextInput
-            label="Search products"
+            label="Tìm kiếm sản phẩm"
             isLabelHidden
             value={draftSearch}
             onChange={setDraftSearch}
             onEnter={submitSearch}
-            placeholder="Search name or brand"
+            placeholder="Tìm theo tên hoặc thương hiệu"
             hasClear
             width="100%"
           />
@@ -195,21 +195,21 @@ export const AdminProductView = () => {
         endContent={(
           <HStack gap={2}>
             <Button
-              label="Search"
+              label="Tìm kiếm"
               variant="secondary"
               onClick={submitSearch}
               isDisabled={isLoading}
             />
             {search && (
               <Button
-                label="Clear search"
+                label="Xóa tìm kiếm"
                 variant="ghost"
                 onClick={clearSearch}
                 isDisabled={isLoading}
               />
             )}
             <Button
-              label="Create product"
+              label="Tạo sản phẩm"
               variant="primary"
               onClick={openCreateForm}
               isDisabled={categories.length === 0}
@@ -227,13 +227,13 @@ export const AdminProductView = () => {
         onEdit={openEditForm}
         onDelete={setDeleteTarget}
         onRetry={loadProducts}
-        emptyTitle={search ? 'No matching products' : 'No products yet'}
+        emptyTitle={search ? 'Không có sản phẩm phù hợp' : 'Chưa có sản phẩm'}
         emptyDescription={
           search
-            ? 'Clear the search or try another product name or brand.'
-            : 'Create the first product to populate the catalog.'
+            ? 'Hãy xóa tìm kiếm hoặc thử tên sản phẩm hay thương hiệu khác.'
+            : 'Hãy tạo sản phẩm đầu tiên để bổ sung vào danh mục.'
         }
-        emptyActionLabel={search ? 'Clear search' : 'Create product'}
+        emptyActionLabel={search ? 'Xóa tìm kiếm' : 'Tạo sản phẩm'}
         emptyActionDisabled={!search && categories.length === 0}
         onEmptyAction={search ? clearSearch : openCreateForm}
       />
@@ -261,13 +261,13 @@ export const AdminProductView = () => {
             setDeleteTarget(null);
           }
         }}
-        title="Delete product?"
+        title="Xóa sản phẩm?"
         description={
           deleteTarget
-            ? `${deleteTarget.name} will be permanently removed from the catalog.`
-            : 'This product will be permanently removed from the catalog.'
+            ? `${deleteTarget.name} sẽ bị xóa vĩnh viễn khỏi danh mục.`
+            : 'Sản phẩm này sẽ bị xóa vĩnh viễn khỏi danh mục.'
         }
-        actionLabel="Delete product"
+        actionLabel="Xóa sản phẩm"
         isActionLoading={isDeleting}
         onAction={handleDelete}
       />

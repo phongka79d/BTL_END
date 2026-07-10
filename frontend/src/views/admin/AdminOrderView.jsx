@@ -29,7 +29,7 @@ import Pagination from '../../components/common/Pagination';
 const PAGE_SIZE = 12;
 
 const STATUS_FILTER_OPTIONS = [
-  { label: 'All statuses', value: '' },
+  { label: 'Tất cả trạng thái', value: '' },
   ...ORDER_STATUS_VALUES.map((value) => ({
     label: ORDER_STATUS_LABELS[value] || value,
     value,
@@ -93,9 +93,9 @@ export const AdminOrderView = () => {
       setOrders([]);
 
       if (err?.status === 403) {
-        setError('You do not have permission to access admin orders.');
+        setError('Bạn không có quyền truy cập đơn hàng quản trị.');
       } else {
-        setError(err?.message || 'Unable to load orders. Please try again.');
+        setError(err?.message || 'Không thể tải đơn hàng. Vui lòng thử lại.');
       }
     } finally {
       setIsLoading(false);
@@ -141,7 +141,7 @@ export const AdminOrderView = () => {
     () => [
       {
         key: 'customer',
-        header: 'Customer',
+        header: 'Khách hàng',
         width: proportional(2),
         renderCell: (order) => (
           <VStack gap={0}>
@@ -156,7 +156,7 @@ export const AdminOrderView = () => {
       },
       {
         key: 'id',
-        header: 'Order ID',
+        header: 'Mã đơn hàng',
         width: proportional(1),
         renderCell: (order) => (
           <Text size="supporting" hasTabularNumbers>
@@ -166,7 +166,7 @@ export const AdminOrderView = () => {
       },
       {
         key: 'createdAt',
-        header: 'Date',
+        header: 'Ngày',
         width: proportional(1.5),
         renderCell: (order) => (
           <Text size="supporting" color="secondary">
@@ -176,7 +176,7 @@ export const AdminOrderView = () => {
       },
       {
         key: 'totalAmount',
-        header: 'Total',
+        header: 'Tổng cộng',
         width: proportional(1),
         align: 'end',
         renderCell: (order) => (
@@ -187,7 +187,7 @@ export const AdminOrderView = () => {
       },
       {
         key: 'status',
-        header: 'Order Status',
+        header: 'Trạng thái đơn hàng',
         width: proportional(2),
         renderCell: (order) => (
           <OrderStatusSelect
@@ -198,7 +198,7 @@ export const AdminOrderView = () => {
       },
       {
         key: 'paymentStatus',
-        header: 'Payment',
+        header: 'Thanh toán',
         width: proportional(1),
         renderCell: (order) => {
           const paymentStatus = order.payment?.paymentStatus || 'unpaid';
@@ -207,7 +207,7 @@ export const AdminOrderView = () => {
       },
       {
         key: 'actions',
-        header: 'Actions',
+        header: 'Thao tác',
         width: pixel(72),
         align: 'end',
         resizable: false,
@@ -216,7 +216,7 @@ export const AdminOrderView = () => {
             label={`Actions for order ${buildOrderId(order.id)}`}
             items={[
               {
-                label: 'View Details',
+            label: 'Xem chi tiết',
                 onClick: () => handleViewDetails(order),
               },
             ]}
@@ -238,14 +238,14 @@ export const AdminOrderView = () => {
         }}
       >
         <VStack gap={1}>
-          <Heading level={1}>Manage Orders</Heading>
+          <Heading level={1}>Quản lý đơn hàng</Heading>
           <Text color="secondary">
-            View and manage all customer orders.
+            Xem và quản lý tất cả đơn hàng của khách hàng.
           </Text>
         </VStack>
 
         <EmptyState
-          title="Access denied"
+          title="Truy cập bị từ chối"
           description={error}
           isCompact
         />
@@ -264,9 +264,9 @@ export const AdminOrderView = () => {
         }}
       >
         <VStack gap={1}>
-          <Heading level={1}>Manage Orders</Heading>
+          <Heading level={1}>Quản lý đơn hàng</Heading>
           <Text color="secondary">
-            View and manage all customer orders.
+            Xem và quản lý tất cả đơn hàng của khách hàng.
           </Text>
         </VStack>
 
@@ -290,16 +290,16 @@ export const AdminOrderView = () => {
         }}
       >
         <VStack gap={1}>
-          <Heading level={1}>Manage Orders</Heading>
+          <Heading level={1}>Quản lý đơn hàng</Heading>
           <Text color="secondary">
-            View and manage all customer orders.
+            Xem và quản lý tất cả đơn hàng của khách hàng.
           </Text>
         </VStack>
 
         <Alert
-          title="Unable to load orders"
+          title="Không thể tải đơn hàng"
           description={error}
-          actionLabel="Retry"
+          actionLabel="Thử lại"
           onAction={fetchOrders}
         />
       </VStack>
@@ -317,29 +317,29 @@ export const AdminOrderView = () => {
         }}
       >
         <VStack gap={1}>
-          <Heading level={1}>Manage Orders</Heading>
+          <Heading level={1}>Quản lý đơn hàng</Heading>
           <Text color="secondary">
-            View and manage all customer orders.
+            Xem và quản lý tất cả đơn hàng của khách hàng.
           </Text>
         </VStack>
 
         <Toolbar
-          label="Order filters"
+          label="Bộ lọc đơn hàng"
           startContent={
             <Selector
-              label="Filter by status"
+              label="Lọc theo trạng thái"
               isLabelHidden
               value={statusFilter}
               onChange={setStatusFilter}
               options={STATUS_FILTER_OPTIONS}
-              placeholder="All statuses"
+              placeholder="Tất cả trạng thái"
               width="220px"
             />
           }
           endContent={
             statusFilter ? (
               <Button
-                label="Clear filter"
+                label="Xóa bộ lọc"
                 variant="ghost"
                 onClick={() => setStatusFilter('')}
               />
@@ -350,11 +350,11 @@ export const AdminOrderView = () => {
         <AdminTable
           columns={columns}
           data={[]}
-          emptyTitle={statusFilter ? 'No matching orders' : 'No orders yet'}
+          emptyTitle={statusFilter ? 'Không có đơn hàng phù hợp' : 'Chưa có đơn hàng'}
           emptyDescription={
             statusFilter
-              ? `No orders with status "${ORDER_STATUS_LABELS[statusFilter] || statusFilter}". Clear the filter or try a different status.`
-              : 'No orders have been placed yet. Orders will appear here once customers complete checkout.'
+              ? `Không có đơn hàng với trạng thái "${ORDER_STATUS_LABELS[statusFilter] || statusFilter}". Hãy xóa bộ lọc hoặc thử trạng thái khác.`
+              : 'Chưa có đơn hàng nào được đặt. Đơn hàng sẽ xuất hiện tại đây sau khi khách hàng hoàn tất thanh toán.'
           }
           isLoading={isLoading}
           error={null}
@@ -373,31 +373,31 @@ export const AdminOrderView = () => {
       }}
     >
       <VStack gap={1}>
-        <Heading level={1}>Manage Orders</Heading>
+        <Heading level={1}>Quản lý đơn hàng</Heading>
         <Text color="secondary">
           {statusFilter
-            ? `${orders.length} order${orders.length !== 1 ? 's' : ''} with status "${ORDER_STATUS_LABELS[statusFilter] || statusFilter}"`
-            : `${orders.length} order${orders.length !== 1 ? 's' : ''} total`}
+            ? `${orders.length} đơn hàng với trạng thái "${ORDER_STATUS_LABELS[statusFilter] || statusFilter}"`
+            : `Tổng cộng ${orders.length} đơn hàng`}
         </Text>
       </VStack>
 
       <Toolbar
-        label="Order filters"
+        label="Bộ lọc đơn hàng"
         startContent={
           <Selector
-            label="Filter by status"
+            label="Lọc theo trạng thái"
             isLabelHidden
             value={statusFilter}
             onChange={setStatusFilter}
             options={STATUS_FILTER_OPTIONS}
-            placeholder="All statuses"
+            placeholder="Tất cả trạng thái"
             width="220px"
           />
         }
         endContent={
           statusFilter ? (
             <Button
-              label="Clear filter"
+              label="Xóa bộ lọc"
               variant="ghost"
               onClick={() => setStatusFilter('')}
             />
@@ -408,8 +408,8 @@ export const AdminOrderView = () => {
       <AdminTable
         columns={columns}
         data={pagedOrders}
-        emptyTitle="No orders found"
-        emptyDescription="No orders match the current filter. Try a different status."
+        emptyTitle="Không tìm thấy đơn hàng"
+        emptyDescription="Không có đơn hàng phù hợp với bộ lọc hiện tại. Hãy thử trạng thái khác."
         isLoading={false}
         error={null}
       />

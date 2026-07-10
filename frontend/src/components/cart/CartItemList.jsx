@@ -66,8 +66,8 @@ export const CartItemList = ({
     return (
       <VStack gap={4}>
         <VStack gap={1}>
-          <Heading level={2}>Cart items</Heading>
-          <Text color="secondary">Loading your cart from the backend.</Text>
+          <Heading level={2}>Sản phẩm trong giỏ hàng</Heading>
+          <Text color="secondary">Đang tải giỏ hàng từ backend.</Text>
         </VStack>
 
         <VStack gap={3}>
@@ -81,9 +81,9 @@ export const CartItemList = ({
   if (error) {
     return (
       <Alert
-        title="Unable to load cart"
+        title="Không thể tải giỏ hàng"
         description={error}
-        actionLabel="Retry"
+        actionLabel="Thử lại"
         onAction={onRetry}
       />
     );
@@ -92,12 +92,12 @@ export const CartItemList = ({
   if (!items.length) {
     return (
       <EmptyState
-        title="Your cart is empty"
-        description="Browse the catalog and add products to start building an order."
+        title="Giỏ hàng trống"
+        description="Hãy xem danh mục và thêm sản phẩm để bắt đầu tạo đơn hàng."
         icon={<CartIcon />}
         actions={(
           <Button
-            label="Browse products"
+            label="Xem sản phẩm"
             variant="primary"
             onClick={onBrowseProducts}
           />
@@ -111,16 +111,16 @@ export const CartItemList = ({
       <VStack gap={1}>
         <HStack gap={3} style={{ alignItems: 'center', flexWrap: 'wrap' }}>
           <CheckboxInput
-            label="Select all products"
+            label="Chọn tất cả sản phẩm"
             value={selectAllValue}
             onChange={onSelectAll}
             size="sm"
             isDisabled={isBusy}
           />
-          <Heading level={2}>Cart items</Heading>
+          <Heading level={2}>Sản phẩm trong giỏ hàng</Heading>
         </HStack>
         <Text color="secondary">
-          {selectedProductCount} of {items.length} products selected for checkout. Save quantity changes before checkout.
+          Đã chọn {selectedProductCount}/{items.length} sản phẩm để thanh toán. Hãy lưu thay đổi số lượng trước khi thanh toán.
         </Text>
       </VStack>
 

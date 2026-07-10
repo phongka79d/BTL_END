@@ -12,8 +12,8 @@ export const ProductList = ({
   isLoading = false,
   error = null,
   onRetry,
-  emptyTitle = 'No products found',
-  emptyDescription = 'Try adjusting your search or filter criteria.',
+  emptyTitle = 'Không tìm thấy sản phẩm',
+  emptyDescription = 'Hãy điều chỉnh tiêu chí tìm kiếm hoặc bộ lọc.',
   pagination = null,
   onPageChange,
   skeletonCount = 6
@@ -35,9 +35,9 @@ export const ProductList = ({
   if (error) {
     return (
       <Alert
-        title="Unable to load products"
+        title="Không thể tải sản phẩm"
         description={error}
-        actionLabel="Try again"
+        actionLabel="Thử lại"
         onAction={onRetry}
       />
     );
@@ -51,7 +51,7 @@ export const ProductList = ({
         icon={<Icon icon="search" />}
         actions={onRetry ? (
           <Button
-            label="Try again"
+            label="Thử lại"
             variant="secondary"
             onClick={onRetry}
           />

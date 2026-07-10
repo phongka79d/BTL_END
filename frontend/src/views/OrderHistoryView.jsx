@@ -66,7 +66,7 @@ export const OrderHistoryView = () => {
 
       setOrders(data);
     } catch (err) {
-      setError(err?.message || 'Unable to load your orders. Please try again.');
+      setError(err?.message || 'Không thể tải đơn hàng của bạn. Vui lòng thử lại.');
     } finally {
       setIsLoading(false);
     }
@@ -92,7 +92,7 @@ export const OrderHistoryView = () => {
     () => [
       {
         key: 'id',
-        header: 'Order ID',
+        header: 'Mã đơn hàng',
         renderCell: (order) => (
           <Text size="supporting" hasTabularNumbers>
             {`#${order.id.slice(0, 8)}…`}
@@ -101,7 +101,7 @@ export const OrderHistoryView = () => {
       },
       {
         key: 'createdAt',
-        header: 'Date',
+        header: 'Ngày',
         renderCell: (order) => (
           <Text size="supporting" color="secondary">
             {formatDate(order.createdAt)}
@@ -110,7 +110,7 @@ export const OrderHistoryView = () => {
       },
       {
         key: 'totalAmount',
-        header: 'Total',
+        header: 'Tổng cộng',
         align: 'end',
         renderCell: (order) => (
           <Text weight="semibold" hasTabularNumbers>
@@ -120,12 +120,12 @@ export const OrderHistoryView = () => {
       },
       {
         key: 'status',
-        header: 'Status',
+        header: 'Trạng thái',
         renderCell: (order) => <OrderStatusBadge status={order.status} />,
       },
       {
         key: 'paymentStatus',
-        header: 'Payment',
+        header: 'Thanh toán',
         renderCell: (order) => {
           const paymentStatus = order.payment?.paymentStatus || 'unpaid';
           return <PaymentStatusBadge status={paymentStatus} />;
@@ -133,11 +133,11 @@ export const OrderHistoryView = () => {
       },
       {
         key: 'actions',
-        header: 'Actions',
+        header: 'Thao tác',
         align: 'end',
         renderCell: (order) => (
           <Button
-            label="View"
+            label="Xem"
             variant="ghost"
             size="small"
             onClick={() => navigate(`/orders/${order.id}`)}
@@ -161,9 +161,9 @@ export const OrderHistoryView = () => {
         }}
       >
         <VStack gap={1}>
-          <Heading level={1}>My Orders</Heading>
+          <Heading level={1}>Đơn hàng của tôi</Heading>
           <Text color="secondary">
-            View and track your order history.
+            Xem và theo dõi lịch sử đơn hàng của bạn.
           </Text>
         </VStack>
 
@@ -195,16 +195,16 @@ export const OrderHistoryView = () => {
         }}
       >
         <VStack gap={1}>
-          <Heading level={1}>My Orders</Heading>
+          <Heading level={1}>Đơn hàng của tôi</Heading>
           <Text color="secondary">
-            View and track your order history.
+            Xem và theo dõi lịch sử đơn hàng của bạn.
           </Text>
         </VStack>
 
         <Alert
-          title="Unable to load orders"
+          title="Không thể tải đơn hàng"
           description={error}
-          actionLabel="Retry"
+          actionLabel="Thử lại"
           onAction={fetchOrders}
         />
       </VStack>
@@ -224,24 +224,24 @@ export const OrderHistoryView = () => {
         }}
       >
         <VStack gap={1}>
-          <Heading level={1}>My Orders</Heading>
+          <Heading level={1}>Đơn hàng của tôi</Heading>
           <Text color="secondary">
-            View and track your order history.
+            Xem và theo dõi lịch sử đơn hàng của bạn.
           </Text>
         </VStack>
 
         <EmptyState
-          title="No orders yet"
-          description="You haven't placed any orders. Start shopping to see your order history here."
+          title="Chưa có đơn hàng"
+          description="Bạn chưa đặt đơn hàng nào. Hãy bắt đầu mua sắm để xem lịch sử đơn hàng tại đây."
           actions={
             <HStack gap={3} style={{ justifyContent: 'center', flexWrap: 'wrap' }}>
               <Button
-                label="Browse products"
+                label="Xem sản phẩm"
                 variant="primary"
                 onClick={() => navigate('/products')}
               />
               <Button
-                label="View cart"
+                label="Xem giỏ hàng"
                 variant="secondary"
                 onClick={() => navigate('/cart')}
               />
@@ -264,9 +264,9 @@ export const OrderHistoryView = () => {
       }}
     >
       <VStack gap={1}>
-        <Heading level={1}>My Orders</Heading>
+        <Heading level={1}>Đơn hàng của tôi</Heading>
         <Text color="secondary">
-          You have {orders.length} order{orders.length !== 1 ? 's' : ''}.
+          Bạn có {orders.length} đơn hàng.
         </Text>
       </VStack>
 

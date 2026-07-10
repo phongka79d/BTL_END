@@ -15,15 +15,15 @@ export const RevenueSummaryCard = ({
   isLoading = false,
   totalRevenue = 0,
 }) => (
-  <Card padding={4} aria-label="Revenue summary">
+  <Card padding={4} aria-label="Tổng quan doanh thu">
     <VStack gap={3}>
       <HStack justify="between" align="center" gap={2}>
-        <Heading level={2}>Revenue summary</Heading>
-        <Badge variant="success" label="Paid COD" />
+        <Heading level={2}>Tổng quan doanh thu</Heading>
+        <Badge variant="success" label="COD đã thanh toán" />
       </HStack>
 
       {isLoading ? (
-        <VStack gap={2} aria-label="Loading revenue summary">
+        <VStack gap={2} aria-label="Đang tải tổng quan doanh thu">
           <Skeleton width="60%" height="var(--spacing-8)" radius="rounded" />
           <Skeleton width="40%" height="var(--spacing-5)" radius="rounded" />
         </VStack>
@@ -33,7 +33,7 @@ export const RevenueSummaryCard = ({
             {formatPrice(totalRevenue)}
           </Text>
           <Text color="secondary" hasTabularNumbers>
-            Completed orders: {Number(completedOrderCount || 0).toLocaleString('vi-VN')}
+            Đơn hàng hoàn tất: {Number(completedOrderCount || 0).toLocaleString('vi-VN')}
           </Text>
         </VStack>
       )}

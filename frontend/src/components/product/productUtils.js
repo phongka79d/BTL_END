@@ -28,14 +28,14 @@ export const getStockLabel = (quantity) => {
   const stock = Number(quantity ?? 0);
 
   if (stock <= 0) {
-    return 'Out of stock';
+    return 'Hết hàng';
   }
 
   if (stock <= 5) {
-    return 'Low stock';
+    return 'Sắp hết hàng';
   }
 
-  return 'In stock';
+  return 'Còn hàng';
 };
 
 export const getStockVariant = (quantity) => {

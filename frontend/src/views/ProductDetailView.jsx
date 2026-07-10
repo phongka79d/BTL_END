@@ -41,10 +41,10 @@ const clampQuantity = (value, maxQuantity) => {
 const DetailSkeleton = () => {
   return (
     <VStack gap={5} style={{ width: '100%', maxWidth: '72rem', marginInline: 'auto' }}>
-      <Breadcrumbs variant="supporting" label="Product details">
-        <BreadcrumbItem as={Link} href="/">Home</BreadcrumbItem>
-        <BreadcrumbItem as={Link} href="/products">Products</BreadcrumbItem>
-        <BreadcrumbItem isCurrent>Loading product</BreadcrumbItem>
+      <Breadcrumbs variant="supporting" label="Chi tiết sản phẩm">
+        <BreadcrumbItem as={Link} href="/">Trang chủ</BreadcrumbItem>
+        <BreadcrumbItem as={Link} href="/products">Sản phẩm</BreadcrumbItem>
+        <BreadcrumbItem isCurrent>Đang tải sản phẩm</BreadcrumbItem>
       </Breadcrumbs>
 
       <Grid columns={{ minWidth: 280, max: 2 }} gap={5} style={{ alignItems: 'start' }}>
@@ -215,7 +215,7 @@ export const ProductDetailView = () => {
         setIsNotFound(true);
       } else {
         setProduct(null);
-        setError(err?.message || 'Unable to load product details.');
+        setError(err?.message || 'Không thể tải chi tiết sản phẩm.');
       }
     } finally {
       if (requestId === requestIdRef.current) {
@@ -260,7 +260,7 @@ export const ProductDetailView = () => {
       }
 
       setReviews([]);
-      setReviewsError(err?.message || 'Unable to load customer reviews.');
+      setReviewsError(err?.message || 'Không thể tải đánh giá của khách hàng.');
     } finally {
       if (requestId === reviewRequestIdRef.current) {
         setIsReviewsLoading(false);
@@ -280,7 +280,7 @@ export const ProductDetailView = () => {
   const stockLabel = getStockLabel(availableQuantity);
   const stockVariant = getStockVariant(availableQuantity);
   const maxSelectableQuantity = availableQuantity > 0 ? availableQuantity : 1;
-  const currentTitle = product?.name || (isLoading ? 'Loading product' : `Product ${id}`);
+  const currentTitle = product?.name || (isLoading ? 'Đang tải sản phẩm' : `Sản phẩm ${id}`);
 
   useEffect(() => {
     setQuantity((currentValue) => clampQuantity(currentValue, maxSelectableQuantity));
@@ -293,7 +293,7 @@ export const ProductDetailView = () => {
 
     return {
       type: 'warning',
-      message: 'This product is currently out of stock.'
+      message: 'Sản phẩm này hiện đã hết hàng.'
     };
   }, [availableQuantity]);
 
@@ -314,9 +314,9 @@ export const ProductDetailView = () => {
     if (result.success) {
       setFeedback({
         status: 'success',
-        title: 'Added to cart',
-        description: `${quantity} ${quantity === 1 ? 'unit' : 'units'} of ${product.name} was added to your cart.`,
-        actionLabel: 'View cart',
+        title: 'Đã thêm vào giỏ hàng',
+        description: `${quantity} ${quantity === 1 ? 'đơn vị' : 'đơn vị'} của ${product.name} đã được thêm vào giỏ hàng.`,
+        actionLabel: 'Xem giỏ hàng',
         onAction: () => navigate('/cart')
       });
       return;
@@ -325,9 +325,9 @@ export const ProductDetailView = () => {
     const signInRequired = !isAuthenticated;
     setFeedback({
       status: 'error',
-      title: signInRequired ? 'Sign in required' : 'Unable to add to cart',
-      description: result.error || 'The item could not be added to the cart.',
-      actionLabel: signInRequired ? 'Sign in' : undefined,
+      title: signInRequired ? 'Yêu cầu đăng nhập' : 'Không thể thêm vào giỏ hàng',
+      description: result.error || 'Không thể thêm sản phẩm vào giỏ hàng.',
+      actionLabel: signInRequired ? 'Đăng nhập' : undefined,
       onAction: signInRequired ? () => navigate('/login') : undefined
     });
   };
@@ -336,7 +336,7 @@ export const ProductDetailView = () => {
 
   const handleReviewSubmit = async (payload) => {
     if (!product) {
-      throw new Error('Product details are not available yet.');
+      throw new Error('Thông tin sản phẩm hiện chưa khả dụng.');
     }
 
     setIsReviewSubmitting(true);
@@ -355,21 +355,21 @@ export const ProductDetailView = () => {
   if (error) {
     return (
       <VStack gap={4} style={{ width: '100%', maxWidth: '72rem', marginInline: 'auto' }}>
-        <Breadcrumbs variant="supporting" label="Product details">
-          <BreadcrumbItem as={Link} href="/">Home</BreadcrumbItem>
-          <BreadcrumbItem as={Link} href="/products">Products</BreadcrumbItem>
+        <Breadcrumbs variant="supporting" label="Chi tiết sản phẩm">
+          <BreadcrumbItem as={Link} href="/">Trang chủ</BreadcrumbItem>
+          <BreadcrumbItem as={Link} href="/products">Sản phẩm</BreadcrumbItem>
           <BreadcrumbItem isCurrent>{currentTitle}</BreadcrumbItem>
         </Breadcrumbs>
 
         <Alert
-          title="Unable to load product"
+          title="Không thể tải sản phẩm"
           description={error}
-          actionLabel="Retry"
+          actionLabel="Thử lại"
           onAction={loadProduct}
         />
 
         <Button
-          label="Back to products"
+          label="Quay lại sản phẩm"
           variant="secondary"
           onClick={() => navigate('/products')}
         />
@@ -380,19 +380,19 @@ export const ProductDetailView = () => {
   if (isNotFound || !product) {
     return (
       <VStack gap={4} style={{ width: '100%', maxWidth: '72rem', marginInline: 'auto' }}>
-        <Breadcrumbs variant="supporting" label="Product details">
-          <BreadcrumbItem as={Link} href="/">Home</BreadcrumbItem>
-          <BreadcrumbItem as={Link} href="/products">Products</BreadcrumbItem>
+        <Breadcrumbs variant="supporting" label="Chi tiết sản phẩm">
+          <BreadcrumbItem as={Link} href="/">Trang chủ</BreadcrumbItem>
+          <BreadcrumbItem as={Link} href="/products">Sản phẩm</BreadcrumbItem>
           <BreadcrumbItem isCurrent>{currentTitle}</BreadcrumbItem>
         </Breadcrumbs>
 
         <EmptyState
-          title="Product not found"
-          description="The item you were looking for is no longer available in the catalog."
+          title="Không tìm thấy sản phẩm"
+          description="Sản phẩm bạn đang tìm không còn trong danh mục."
           icon={<Icon icon="search" />}
           actions={(
             <Button
-              label="Back to products"
+              label="Quay lại sản phẩm"
               variant="secondary"
               onClick={() => navigate('/products')}
             />
@@ -404,9 +404,9 @@ export const ProductDetailView = () => {
 
   return (
     <VStack gap={5} style={{ width: '100%', maxWidth: '72rem', marginInline: 'auto' }}>
-      <Breadcrumbs variant="supporting" label="Product details">
-        <BreadcrumbItem as={Link} href="/">Home</BreadcrumbItem>
-        <BreadcrumbItem as={Link} href="/products">Products</BreadcrumbItem>
+      <Breadcrumbs variant="supporting" label="Chi tiết sản phẩm">
+        <BreadcrumbItem as={Link} href="/">Trang chủ</BreadcrumbItem>
+        <BreadcrumbItem as={Link} href="/products">Sản phẩm</BreadcrumbItem>
         <BreadcrumbItem isCurrent>{currentTitle}</BreadcrumbItem>
       </Breadcrumbs>
 
@@ -466,13 +466,13 @@ export const ProductDetailView = () => {
           <Card padding={4}>
             <VStack gap={3}>
               <VStack gap={1}>
-                <Text weight="semibold">Sign in to write a review</Text>
+                <Text weight="semibold">Đăng nhập để viết đánh giá</Text>
                 <Text size="supporting" color="secondary">
-                  Customer accounts can submit ratings and optional comments for this product.
+                  Tài khoản khách hàng có thể gửi đánh giá và nhận xét tùy chọn cho sản phẩm này.
                 </Text>
               </VStack>
               <Button
-                label={isAuthenticated ? 'Use a customer account' : 'Sign in'}
+                label={isAuthenticated ? 'Sử dụng tài khoản khách hàng' : 'Đăng nhập'}
                 variant="secondary"
                 onClick={() => navigate('/login')}
               />

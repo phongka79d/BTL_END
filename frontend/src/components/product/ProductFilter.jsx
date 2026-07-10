@@ -62,7 +62,7 @@ export const ProductFilter = ({
           />
 
           <VStack gap={2}>
-            <Text weight="medium">Category</Text>
+            <Text weight="medium">Danh mục</Text>
             <HStack gap={2} style={{ flexWrap: 'wrap' }}>
               <Link
                 to={toCategoryHref('', filters)}
@@ -72,7 +72,7 @@ export const ProductFilter = ({
                 All categories
               </Link>
               {isCategoriesLoading && (
-                <Text color="secondary" size="supporting">Loading categories...</Text>
+                <Text color="secondary" size="supporting">Đang tải danh mục...</Text>
               )}
               {!isCategoriesLoading && categories.map((category) => (
                 <Link
@@ -89,39 +89,39 @@ export const ProductFilter = ({
 
           <Grid columns={{ minWidth: 220, max: 2 }} gap={3}>
             <NumberInput
-              label="Minimum price"
+              label="Giá tối thiểu"
               value={toNumberValue(filters.minPrice)}
               onChange={(value) => onFieldChange('minPrice', value === null ? '' : String(value))}
               hasClear
               min={0}
               step={1}
               units="VND"
-              placeholder="No minimum"
+              placeholder="Không giới hạn tối thiểu"
               isDisabled={isDisabled}
             />
 
             <NumberInput
-              label="Maximum price"
+              label="Giá tối đa"
               value={toNumberValue(filters.maxPrice)}
               onChange={(value) => onFieldChange('maxPrice', value === null ? '' : String(value))}
               hasClear
               min={0}
               step={1}
               units="VND"
-              placeholder="No maximum"
+              placeholder="Không giới hạn tối đa"
               isDisabled={isDisabled}
             />
           </Grid>
 
           <HStack gap={3} style={{ flexWrap: 'wrap' }}>
             <Button
-              label="Apply filters"
+              label="Áp dụng bộ lọc"
               variant="primary"
               type="submit"
               isDisabled={isDisabled}
             />
             <Button
-              label="Clear filters"
+              label="Xóa bộ lọc"
               variant="secondary"
               type="button"
               isDisabled={isDisabled}

@@ -14,7 +14,7 @@ export const getCategoryFormValues = (category) => (
 
 export const validateCategoryForm = (values) => {
   if (!values.name?.trim()) {
-    return { name: 'Category name is required.' };
+    return { name: 'Vui lòng nhập tên danh mục.' };
   }
 
   return {};

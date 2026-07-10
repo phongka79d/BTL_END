@@ -6,7 +6,7 @@
  * @param {Object} [data={}] - Dữ liệu trả về (mặc định {}).
  * @returns {Object} response JSON.
  */
-const successResponse = (res, statusCode = 200, message = 'Success', data = {}) => {
+const successResponse = (res, statusCode = 200, message = 'Thành công', data = {}) => {
   return res.status(statusCode).json({
     success: true,
     message,
@@ -22,7 +22,7 @@ const successResponse = (res, statusCode = 200, message = 'Success', data = {}) 
  * @param {Array} [errors=[]] - Danh sách lỗi chi tiết (mặc định []).
  * @returns {Object} response JSON.
  */
-const errorResponse = (res, statusCode = 500, message = 'Error', errors = []) => {
+const errorResponse = (res, statusCode = 500, message = 'Lỗi', errors = []) => {
   return res.status(statusCode).json({
     success: false,
     message,

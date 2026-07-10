@@ -32,7 +32,7 @@ export const LinkTargetFields = ({
   return (
     <FormLayout>
       <Selector
-        label={fieldPrefix ? 'Featured link type' : 'Link type'}
+        label={fieldPrefix ? 'Loại liên kết nổi bật' : 'Loại liên kết'}
         options={LINK_TYPE_OPTIONS}
         value={linkType}
         onChange={(value) => updateField(linkTypeKey, value)}
@@ -47,21 +47,21 @@ export const LinkTargetFields = ({
       )}
       {linkType === 'category' && (
         <Selector
-          label="Category target"
+          label="Danh mục đích"
           options={toCategoryOptions(categories)}
           value={values[categoryIdKey] || undefined}
           onChange={(value) => updateField(categoryIdKey, value)}
-          placeholder="Select category"
+          placeholder="Chọn danh mục"
           status={fieldStatus(errors[categoryIdKey])}
           width="100%"
         />
       )}
       {linkType === 'customUrl' && (
         <TextInput
-          label="Custom URL"
+          label="URL tùy chỉnh"
           value={values[customUrlKey]}
           onChange={(value) => updateField(customUrlKey, value)}
-          placeholder="/products or https://example.com"
+          placeholder="/products hoặc https://example.com"
           status={fieldStatus(errors[customUrlKey])}
           width="100%"
         />

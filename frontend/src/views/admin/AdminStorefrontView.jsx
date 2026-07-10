@@ -63,7 +63,7 @@ export const AdminStorefrontView = () => {
       setFeaturedProducts([]);
       setFeaturedSettings(defaultFeaturedSettings);
       setCategories([]);
-      setLoadError(error?.message || 'Unable to load storefront content.');
+      setLoadError(error?.message || 'Không thể tải nội dung cửa hàng.');
     } finally {
       setIsLoading(false);
     }
@@ -98,10 +98,10 @@ export const AdminStorefrontView = () => {
   const saveSlide = async (payload) => {
     if (editingSlide?.id) {
       await storefrontContentApi.updateCarouselSlide(editingSlide.id, payload);
-      setFeedback({ title: 'Slide updated', description: `${payload.title} was updated.`, status: 'success' });
+      setFeedback({ title: 'Đã cập nhật slide', description: `${payload.title} đã được cập nhật.`, status: 'success' });
     } else {
       await storefrontContentApi.createCarouselSlide(payload);
-      setFeedback({ title: 'Slide created', description: `${payload.title} was created.`, status: 'success' });
+      setFeedback({ title: 'Đã tạo slide', description: `${payload.title} đã được tạo.`, status: 'success' });
     }
     await loadStorefront();
   };
@@ -110,10 +110,10 @@ export const AdminStorefrontView = () => {
     const nextPayload = childParent ? { ...payload, parentId: childParent.id, itemType: 'link' } : payload;
     if (editingNavItem?.id) {
       await storefrontContentApi.updateNavigationItem(editingNavItem.id, nextPayload);
-      setFeedback({ title: 'Navigation item updated', description: `${nextPayload.label} was updated.`, status: 'success' });
+      setFeedback({ title: 'Đã cập nhật mục điều hướng', description: `${nextPayload.label} đã được cập nhật.`, status: 'success' });
     } else {
       await storefrontContentApi.createNavigationItem(nextPayload);
-      setFeedback({ title: 'Navigation item created', description: `${nextPayload.label} was created.`, status: 'success' });
+      setFeedback({ title: 'Đã tạo mục điều hướng', description: `${nextPayload.label} đã được tạo.`, status: 'success' });
     }
     await loadStorefront();
   };
@@ -132,10 +132,10 @@ export const AdminStorefrontView = () => {
     setIsSavingFeatured(true);
     try {
       await storefrontContentApi.updateStorefrontSettings(payload);
-      setFeedback({ title: 'Featured product count saved', description: 'Homepage featured product count was updated.', status: 'success' });
+      setFeedback({ title: 'Đã lưu số lượng sản phẩm nổi bật', description: 'Số lượng sản phẩm nổi bật trên trang chủ đã được cập nhật.', status: 'success' });
       await loadStorefront();
     } catch (error) {
-      setFeedback({ title: 'Unable to save featured count', description: error?.message || 'Storefront settings could not be saved.', status: 'error' });
+      setFeedback({ title: 'Không thể lưu số lượng nổi bật', description: error?.message || 'Không thể lưu cài đặt cửa hàng.', status: 'error' });
     } finally {
       setIsSavingFeatured(false);
     }
@@ -148,13 +148,13 @@ export const AdminStorefrontView = () => {
       const createdCount = response?.data?.items?.length || 0;
       const skippedCount = response?.data?.skippedProductIds?.length || 0;
       setFeedback({
-        title: 'Featured products added',
-        description: `${createdCount} products were added${skippedCount ? ` and ${skippedCount} duplicates were skipped` : ''}.`,
+        title: 'Đã thêm sản phẩm nổi bật',
+        description: `${createdCount} sản phẩm đã được thêm${skippedCount ? ` và bỏ qua ${skippedCount} sản phẩm trùng lặp` : ''}.`,
         status: 'success'
       });
       await loadStorefront();
     } catch (error) {
-      setFeedback({ title: 'Unable to add featured products', description: error?.message || 'The selected products could not be featured.', status: 'error' });
+      setFeedback({ title: 'Không thể thêm sản phẩm nổi bật', description: error?.message || 'Không thể chọn các sản phẩm đã chọn làm sản phẩm nổi bật.', status: 'error' });
     } finally {
       setIsSavingFeatured(false);
     }
@@ -166,7 +166,7 @@ export const AdminStorefrontView = () => {
       await storefrontContentApi.updateFeaturedProduct(id, payload);
       await loadStorefront();
     } catch (error) {
-      setFeedback({ title: 'Unable to update featured product', description: error?.message || 'The featured product could not be updated.', status: 'error' });
+      setFeedback({ title: 'Không thể cập nhật sản phẩm nổi bật', description: error?.message || 'Không thể cập nhật sản phẩm nổi bật.', status: 'error' });
     } finally {
       setIsSavingFeatured(false);
     }
@@ -178,7 +178,7 @@ export const AdminStorefrontView = () => {
       await storefrontContentApi.reorderFeaturedProducts(orderedIds);
       await loadStorefront();
     } catch (error) {
-      setFeedback({ title: 'Unable to reorder featured products', description: error?.message || 'The featured product order could not be saved.', status: 'error' });
+      setFeedback({ title: 'Không thể sắp xếp sản phẩm nổi bật', description: error?.message || 'Không thể lưu thứ tự sản phẩm nổi bật.', status: 'error' });
     } finally {
       setIsSavingFeatured(false);
     }
@@ -204,10 +204,10 @@ export const AdminStorefrontView = () => {
         await storefrontContentApi.deleteFeaturedProduct(deleteTarget.item.id);
       }
       setDeleteTarget(null);
-      setFeedback({ title: 'Storefront content deleted', description: 'The item was removed from storefront configuration.', status: 'success' });
+      setFeedback({ title: 'Đã xóa nội dung cửa hàng', description: 'Mục này đã được xóa khỏi cấu hình cửa hàng.', status: 'success' });
       await loadStorefront();
     } catch (error) {
-      setFeedback({ title: 'Unable to delete item', description: error?.message || 'The storefront item could not be deleted.', status: 'error' });
+      setFeedback({ title: 'Không thể xóa mục', description: error?.message || 'Không thể xóa mục khỏi cửa hàng.', status: 'error' });
     } finally {
       setIsDeleting(false);
     }
@@ -217,23 +217,23 @@ export const AdminStorefrontView = () => {
     <VStack gap={6} width="100%">
       <HStack gap={4} align="center" justify="between" wrap="wrap" width="100%">
         <VStack gap={1}>
-          <Heading level={1}>Storefront</Heading>
-          <Text color="secondary">Manage homepage carousel slides and customer navigation.</Text>
+          <Heading level={1}>Cửa hàng</Heading>
+          <Text color="secondary">Quản lý slide băng chuyền trang chủ và điều hướng khách hàng.</Text>
         </VStack>
-        <Button label="Refresh" variant="secondary" onClick={loadStorefront} isDisabled={isLoading} />
+        <Button label="Làm mới" variant="secondary" onClick={loadStorefront} isDisabled={isLoading} />
       </HStack>
 
       {feedback && <Alert title={feedback.title} description={feedback.description} status={feedback.status} />}
 
-      <TabList value={activeTab} onChange={setActiveTab} aria-label="Storefront sections">
-        <Tab value="carousel" label="Carousel" />
-        <Tab value="navigation" label="Navigation" />
-        <Tab value="featuredProducts" label="Featured products" />
+      <TabList value={activeTab} onChange={setActiveTab} aria-label="Các phần cửa hàng">
+        <Tab value="carousel" label="Băng chuyền" />
+        <Tab value="navigation" label="Điều hướng" />
+        <Tab value="featuredProducts" label="Sản phẩm nổi bật" />
       </TabList>
 
       {activeTab === 'carousel' && (
         <VStack gap={4}>
-          <Toolbar label="Carousel manager" endContent={<Button label="Create slide" variant="primary" onClick={openCreateSlide} />} />
+          <Toolbar label="Quản lý băng chuyền" endContent={<Button label="Tạo slide" variant="primary" onClick={openCreateSlide} />} />
           <CarouselSlideTable
             slides={slides}
             isLoading={isLoading}
@@ -250,7 +250,7 @@ export const AdminStorefrontView = () => {
 
       {activeTab === 'navigation' && (
         <VStack gap={4}>
-          <Toolbar label="Navigation manager" endContent={<Button label="Create navigation item" variant="primary" onClick={openCreateNavItem} />} />
+          <Toolbar label="Quản lý điều hướng" endContent={<Button label="Tạo mục điều hướng" variant="primary" onClick={openCreateNavItem} />} />
           <NavigationItemTable
             items={navItems}
             isLoading={isLoading}
@@ -303,9 +303,9 @@ export const AdminStorefrontView = () => {
         onOpenChange={(isOpen) => {
           if (!isOpen && !isDeleting) setDeleteTarget(null);
         }}
-        title="Delete storefront item?"
-        description={deleteTarget ? `${deleteTarget.item.label || deleteTarget.item.title || deleteTarget.item.product?.name || 'This item'} will be removed from storefront configuration.` : 'This item will be removed.'}
-        actionLabel="Delete item"
+        title="Xóa mục cửa hàng?"
+        description={deleteTarget ? `${deleteTarget.item.label || deleteTarget.item.title || deleteTarget.item.product?.name || 'Mục này'} sẽ bị xóa khỏi cấu hình cửa hàng.` : 'Mục này sẽ bị xóa.'}
+        actionLabel="Xóa mục"
         isActionLoading={isDeleting}
         onAction={confirmDelete}
       />

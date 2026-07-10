@@ -35,7 +35,7 @@ export const ProductTable = ({
   const columns = useMemo(() => [
     {
       key: 'image',
-      header: 'Image',
+      header: 'Hình ảnh',
       width: pixel(72),
       resizable: false,
       renderCell: (product) => (
@@ -48,7 +48,7 @@ export const ProductTable = ({
     },
     {
       key: 'name',
-      header: 'Product',
+      header: 'Sản phẩm',
       width: proportional(2),
       renderCell: (product) => (
         <VStack gap={0.5}>
@@ -59,13 +59,13 @@ export const ProductTable = ({
     },
     {
       key: 'category',
-      header: 'Category',
+      header: 'Danh mục',
       width: proportional(1),
-      renderCell: (product) => product.category?.name || 'Uncategorized'
+      renderCell: (product) => product.category?.name || 'Chưa phân loại'
     },
     {
       key: 'price',
-      header: 'Price',
+      header: 'Giá',
       width: proportional(1),
       align: 'end',
       renderCell: (product) => (
@@ -74,7 +74,7 @@ export const ProductTable = ({
     },
     {
       key: 'quantity',
-      header: 'Quantity',
+      header: 'Số lượng',
       width: proportional(1),
       align: 'end',
       renderCell: (product) => (
@@ -83,7 +83,7 @@ export const ProductTable = ({
     },
     {
       key: 'stock',
-      header: 'Stock status',
+      header: 'Trạng thái kho',
       width: proportional(1),
       renderCell: (product) => (
         <Badge
@@ -94,25 +94,25 @@ export const ProductTable = ({
     },
     {
       key: 'actions',
-      header: 'Actions',
+      header: 'Thao tác',
       width: pixel(80),
       align: 'end',
       resizable: false,
       renderCell: (product) => (
         <MoreMenu
-          label={`Actions for ${product.name}`}
+          label={`Thao tác với ${product.name}`}
           isDisabled={isDeleting}
           items={[
             {
-              label: 'View',
+              label: 'Xem',
               onClick: () => onView(product)
             },
             {
-              label: 'Edit',
+              label: 'Chỉnh sửa',
               onClick: () => onEdit(product)
             },
             {
-              label: 'Delete',
+              label: 'Xóa',
               onClick: () => onDelete(product)
             }
           ]}

@@ -46,7 +46,7 @@ export const HomeView = () => {
 
       setFeaturedProducts([]);
       setCarouselSlides([]);
-      setError(err?.message || 'Unable to load storefront data.');
+      setError(err?.message || 'Không thể tải dữ liệu cửa hàng.');
     } finally {
       if (isActive()) {
         setIsLoading(false);
@@ -73,7 +73,7 @@ export const HomeView = () => {
       }
 
       setAllProducts([]);
-      setAllProductsError(err?.message || 'Unable to load products.');
+      setAllProductsError(err?.message || 'Không thể tải sản phẩm.');
     } finally {
       if (isActive()) {
         setIsAllProductsLoading(false);
@@ -126,9 +126,9 @@ export const HomeView = () => {
         <HomeSkeleton />
       ) : error ? (
         <Alert
-          title="Unable to load storefront"
+          title="Không thể tải cửa hàng"
           description={error}
-          actionLabel="Retry"
+          actionLabel="Thử lại"
           onAction={() => loadHomeData()}
         />
       ) : (

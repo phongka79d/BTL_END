@@ -118,8 +118,8 @@ export const CartView = () => {
 
     if (result.success) {
       setFeedback({
-        title: 'Cart changes saved',
-        description: 'Quantities and totals were refreshed from the backend.',
+        title: 'Đã lưu thay đổi giỏ hàng',
+        description: 'Số lượng và tổng tiền đã được cập nhật từ backend.',
         status: 'success'
       });
     }
@@ -134,8 +134,8 @@ export const CartView = () => {
 
     if (result.success) {
       setFeedback({
-        title: 'Item removed',
-        description: 'The cart totals were refreshed from the backend.',
+        title: 'Đã xóa sản phẩm',
+        description: 'Tổng tiền giỏ hàng đã được cập nhật từ backend.',
         status: 'success'
       });
     }
@@ -155,9 +155,9 @@ export const CartView = () => {
       }}
     >
       <VStack gap={1}>
-        <Heading level={1}>Cart</Heading>
+        <Heading level={1}>Giỏ hàng</Heading>
         <Text color="secondary">
-          Select products for checkout, adjust quantities, then save all changes together before continuing.
+          Chọn sản phẩm để thanh toán, điều chỉnh số lượng rồi lưu tất cả thay đổi trước khi tiếp tục.
         </Text>
       </VStack>
 

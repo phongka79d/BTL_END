@@ -84,7 +84,7 @@ const completePasswordChange = async ({ otpId, userId, passwordHash }) => {
     });
 
     if (claimResult.count !== 1) {
-      throw new Error('OTP is no longer valid');
+      throw new Error('OTP không còn hợp lệ');
     }
 
     await tx.user.update({

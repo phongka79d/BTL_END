@@ -1,29 +1,29 @@
 export const LINK_TYPE_OPTIONS = [
-  { value: 'product', label: 'Product' },
-  { value: 'category', label: 'Category' },
-  { value: 'customUrl', label: 'Custom URL' },
+  { value: 'product', label: 'Sản phẩm' },
+  { value: 'category', label: 'Danh mục' },
+  { value: 'customUrl', label: 'URL tùy chỉnh' },
 ];
 
 export const NAV_ITEM_TYPE_OPTIONS = [
-  { value: 'link', label: 'Simple link' },
+  { value: 'link', label: 'Liên kết đơn giản' },
   { value: 'mega_menu', label: 'Mega menu' },
 ];
 
 export const NAV_ICON_OPTIONS = [
-  { value: 'info', label: 'Info' },
-  { value: 'success', label: 'Success' },
-  { value: 'copy', label: 'Copy' },
-  { value: 'wrench', label: 'Wrench' },
-  { value: 'warning', label: 'Warning' },
-  { value: 'check', label: 'Check' },
-  { value: 'externalLink', label: 'External link' },
+  { value: 'info', label: 'Thông tin' },
+  { value: 'success', label: 'Thành công' },
+  { value: 'copy', label: 'Sao chép' },
+  { value: 'wrench', label: 'Cờ lê' },
+  { value: 'warning', label: 'Cảnh báo' },
+  { value: 'check', label: 'Dấu kiểm' },
+  { value: 'externalLink', label: 'Liên kết ngoài' },
 ];
 
 export const EMPTY_CAROUSEL_FORM = {
   title: '',
   description: '',
   imageUrl: '',
-  primaryButtonLabel: 'Shop now',
+  primaryButtonLabel: 'Mua ngay',
   linkType: 'product',
   productId: '',
   categoryId: '',
@@ -64,7 +64,7 @@ export const getCarouselFormValues = (slide) => (
         title: slide.title || '',
         description: slide.description || '',
         imageUrl: slide.imageUrl || '',
-        primaryButtonLabel: slide.primaryButtonLabel || 'Shop now',
+        primaryButtonLabel: slide.primaryButtonLabel || 'Mua ngay',
         linkType: slide.linkType || slide.linkTarget?.type || 'product',
         productId: slide.productId || slide.linkTarget?.productId || '',
         categoryId: slide.categoryId || slide.linkTarget?.categoryId || '',
@@ -88,28 +88,28 @@ const validateLinkTarget = (values, errors, prefix = '') => {
   const linkType = values[linkTypeKey];
 
   if (linkType === 'product' && !values[productIdKey]) {
-    errors[productIdKey] = 'Product target is required.';
+    errors[productIdKey] = 'Đích sản phẩm là bắt buộc.';
   }
 
   if (linkType === 'category' && !values[categoryIdKey]) {
-    errors[categoryIdKey] = 'Category target is required.';
+    errors[categoryIdKey] = 'Đích danh mục là bắt buộc.';
   }
 
   if (linkType === 'customUrl') {
     const customUrl = trim(values[customUrlKey] || '');
     if (!customUrl) {
-      errors[customUrlKey] = 'Custom URL is required.';
+      errors[customUrlKey] = 'URL tùy chỉnh là bắt buộc.';
     } else if (!customUrl.startsWith('/') && !customUrl.startsWith('http://') && !customUrl.startsWith('https://')) {
-      errors[customUrlKey] = 'Custom URL must start with /, http://, or https://.';
+      errors[customUrlKey] = 'URL tùy chỉnh phải bắt đầu bằng /, http:// hoặc https://.';
     }
   }
 };
 
 export const validateCarouselForm = (values) => {
   const errors = {};
-  if (!trim(values.title)) errors.title = 'Title is required.';
-  if (values.isActive && !trim(values.imageUrl)) errors.imageUrl = 'Image URL is required for active slides.';
-  if (!trim(values.primaryButtonLabel)) errors.primaryButtonLabel = 'Button label is required.';
+  if (!trim(values.title)) errors.title = 'Tiêu đề là bắt buộc.';
+  if (values.isActive && !trim(values.imageUrl)) errors.imageUrl = 'URL hình ảnh là bắt buộc đối với slide đang kích hoạt.';
+  if (!trim(values.primaryButtonLabel)) errors.primaryButtonLabel = 'Nhãn nút là bắt buộc.';
   validateLinkTarget(values, errors);
   return errors;
 };
@@ -180,7 +180,7 @@ export const getNavigationFormValues = (item) => (
 
 export const validateNavigationForm = (values) => {
   const errors = {};
-  if (!trim(values.label)) errors.label = 'Label is required.';
+  if (!trim(values.label)) errors.label = 'Nhãn là bắt buộc.';
   const isTopLevelMegaMenu = values.itemType === 'mega_menu' && !values.parentId;
   if (!isTopLevelMegaMenu) validateLinkTarget(values, errors);
   if (trim(values.featuredLinkLabel || '') || trim(values.featuredTitle || '')) {

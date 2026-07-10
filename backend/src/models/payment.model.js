@@ -35,7 +35,7 @@ const createOrGetCODPayment = async (orderId) => {
     });
 
     if (!order) {
-      throw new Error(`Order with ID ${orderId} not found.`);
+      throw new Error(`Không tìm thấy đơn hàng có ID ${orderId}.`);
     }
 
     // Tạo thanh toán COD mới.

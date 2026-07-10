@@ -59,9 +59,9 @@ export const AdminOrderDetailDialog = ({ isOpen, orderId, onOpenChange }) => {
       setOrder(null);
 
       if (err?.status === 404) {
-        setError('Order not found. It may have been deleted.');
+      setError('Không tìm thấy đơn hàng. Đơn hàng có thể đã bị xóa.');
       } else {
-        setError(err?.message || 'Unable to load order details.');
+      setError(err?.message || 'Không thể tải chi tiết đơn hàng.');
       }
     } finally {
       setIsLoading(false);
@@ -104,9 +104,9 @@ export const AdminOrderDetailDialog = ({ isOpen, orderId, onOpenChange }) => {
       return (
         <LayoutContent isScrollable>
           <Alert
-            title="Unable to load order details"
+            title="Không thể tải chi tiết đơn hàng"
             description={error}
-            actionLabel="Retry"
+            actionLabel="Thử lại"
             onAction={fetchOrderDetail}
           />
         </LayoutContent>
@@ -118,7 +118,7 @@ export const AdminOrderDetailDialog = ({ isOpen, orderId, onOpenChange }) => {
       return (
         <LayoutContent isScrollable>
           <VStack gap={3} align="center" style={{ paddingBlock: 'var(--spacing-8)' }}>
-            <Text weight="semibold">Order not available</Text>
+            <Text weight="semibold">Đơn hàng không khả dụng</Text>
             <Text color="secondary" align="center">
               The order could not be loaded. It may have been removed
               or the server is unavailable.
@@ -147,7 +147,7 @@ export const AdminOrderDetailDialog = ({ isOpen, orderId, onOpenChange }) => {
               </Text>
 
               <HStack gap={1}>
-                <Text color="secondary">Name</Text>
+                <Text color="secondary">Tên</Text>
                 <Text weight="semibold">
                   {customer.fullName || customer.username || '—'}
                 </Text>
@@ -162,14 +162,14 @@ export const AdminOrderDetailDialog = ({ isOpen, orderId, onOpenChange }) => {
 
               {customer.phone && (
                 <HStack gap={1}>
-                  <Text color="secondary">Phone</Text>
+                <Text color="secondary">Số điện thoại</Text>
                   <Text>{customer.phone}</Text>
                 </HStack>
               )}
 
               {customer.createdAt && (
                 <HStack gap={1}>
-                  <Text color="secondary">Customer since</Text>
+                <Text color="secondary">Khách hàng từ</Text>
                   <Text>{formatDate(customer.createdAt)}</Text>
                 </HStack>
               )}
@@ -193,11 +193,11 @@ export const AdminOrderDetailDialog = ({ isOpen, orderId, onOpenChange }) => {
       <Layout
         header={
           <DialogHeader
-            title={order ? `Order ${order.id.slice(0, 8)}…` : 'Order Details'}
+            title={order ? `Đơn hàng ${order.id.slice(0, 8)}…` : 'Chi tiết đơn hàng'}
             subtitle={
               order
                 ? `Placed ${formatDate(order.createdAt)}`
-                : 'Loading order information…'
+                : 'Đang tải thông tin đơn hàng…'
             }
             onOpenChange={handleClose}
             hasDivider
@@ -208,7 +208,7 @@ export const AdminOrderDetailDialog = ({ isOpen, orderId, onOpenChange }) => {
           <LayoutFooter hasDivider>
             <HStack gap={2} justify="end">
               <Button
-                label="Close"
+                label="Đóng"
                 variant="secondary"
                 onClick={handleClose}
               />

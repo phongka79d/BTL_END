@@ -61,14 +61,14 @@ export const ProductPurchasePanel = ({
       <VStack gap={5}>
         <VStack gap={3}>
           <HStack gap={2} style={{ flexWrap: 'wrap' }}>
-            <Badge variant="blue" label={product.category?.name || 'Uncategorized'} />
+            <Badge variant="blue" label={product.category?.name || 'Chưa phân loại'} />
             <Badge variant={stockVariant} label={stockLabel} />
           </HStack>
 
           <VStack gap={1}>
             <Heading level={1}>{product.name}</Heading>
             <Text size="supporting" color="secondary">
-              {product.brand || 'Brand unavailable'}
+              {product.brand || 'Chưa có thương hiệu'}
             </Text>
           </VStack>
 
@@ -93,7 +93,7 @@ export const ProductPurchasePanel = ({
           </HStack>
         </VStack>
 
-        <Text>{product.description || 'No description available for this product.'}</Text>
+        <Text>{product.description || 'Chưa có mô tả cho sản phẩm này.'}</Text>
 
         <Divider />
 
@@ -110,7 +110,7 @@ export const ProductPurchasePanel = ({
             description={
               availableQuantity > 0
                 ? `Choose a quantity from 1 to ${maxSelectableQuantity}. Final stock validation still happens on the backend.`
-                : 'This product is unavailable until stock is replenished.'
+                : 'Sản phẩm này chưa khả dụng cho đến khi được bổ sung tồn kho.'
             }
             status={quantityStatus || undefined}
           />
@@ -142,13 +142,13 @@ export const ProductPurchasePanel = ({
         <CollapsibleGroup type="multiple" defaultValue={['description', 'details']}>
           <Divider />
           <Collapsible value="description" trigger={<Heading level={3}>Description</Heading>}>
-            <Text>{product.description || 'No description available for this product.'}</Text>
+            <Text>{product.description || 'Chưa có mô tả cho sản phẩm này.'}</Text>
           </Collapsible>
           <Divider />
           <Collapsible value="details" trigger={<Heading level={3}>Product details</Heading>}>
             <Grid columns={{ minWidth: 160, max: 2 }} gap={3}>
-              <ProductMetaItem label="Category" value={product.category?.name || 'Uncategorized'} />
-              <ProductMetaItem label="Brand" value={product.brand || 'Brand unavailable'} />
+              <ProductMetaItem label="Danh mục" value={product.category?.name || 'Chưa phân loại'} />
+              <ProductMetaItem label="Thương hiệu" value={product.brand || 'Chưa có thương hiệu'} />
               <ProductMetaItem label="Stock status" value={stockLabel} />
               <ProductMetaItem label="Available quantity" value={availableQuantity} />
             </Grid>

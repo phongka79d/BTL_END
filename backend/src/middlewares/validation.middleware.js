@@ -17,7 +17,7 @@ const validateBody = (requiredFields, options = {}) => {
       if (body[field] === undefined || body[field] === null || String(body[field]).trim() === '') {
         errors.push({
           field,
-          message: `${field} is required`
+          message: `${field} là bắt buộc`
         });
       }
     });
@@ -28,7 +28,7 @@ const validateBody = (requiredFields, options = {}) => {
       if (!emailRegex.test(body.email)) {
         errors.push({
           field: 'email',
-          message: 'Invalid email format'
+          message: 'Định dạng email không hợp lệ'
         });
       }
     }
@@ -45,7 +45,7 @@ const validateBody = (requiredFields, options = {}) => {
     }
 
     if (errors.length > 0) {
-      return errorResponse(res, 400, 'Validation failed', errors);
+      return errorResponse(res, 400, 'Xác thực thất bại', errors);
     }
 
     next();

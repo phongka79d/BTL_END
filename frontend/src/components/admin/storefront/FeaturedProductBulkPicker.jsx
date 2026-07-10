@@ -74,7 +74,7 @@ export const FeaturedProductBulkPicker = ({
       .catch((error) => {
         if (isActive) {
           setResults([]);
-          setSearchError(error?.message || 'Unable to search products.');
+          setSearchError(error?.message || 'Không thể tìm kiếm sản phẩm.');
         }
       })
       .finally(() => {
@@ -107,17 +107,17 @@ export const FeaturedProductBulkPicker = ({
   return (
     <VStack gap={3}>
       <TextInput
-        label="Search products"
+        label="Tìm kiếm sản phẩm"
         value={query}
         onChange={handleSearchChange}
-        placeholder="Type product name or brand"
+        placeholder="Nhập tên sản phẩm hoặc thương hiệu"
         isDisabled={isDisabled}
         width="100%"
       />
       {searchError && <Text color="danger">{searchError}</Text>}
-      {isSearching && <Text color="secondary" size="supporting">Searching products...</Text>}
+      {isSearching && <Text color="secondary" size="supporting">Đang tìm kiếm sản phẩm...</Text>}
       {!isSearching && query.trim().length >= 2 && results.length === 0 && !searchError && (
-        <Text color="secondary" size="supporting">No matching products.</Text>
+        <Text color="secondary" size="supporting">Không có sản phẩm phù hợp.</Text>
       )}
       {!isSearching && results.length > 0 && (
         <Card padding={0}>
@@ -130,7 +130,7 @@ export const FeaturedProductBulkPicker = ({
             }}
           >
             <CheckboxList
-              label="Products"
+              label="Sản phẩm"
               isLabelHidden
               value={selectedProductIds}
               onChange={setSelectedProductIds}
@@ -157,7 +157,7 @@ export const FeaturedProductBulkPicker = ({
       )}
       <HStack gap={2} justify="end">
         <Button
-          label={`Add ${selectedProductIds.length} selected products`}
+          label={`Thêm ${selectedProductIds.length} sản phẩm đã chọn`}
           variant="primary"
           isDisabled={selectedProductIds.length === 0 || isDisabled}
           onClick={handleAddSelectedProducts}

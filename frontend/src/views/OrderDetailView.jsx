@@ -50,7 +50,7 @@ export const OrderDetailView = () => {
       const data = response?.data || response;
 
       if (!data || !data.id) {
-        setError('Order not found.');
+        setError('Không tìm thấy đơn hàng.');
         setHttpStatus(404);
         return;
       }
@@ -58,7 +58,7 @@ export const OrderDetailView = () => {
       setOrder(data);
     } catch (err) {
       setError(
-        err?.message || 'Unable to load order details. Please try again.'
+        err?.message || 'Không thể tải chi tiết đơn hàng. Vui lòng thử lại.'
       );
       setHttpStatus(err?.status || null);
     } finally {
@@ -116,20 +116,20 @@ export const OrderDetailView = () => {
         }}
       >
         <EmptyState
-          title="Order not found"
-          description="The order you are looking for does not exist or may have been removed."
+          title="Không tìm thấy đơn hàng"
+          description="Đơn hàng bạn đang tìm không tồn tại hoặc có thể đã bị xóa."
           actions={
             <HStack
               gap={3}
               style={{ justifyContent: 'center', flexWrap: 'wrap' }}
             >
               <Button
-                label="Back to orders"
+                label="Quay lại đơn hàng"
                 variant="primary"
                 onClick={() => navigate('/orders')}
               />
               <Button
-                label="Browse products"
+                label="Xem sản phẩm"
                 variant="secondary"
                 onClick={() => navigate('/products')}
               />
@@ -153,20 +153,20 @@ export const OrderDetailView = () => {
         }}
       >
         <EmptyState
-          title="Access denied"
-          description="You do not have permission to view this order."
+          title="Truy cập bị từ chối"
+          description="Bạn không có quyền xem đơn hàng này."
           actions={
             <HStack
               gap={3}
               style={{ justifyContent: 'center', flexWrap: 'wrap' }}
             >
               <Button
-                label="Back to orders"
+                label="Quay lại đơn hàng"
                 variant="primary"
                 onClick={() => navigate('/orders')}
               />
               <Button
-                label="Return home"
+                label="Về trang chủ"
                 variant="secondary"
                 onClick={() => navigate('/')}
               />
@@ -190,15 +190,15 @@ export const OrderDetailView = () => {
         }}
       >
         <Alert
-          title="Unable to load order"
+          title="Không thể tải đơn hàng"
           description={error}
-          actionLabel="Retry"
+          actionLabel="Thử lại"
           onAction={fetchOrder}
         />
 
         <HStack style={{ justifyContent: 'center' }}>
           <Button
-            label="Back to orders"
+            label="Quay lại đơn hàng"
             variant="secondary"
             onClick={() => navigate('/orders')}
           />
@@ -223,16 +223,16 @@ export const OrderDetailView = () => {
           gap={2}
           style={{ alignItems: 'center', flexWrap: 'wrap' }}
         >
-          <Heading level={1}>Order Detail</Heading>
+          <Heading level={1}>Chi tiết đơn hàng</Heading>
         </HStack>
         <Text color="secondary">
-          View the details for your order.
+          Xem chi tiết đơn hàng của bạn.
         </Text>
       </VStack>
 
       <HStack style={{ justifyContent: 'flex-start' }}>
         <Button
-          label="← Back to orders"
+          label="← Quay lại đơn hàng"
           variant="ghost"
           size="small"
           onClick={() => navigate('/orders')}

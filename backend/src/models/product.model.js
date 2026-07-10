@@ -122,19 +122,19 @@ const sortByOrderedQuantity = async (items) => {
 const validateProductData = (data) => {
   const { name, brand, price, quantity, categoryId } = data;
   if (!name || typeof name !== 'string' || name.trim() === '') {
-    throw new Error('Product name is required.');
+    throw new Error('Tên sản phẩm là bắt buộc.');
   }
   if (!brand || typeof brand !== 'string' || brand.trim() === '') {
-    throw new Error('Product brand is required.');
+    throw new Error('Thương hiệu sản phẩm là bắt buộc.');
   }
   if (price === undefined || price === null || isNaN(parseFloat(price)) || parseFloat(price) < 0) {
-    throw new Error('Price must be a non-negative number.');
+    throw new Error('Giá phải là số không âm.');
   }
   if (quantity === undefined || quantity === null || !Number.isInteger(Number(quantity)) || Number(quantity) < 0) {
-    throw new Error('Quantity must be a non-negative integer.');
+    throw new Error('Số lượng phải là số nguyên không âm.');
   }
   if (!categoryId || typeof categoryId !== 'string' || categoryId.trim() === '') {
-    throw new Error('Category ID is required.');
+    throw new Error('Category ID là bắt buộc.');
   }
 };
 
@@ -145,19 +145,19 @@ const validateProductData = (data) => {
 const validateProductUpdateData = (data) => {
   const { name, brand, price, quantity, categoryId } = data;
   if (name !== undefined && (!name || typeof name !== 'string' || name.trim() === '')) {
-    throw new Error('Product name cannot be empty.');
+    throw new Error('Tên sản phẩm không được để trống.');
   }
   if (brand !== undefined && (!brand || typeof brand !== 'string' || brand.trim() === '')) {
-    throw new Error('Product brand cannot be empty.');
+    throw new Error('Thương hiệu sản phẩm không được để trống.');
   }
   if (price !== undefined && (price === null || isNaN(parseFloat(price)) || parseFloat(price) < 0)) {
-    throw new Error('Price must be a non-negative number.');
+    throw new Error('Giá phải là số không âm.');
   }
   if (quantity !== undefined && (quantity === null || !Number.isInteger(Number(quantity)) || Number(quantity) < 0)) {
-    throw new Error('Quantity must be a non-negative integer.');
+    throw new Error('Số lượng phải là số nguyên không âm.');
   }
   if (categoryId !== undefined && (!categoryId || typeof categoryId !== 'string' || categoryId.trim() === '')) {
-    throw new Error('Category ID cannot be empty.');
+    throw new Error('Category ID không được để trống.');
   }
 };
 

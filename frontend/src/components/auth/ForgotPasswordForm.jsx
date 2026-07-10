@@ -40,7 +40,7 @@ export const ForgotPasswordForm = ({ onBackToLogin, onResetComplete }) => {
     if (!email) {
       setFieldStatus((current) => ({
         ...current,
-        email: { type: 'error', message: 'Email is required' },
+        email: { type: 'error', message: 'Vui lòng nhập email' },
       }));
       return null;
     }
@@ -48,7 +48,7 @@ export const ForgotPasswordForm = ({ onBackToLogin, onResetComplete }) => {
     if (!isValidEmail(email)) {
       setFieldStatus((current) => ({
         ...current,
-        email: { type: 'error', message: 'Please enter a valid email address' },
+        email: { type: 'error', message: 'Vui lòng nhập địa chỉ email hợp lệ' },
       }));
       return null;
     }
@@ -68,13 +68,13 @@ export const ForgotPasswordForm = ({ onBackToLogin, onResetComplete }) => {
       await authApi.requestForgotPasswordOtp({ email });
       setStep('otp');
       notification.info({
-        title: 'OTP sent',
-        description: 'If an account exists, check your email for the password reset code.',
+        title: 'Đã gửi OTP',
+        description: 'Nếu tài khoản tồn tại, hãy kiểm tra email để nhận mã đặt lại mật khẩu.',
       });
     } catch (error) {
       notification.error({
-        title: 'Unable to send OTP',
-        description: error?.message || 'The password reset code could not be sent.',
+        title: 'Không thể gửi OTP',
+        description: error?.message || 'Không thể gửi mã đặt lại mật khẩu.',
       });
     } finally {
       setIsSendingOtp(false);
@@ -91,7 +91,7 @@ export const ForgotPasswordForm = ({ onBackToLogin, onResetComplete }) => {
     if (!values.otp.trim()) {
       setFieldStatus((current) => ({
         ...current,
-        otp: { type: 'error', message: 'OTP is required' },
+        otp: { type: 'error', message: 'Vui lòng nhập OTP' },
       }));
       return;
     }
@@ -104,13 +104,13 @@ export const ForgotPasswordForm = ({ onBackToLogin, onResetComplete }) => {
       });
       setStep('reset');
       notification.success({
-        title: 'OTP verified',
-        description: 'Enter a new password for your account.',
+        title: 'Đã xác minh OTP',
+        description: 'Nhập mật khẩu mới cho tài khoản của bạn.',
       });
     } catch (error) {
       notification.error({
-        title: 'Unable to verify OTP',
-        description: error?.message || 'The OTP is incorrect or expired.',
+        title: 'Không thể xác minh OTP',
+        description: error?.message || 'OTP không chính xác hoặc đã hết hạn.',
       });
     } finally {
       setIsVerifyingOtp(false);
@@ -124,18 +124,18 @@ export const ForgotPasswordForm = ({ onBackToLogin, onResetComplete }) => {
     if (!passwordPolicy.isValid) {
       nextStatus.newPassword = {
         type: 'error',
-        message: passwordPolicy.message.replace('Password', 'New password'),
+        message: passwordPolicy.message.replace('Mật khẩu', 'Mật khẩu mới'),
       };
     }
     if (!values.confirmPassword) {
       nextStatus.confirmPassword = {
         type: 'error',
-        message: 'Confirm new password is required',
+        message: 'Vui lòng nhập mật khẩu mới để xác nhận',
       };
     } else if (values.newPassword !== values.confirmPassword) {
       nextStatus.confirmPassword = {
         type: 'error',
-        message: 'New password and confirmation password must match',
+        message: 'Mật khẩu mới và mật khẩu xác nhận phải khớp nhau',
       };
     }
 
@@ -161,14 +161,14 @@ export const ForgotPasswordForm = ({ onBackToLogin, onResetComplete }) => {
       setValues(EMPTY_VALUES);
       setStep('email');
       notification.success({
-        title: 'Password reset',
-        description: 'Use your new password to sign in.',
+        title: 'Đã đặt lại mật khẩu',
+        description: 'Sử dụng mật khẩu mới để đăng nhập.',
       });
       onResetComplete();
     } catch (error) {
       notification.error({
-        title: 'Unable to reset password',
-        description: error?.message || 'The password could not be reset.',
+        title: 'Không thể đặt lại mật khẩu',
+        description: error?.message || 'Không thể đặt lại mật khẩu.',
       });
     } finally {
       setIsResetting(false);
@@ -179,10 +179,10 @@ export const ForgotPasswordForm = ({ onBackToLogin, onResetComplete }) => {
     <VStack gap={4} style={{ width: '100%' }}>
       <VStack gap={1} style={{ alignItems: 'center' }}>
         <Heading level={2} style={{ fontSize: 'var(--text-title-2-size)' }}>
-          Forgot Password?
+          Quên mật khẩu?
         </Heading>
         <Text size="supporting" color="secondary">
-          Verify your email and OTP before setting a new password.
+          Xác minh email và OTP trước khi đặt mật khẩu mới.
         </Text>
       </VStack>
 
@@ -190,7 +190,7 @@ export const ForgotPasswordForm = ({ onBackToLogin, onResetComplete }) => {
         <VStack gap={4}>
           <FormLayout>
             <TextInput
-              label="Email Address"
+              label="Địa chỉ email"
               type="email"
               value={values.email}
               onChange={(value) => updateField('email', value)}
@@ -216,7 +216,7 @@ export const ForgotPasswordForm = ({ onBackToLogin, onResetComplete }) => {
             {step === 'reset' && (
               <>
                 <TextInput
-                  label="New Password"
+                  label="Mật khẩu mới"
                   type="password"
                   value={values.newPassword}
                   onChange={(value) => updateField('newPassword', value)}
@@ -226,7 +226,7 @@ export const ForgotPasswordForm = ({ onBackToLogin, onResetComplete }) => {
                   width="100%"
                 />
                 <TextInput
-                  label="Confirm New Password"
+                  label="Xác nhận mật khẩu mới"
                   type="password"
                   value={values.confirmPassword}
                   onChange={(value) => updateField('confirmPassword', value)}
@@ -240,7 +240,7 @@ export const ForgotPasswordForm = ({ onBackToLogin, onResetComplete }) => {
           </FormLayout>
 
           <Button
-            label={step === 'email' ? 'Send OTP' : step === 'otp' ? 'Verify OTP' : 'Reset Password'}
+            label={step === 'email' ? 'Gửi OTP' : step === 'otp' ? 'Xác minh OTP' : 'Đặt lại mật khẩu'}
             variant="primary"
             type="submit"
             isLoading={isSendingOtp || isVerifyingOtp || isResetting}
@@ -252,7 +252,7 @@ export const ForgotPasswordForm = ({ onBackToLogin, onResetComplete }) => {
 
       <HStack justify="center" wrap="wrap">
         <Button
-          label="Back to login"
+          label="Quay lại đăng nhập"
           variant="ghost"
           onClick={onBackToLogin}
           isDisabled={isSendingOtp || isVerifyingOtp || isResetting}

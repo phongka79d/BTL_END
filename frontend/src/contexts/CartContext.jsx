@@ -82,7 +82,7 @@ export const CartProvider = ({ children }) => {
       }
       return nextCart;
     } catch (err) {
-      const message = getErrorMessage(err, 'Unable to load cart');
+      const message = getErrorMessage(err, 'Không thể tải giỏ hàng');
       if (requestId === requestIdRef.current) {
         setError(message);
       }
@@ -109,13 +109,13 @@ export const CartProvider = ({ children }) => {
 
   const runCartMutation = useCallback(async (mutation, options = {}) => {
     if (authLoading) {
-      const message = 'Cart is not ready yet';
+      const message = 'Giỏ hàng chưa sẵn sàng';
       setError(message);
       return { success: false, error: message };
     }
 
     if (!isAuthenticated) {
-      const message = 'Please log in to manage your cart';
+      const message = 'Vui lòng đăng nhập để quản lý giỏ hàng';
       setError(message);
       return { success: false, error: message };
     }
@@ -138,7 +138,7 @@ export const CartProvider = ({ children }) => {
 
       return { success: true, data: nextCart, response };
     } catch (err) {
-      const message = getErrorMessage(err, 'Unable to update cart');
+      const message = getErrorMessage(err, 'Không thể cập nhật giỏ hàng');
       setError(message);
       return { success: false, error: message };
     } finally {

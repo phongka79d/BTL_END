@@ -41,8 +41,8 @@ export const ReportView = () => {
       setOrderSummary({});
       setError(
         err?.status === 403
-          ? 'You do not have permission to access admin reports.'
-          : err?.message || 'Unable to load reports. Please try again.'
+          ? 'Bạn không có quyền truy cập báo cáo quản trị.'
+          : err?.message || 'Không thể tải báo cáo. Vui lòng thử lại.'
       );
     } finally {
       setIsLoading(false);
@@ -62,7 +62,7 @@ export const ReportView = () => {
       }}
     >
       <VStack gap={1}>
-        <Heading level={1}>Reports</Heading>
+        <Heading level={1}>Báo cáo</Heading>
         <Text color="secondary">
           Revenue, best-selling products, and order summaries.
         </Text>
@@ -70,9 +70,9 @@ export const ReportView = () => {
 
       {error ? (
         <Alert
-          title="Unable to load reports"
+          title="Không thể tải báo cáo"
           description={error}
-          actionLabel="Retry"
+          actionLabel="Thử lại"
           onAction={fetchReports}
         />
       ) : (

@@ -39,11 +39,11 @@ export const ProductSummary = ({ product }) => (
     <VStack gap={1} style={{ minWidth: 0, flex: 1 }}>
       <Text weight="semibold">{product.name}</Text>
       <Text color="secondary" size="supporting">
-        {product.brand || 'Brand unavailable'} - {product.category?.name || 'Uncategorized'}
+        {product.brand || 'Chưa có thương hiệu'} - {product.category?.name || 'Chưa phân loại'}
       </Text>
       <HStack gap={2} style={{ flexWrap: 'wrap' }}>
         <Badge variant="blue" label={formatPrice(product.price)} />
-        <Badge variant={Number(product.quantity) > 0 ? 'green' : 'red'} label={`Stock ${product.quantity ?? 0}`} />
+        <Badge variant={Number(product.quantity) > 0 ? 'green' : 'red'} label={`Tồn kho ${product.quantity ?? 0}`} />
       </HStack>
     </VStack>
   </HStack>
@@ -153,7 +153,7 @@ export const ProductPicker = ({
       .catch((error) => {
         if (isActive) {
           setResults([]);
-          setSearchError(error?.message || 'Unable to search products.');
+          setSearchError(error?.message || 'Không thể tìm kiếm sản phẩm.');
         }
       })
       .finally(() => {
@@ -190,7 +190,7 @@ export const ProductPicker = ({
     return (
       <VStack gap={3}>
         <Card padding={3} variant="muted">
-          <Text color="secondary" size="supporting">Loading selected product...</Text>
+          <Text color="secondary" size="supporting">Đang tải sản phẩm đã chọn...</Text>
         </Card>
       </VStack>
     );
@@ -203,7 +203,7 @@ export const ProductPicker = ({
           <HStack gap={3} style={{ alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap' }}>
             <ProductSummary product={selectedProduct} />
             <Button
-              label="Change Product"
+              label="Đổi sản phẩm"
               variant="secondary"
               size="sm"
               onClick={handleChangeProduct}
@@ -218,20 +218,20 @@ export const ProductPicker = ({
   return (
     <VStack gap={3}>
       <TextInput
-        label="Search products"
+        label="Tìm kiếm sản phẩm"
         value={query}
         onChange={handleSearchChange}
-        placeholder="Type product name or brand"
+        placeholder="Nhập tên sản phẩm hoặc thương hiệu"
         status={status}
         isDisabled={isDisabled}
         width="100%"
       />
 
       {searchError && <Text color="danger">{searchError}</Text>}
-      {isSearching && <Text color="secondary" size="supporting">Searching products...</Text>}
+      {isSearching && <Text color="secondary" size="supporting">Đang tìm kiếm sản phẩm...</Text>}
       {!isSearching && (showInitialProducts || query.trim().length >= 2) && results.length === 0 && !searchError && (
         <Text color="secondary" size="supporting">
-          {searchKeyword ? 'No matching products.' : 'No products available.'}
+          {searchKeyword ? 'Không có sản phẩm phù hợp.' : 'Chưa có sản phẩm khả dụng.'}
         </Text>
       )}
       {!isSearching && results.length > 0 && (
@@ -248,7 +248,7 @@ export const ProductPicker = ({
               <HStack gap={3} style={{ alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap' }}>
                 <ProductSummary product={product} />
                 <Button
-                  label={value === product.id ? 'Selected' : 'Select'}
+                  label={value === product.id ? 'Đã chọn' : 'Chọn'}
                   variant={value === product.id ? 'primary' : 'secondary'}
                   size="sm"
                   onClick={() => handleSelectProduct(product)}

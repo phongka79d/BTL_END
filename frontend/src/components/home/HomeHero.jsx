@@ -57,7 +57,7 @@ const HomeHeroSlide = ({ isActive, slide }) => {
         }}
       >
         <VStack gap={3}>
-          <Badge variant="blue" label="Featured" />
+          <Badge variant="blue" label="Nổi bật" />
           <Heading
             level={1}
             style={{
@@ -79,7 +79,7 @@ const HomeHeroSlide = ({ isActive, slide }) => {
             onClick={() => navigate(href)}
           />
           <Button
-            label="Browse catalog"
+            label="Xem danh mục"
             variant="secondary"
             onClick={() => navigate('/products')}
           />
@@ -132,13 +132,13 @@ export const HomeHero = ({ slides = [] }) => {
         style={{ '--_card-radius': 'var(--radius-container)' }}
       >
         <VStack gap={4} style={{ height: '100%', justifyContent: 'center' }}>
-          <Heading level={1}>Storefront carousel is ready for slides</Heading>
+          <Heading level={1}>Băng chuyền cửa hàng đã sẵn sàng cho các slide</Heading>
           <Text color="secondary">
-            Add active slides in the admin Storefront manager to publish homepage carousel content.
+            Thêm các slide đang kích hoạt trong trình quản lý cửa hàng để xuất bản nội dung băng chuyền trang chủ.
           </Text>
           <HStack gap={3}>
-            <Button label="Browse products" variant="primary" onClick={() => navigate('/products')} />
-            <Button label="Manage storefront" variant="secondary" onClick={() => navigate('/admin/storefront')} />
+            <Button label="Xem sản phẩm" variant="primary" onClick={() => navigate('/products')} />
+            <Button label="Quản lý cửa hàng" variant="secondary" onClick={() => navigate('/admin/storefront')} />
           </HStack>
         </VStack>
       </Card>
@@ -147,7 +147,7 @@ export const HomeHero = ({ slides = [] }) => {
 
   return (
     <VStack
-      aria-label="Featured carousel"
+      aria-label="Băng chuyền nổi bật"
       role="region"
       onBlurCapture={(event) => {
         if (!event.currentTarget.contains(event.relatedTarget)) {
@@ -197,16 +197,16 @@ export const HomeHero = ({ slides = [] }) => {
             }}
           >
             <IconButton
-              label="Previous slide"
-              tooltip="Previous"
+              label="Slide trước"
+              tooltip="Trước"
               variant="secondary"
               icon={<Icon icon="chevronLeft" size="sm" />}
               onClick={showPreviousSlide}
               style={{ pointerEvents: 'auto' }}
             />
             <IconButton
-              label="Next slide"
-              tooltip="Next"
+              label="Slide sau"
+              tooltip="Sau"
               variant="secondary"
               icon={<Icon icon="chevronRight" size="sm" />}
               onClick={showNextSlide}

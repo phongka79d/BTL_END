@@ -53,7 +53,7 @@ export const AdminUserView = () => {
     } catch (error) {
       setUsers([]);
       setPagination({ ...DEFAULT_PAGINATION, page });
-      setLoadError(error?.message || 'Unable to load users.');
+      setLoadError(error?.message || 'Không thể tải người dùng.');
     } finally {
       setIsLoading(false);
     }
@@ -87,14 +87,14 @@ export const AdminUserView = () => {
         item.id === target.id ? { ...item, ...(updatedUser || {}), role: nextRole } : item
       )));
       setFeedback({
-        title: 'Role updated',
-        description: `${getUserDisplayName(target)} is now ${nextRole}.`,
+        title: 'Đã cập nhật vai trò',
+        description: `${getUserDisplayName(target)} hiện có vai trò ${nextRole}.`,
         status: 'success'
       });
     } catch (error) {
       setFeedback({
-        title: 'Unable to update role',
-        description: error?.message || 'The user role could not be updated.',
+        title: 'Không thể cập nhật vai trò',
+        description: error?.message || 'Không thể cập nhật vai trò người dùng.',
         status: 'error'
       });
     } finally {
@@ -115,14 +115,14 @@ export const AdminUserView = () => {
         item.id === target.id ? { ...item, ...(updatedUser || {}), isBlocked: nextBlockedState } : item
       )));
       setFeedback({
-        title: nextBlockedState ? 'User blocked' : 'User unblocked',
-        description: `${getUserDisplayName(target)} is now ${nextBlockedState ? 'blocked' : 'active'}.`,
+        title: nextBlockedState ? 'Đã khóa người dùng' : 'Đã mở khóa người dùng',
+        description: `${getUserDisplayName(target)} hiện ${nextBlockedState ? 'bị khóa' : 'đang hoạt động'}.`,
         status: 'success'
       });
     } catch (error) {
       setFeedback({
-        title: 'Unable to update blocked status',
-        description: error?.message || 'The user blocked status could not be updated.',
+        title: 'Không thể cập nhật trạng thái khóa',
+        description: error?.message || 'Không thể cập nhật trạng thái khóa người dùng.',
         status: 'error'
       });
     } finally {
@@ -140,8 +140,8 @@ export const AdminUserView = () => {
       item.id === editingUser.id ? { ...item, ...(updatedUser || {}), ...payload } : item
     )));
     setFeedback({
-      title: 'Profile updated',
-      description: `${getUserDisplayName(editingUser)} was updated.`,
+      title: 'Đã cập nhật hồ sơ',
+      description: `${getUserDisplayName(editingUser)} đã được cập nhật.`,
       status: 'success'
     });
   };
@@ -149,7 +149,7 @@ export const AdminUserView = () => {
   return (
     <VStack gap={6} width="100%">
       <VStack gap={1}>
-        <Heading level={1}>Manage Users</Heading>
+        <Heading level={1}>Quản lý người dùng</Heading>
         <Text color="secondary">
           Search customer accounts and manage admin access.
         </Text>
@@ -164,15 +164,15 @@ export const AdminUserView = () => {
       )}
 
       <Toolbar
-        label="User management"
+        label="Quản lý người dùng"
         startContent={(
           <TextInput
-            label="Search users"
+            label="Tìm kiếm người dùng"
             isLabelHidden
             value={draftSearch}
             onChange={setDraftSearch}
             onEnter={submitSearch}
-            placeholder="Search username, email, or name"
+            placeholder="Tìm tên người dùng, email hoặc tên"
             hasClear
             width="100%"
           />
@@ -180,21 +180,21 @@ export const AdminUserView = () => {
         endContent={(
           <HStack gap={2}>
             <Button
-              label="Search"
+              label="Tìm kiếm"
               variant="secondary"
               onClick={submitSearch}
               isDisabled={isLoading}
             />
             {search && (
               <Button
-                label="Clear search"
+                label="Xóa tìm kiếm"
                 variant="ghost"
                 onClick={clearSearch}
                 isDisabled={isLoading}
               />
             )}
             <Button
-              label="Refresh"
+              label="Làm mới"
               variant="secondary"
               onClick={loadUsers}
               isDisabled={isLoading}

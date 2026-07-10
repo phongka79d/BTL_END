@@ -31,21 +31,21 @@ export const NavigationItemTable = ({
   const columns = useMemo(() => [
     {
       key: 'order',
-      header: 'Order',
+      header: 'Thứ tự',
       width: pixel(80),
       renderCell: (item) => <Text hasTabularNumbers>{item.sortOrder}</Text>,
     },
     {
       key: 'status',
-      header: 'Status',
+      header: 'Trạng thái',
       width: pixel(110),
       renderCell: (item) => (
-        <Badge variant={item.isActive ? 'green' : 'gray'} label={item.isActive ? 'Active' : 'Inactive'} />
+        <Badge variant={item.isActive ? 'green' : 'gray'} label={item.isActive ? 'Đang hoạt động' : 'Không hoạt động'} />
       ),
     },
     {
       key: 'label',
-      header: 'Navigation item',
+      header: 'Mục điều hướng',
       width: proportional(2),
       renderCell: (item) => (
         <VStack gap={0.5}>
@@ -56,18 +56,18 @@ export const NavigationItemTable = ({
     },
     {
       key: 'actions',
-      header: 'Actions',
+      header: 'Thao tác',
       width: pixel(120),
       align: 'end',
       renderCell: (item) => (
         <MoreMenu
-          label={`Actions for ${item.label}`}
+          label={`Thao tác với ${item.label}`}
           isDisabled={isDeleting}
           items={[
-            { label: 'Edit', onClick: () => onEdit(item) },
-            ...(item.itemType === 'mega_menu' && !item.parentId ? [{ label: 'Add child link', onClick: () => onCreateChild(item) }] : []),
-            { label: item.isActive ? 'Deactivate' : 'Activate', onClick: () => onToggleActive(item) },
-            { label: 'Delete', onClick: () => onDelete(item) },
+            { label: 'Chỉnh sửa', onClick: () => onEdit(item) },
+            ...(item.itemType === 'mega_menu' && !item.parentId ? [{ label: 'Thêm liên kết con', onClick: () => onCreateChild(item) }] : []),
+            { label: item.isActive ? 'Tắt kích hoạt' : 'Kích hoạt', onClick: () => onToggleActive(item) },
+            { label: 'Xóa', onClick: () => onDelete(item) },
           ]}
         />
       ),
@@ -80,13 +80,13 @@ export const NavigationItemTable = ({
       data={rows}
       isLoading={isLoading}
       error={error}
-      errorTitle="Unable to load storefront navigation"
+      errorTitle="Không thể tải điều hướng cửa hàng"
       onRetry={onRetry}
-      emptyTitle="No navigation items yet"
-      emptyDescription="Create top-level links or mega menus for the storefront."
+      emptyTitle="Chưa có mục điều hướng"
+      emptyDescription="Hãy tạo liên kết cấp cao nhất hoặc mega menu cho cửa hàng."
       emptyActions={(
         <HStack gap={2}>
-          <Button label="Create navigation item" variant="primary" onClick={onCreate} />
+          <Button label="Tạo mục điều hướng" variant="primary" onClick={onCreate} />
         </HStack>
       )}
     />

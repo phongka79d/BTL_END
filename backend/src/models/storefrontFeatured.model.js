@@ -18,7 +18,7 @@ const normalizeLimit = (value) => {
   const limit = Number(value);
 
   if (!Number.isInteger(limit) || limit < 1 || limit > MAX_FEATURED_PRODUCT_LIMIT) {
-    throw new Error(`Featured product count must be between 1 and ${MAX_FEATURED_PRODUCT_LIMIT}.`);
+    throw new Error(`Số lượng sản phẩm nổi bật phải nằm trong khoảng từ 1 đến ${MAX_FEATURED_PRODUCT_LIMIT}.`);
   }
 
   return limit;
@@ -100,7 +100,7 @@ const updateStorefrontSettings = async ({ featuredProductLimit }) => {
 
 const validateProduct = async (productId) => {
   if (!productId || typeof productId !== 'string' || productId.trim() === '') {
-    throw new Error('Featured product is required.');
+    throw new Error('Sản phẩm nổi bật là bắt buộc.');
   }
 
   const product = await prisma.product.findUnique({
@@ -109,7 +109,7 @@ const validateProduct = async (productId) => {
   });
 
   if (!product) {
-    throw new Error('Featured product was not found.');
+    throw new Error('Không tìm thấy sản phẩm nổi bật.');
   }
 };
 
@@ -146,7 +146,7 @@ const createFeaturedProductsBulk = async ({ productIds } = {}) => {
   const uniqueProductIds = toUniqueProductIds(productIds);
 
   if (!uniqueProductIds.length) {
-    throw new Error('Featured product is required.');
+    throw new Error('Sản phẩm nổi bật là bắt buộc.');
   }
 
   const existingProducts = await prisma.product.findMany({
@@ -156,7 +156,7 @@ const createFeaturedProductsBulk = async ({ productIds } = {}) => {
   const existingProductIds = new Set(existingProducts.map((product) => product.id));
 
   if (existingProductIds.size !== uniqueProductIds.length) {
-    throw new Error('Featured product was not found.');
+    throw new Error('Không tìm thấy sản phẩm nổi bật.');
   }
 
   const existingFeaturedProducts = await prisma.storefrontFeaturedProduct.findMany({
@@ -201,7 +201,7 @@ const reorderFeaturedProducts = async ({ orderedIds } = {}) => {
   const uniqueOrderedIds = toUniqueProductIds(orderedIds);
 
   if (!uniqueOrderedIds.length) {
-    throw new Error('Featured product order is required.');
+    throw new Error('Thứ tự sản phẩm nổi bật là bắt buộc.');
   }
 
   const existingFeaturedProducts = await prisma.storefrontFeaturedProduct.findMany({
@@ -210,7 +210,7 @@ const reorderFeaturedProducts = async ({ orderedIds } = {}) => {
   });
 
   if (existingFeaturedProducts.length !== uniqueOrderedIds.length) {
-    throw new Error('Featured product was not found.');
+    throw new Error('Không tìm thấy sản phẩm nổi bật.');
   }
 
   const updates = uniqueOrderedIds.map((id, index) => (

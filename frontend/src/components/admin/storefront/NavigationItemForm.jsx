@@ -77,7 +77,7 @@ export const NavigationItemForm = ({
       await onSubmit(createNavigationPayload(values));
       onOpenChange(false);
     } catch (error) {
-      setSubmitError(error?.message || 'Unable to save the navigation item.');
+      setSubmitError(error?.message || 'Không thể lưu mục điều hướng.');
     } finally {
       setIsSubmitting(false);
     }
@@ -90,8 +90,8 @@ export const NavigationItemForm = ({
       <Layout
         header={(
           <DialogHeader
-            title={item?.id ? 'Edit navigation item' : 'Create navigation item'}
-            subtitle="Saved active items publish immediately."
+            title={item?.id ? 'Chỉnh sửa mục điều hướng' : 'Tạo mục điều hướng'}
+            subtitle="Các mục đang kích hoạt sẽ được xuất bản ngay lập tức."
             onOpenChange={onOpenChange}
             hasDivider
           />
@@ -100,10 +100,10 @@ export const NavigationItemForm = ({
           <LayoutContent isScrollable>
             <form id={formId} onSubmit={handleSubmit}>
               <VStack gap={4}>
-                {submitError && <Alert title="Unable to save navigation item" description={submitError} />}
+                {submitError && <Alert title="Không thể lưu mục điều hướng" description={submitError} />}
                 <FormLayout>
                   <Selector
-                    label="Item type"
+                    label="Loại mục"
                     options={NAV_ITEM_TYPE_OPTIONS}
                     value={values.itemType}
                     onChange={(value) => updateField('itemType', value)}
@@ -111,15 +111,15 @@ export const NavigationItemForm = ({
                     isDisabled={Boolean(values.parentId)}
                   />
                   <Selector
-                    label="Parent mega menu"
+                    label="Mega menu cha"
                     options={parentSelectorOptions}
                     value={values.parentId || undefined}
                     onChange={(value) => updateField('parentId', value || '')}
-                    placeholder="Top-level item"
+                    placeholder="Mục cấp cao nhất"
                     width="100%"
                   />
                   <TextInput
-                    label="Label"
+                    label="Nhãn"
                     value={values.label}
                     onChange={(value) => updateField('label', value)}
                     status={fieldStatus(errors.label)}
@@ -127,7 +127,7 @@ export const NavigationItemForm = ({
                     width="100%"
                   />
                   <TextArea
-                    label="Description"
+                    label="Mô tả"
                     value={values.description}
                     onChange={(value) => updateField('description', value)}
                     rows={3}
@@ -135,14 +135,14 @@ export const NavigationItemForm = ({
                     width="100%"
                   />
                   <Selector
-                    label="Icon"
+                    label="Biểu tượng"
                     options={NAV_ICON_OPTIONS}
                     value={values.icon}
                     onChange={(value) => updateField('icon', value)}
                     width="100%"
                   />
                   <NumberInput
-                    label="Sort order"
+                    label="Thứ tự sắp xếp"
                     value={values.sortOrder}
                     onChange={(value) => updateField('sortOrder', value)}
                     step={1}
@@ -150,7 +150,7 @@ export const NavigationItemForm = ({
                     width="100%"
                   />
                   <Switch
-                    label="Active"
+                    label="Kích hoạt"
                     value={values.isActive}
                     onChange={(checked) => updateField('isActive', checked)}
                   />
@@ -165,10 +165,10 @@ export const NavigationItemForm = ({
                 )}
                 {isTopLevelMegaMenu && (
                   <VStack gap={4}>
-                    <TextInput label="Featured title" value={values.featuredTitle} onChange={(value) => updateField('featuredTitle', value)} width="100%" />
-                    <TextArea label="Featured description" value={values.featuredDescription} onChange={(value) => updateField('featuredDescription', value)} rows={3} isOptional width="100%" />
-                    <TextInput label="Featured image URL" value={values.featuredImageUrl} onChange={(value) => updateField('featuredImageUrl', value)} width="100%" />
-                    <TextInput label="Featured link label" value={values.featuredLinkLabel} onChange={(value) => updateField('featuredLinkLabel', value)} width="100%" />
+                    <TextInput label="Tiêu đề nổi bật" value={values.featuredTitle} onChange={(value) => updateField('featuredTitle', value)} width="100%" />
+                    <TextArea label="Mô tả nổi bật" value={values.featuredDescription} onChange={(value) => updateField('featuredDescription', value)} rows={3} isOptional width="100%" />
+                    <TextInput label="URL hình ảnh nổi bật" value={values.featuredImageUrl} onChange={(value) => updateField('featuredImageUrl', value)} width="100%" />
+                    <TextInput label="Nhãn liên kết nổi bật" value={values.featuredLinkLabel} onChange={(value) => updateField('featuredLinkLabel', value)} width="100%" />
                     <LinkTargetFields
                       categories={categories}
                       errors={errors}
@@ -185,8 +185,8 @@ export const NavigationItemForm = ({
         footer={(
           <LayoutFooter hasDivider>
             <HStack gap={2} justify="end">
-              <Button label="Cancel" variant="secondary" onClick={() => onOpenChange(false)} isDisabled={isSubmitting} />
-              <Button label={item?.id ? 'Save changes' : 'Create navigation item'} type="submit" form={formId} variant="primary" isLoading={isSubmitting} />
+              <Button label="Hủy" variant="secondary" onClick={() => onOpenChange(false)} isDisabled={isSubmitting} />
+              <Button label={item?.id ? 'Lưu thay đổi' : 'Tạo mục điều hướng'} type="submit" form={formId} variant="primary" isLoading={isSubmitting} />
             </HStack>
           </LayoutFooter>
         )}

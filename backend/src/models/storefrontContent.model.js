@@ -44,42 +44,42 @@ const hasResolvedTarget = (item, prefix = '') => {
 
 const validateLinkTarget = async ({ linkType, productId, categoryId, customUrl }, { isRequired = true } = {}) => {
   if (!linkType) {
-    if (isRequired) throw new Error('Link type is required.');
+    if (isRequired) throw new Error('Loại liên kết là bắt buộc.');
     return;
   }
 
   if (!Object.values(LINK_TYPES).includes(linkType)) {
-    throw new Error('Link type is invalid.');
+    throw new Error('Loại liên kết không hợp lệ.');
   }
 
   if (linkType === LINK_TYPES.PRODUCT) {
     if (!isNonEmptyString(productId)) {
-      throw new Error('Product link target is required.');
+      throw new Error('Đích liên kết sản phẩm là bắt buộc.');
     }
     const product = await prisma.product.findUnique({
       where: { id: productId },
       select: { id: true },
     });
     if (!product) {
-      throw new Error('Product link target was not found.');
+      throw new Error('Không tìm thấy đích liên kết sản phẩm.');
     }
   }
 
   if (linkType === LINK_TYPES.CATEGORY) {
     if (!isNonEmptyString(categoryId)) {
-      throw new Error('Category link target is required.');
+      throw new Error('Đích liên kết danh mục là bắt buộc.');
     }
     const category = await prisma.category.findUnique({
       where: { id: categoryId },
       select: { id: true },
     });
     if (!category) {
-      throw new Error('Category link target was not found.');
+      throw new Error('Không tìm thấy đích liên kết danh mục.');
     }
   }
 
   if (linkType === LINK_TYPES.CUSTOM_URL && !isValidCustomUrl(customUrl)) {
-    throw new Error('Custom URL must start with /, http://, or https://.');
+    throw new Error('URL tùy chỉnh phải bắt đầu bằng /, http:// hoặc https://.');
   }
 };
 
@@ -101,9 +101,9 @@ const hasFeaturedCardInput = (data) => (
 );
 
 const validateCarouselPayload = async (data) => {
-  if (!isNonEmptyString(data.title)) throw new Error('Carousel title is required.');
-  if (data.isActive !== false && !isNonEmptyString(data.imageUrl)) throw new Error('Carousel image URL is required.');
-  if (!isNonEmptyString(data.primaryButtonLabel)) throw new Error('Carousel button label is required.');
+  if (!isNonEmptyString(data.title)) throw new Error('Tiêu đề băng chuyền là bắt buộc.');
+  if (data.isActive !== false && !isNonEmptyString(data.imageUrl)) throw new Error('URL hình ảnh băng chuyền là bắt buộc.');
+  if (!isNonEmptyString(data.primaryButtonLabel)) throw new Error('Nhãn nút băng chuyền là bắt buộc.');
   await validateLinkTarget(data);
 };
 
@@ -164,8 +164,8 @@ const updateCarouselSlide = async (id, data) => {
 const deleteCarouselSlide = (id) => prisma.carouselSlide.delete({ where: { id } });
 
 const validateNavigationPayload = async (data) => {
-  if (!isNonEmptyString(data.label)) throw new Error('Navigation label is required.');
-  if (!Object.values(NAV_ITEM_TYPES).includes(data.itemType)) throw new Error('Navigation item type is invalid.');
+  if (!isNonEmptyString(data.label)) throw new Error('Nhãn điều hướng là bắt buộc.');
+  if (!Object.values(NAV_ITEM_TYPES).includes(data.itemType)) throw new Error('Loại mục điều hướng không hợp lệ.');
 
   if (data.parentId) {
     const parent = await prisma.storefrontNavItem.findUnique({
@@ -173,7 +173,7 @@ const validateNavigationPayload = async (data) => {
       select: { id: true, parentId: true, itemType: true },
     });
     if (!parent || parent.parentId || parent.itemType !== NAV_ITEM_TYPES.MEGA_MENU) {
-      throw new Error('Navigation children must belong to a top-level mega menu.');
+      throw new Error('Mục điều hướng con phải thuộc một mega menu cấp cao nhất.');
     }
   }
 

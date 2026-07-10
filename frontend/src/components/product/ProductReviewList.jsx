@@ -20,7 +20,7 @@ const getCustomerName = (review) => (
   review?.user?.name ||
   review?.user?.email ||
   review?.customerName ||
-  'Customer'
+  'Khách hàng'
 );
 
 const formatRatingLabel = (rating) => `${Number(rating) || 0}/5`;
@@ -45,9 +45,9 @@ export const ProductReviewList = ({
   isLoading = false,
   error = null,
   onRetry,
-  title = 'Customer reviews',
-  emptyTitle = 'No reviews yet',
-  emptyDescription = 'Be the first customer to share feedback on this product.'
+  title = 'Đánh giá của khách hàng',
+  emptyTitle = 'Chưa có đánh giá',
+  emptyDescription = 'Hãy là khách hàng đầu tiên chia sẻ phản hồi về sản phẩm này.'
 }) => {
   if (isLoading) {
     return (
@@ -69,9 +69,9 @@ export const ProductReviewList = ({
   if (error) {
     return (
       <Alert
-        title="Unable to load reviews"
+        title="Không thể tải đánh giá"
         description={error}
-        actionLabel={onRetry ? 'Try again' : undefined}
+        actionLabel={onRetry ? 'Thử lại' : undefined}
         onAction={onRetry}
       />
     );
@@ -84,7 +84,7 @@ export const ProductReviewList = ({
           title={emptyTitle}
           description={emptyDescription}
           actions={onRetry ? (
-            <Button label="Refresh reviews" variant="secondary" onClick={onRetry} />
+            <Button label="Làm mới đánh giá" variant="secondary" onClick={onRetry} />
           ) : undefined}
         />
       </Card>
@@ -118,7 +118,7 @@ export const ProductReviewList = ({
                 description={(
                   <VStack gap={1}>
                     <Text color={review.comment ? undefined : 'secondary'}>
-                      {review.comment || 'No comment provided.'}
+                      {review.comment || 'Chưa có nhận xét.'}
                     </Text>
                     {review.createdAt ? (
                       <Timestamp value={review.createdAt} format="date" />

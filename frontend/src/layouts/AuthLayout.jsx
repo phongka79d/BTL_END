@@ -41,7 +41,7 @@ export const AuthLayout = () => {
               <Text size="large" weight="semibold">tsshop</Text>
             </HStack>
             <Text size="supporting" color="secondary">
-              Account access
+              Truy cập tài khoản
             </Text>
           </VStack>
 
@@ -62,7 +62,7 @@ export const AuthLayout = () => {
                 }
               }}
             >
-              ← Back to Homepage
+              ← Quay lại trang chủ
             </Link>
           </Center>
         </VStack>

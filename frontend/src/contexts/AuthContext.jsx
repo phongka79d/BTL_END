@@ -54,13 +54,13 @@ export const AuthProvider = ({ children }) => {
         setLoading(false);
         return { success: true, user: loggedUser };
       } else {
-        const errMsg = res.message || 'Login failed';
+        const errMsg = res.message || 'Đăng nhập thất bại';
         setError(errMsg);
         setLoading(false);
         return { success: false, error: errMsg };
       }
     } catch (err) {
-      const errMsg = err.message || 'An error occurred during login';
+      const errMsg = err.message || 'Đã xảy ra lỗi khi đăng nhập';
       setError(errMsg);
       setLoading(false);
       return { success: false, error: errMsg };
@@ -80,13 +80,13 @@ export const AuthProvider = ({ children }) => {
         setLoading(false);
         return { success: true, user: registeredUser };
       } else {
-        const errMsg = res.message || 'Registration failed';
+        const errMsg = res.message || 'Đăng ký thất bại';
         setError(errMsg);
         setLoading(false);
         return { success: false, error: errMsg };
       }
     } catch (err) {
-      const errMsg = err.message || 'An error occurred during registration';
+      const errMsg = err.message || 'Đã xảy ra lỗi khi đăng ký';
       setError(errMsg);
       setLoading(false);
       return { success: false, error: errMsg };

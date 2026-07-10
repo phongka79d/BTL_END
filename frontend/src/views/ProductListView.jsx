@@ -104,7 +104,7 @@ export const ProductListView = () => {
         }
 
         setCategories([]);
-        setCategoryError(err?.message || 'Unable to load categories.');
+        setCategoryError(err?.message || 'Không thể tải danh mục.');
       } finally {
         if (isActive) {
           setIsCategoriesLoading(false);
@@ -141,7 +141,7 @@ export const ProductListView = () => {
 
         setProducts([]);
         setPagination({ page, totalPages: 1, total: 0, limit: 12 });
-        setError(err?.message || 'Unable to load products.');
+      setError(err?.message || 'Không thể tải sản phẩm.');
       } finally {
         if (isActive) {
           setIsLoading(false);
@@ -193,23 +193,23 @@ export const ProductListView = () => {
       }}
     >
       <VStack gap={1}>
-        <Heading level={1}>Products</Heading>
+        <Heading level={1}>Sản phẩm</Heading>
         <Text color="secondary">
-          Search the catalog by keyword, category, and price range.
+          Tìm kiếm danh mục theo từ khóa, danh mục và khoảng giá.
         </Text>
       </VStack>
 
       {categoryError && (
         <Alert
-          title="Category filter unavailable"
+          title="Bộ lọc danh mục không khả dụng"
           description={categoryError}
-          actionLabel="Retry categories"
+          actionLabel="Thử lại danh mục"
           onAction={() => {
             setIsCategoriesLoading(true);
             setCategoryError(null);
             categoryApi.getCategories()
               .then((response) => setCategories(response?.data?.categories || []))
-              .catch((err) => setCategoryError(err?.message || 'Unable to load categories.'))
+              .catch((err) => setCategoryError(err?.message || 'Không thể tải danh mục.'))
               .finally(() => setIsCategoriesLoading(false));
           }}
         />
@@ -230,8 +230,8 @@ export const ProductListView = () => {
         isLoading={isLoading}
         error={error}
         onRetry={handleRetry}
-        emptyTitle="No products match your filters"
-        emptyDescription="Clear the current filters or broaden the search terms to see more catalog items."
+        emptyTitle="Không có sản phẩm phù hợp với bộ lọc"
+        emptyDescription="Hãy xóa các bộ lọc hiện tại hoặc mở rộng từ khóa tìm kiếm để xem thêm sản phẩm."
         pagination={pagination}
         onPageChange={handlePageChange}
       />

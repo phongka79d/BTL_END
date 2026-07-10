@@ -80,7 +80,7 @@ const getAccountName = (profile, fallbackUser) => (
   fallbackUser?.fullName ||
   fallbackUser?.username ||
   fallbackUser?.email ||
-  'Your account'
+  'Tài khoản của bạn'
 );
 
 const ProfileInfoRow = ({ icon, label, children }) => (
@@ -117,7 +117,7 @@ export const ProfileView = () => {
       setUsernameStatus(null);
     } catch (error) {
       setProfile(null);
-      setLoadError(error?.message || 'Unable to load your profile.');
+      setLoadError(error?.message || 'Không thể tải hồ sơ của bạn.');
     } finally {
       setIsLoading(false);
     }
@@ -148,7 +148,7 @@ export const ProfileView = () => {
     const payload = toProfilePayload(values);
 
     if (!payload.username) {
-      setUsernameStatus({ type: 'error', message: 'Username cannot be empty' });
+      setUsernameStatus({ type: 'error', message: 'Tên người dùng không được để trống' });
       return;
     }
 
@@ -161,14 +161,14 @@ export const ProfileView = () => {
       setProfile(updatedProfile);
       setValues(toProfileValues(updatedProfile));
       setFeedback({
-        title: 'Profile saved',
-        description: 'Your account details were updated.',
+        title: 'Đã lưu hồ sơ',
+        description: 'Thông tin tài khoản của bạn đã được cập nhật.',
         status: 'success',
       });
     } catch (error) {
       setFeedback({
-        title: 'Unable to save profile',
-        description: error?.message || 'Your profile could not be updated.',
+        title: 'Không thể lưu hồ sơ',
+        description: error?.message || 'Không thể cập nhật hồ sơ của bạn.',
         status: 'error',
       });
     } finally {
@@ -180,8 +180,8 @@ export const ProfileView = () => {
     return (
       <Card padding={4}>
         <VStack gap={2}>
-          <Text weight="semibold">Loading profile</Text>
-          <Text color="secondary">Fetching your account details.</Text>
+          <Text weight="semibold">Đang tải hồ sơ</Text>
+          <Text color="secondary">Đang tải thông tin tài khoản của bạn.</Text>
         </VStack>
       </Card>
     );
@@ -190,9 +190,9 @@ export const ProfileView = () => {
   if (loadError) {
     return (
       <Alert
-        title="Unable to load profile"
+        title="Không thể tải hồ sơ"
         description={loadError}
-        actionLabel="Retry"
+        actionLabel="Thử lại"
         onAction={loadProfile}
       />
     );
@@ -202,20 +202,20 @@ export const ProfileView = () => {
     <VStack gap={6} width="100%">
       <HStack gap={4} align="center" justify="between" wrap="wrap" width="100%">
         <VStack gap={1}>
-          <Heading level={1}>My profile</Heading>
+          <Heading level={1}>Hồ sơ của tôi</Heading>
           <Text color="secondary">
-            Manage account details used for checkout and account display.
+            Quản lý thông tin tài khoản dùng cho thanh toán và hiển thị tài khoản.
           </Text>
         </VStack>
         <HStack gap={2} wrap="wrap">
           <Button
-            label="Order history"
+            label="Lịch sử đơn hàng"
             variant="secondary"
             onClick={() => navigate('/orders')}
           />
           {isAdmin && (
             <Button
-              label="Admin dashboard"
+            label="Bảng điều khiển quản trị"
               variant="secondary"
               onClick={() => navigate('/admin')}
             />
@@ -239,20 +239,20 @@ export const ProfileView = () => {
                 <Avatar name={accountName} size="large" />
               </HStack>
               <VStack gap={1}>
-                <Heading level={2}>Account summary</Heading>
+                <Heading level={2}>Tổng quan tài khoản</Heading>
                 <Text color="secondary">{accountName}</Text>
               </VStack>
               <VStack gap={4}>
                 <ProfileInfoRow icon={<EmailIcon />} label="Email">
-                  <Text color="secondary">{profile?.email || user?.email || 'Not available'}</Text>
+                  <Text color="secondary">{profile?.email || user?.email || 'Không có thông tin'}</Text>
                 </ProfileInfoRow>
-                <ProfileInfoRow icon={<RoleIcon />} label="Role">
+                <ProfileInfoRow icon={<RoleIcon />} label="Vai trò">
                   <Badge label={profile?.role || user?.role || 'customer'} />
                 </ProfileInfoRow>
                 {profile?.isBlocked && (
                   <Alert
-                    title="Account blocked"
-                    description="This account cannot place protected requests until an admin unblocks it."
+                    title="Tài khoản bị khóa"
+                    description="Tài khoản này không thể thực hiện các yêu cầu được bảo vệ cho đến khi quản trị viên mở khóa."
                   />
                 )}
               </VStack>
@@ -266,15 +266,15 @@ export const ProfileView = () => {
           <form onSubmit={handleSubmit}>
             <VStack gap={4}>
               <VStack gap={1}>
-                <Heading level={2}>Profile details</Heading>
+                <Heading level={2}>Thông tin hồ sơ</Heading>
                 <Text color="secondary">
-                  Update your public name, contact phone, and delivery address.
+                  Cập nhật tên hiển thị, số điện thoại liên hệ và địa chỉ giao hàng.
                 </Text>
               </VStack>
 
               <FormLayout>
                 <TextInput
-                  label="Username"
+                  label="Tên người dùng"
                   value={values.username}
                   onChange={(value) => updateField('username', value)}
                   status={usernameStatus}
@@ -283,7 +283,7 @@ export const ProfileView = () => {
                   width="100%"
                 />
                 <TextInput
-                  label="Full name"
+                  label="Họ và tên"
                   value={values.fullName}
                   onChange={(value) => updateField('fullName', value)}
                   isOptional
@@ -291,7 +291,7 @@ export const ProfileView = () => {
                   width="100%"
                 />
                 <TextInput
-                  label="Phone"
+                  label="Số điện thoại"
                   startIcon={<PhoneIcon />}
                   value={values.phone}
                   onChange={(value) => updateField('phone', value)}
@@ -300,7 +300,7 @@ export const ProfileView = () => {
                   width="100%"
                 />
                 <TextArea
-                  label="Address"
+                  label="Địa chỉ"
                   startIcon={<AddressIcon />}
                   value={values.address}
                   onChange={(value) => updateField('address', value)}
@@ -313,13 +313,13 @@ export const ProfileView = () => {
 
               <HStack gap={3} justify="end" wrap="wrap" style={{ paddingTop: 'var(--spacing-2)' }}>
                 <Button
-                  label="Reset"
+                  label="Đặt lại"
                   variant="ghost"
                   onClick={resetForm}
                   isDisabled={isSaving}
                 />
                 <Button
-                  label="Save profile"
+                  label="Lưu hồ sơ"
                   type="submit"
                   variant="primary"
                   isLoading={isSaving}

@@ -4,7 +4,7 @@ import { getProductImageSrc } from './productUtils';
 
 export const ProductDetailMedia = ({ product }) => {
   const imageSrc = getProductImageSrc(product?.imageUrl);
-  const imageAlt = product?.name || 'Product image';
+  const imageAlt = product?.name || 'Hình ảnh sản phẩm';
 
   return (
     <VStack gap={3}>
@@ -33,7 +33,7 @@ export const ProductDetailMedia = ({ product }) => {
       </AspectRatio>
 
       <SelectableCard
-        label="Primary product image"
+        label="Hình ảnh chính của sản phẩm"
         isSelected
         onChange={() => {}}
         variant="transparent"

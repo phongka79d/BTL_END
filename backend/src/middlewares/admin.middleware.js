@@ -8,7 +8,7 @@ const admin = (req, res, next) => {
   if (req.user && req.user.role === 'admin') {
     next();
   } else {
-    return errorResponse(res, 403, 'Forbidden, admin resource only');
+    return errorResponse(res, 403, 'Bị từ chối, chỉ dành cho quản trị viên');
   }
 };
 

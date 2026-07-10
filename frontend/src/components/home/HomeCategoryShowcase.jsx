@@ -14,7 +14,7 @@ export const HomeProductTile = ({ product }) => {
 
   return (
     <ClickableCard
-      label={`View ${product.name}`}
+      label={`Xem ${product.name}`}
       onClick={() => navigate(`/products/${product.id}`)}
       padding={0}
       variant="transparent"
@@ -44,7 +44,7 @@ export const HomeProductTile = ({ product }) => {
         <VStack gap={1}>
           <Text weight="semibold">{product.name}</Text>
           <HStack gap={2} style={{ flexWrap: 'wrap' }}>
-            <Badge variant="blue" label={product.category?.name || 'Uncategorized'} />
+            <Badge variant="blue" label={product.category?.name || 'Chưa phân loại'} />
             <Badge variant={getStockVariant(product.quantity)} label={getStockLabel(product.quantity)} />
             <ProductRatingBadge product={product} />
           </HStack>
@@ -65,7 +65,7 @@ export const HomeSection = ({ title, children }) => (
 );
 
 export const HomeCategoryShowcase = ({ products = [] }) => (
-  <HomeSection title="Featured products">
+  <HomeSection title="Sản phẩm nổi bật">
     <Grid columns={{ minWidth: 200, max: 6 }} gap={4}>
       {products.map((product) => (
         <HomeProductTile key={product.id} product={product} />

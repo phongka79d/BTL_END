@@ -52,7 +52,7 @@ export const ChangePasswordPanel = () => {
   const handleSendOtp = async () => {
     if (!values.currentPassword.trim()) {
       setFieldStatus({
-        currentPassword: { type: 'error', message: 'Current password is required' },
+        currentPassword: { type: 'error', message: 'Vui lòng nhập mật khẩu hiện tại' },
       });
       return;
     }
@@ -66,14 +66,14 @@ export const ChangePasswordPanel = () => {
       });
       setOtpRequested(true);
       setFeedback({
-        title: 'OTP sent',
-        description: 'Check your email for the password change code.',
+        title: 'Đã gửi OTP',
+        description: 'Hãy kiểm tra email để nhận mã đổi mật khẩu.',
         status: 'success',
       });
     } catch (error) {
       setFeedback({
-        title: 'Unable to send OTP',
-        description: error?.message || 'Current password could not be verified.',
+        title: 'Không thể gửi OTP',
+        description: error?.message || 'Không thể xác minh mật khẩu hiện tại.',
         status: 'error',
       });
     } finally {
@@ -85,24 +85,24 @@ export const ChangePasswordPanel = () => {
     const nextStatus = {};
 
     if (!values.currentPassword.trim()) {
-      nextStatus.currentPassword = { type: 'error', message: 'Current password is required' };
+      nextStatus.currentPassword = { type: 'error', message: 'Vui lòng nhập mật khẩu hiện tại' };
     }
     if (!values.otp.trim()) {
-      nextStatus.otp = { type: 'error', message: 'OTP is required' };
+      nextStatus.otp = { type: 'error', message: 'Vui lòng nhập OTP' };
     }
     const passwordPolicy = validatePasswordPolicy(values.newPassword);
     if (!passwordPolicy.isValid) {
       nextStatus.newPassword = {
         type: 'error',
-        message: passwordPolicy.message.replace('Password', 'New password'),
+        message: passwordPolicy.message.replace('Mật khẩu', 'Mật khẩu mới'),
       };
     }
     if (!values.confirmPassword) {
-      nextStatus.confirmPassword = { type: 'error', message: 'Confirm new password is required' };
+      nextStatus.confirmPassword = { type: 'error', message: 'Vui lòng nhập mật khẩu mới để xác nhận' };
     } else if (values.newPassword !== values.confirmPassword) {
       nextStatus.confirmPassword = {
         type: 'error',
-        message: 'New password and confirmation password must match',
+        message: 'Mật khẩu mới và mật khẩu xác nhận phải khớp nhau',
       };
     }
 
@@ -130,14 +130,14 @@ export const ChangePasswordPanel = () => {
       resetFlow();
       setIsOpen(false);
       setFeedback({
-        title: 'Password changed',
-        description: 'Use your new password the next time you sign in.',
+        title: 'Đã đổi mật khẩu',
+        description: 'Sử dụng mật khẩu mới vào lần đăng nhập tiếp theo.',
         status: 'success',
       });
     } catch (error) {
       setFeedback({
-        title: 'Unable to change password',
-        description: error?.message || 'The password was not changed.',
+        title: 'Không thể đổi mật khẩu',
+        description: error?.message || 'Mật khẩu chưa được thay đổi.',
         status: 'error',
       });
     } finally {
@@ -150,19 +150,19 @@ export const ChangePasswordPanel = () => {
       <VStack gap={4}>
         <HStack gap={3} justify="between" align="center" wrap="wrap">
           <VStack gap={1}>
-            <Heading level={2}>Password</Heading>
-            <Text color="secondary">Verify your current password and email OTP before changing it.</Text>
+            <Heading level={2}>Mật khẩu</Heading>
+            <Text color="secondary">Xác minh mật khẩu hiện tại và OTP gửi qua email trước khi thay đổi.</Text>
           </VStack>
           {isOpen ? (
             <Button
-              label="Cancel"
+              label="Hủy"
               variant="secondary"
               onClick={handleToggle}
               isDisabled={isSendingOtp || isSubmitting}
             />
           ) : (
             <Button
-              label="Change Password"
+              label="Đổi mật khẩu"
               variant="primary"
               onClick={handleToggle}
               isDisabled={isSendingOtp || isSubmitting}
@@ -177,7 +177,7 @@ export const ChangePasswordPanel = () => {
             <VStack gap={4}>
               <FormLayout>
                 <TextInput
-                  label="Current password"
+                  label="Mật khẩu hiện tại"
                   type="password"
                   value={values.currentPassword}
                   onChange={(value) => updateField('currentPassword', value)}
@@ -190,7 +190,7 @@ export const ChangePasswordPanel = () => {
 
               <HStack gap={2} justify="start" wrap="wrap">
                 <Button
-                  label="Send OTP"
+                  label="Gửi OTP"
                   type="button"
                   variant="secondary"
                   onClick={handleSendOtp}
@@ -211,7 +211,7 @@ export const ChangePasswordPanel = () => {
                     width="100%"
                   />
                   <TextInput
-                    label="New password"
+                    label="Mật khẩu mới"
                     type="password"
                     value={values.newPassword}
                     onChange={(value) => updateField('newPassword', value)}
@@ -221,7 +221,7 @@ export const ChangePasswordPanel = () => {
                     width="100%"
                   />
                   <TextInput
-                    label="Confirm new password"
+                    label="Xác nhận mật khẩu mới"
                     type="password"
                     value={values.confirmPassword}
                     onChange={(value) => updateField('confirmPassword', value)}
@@ -236,14 +236,14 @@ export const ChangePasswordPanel = () => {
               {otpRequested && (
                 <HStack gap={2} justify="end" wrap="wrap">
                   <Button
-                    label="Reset"
+                    label="Đặt lại"
                     type="button"
                     variant="secondary"
                     onClick={resetFlow}
                     isDisabled={isSubmitting}
                   />
                   <Button
-                    label="Save new password"
+                    label="Lưu mật khẩu mới"
                     type="submit"
                     variant="primary"
                     isLoading={isSubmitting}

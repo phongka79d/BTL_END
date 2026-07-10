@@ -19,13 +19,13 @@ import ProductRatingBadge from './ProductRatingBadge';
 export const ProductCard = ({ product }) => {
   const navigate = useNavigate();
 
-  const categoryName = product?.category?.name || 'Uncategorized';
+  const categoryName = product?.category?.name || 'Chưa phân loại';
   const stockLabel = getStockLabel(product?.quantity);
   const stockVariant = getStockVariant(product?.quantity);
 
   return (
     <ClickableCard
-      label={`View details for ${product.name}`}
+      label={`Xem chi tiết ${product.name}`}
       onClick={() => navigate(`/products/${product.id}`)}
       padding={4}
       variant="default"

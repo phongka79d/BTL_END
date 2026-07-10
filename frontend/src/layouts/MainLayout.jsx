@@ -29,7 +29,7 @@ import {
 
 const CustomerAccountMenu = ({ items, user }) => {
   const { isMobile } = useAppShellMobile();
-  const accountLabel = user.username || user.email || 'Account';
+  const accountLabel = user.username || user.email || 'Tài khoản';
 
   return (
     <DropdownMenu
@@ -60,7 +60,7 @@ export const MainLayout = () => {
   const getDropdownItems = () => {
     const items = [
       {
-        label: 'Profile',
+        label: 'Hồ sơ',
         onClick: () => navigate('/profile'),
         icon: UserIcon
       }
@@ -68,7 +68,7 @@ export const MainLayout = () => {
 
     if (!user || user.role === 'customer') {
       items.push({
-        label: 'My Orders',
+        label: 'Đơn hàng của tôi',
         onClick: () => navigate('/orders'),
         icon: OrdersIcon
       });
@@ -76,14 +76,14 @@ export const MainLayout = () => {
 
     if (user && user.role === 'admin') {
       items.push({
-        label: 'Admin Dashboard',
+        label: 'Bảng điều khiển quản trị',
         onClick: () => navigate('/admin'),
         icon: AdminIcon
       });
     }
 
     items.push({
-      label: 'Logout',
+      label: 'Đăng xuất',
       onClick: logout,
       icon: LogOutIcon
     });
@@ -93,7 +93,7 @@ export const MainLayout = () => {
 
   const topNav = (
     <TopNav
-      label="tsshop storefront navigation"
+      label="Điều hướng cửa hàng tsshop"
       heading={
         <TopNavHeading
           logo={<NavIcon icon={<Icon icon="wrench" size="sm" />} />}
@@ -110,8 +110,8 @@ export const MainLayout = () => {
       endContent={
         <HStack gap={3} style={{ alignItems: 'center' }}>
           <IconButton
-            label="Search products"
-            tooltip="Search"
+            label="Tìm kiếm sản phẩm"
+            tooltip="Tìm kiếm"
             variant="ghost"
             icon={<Icon icon="search" size="sm" />}
             onClick={() => navigate('/products')}
@@ -124,7 +124,7 @@ export const MainLayout = () => {
             />
           ) : (
             <Button
-              label="Sign in"
+              label="Đăng nhập"
               variant="ghost"
               size="sm"
               onClick={() => navigate('/login')}
@@ -132,7 +132,7 @@ export const MainLayout = () => {
           )}
 
           <Button
-            label="Checkout"
+            label="Thanh toán"
             variant="primary"
             size="sm"
             icon={<CartIcon />}
@@ -170,7 +170,7 @@ export const MainLayout = () => {
           }}
         >
           <Text size="supporting" color="secondary">
-            © 2026 tsshop. All rights reserved.
+            © 2026 tsshop. Bảo lưu mọi quyền.
           </Text>
           <HStack gap={4}>
             <Link
@@ -181,7 +181,7 @@ export const MainLayout = () => {
                 fontSize: 'var(--text-supporting-size)'
               }}
             >
-              About Us
+              Về chúng tôi
             </Link>
             <Link
               to="/contact"
@@ -191,7 +191,7 @@ export const MainLayout = () => {
                 fontSize: 'var(--text-supporting-size)'
               }}
             >
-              Contact
+              Liên hệ
             </Link>
             <Link
               to="/terms"
@@ -201,7 +201,7 @@ export const MainLayout = () => {
                 fontSize: 'var(--text-supporting-size)'
               }}
             >
-              Terms & Conditions
+              Điều khoản và điều kiện
             </Link>
           </HStack>
         </VStack>

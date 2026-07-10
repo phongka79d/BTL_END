@@ -51,12 +51,12 @@ export const CheckoutSuccessDialog = ({
 
         <HStack gap={3} style={{ flexWrap: 'wrap', justifyContent: 'center' }}>
           <Button
-            label="View order"
+            label="Xem đơn hàng"
             variant="primary"
             onClick={onViewOrder}
           />
           <Button
-            label="Continue shopping"
+            label="Tiếp tục mua sắm"
             variant="secondary"
             onClick={onContinueShopping}
           />

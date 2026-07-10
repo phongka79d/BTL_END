@@ -36,7 +36,7 @@ export const CategoryTable = ({
         <VStack gap={0.5}>
           <Text weight="semibold">{category.name}</Text>
           <Text type="supporting">
-            {category.description || 'No description'}
+            {category.description || 'Chưa có mô tả'}
           </Text>
         </VStack>
       )
@@ -49,15 +49,15 @@ export const CategoryTable = ({
       resizable: false,
       renderCell: (category) => (
         <MoreMenu
-          label={`Actions for ${category.name}`}
+          label={`Thao tác với ${category.name}`}
           isDisabled={isDeleting}
           items={[
             {
-              label: 'Edit',
+              label: 'Chỉnh sửa',
               onClick: () => onEdit(category)
             },
             {
-              label: 'Delete',
+              label: 'Xóa',
               onClick: () => onDelete(category)
             }
           ]}
@@ -72,13 +72,13 @@ export const CategoryTable = ({
       data={categories}
       isLoading={isLoading}
       error={error}
-      errorTitle="Unable to load categories"
+      errorTitle="Không thể tải danh mục"
       onRetry={onRetry}
-      emptyTitle="No categories yet"
-      emptyDescription="Create the first category to organize catalog products."
+      emptyTitle="Chưa có danh mục"
+      emptyDescription="Hãy tạo danh mục đầu tiên để sắp xếp sản phẩm trong danh mục."
       emptyActions={(
         <Button
-          label="Create category"
+          label="Tạo danh mục"
           variant="primary"
           onClick={onCreate}
         />

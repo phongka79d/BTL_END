@@ -86,11 +86,11 @@ export const CheckoutForm = ({
         <Card padding={3}>
           <VStack gap={2}>
             <HStack gap={3} style={{ alignItems: 'center' }}>
-              <Text weight="semibold">Payment method</Text>
+              <Text weight="semibold">Phương thức thanh toán</Text>
               <Badge variant="info">COD</Badge>
             </HStack>
             <Text color="secondary">
-              Cash on Delivery — you will pay when your order arrives.
+              Thanh toán khi nhận hàng — bạn sẽ thanh toán khi đơn hàng được giao.
             </Text>
           </VStack>
         </Card>

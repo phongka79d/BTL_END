@@ -28,23 +28,23 @@ export const validateProductForm = (values) => {
   const errors = {};
 
   if (!values.name?.trim()) {
-    errors.name = 'Product name is required.';
+    errors.name = 'Vui lòng nhập tên sản phẩm.';
   }
   if (!values.brand?.trim()) {
-    errors.brand = 'Brand is required.';
+    errors.brand = 'Vui lòng nhập thương hiệu.';
   }
   if (values.price === '' || values.price === null || values.price === undefined) {
-    errors.price = 'Price is required.';
+    errors.price = 'Vui lòng nhập giá.';
   } else if (!Number.isFinite(Number(values.price)) || Number(values.price) < 0) {
     errors.price = 'Price must be a non-negative number.';
   }
   if (values.quantity === '' || values.quantity === null || values.quantity === undefined) {
-    errors.quantity = 'Quantity is required.';
+    errors.quantity = 'Vui lòng nhập số lượng.';
   } else if (!Number.isInteger(Number(values.quantity)) || Number(values.quantity) < 0) {
     errors.quantity = 'Quantity must be a non-negative integer.';
   }
   if (!values.categoryId) {
-    errors.categoryId = 'Category is required.';
+    errors.categoryId = 'Vui lòng chọn danh mục.';
   }
 
   return errors;

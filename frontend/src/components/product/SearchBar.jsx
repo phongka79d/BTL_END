@@ -8,11 +8,11 @@ export const SearchBar = ({
 }) => {
   return (
     <TextInput
-      label="Search products"
+      label="Tìm kiếm sản phẩm"
       value={value}
       onChange={onChange}
       hasClear
-      placeholder="Search by name or brand"
+      placeholder="Tìm theo tên hoặc thương hiệu"
       isDisabled={isDisabled}
     />
   );

@@ -19,7 +19,7 @@ export const BestSellingProductsTable = ({
     () => [
       {
         key: 'name',
-        header: 'Product',
+        header: 'Sản phẩm',
         width: proportional(2),
         renderCell: (product) => (
           <Text weight="semibold">{product.name}</Text>
@@ -27,7 +27,7 @@ export const BestSellingProductsTable = ({
       },
       {
         key: 'brand',
-        header: 'Brand',
+        header: 'Thương hiệu',
         width: proportional(1),
         renderCell: (product) => (
           <Text color="secondary">{product.brand || '—'}</Text>
@@ -35,7 +35,7 @@ export const BestSellingProductsTable = ({
       },
       {
         key: 'soldQuantity',
-        header: 'Sold quantity',
+        header: 'Số lượng đã bán',
         width: proportional(1),
         align: 'end',
         renderCell: (product) => (
@@ -44,7 +44,7 @@ export const BestSellingProductsTable = ({
       },
       {
         key: 'revenue',
-        header: 'Revenue',
+        header: 'Doanh thu',
         width: proportional(1),
         align: 'end',
         renderCell: (product) => (
@@ -62,7 +62,7 @@ export const BestSellingProductsTable = ({
       <VStack gap={1}>
         <Text weight="semibold">Best-selling products</Text>
         <Text color="secondary">
-          Top products from completed orders with paid COD payments.
+          Các sản phẩm hàng đầu từ những đơn hàng hoàn tất đã thanh toán COD.
         </Text>
       </VStack>
       <AdminTable

@@ -1,5 +1,5 @@
 export const PASSWORD_POLICY_MESSAGE =
-  'Password must be at least 12 characters and include uppercase, lowercase, number, and special character';
+  'Mật khẩu phải có ít nhất 12 ký tự và bao gồm chữ hoa, chữ thường, số và ký tự đặc biệt';
 
 export const validatePasswordPolicy = (password) => {
   const value = typeof password === 'string' ? password : '';

@@ -24,15 +24,15 @@ export const PAYMENT_STATUS_VALUES = [
 ];
 
 export const ORDER_STATUS_LABELS = {
-  pending: 'Pending',
-  confirmed: 'Confirmed',
-  shipping: 'Shipping',
-  completed: 'Completed',
-  cancelled: 'Cancelled',
+  pending: 'Đang chờ',
+  confirmed: 'Đã xác nhận',
+  shipping: 'Đang giao',
+  completed: 'Hoàn tất',
+  cancelled: 'Đã hủy',
 };
 
 export const PAYMENT_STATUS_LABELS = {
-  unpaid: 'Unpaid',
-  paid: 'Paid',
-  failed: 'Failed',
+  unpaid: 'Chưa thanh toán',
+  paid: 'Đã thanh toán',
+  failed: 'Thất bại',
 };

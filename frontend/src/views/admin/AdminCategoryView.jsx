@@ -31,7 +31,7 @@ export const AdminCategoryView = () => {
       setCategories(response?.data?.categories || []);
     } catch (error) {
       setCategories([]);
-      setLoadError(error?.message || 'Unable to load categories.');
+      setLoadError(error?.message || 'Không thể tải danh mục.');
     } finally {
       setIsLoading(false);
     }
@@ -57,15 +57,15 @@ export const AdminCategoryView = () => {
     if (editingCategory) {
       await categoryApi.updateCategory(editingCategory.id, payload);
       setFeedback({
-        title: 'Category updated',
-        description: `${payload.name} was updated successfully.`,
+        title: 'Đã cập nhật danh mục',
+        description: `${payload.name} đã được cập nhật thành công.`,
         status: 'success'
       });
     } else {
       await categoryApi.createCategory(payload);
       setFeedback({
-        title: 'Category created',
-        description: `${payload.name} was added successfully.`,
+        title: 'Đã tạo danh mục',
+        description: `${payload.name} đã được thêm thành công.`,
         status: 'success'
       });
     }
@@ -84,15 +84,15 @@ export const AdminCategoryView = () => {
       await categoryApi.deleteCategory(deleteTarget.id);
       setDeleteTarget(null);
       setFeedback({
-        title: 'Category deleted',
-        description: `${deleteTarget.name} was deleted successfully.`,
+        title: 'Đã xóa danh mục',
+        description: `${deleteTarget.name} đã được xóa thành công.`,
         status: 'success'
       });
       await loadCategories();
     } catch (error) {
       setFeedback({
-        title: 'Unable to delete category',
-        description: error?.message || 'The category could not be deleted.',
+        title: 'Không thể xóa danh mục',
+        description: error?.message || 'Không thể xóa danh mục.',
         status: 'error'
       });
     } finally {
@@ -103,9 +103,9 @@ export const AdminCategoryView = () => {
   return (
     <VStack gap={6} width="100%">
       <VStack gap={1}>
-        <Heading level={1}>Categories</Heading>
+        <Heading level={1}>Danh mục</Heading>
         <Text color="secondary">
-          Create, update, and remove catalog categories.
+          Tạo, cập nhật và xóa danh mục sản phẩm.
         </Text>
       </VStack>
 
@@ -118,10 +118,10 @@ export const AdminCategoryView = () => {
       )}
 
       <Toolbar
-        label="Category management"
+        label="Quản lý danh mục"
         endContent={(
           <Button
-            label="Create category"
+            label="Tạo danh mục"
             variant="primary"
             onClick={openCreateForm}
           />
@@ -153,13 +153,13 @@ export const AdminCategoryView = () => {
             setDeleteTarget(null);
           }
         }}
-        title="Delete category?"
+        title="Xóa danh mục?"
         description={
           deleteTarget
-            ? `${deleteTarget.name} will be permanently removed if it has no products.`
-            : 'This category will be permanently removed if it has no products.'
+            ? `${deleteTarget.name} sẽ bị xóa vĩnh viễn nếu không có sản phẩm.`
+            : 'Danh mục này sẽ bị xóa vĩnh viễn nếu không có sản phẩm.'
         }
-        actionLabel="Delete category"
+        actionLabel="Xóa danh mục"
         isActionLoading={isDeleting}
         onAction={handleDelete}
       />

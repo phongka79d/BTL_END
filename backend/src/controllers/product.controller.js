@@ -17,7 +17,7 @@ const getProducts = async (req, res, next) => {
       limit,
       sort
     });
-    return successResponse(res, 200, 'Products retrieved successfully', result);
+    return successResponse(res, 200, 'Đã lấy sản phẩm thành công', result);
   } catch (error) {
     next(error);
   }
@@ -32,9 +32,9 @@ const getProductById = async (req, res, next) => {
     const { id } = req.params;
     const product = await productModel.findById(id);
     if (!product) {
-      return errorResponse(res, 404, 'Product not found');
+      return errorResponse(res, 404, 'Không tìm thấy sản phẩm');
     }
-    return successResponse(res, 200, 'Product retrieved successfully', { product });
+    return successResponse(res, 200, 'Đã lấy sản phẩm thành công', { product });
   } catch (error) {
     next(error);
   }
@@ -56,7 +56,7 @@ const createProduct = async (req, res, next) => {
       description,
       imageUrl
     });
-    return successResponse(res, 201, 'Product created successfully', { product });
+    return successResponse(res, 201, 'Đã tạo sản phẩm thành công', { product });
   } catch (error) {
     if (error.message && (
       error.message.includes('required') || 
@@ -79,14 +79,14 @@ const updateProduct = async (req, res, next) => {
     // Pre-check existence for precise 404 response
     const existing = await productModel.findById(id);
     if (!existing) {
-      return errorResponse(res, 404, 'Product not found');
+      return errorResponse(res, 404, 'Không tìm thấy sản phẩm');
     }
 
     const product = await productModel.update(id, req.body);
-    return successResponse(res, 200, 'Product updated successfully', { product });
+    return successResponse(res, 200, 'Đã cập nhật sản phẩm thành công', { product });
   } catch (error) {
     if (error.code === 'P2025') {
-      return errorResponse(res, 404, 'Product not found');
+      return errorResponse(res, 404, 'Không tìm thấy sản phẩm');
     }
     if (error.message && (
       error.message.includes('cannot be') || 
@@ -109,14 +109,14 @@ const deleteProduct = async (req, res, next) => {
     // Pre-check existence for precise 404 response
     const existing = await productModel.findById(id);
     if (!existing) {
-      return errorResponse(res, 404, 'Product not found');
+      return errorResponse(res, 404, 'Không tìm thấy sản phẩm');
     }
 
     await productModel.destroy(id);
-    return successResponse(res, 200, 'Product deleted successfully');
+    return successResponse(res, 200, 'Đã xóa sản phẩm thành công');
   } catch (error) {
     if (error.code === 'P2025') {
-      return errorResponse(res, 404, 'Product not found');
+      return errorResponse(res, 404, 'Không tìm thấy sản phẩm');
     }
     next(error);
   }

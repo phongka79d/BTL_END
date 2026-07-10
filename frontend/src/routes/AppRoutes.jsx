@@ -44,7 +44,7 @@ export const PrivateRoute = () => {
         fontFamily: 'system-ui, -apple-system, sans-serif',
         color: 'var(--color-text-secondary, #666)'
       }}>
-        Loading...
+        Đang tải...
       </div>
     );
   }
@@ -69,7 +69,7 @@ export const AdminRoute = () => {
         fontFamily: 'system-ui, -apple-system, sans-serif',
         color: 'var(--color-text-secondary, #666)'
       }}>
-        Loading...
+        Đang tải...
       </div>
     );
   }
@@ -98,7 +98,7 @@ export const PublicOnlyRoute = () => {
         fontFamily: 'system-ui, -apple-system, sans-serif',
         color: 'var(--color-text-secondary, #666)'
       }}>
-        Loading...
+        Đang tải...
       </div>
     );
   }

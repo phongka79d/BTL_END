@@ -60,7 +60,7 @@ export const CartItem = ({
       <Grid columns={{ minWidth: 240, max: 2 }} gap={4} style={{ alignItems: 'stretch' }}>
         <HStack gap={3} style={{ alignItems: 'center', minWidth: 0 }}>
           <CheckboxInput
-            label={`Select ${item?.product?.name || 'product'} for checkout`}
+            label={`Chọn ${item?.product?.name || 'sản phẩm'} để thanh toán`}
             isLabelHidden
             value={isSelected}
             onChange={onSelectionChange}
@@ -79,7 +79,7 @@ export const CartItem = ({
           >
             <img
               src={getProductImageSrc(item?.product?.imageUrl)}
-              alt={item?.product?.name || 'Cart item'}
+              alt={item?.product?.name || 'Sản phẩm trong giỏ hàng'}
               style={{
                 width: '100%',
                 height: '100%',
@@ -92,16 +92,16 @@ export const CartItem = ({
           <VStack gap={2} style={{ minWidth: 0, flex: 1 }}>
             <VStack gap={1} style={{ minWidth: 0 }}>
               <Text weight="semibold" style={{ overflowWrap: 'anywhere' }}>
-                {item?.product?.name || 'Unnamed product'}
+                {item?.product?.name || 'Sản phẩm chưa có tên'}
               </Text>
               <Text size="supporting" color="secondary" style={{ overflowWrap: 'anywhere' }}>
-                {item?.product?.brand || 'Unknown brand'}
+                {item?.product?.brand || 'Thương hiệu chưa xác định'}
               </Text>
             </VStack>
 
             <HStack gap={2} style={{ flexWrap: 'wrap' }}>
               <Badge variant={stockVariant} label={stockLabel} />
-              <Badge variant="blue" label={`Unit ${formatPrice(item?.unitPrice ?? 0)}`} />
+              <Badge variant="blue" label={`Đơn giá ${formatPrice(item?.unitPrice ?? 0)}`} />
             </HStack>
           </VStack>
         </HStack>
@@ -109,7 +109,7 @@ export const CartItem = ({
         <VStack gap={3} style={{ minWidth: 0 }}>
           <VStack gap={2} style={{ minWidth: 0 }}>
             <Text size="supporting" color="secondary" weight="semibold">
-              Quantity
+              Số lượng
             </Text>
             <HStack gap={1} style={{ alignItems: 'center' }}>
               <Button
@@ -118,10 +118,10 @@ export const CartItem = ({
                 size="sm"
                 isDisabled={isBusy || currentQuantity <= 1}
                 onClick={() => handleStepQuantity(-1)}
-                aria-label={`Decrease quantity for ${item?.product?.name || 'product'}`}
+                aria-label={`Giảm số lượng ${item?.product?.name || 'sản phẩm'}`}
               />
               <NumberInput
-                label="Quantity"
+                label="Số lượng"
                 isLabelHidden
                 value={currentQuantity}
                 onChange={handleQuantityChange}
@@ -139,11 +139,11 @@ export const CartItem = ({
                 size="sm"
                 isDisabled={isBusy || currentQuantity >= maxQuantity}
                 onClick={() => handleStepQuantity(1)}
-                aria-label={`Increase quantity for ${item?.product?.name || 'product'}`}
+                aria-label={`Tăng số lượng ${item?.product?.name || 'sản phẩm'}`}
               />
               <IconButton
-                label={`Remove ${item?.product?.name || 'product'} from cart`}
-                tooltip="Remove from cart"
+                label={`Xóa ${item?.product?.name || 'sản phẩm'} khỏi giỏ hàng`}
+                tooltip="Xóa khỏi giỏ hàng"
                 icon={<TrashIcon />}
                 variant="destructive"
                 size="sm"
@@ -158,7 +158,7 @@ export const CartItem = ({
 
           <VStack gap={1}>
             <Text size="supporting" color="secondary">
-              Line total
+              Tổng dòng
             </Text>
             <Text weight="bold" color="accent" style={{ fontSize: 'var(--text-title-3-size)' }}>
               {lineSubtotal}

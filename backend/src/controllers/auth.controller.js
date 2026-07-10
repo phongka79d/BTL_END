@@ -9,7 +9,7 @@ const { successResponse, errorResponse } = require('../utils/response');
 
 const SALT_ROUNDS = 10;
 const DEFAULT_PASSWORD_OTP_MAX_ATTEMPTS = 5;
-const FORGOT_PASSWORD_GENERIC_MESSAGE = 'If an account exists, a password reset OTP has been sent';
+const FORGOT_PASSWORD_GENERIC_MESSAGE = 'Nếu tài khoản tồn tại, OTP đặt lại mật khẩu đã được gửi';
 
 const getPasswordOtpMaxAttempts = () => {
   const attempts = Number(process.env.PASSWORD_OTP_MAX_ATTEMPTS || DEFAULT_PASSWORD_OTP_MAX_ATTEMPTS);
@@ -23,18 +23,18 @@ const getPasswordOtpMaxAttempts = () => {
 
 const findAuthenticatedUserWithPassword = async (req, res) => {
   if (!req.user) {
-    errorResponse(res, 401, 'User not authenticated');
+    errorResponse(res, 401, 'Người dùng chưa được xác thực');
     return null;
   }
 
   const user = await userModel.findById(req.user.id);
   if (!user) {
-    errorResponse(res, 401, 'User not authenticated');
+    errorResponse(res, 401, 'Người dùng chưa được xác thực');
     return null;
   }
 
   if (user.isBlocked) {
-    errorResponse(res, 403, 'Your account has been blocked');
+    errorResponse(res, 403, 'Tài khoản của bạn đã bị khóa');
     return null;
   }
 
@@ -49,13 +49,13 @@ const normalizeEmail = (email) => String(email || '').trim();
 
 const validateNewPassword = (res, newPassword, confirmPassword) => {
   if (newPassword !== confirmPassword) {
-    errorResponse(res, 400, 'New password and confirmation password must match');
+    errorResponse(res, 400, 'Mật khẩu mới và mật khẩu xác nhận phải khớp nhau');
     return false;
   }
 
   const passwordPolicy = validatePasswordPolicy(newPassword);
   if (!passwordPolicy.isValid) {
-    errorResponse(res, 400, passwordPolicy.message.replace('Password', 'New password'));
+    errorResponse(res, 400, passwordPolicy.message.replace('Mật khẩu', 'Mật khẩu mới'));
     return false;
   }
 
@@ -70,27 +70,27 @@ const validateOtpForUser = async ({ user, otp, res, requiredMessage }) => {
   }
 
   if (passwordChangeOtp.usedAt) {
-    errorResponse(res, 400, 'OTP has already been used');
+    errorResponse(res, 400, 'OTP đã được sử dụng');
     return null;
   }
 
   if (passwordChangeOtp.expiresAt <= new Date()) {
     await passwordChangeOtpModel.invalidateActiveOtps(user.id);
-    errorResponse(res, 400, 'OTP has expired');
+    errorResponse(res, 400, 'OTP đã hết hạn');
     return null;
   }
 
   const maxAttempts = getPasswordOtpMaxAttempts();
   if (passwordChangeOtp.attempts >= maxAttempts) {
     await passwordChangeOtpModel.invalidateActiveOtps(user.id);
-    errorResponse(res, 400, 'Too many OTP attempts. Request a new OTP');
+    errorResponse(res, 400, 'Quá nhiều lần thử OTP. Hãy yêu cầu OTP mới');
     return null;
   }
 
   const otpMatches = await compareOtp(otp, passwordChangeOtp.otpHash);
   if (!otpMatches) {
     await passwordChangeOtpModel.incrementOtpAttempts(passwordChangeOtp.id);
-    errorResponse(res, 400, 'Invalid OTP');
+    errorResponse(res, 400, 'OTP không hợp lệ');
     return null;
   }
 
@@ -127,7 +127,7 @@ const register = async (req, res, next) => {
     // Kiểm tra xem email đã được đăng ký chưa
     const existingUser = await userModel.findByEmail(email);
     if (existingUser) {
-      return errorResponse(res, 400, 'Email is already registered');
+      return errorResponse(res, 400, 'Email đã được đăng ký');
     }
 
     // Hash mật khẩu
@@ -156,7 +156,7 @@ const register = async (req, res, next) => {
       role: user.role
     };
 
-    return successResponse(res, 201, 'User registered successfully', {
+    return successResponse(res, 201, 'Đăng ký người dùng thành công', {
       user: safeUser,
       token
     });
@@ -176,17 +176,17 @@ const login = async (req, res, next) => {
     // Tìm người dùng theo email
     const user = await userModel.findByEmail(email);
     if (!user) {
-      return errorResponse(res, 401, 'Invalid email or password');
+      return errorResponse(res, 401, 'Email hoặc mật khẩu không hợp lệ');
     }
 
     // So khớp mật khẩu
     const isMatch = await bcrypt.compare(password, user.passwordHash);
     if (!isMatch) {
-      return errorResponse(res, 401, 'Invalid email or password');
+      return errorResponse(res, 401, 'Email hoặc mật khẩu không hợp lệ');
     }
 
     if (user.isBlocked) {
-      return errorResponse(res, 403, 'Your account has been blocked');
+      return errorResponse(res, 403, 'Tài khoản của bạn đã bị khóa');
     }
 
     // Tạo token JWT
@@ -202,7 +202,7 @@ const login = async (req, res, next) => {
       isBlocked: user.isBlocked
     };
 
-    return successResponse(res, 200, 'Login successful', {
+    return successResponse(res, 200, 'Đăng nhập thành công', {
       user: safeUser,
       token
     });
@@ -219,7 +219,7 @@ const getMe = async (req, res, next) => {
   try {
     // Middleware auth.middleware đã xác thực và gán user vào req.user (không có passwordHash)
     if (!req.user) {
-      return errorResponse(res, 401, 'User not authenticated');
+      return errorResponse(res, 401, 'Người dùng chưa được xác thực');
     }
 
     const safeUser = {
@@ -230,7 +230,7 @@ const getMe = async (req, res, next) => {
       role: req.user.role
     };
 
-    return successResponse(res, 200, 'User profile retrieved successfully', {
+    return successResponse(res, 200, 'Đã lấy hồ sơ người dùng thành công', {
       user: safeUser
     });
   } catch (error) {
@@ -252,12 +252,12 @@ const requestPasswordChangeOtp = async (req, res, next) => {
 
     const passwordMatches = await verifyCurrentPassword(user, currentPassword);
     if (!passwordMatches) {
-      return errorResponse(res, 400, 'Current password is incorrect');
+      return errorResponse(res, 400, 'Mật khẩu hiện tại không chính xác');
     }
 
     const expiresAt = await createAndSendPasswordOtp(user);
 
-    return successResponse(res, 200, 'Password change OTP sent', {
+    return successResponse(res, 200, 'Đã gửi OTP đổi mật khẩu', {
       expiresAt,
     });
   } catch (error) {
@@ -284,33 +284,33 @@ const confirmPasswordChange = async (req, res, next) => {
 
     const passwordMatches = await verifyCurrentPassword(user, currentPassword);
     if (!passwordMatches) {
-      return errorResponse(res, 400, 'Current password is incorrect');
+      return errorResponse(res, 400, 'Mật khẩu hiện tại không chính xác');
     }
 
     const passwordChangeOtp = await passwordChangeOtpModel.findLatestActiveOtp(user.id);
     if (!passwordChangeOtp) {
-      return errorResponse(res, 400, 'Password change OTP is required');
+      return errorResponse(res, 400, 'OTP đổi mật khẩu là bắt buộc');
     }
 
     if (passwordChangeOtp.usedAt) {
-      return errorResponse(res, 400, 'OTP has already been used');
+      return errorResponse(res, 400, 'OTP đã được sử dụng');
     }
 
     if (passwordChangeOtp.expiresAt <= new Date()) {
       await passwordChangeOtpModel.invalidateActiveOtps(user.id);
-      return errorResponse(res, 400, 'OTP has expired');
+      return errorResponse(res, 400, 'OTP đã hết hạn');
     }
 
     const maxAttempts = getPasswordOtpMaxAttempts();
     if (passwordChangeOtp.attempts >= maxAttempts) {
       await passwordChangeOtpModel.invalidateActiveOtps(user.id);
-      return errorResponse(res, 400, 'Too many OTP attempts. Request a new OTP');
+      return errorResponse(res, 400, 'Quá nhiều lần thử OTP. Hãy yêu cầu OTP mới');
     }
 
     const otpMatches = await compareOtp(otp, passwordChangeOtp.otpHash);
     if (!otpMatches) {
       await passwordChangeOtpModel.incrementOtpAttempts(passwordChangeOtp.id);
-      return errorResponse(res, 400, 'Invalid OTP');
+      return errorResponse(res, 400, 'OTP không hợp lệ');
     }
 
     const passwordHash = await bcrypt.hash(newPassword, SALT_ROUNDS);
@@ -320,7 +320,7 @@ const confirmPasswordChange = async (req, res, next) => {
       passwordHash,
     });
 
-    return successResponse(res, 200, 'Password changed successfully');
+    return successResponse(res, 200, 'Đổi mật khẩu thành công');
   } catch (error) {
     next(error);
   }
@@ -356,7 +356,7 @@ const verifyForgotPasswordOtp = async (req, res, next) => {
     const user = await userModel.findByEmail(email);
 
     if (!user || user.isBlocked) {
-      return errorResponse(res, 400, 'Invalid or expired OTP');
+      return errorResponse(res, 400, 'OTP không hợp lệ hoặc đã hết hạn');
     }
 
     const passwordChangeOtp = await validateOtpForUser({
@@ -369,7 +369,7 @@ const verifyForgotPasswordOtp = async (req, res, next) => {
       return null;
     }
 
-    return successResponse(res, 200, 'OTP verified successfully');
+    return successResponse(res, 200, 'Xác minh OTP thành công');
   } catch (error) {
     next(error);
   }
@@ -390,7 +390,7 @@ const resetForgotPassword = async (req, res, next) => {
 
     const user = await userModel.findByEmail(email);
     if (!user || user.isBlocked) {
-      return errorResponse(res, 400, 'Invalid or expired OTP');
+      return errorResponse(res, 400, 'OTP không hợp lệ hoặc đã hết hạn');
     }
 
     const passwordChangeOtp = await validateOtpForUser({
@@ -410,7 +410,7 @@ const resetForgotPassword = async (req, res, next) => {
       passwordHash,
     });
 
-    return successResponse(res, 200, 'Password reset successfully');
+    return successResponse(res, 200, 'Đặt lại mật khẩu thành công');
   } catch (error) {
     next(error);
   }

@@ -18,13 +18,13 @@ export const OrderSummaryCards = ({
 }) => (
   <VStack gap={3}>
     <VStack gap={1}>
-      <Text weight="semibold">Order summary</Text>
-      <Text color="secondary">Order counts by current status.</Text>
+      <Text weight="semibold">Tổng quan đơn hàng</Text>
+      <Text color="secondary">Số lượng đơn hàng theo trạng thái hiện tại.</Text>
     </VStack>
 
     <Grid columns={{ minWidth: 180, max: 5, repeat: 'fit' }} gap={3}>
       {ORDER_STATUS_VALUES.map((status) => (
-        <Card key={status} padding={3} aria-label={`${ORDER_STATUS_LABELS[status]} orders`}>
+        <Card key={status} padding={3} aria-label={`Đơn hàng ${ORDER_STATUS_LABELS[status]}`}>
           <VStack gap={2}>
             <OrderStatusBadge status={status} />
             {isLoading ? (

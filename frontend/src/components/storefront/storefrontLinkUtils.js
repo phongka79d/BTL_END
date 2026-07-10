@@ -20,7 +20,7 @@ export const resolveStorefrontHref = (linkTarget) => {
 
 export const describeLinkTarget = (linkTarget) => {
   if (!linkTarget) {
-    return 'No link target';
+    return 'Chưa có đích liên kết';
   }
 
   if (linkTarget.type === 'product' && linkTarget.productId) {
@@ -35,5 +35,5 @@ export const describeLinkTarget = (linkTarget) => {
     return linkTarget.customUrl;
   }
 
-  return 'Incomplete link target';
+  return 'Đích liên kết chưa đầy đủ';
 };

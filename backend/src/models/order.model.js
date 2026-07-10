@@ -33,7 +33,7 @@ const findById = async (id) => {
  */
 const checkout = async (userId, shippingAddress, cartItemIds) => {
   if (!shippingAddress || typeof shippingAddress !== 'string' || shippingAddress.trim() === '') {
-    throw new Error('Shipping address is required.');
+      throw new Error('Địa chỉ giao hàng là bắt buộc.');
   }
 
   return prisma.$transaction(async (tx) => {
@@ -51,7 +51,7 @@ const checkout = async (userId, shippingAddress, cartItemIds) => {
 
     // 2. Từ chối giỏ hàng thiếu/rỗng trước khi tạo bất kỳ dòng đơn hàng nào.
     if (!cart || !cart.items || cart.items.length === 0) {
-      throw new Error('Cart is empty.');
+      throw new Error('Giỏ hàng trống.');
     }
 
     const selectedCartItemIds = cartItemIds ? new Set(cartItemIds) : null;
@@ -60,20 +60,20 @@ const checkout = async (userId, shippingAddress, cartItemIds) => {
       : cart.items;
 
     if (selectedCartItemIds && selectedItems.length !== selectedCartItemIds.size) {
-      throw new Error('Selected cart items are unavailable.');
+      throw new Error('Các sản phẩm đã chọn trong giỏ hàng không khả dụng.');
     }
     if (selectedItems.length === 0) {
-      throw new Error('No cart items selected.');
+      throw new Error('Chưa chọn sản phẩm nào trong giỏ hàng.');
     }
 
     // 3. Kiểm tra số lượng từng mục được chọn so với tồn kho hiện tại và tính tổng.
     let total = new Prisma.Decimal(0);
     for (const item of selectedItems) {
       if (!item.product) {
-        throw new Error(`Product with ID ${item.productId} not found.`);
+        throw new Error(`Không tìm thấy sản phẩm có ID ${item.productId}.`);
       }
       if (item.quantity > item.product.quantity) {
-        throw new Error(`Requested quantity for ${item.product.name} exceeds available stock (${item.product.quantity}).`);
+        throw new Error(`Số lượng yêu cầu của ${item.product.name} vượt quá tồn kho (${item.product.quantity}).`);
       }
       
       const itemPrice = new Prisma.Decimal(item.unitPrice);
@@ -257,7 +257,7 @@ const listForAdmin = async (status) => {
   if (status) {
     const validStatuses = ['pending', 'confirmed', 'shipping', 'completed', 'cancelled'];
     if (!validStatuses.includes(status)) {
-      throw new Error(`Invalid status filter: ${status}`);
+      throw new Error(`Bộ lọc trạng thái không hợp lệ: ${status}`);
     }
     where.status = status;
   }
@@ -312,7 +312,7 @@ const listForAdmin = async (status) => {
 const updateStatus = async (id, status) => {
   const allowedStatuses = ['pending', 'confirmed', 'shipping', 'completed', 'cancelled'];
   if (!allowedStatuses.includes(status)) {
-    throw new Error(`Invalid status: ${status}`);
+    throw new Error(`Trạng thái không hợp lệ: ${status}`);
   }
 
   return prisma.$transaction(async (tx) => {
@@ -322,7 +322,7 @@ const updateStatus = async (id, status) => {
     });
 
     if (!order) {
-      throw new Error(`Order with ID ${id} not found.`);
+      throw new Error(`Không tìm thấy đơn hàng có ID ${id}.`);
     }
 
     // Cập nhật trạng thái.

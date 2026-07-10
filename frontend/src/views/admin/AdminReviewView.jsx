@@ -22,13 +22,13 @@ const getCustomerName = (review) => (
   review?.user?.username ||
   review?.user?.fullName ||
   review?.user?.email ||
-  'Customer'
+  'Khách hàng'
 );
 
 const getProductName = (review) => (
   review?.product?.name ||
   review?.product?.title ||
-  'Product'
+  'Sản phẩm'
 );
 
 export const AdminReviewView = () => {
@@ -50,7 +50,7 @@ export const AdminReviewView = () => {
       setReviews(Array.isArray(response?.data) ? response.data : []);
     } catch (error) {
       setReviews([]);
-      setLoadError(error?.message || 'Unable to load reviews.');
+      setLoadError(error?.message || 'Không thể tải đánh giá.');
     } finally {
       setIsReviewsLoading(false);
     }
@@ -78,16 +78,16 @@ export const AdminReviewView = () => {
     setHideTarget(null);
     setReviews((currentReviews) => currentReviews.filter((review) => review.id !== target.id));
     setFeedback({
-      title: 'Review hidden',
-      description: 'The review was removed from public product detail.',
+      title: 'Đã ẩn đánh giá',
+      description: 'Đánh giá đã được xóa khỏi trang chi tiết sản phẩm công khai.',
       status: 'success'
     });
 
     reviewApi.hideReview(target.id)
       .catch((error) => {
         setFeedback({
-          title: 'Unable to hide review',
-          description: error?.message || 'The review could not be hidden.',
+          title: 'Không thể ẩn đánh giá',
+          description: error?.message || 'Không thể ẩn đánh giá.',
           status: 'error'
         });
         loadReviews(selectedProductId);
@@ -101,20 +101,20 @@ export const AdminReviewView = () => {
     () => [
       {
         key: 'customer',
-        header: 'Customer',
+        header: 'Khách hàng',
         width: proportional(1.4),
         renderCell: (review) => (
           <VStack gap={0}>
             <Text weight="semibold">{getCustomerName(review)}</Text>
             <Text size="supporting" color="secondary">
-              {review.user?.email || 'No email'}
+              {review.user?.email || 'Chưa có email'}
             </Text>
           </VStack>
         )
       },
       {
         key: 'rating',
-        header: 'Rating',
+        header: 'Xếp hạng',
         width: pixel(120),
         renderCell: (review) => (
           <Badge variant="yellow" label={`${Number(review.rating) || 0}/5`} />
@@ -122,30 +122,30 @@ export const AdminReviewView = () => {
       },
       {
         key: 'product',
-        header: 'Product',
+        header: 'Sản phẩm',
         width: proportional(1.2),
         renderCell: (review) => (
           <VStack gap={0}>
             <Text weight="semibold">{getProductName(review)}</Text>
             <Text size="supporting" color="secondary">
-              {review.product?.brand || 'No brand'}
+              {review.product?.brand || 'Chưa có thương hiệu'}
             </Text>
           </VStack>
         )
       },
       {
         key: 'comment',
-        header: 'Comment',
+        header: 'Nhận xét',
         width: proportional(2),
         renderCell: (review) => (
           <Text color={review.comment ? undefined : 'secondary'}>
-            {review.comment || 'No comment provided.'}
+            {review.comment || 'Chưa có nhận xét.'}
           </Text>
         )
       },
       {
         key: 'createdAt',
-        header: 'Date',
+        header: 'Ngày',
         width: proportional(1),
         renderCell: (review) => (
           <Text size="supporting" color="secondary">
@@ -155,7 +155,7 @@ export const AdminReviewView = () => {
       },
       {
         key: 'actions',
-        header: 'Actions',
+        header: 'Thao tác',
         width: pixel(260),
         align: 'end',
         renderCell: (review) => {
@@ -164,14 +164,14 @@ export const AdminReviewView = () => {
           return (
             <HStack gap={2} style={{ justifyContent: 'flex-end', flexWrap: 'wrap' }}>
               <Button
-                label="View product"
+                label="Xem sản phẩm"
                 variant="secondary"
                 size="sm"
                 onClick={() => navigate(`/products/${productId}`)}
                 isDisabled={!productId}
               />
               <Button
-                label="Hide review"
+                label="Ẩn đánh giá"
                 variant="secondary"
                 size="sm"
                 onClick={() => setHideTarget(review)}
@@ -189,9 +189,9 @@ export const AdminReviewView = () => {
   return (
     <VStack gap={6} width="100%">
       <VStack gap={1}>
-        <Heading level={1}>Manage Reviews</Heading>
+        <Heading level={1}>Quản lý đánh giá</Heading>
         <Text color="secondary">
-          Hide visible product reviews from the public product detail page.
+          Ẩn các đánh giá sản phẩm đang hiển thị khỏi trang chi tiết sản phẩm công khai.
         </Text>
       </VStack>
 
@@ -204,7 +204,7 @@ export const AdminReviewView = () => {
       )}
 
       <Toolbar
-        label="Product reviews"
+        label="Đánh giá sản phẩm"
         startContent={(
           <ProductPicker
             value={selectedProductId || undefined}
@@ -214,7 +214,7 @@ export const AdminReviewView = () => {
         endContent={(
           <HStack gap={2}>
             <Button
-              label="Refresh reviews"
+              label="Làm mới đánh giá"
               variant="secondary"
               onClick={() => loadReviews(selectedProductId)}
               isDisabled={isLoading}
@@ -225,8 +225,8 @@ export const AdminReviewView = () => {
 
       <Text size="supporting" color="secondary">
         {selectedProductId
-          ? 'Showing visible reviews for the selected product.'
-          : 'Showing all visible reviews. Search and select a product to filter.'}
+          ? 'Đang hiển thị các đánh giá của sản phẩm đã chọn.'
+          : 'Đang hiển thị tất cả đánh giá hiện có. Tìm kiếm và chọn sản phẩm để lọc.'}
       </Text>
 
       <AdminTable
@@ -235,12 +235,12 @@ export const AdminReviewView = () => {
         data={reviews}
         isLoading={isLoading}
         error={loadError}
-        errorTitle="Unable to load reviews"
-        emptyTitle="No visible reviews"
+        errorTitle="Không thể tải đánh giá"
+        emptyTitle="Không có đánh giá hiển thị"
         emptyDescription={
           selectedProductId
-            ? 'Visible reviews for the selected product will appear here.'
-            : 'Visible product reviews will appear here.'
+            ? 'Đánh giá của sản phẩm đã chọn sẽ xuất hiện tại đây.'
+            : 'Đánh giá sản phẩm đang hiển thị sẽ xuất hiện tại đây.'
         }
         onRetry={() => loadReviews(selectedProductId)}
       />
@@ -252,13 +252,13 @@ export const AdminReviewView = () => {
             setHideTarget(null);
           }
         }}
-        title="Hide review?"
+        title="Ẩn đánh giá?"
         description={
           hideTarget
-            ? `This will remove ${getCustomerName(hideTarget)}'s review from public product detail.`
-            : 'This review will be removed from public product detail.'
+            ? `Đánh giá của ${getCustomerName(hideTarget)} sẽ bị xóa khỏi trang chi tiết sản phẩm công khai.`
+            : 'Đánh giá này sẽ bị xóa khỏi trang chi tiết sản phẩm công khai.'
         }
-        actionLabel="Hide review"
+        actionLabel="Ẩn đánh giá"
         isActionLoading={isHiding}
         onAction={handleHideReview}
       />

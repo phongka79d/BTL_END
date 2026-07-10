@@ -71,23 +71,23 @@ export const RegisterView = () => {
 
     // Client-side validations
     if (!username) {
-      setUsernameStatus({ type: 'error', message: 'Username is required' });
+      setUsernameStatus({ type: 'error', message: 'Vui lòng nhập tên người dùng' });
       hasError = true;
     } else if (username.length < 3) {
-      setUsernameStatus({ type: 'error', message: 'Username must be at least 3 characters' });
+      setUsernameStatus({ type: 'error', message: 'Tên người dùng phải có ít nhất 3 ký tự' });
       hasError = true;
     }
 
     if (!email) {
-      setEmailStatus({ type: 'error', message: 'Email is required' });
+      setEmailStatus({ type: 'error', message: 'Vui lòng nhập email' });
       hasError = true;
     } else if (!isValidEmail(email)) {
-      setEmailStatus({ type: 'error', message: 'Please enter a valid email address' });
+      setEmailStatus({ type: 'error', message: 'Vui lòng nhập địa chỉ email hợp lệ' });
       hasError = true;
     }
 
     if (!password) {
-      setPasswordStatus({ type: 'error', message: 'Password is required' });
+      setPasswordStatus({ type: 'error', message: 'Vui lòng nhập mật khẩu' });
       hasError = true;
     } else {
       const passwordPolicy = validatePasswordPolicy(password);
@@ -98,21 +98,21 @@ export const RegisterView = () => {
     }
 
     if (!confirmPassword) {
-      setConfirmPasswordStatus({ type: 'error', message: 'Confirm password is required' });
+      setConfirmPasswordStatus({ type: 'error', message: 'Vui lòng nhập mật khẩu xác nhận' });
       hasError = true;
     } else if (confirmPassword !== password) {
-      setConfirmPasswordStatus({ type: 'error', message: 'Passwords do not match' });
+      setConfirmPasswordStatus({ type: 'error', message: 'Mật khẩu không khớp' });
       hasError = true;
     }
 
     if (!fullName) {
-      setFullNameStatus({ type: 'error', message: 'Full name is required' });
+      setFullNameStatus({ type: 'error', message: 'Vui lòng nhập họ và tên' });
       hasError = true;
     }
 
     // Phone is optional but if filled, it should look like a number
     if (phone && !/^\+?[0-9\s-]{8,15}$/.test(phone)) {
-      setPhoneStatus({ type: 'error', message: 'Please enter a valid phone number' });
+      setPhoneStatus({ type: 'error', message: 'Vui lòng nhập số điện thoại hợp lệ' });
       hasError = true;
     }
 
@@ -131,8 +131,8 @@ export const RegisterView = () => {
 
       if (res.success) {
         notification.success({
-          title: 'Account Created',
-          description: 'Account created successfully! Welcome to tsshop.',
+          title: 'Tạo tài khoản thành công',
+          description: 'Tạo tài khoản thành công! Chào mừng bạn đến với tsshop.',
         });
         // Small delay to allow user to read success message before routing
         setTimeout(() => {
@@ -140,14 +140,14 @@ export const RegisterView = () => {
         }, 1200);
       } else {
         notification.error({
-          title: 'Registration Failed',
-          description: res.error || 'Registration failed. Email or username might already be in use.',
+          title: 'Đăng ký thất bại',
+          description: res.error || 'Đăng ký thất bại. Email hoặc tên người dùng có thể đã được sử dụng.',
         });
       }
     } catch (err) {
       notification.error({
-        title: 'Registration Failed',
-        description: 'An unexpected error occurred. Please try again.',
+        title: 'Đăng ký thất bại',
+        description: 'Đã xảy ra lỗi không mong muốn. Vui lòng thử lại.',
       });
     } finally {
       setIsLoading(false);
@@ -158,17 +158,17 @@ export const RegisterView = () => {
     <VStack gap={4} style={{ width: '100%' }}>
       <VStack gap={1} style={{ alignItems: 'center' }}>
         <Heading level={2} style={{ fontSize: 'var(--text-title-2-size)' }}>
-          Create Account
+          Tạo tài khoản
         </Heading>
         <Text size="supporting" color="secondary">
-          Join tsshop to start shopping
+          Tham gia tsshop để bắt đầu mua sắm
         </Text>
       </VStack>
 
       <form onSubmit={handleSubmit} style={{ width: '100%' }}>
         <VStack gap={4}>
           <TextInput
-            label="Username"
+            label="Tên người dùng"
             value={username}
             onChange={(val) => {
               setUsername(val);
@@ -181,7 +181,7 @@ export const RegisterView = () => {
           />
 
           <TextInput
-            label="Email Address"
+            label="Địa chỉ email"
             type="email"
             value={email}
             onChange={(val) => {
@@ -195,7 +195,7 @@ export const RegisterView = () => {
           />
 
           <TextInput
-            label="Full Name"
+            label="Họ và tên"
             value={fullName}
             onChange={(val) => {
               setFullName(val);
@@ -208,7 +208,7 @@ export const RegisterView = () => {
           />
 
           <TextInput
-            label="Phone Number"
+            label="Số điện thoại"
             type="text"
             value={phone}
             onChange={(val) => {
@@ -221,7 +221,7 @@ export const RegisterView = () => {
           />
 
           <TextInput
-            label="Password"
+            label="Mật khẩu"
             type="password"
             value={password}
             onChange={(val) => {
@@ -231,11 +231,11 @@ export const RegisterView = () => {
             status={passwordStatus}
             isDisabled={isLoading}
             isRequired
-            placeholder="At least 12 characters"
+            placeholder="Ít nhất 12 ký tự"
           />
 
           <TextInput
-            label="Confirm Password"
+            label="Xác nhận mật khẩu"
             type="password"
             value={confirmPassword}
             onChange={(val) => {
@@ -245,11 +245,11 @@ export const RegisterView = () => {
             status={confirmPasswordStatus}
             isDisabled={isLoading}
             isRequired
-            placeholder="Re-enter password"
+            placeholder="Nhập lại mật khẩu"
           />
 
           <TextArea
-            label="Address"
+            label="Địa chỉ"
             value={address}
             onChange={(val) => {
               setAddress(val);
@@ -257,11 +257,11 @@ export const RegisterView = () => {
             }}
             status={addressStatus}
             isDisabled={isLoading}
-            placeholder="Enter your delivery address"
+            placeholder="Nhập địa chỉ giao hàng của bạn"
           />
 
           <Button
-            label={isLoading ? 'Creating Account...' : 'Register'}
+            label={isLoading ? 'Đang tạo tài khoản...' : 'Đăng ký'}
             variant="primary"
             type="submit"
             isLoading={isLoading}
@@ -273,7 +273,7 @@ export const RegisterView = () => {
 
       <HStack style={{ justifyContent: 'center', gap: 'var(--spacing-1)' }}>
         <Text size="supporting" color="secondary">
-          Already have an account?
+          Đã có tài khoản?
         </Text>
         <Link
           to="/login"
@@ -284,7 +284,7 @@ export const RegisterView = () => {
             fontWeight: 'var(--font-weight-medium)'
           }}
         >
-          Login here
+          Đăng nhập tại đây
         </Link>
       </HStack>
     </VStack>

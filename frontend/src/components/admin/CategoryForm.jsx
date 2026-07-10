@@ -59,7 +59,7 @@ export const CategoryForm = ({
       await onSubmit(createCategoryPayload(values));
       onOpenChange(false);
     } catch (error) {
-      setSubmitError(error?.message || 'Unable to save the category.');
+      setSubmitError(error?.message || 'Không thể lưu danh mục.');
     } finally {
       setIsSubmitting(false);
     }
@@ -74,8 +74,8 @@ export const CategoryForm = ({
       <Layout
         header={(
           <DialogHeader
-            title={category ? 'Edit category' : 'Create category'}
-            subtitle="Category names must be unique."
+            title={category ? 'Chỉnh sửa danh mục' : 'Tạo danh mục'}
+            subtitle="Tên danh mục phải là duy nhất."
             onOpenChange={onOpenChange}
             hasDivider
           />
@@ -86,13 +86,13 @@ export const CategoryForm = ({
               <VStack gap={4}>
                 {submitError && (
                   <Alert
-                    title="Unable to save category"
+                    title="Không thể lưu danh mục"
                     description={submitError}
                   />
                 )}
                 <FormLayout>
                   <TextInput
-                    label="Category name"
+                    label="Tên danh mục"
                     value={values.name}
                     onChange={(value) => updateField('name', value)}
                     status={
@@ -104,7 +104,7 @@ export const CategoryForm = ({
                     width="100%"
                   />
                   <TextArea
-                    label="Description"
+                    label="Mô tả"
                     value={values.description}
                     onChange={(value) => updateField('description', value)}
                     rows={4}
@@ -120,13 +120,13 @@ export const CategoryForm = ({
           <LayoutFooter hasDivider>
             <HStack gap={2} justify="end">
               <Button
-                label="Cancel"
+                label="Hủy"
                 variant="secondary"
                 onClick={() => onOpenChange(false)}
                 isDisabled={isSubmitting}
               />
               <Button
-                label={category ? 'Save changes' : 'Create category'}
+              label={category ? 'Lưu thay đổi' : 'Tạo danh mục'}
                 type="submit"
                 form={formId}
                 variant="primary"

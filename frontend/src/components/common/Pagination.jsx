@@ -23,13 +23,13 @@ export const Pagination = ({
       </Text>
       <HStack gap={2}>
         <Button
-          label="Previous"
+          label="Trước"
           variant="secondary"
           isDisabled={!canGoPrevious}
           onClick={() => onPageChange(page - 1)}
         />
         <Button
-          label="Next"
+          label="Sau"
           variant="secondary"
           isDisabled={!canGoNext}
           onClick={() => onPageChange(page + 1)}

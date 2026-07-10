@@ -9,7 +9,7 @@ const parseReviewPayload = (body = {}) => {
     return {
       error: {
         field: 'rating',
-        message: 'Rating must be an integer from 1 to 5',
+        message: 'Xếp hạng phải là số nguyên từ 1 đến 5',
       },
     };
   }
@@ -18,7 +18,7 @@ const parseReviewPayload = (body = {}) => {
     return {
       error: {
         field: 'comment',
-        message: 'Comment must be a string',
+        message: 'Nhận xét phải là chuỗi',
       },
     };
   }
@@ -40,7 +40,7 @@ const getAdminReviews = async (req, res, next) => {
   try {
     const { productId } = req.query;
     const reviews = await reviewModel.listVisibleForAdmin({ productId });
-    return successResponse(res, 200, 'Reviews retrieved successfully', reviews);
+    return successResponse(res, 200, 'Đã lấy đánh giá thành công', reviews);
   } catch (error) {
     next(error);
   }
@@ -56,11 +56,11 @@ const getProductReviews = async (req, res, next) => {
     const product = await productModel.findById(id);
 
     if (!product) {
-      return errorResponse(res, 404, 'Product not found');
+      return errorResponse(res, 404, 'Không tìm thấy sản phẩm');
     }
 
     const reviews = await reviewModel.listVisibleByProductId(id);
-    return successResponse(res, 200, 'Reviews retrieved successfully', reviews);
+    return successResponse(res, 200, 'Đã lấy đánh giá thành công', reviews);
   } catch (error) {
     next(error);
   }
@@ -76,12 +76,12 @@ const createProductReview = async (req, res, next) => {
     const parsed = parseReviewPayload(req.body);
 
     if (parsed.error) {
-      return errorResponse(res, 400, 'Validation failed', [parsed.error]);
+      return errorResponse(res, 400, 'Xác thực thất bại', [parsed.error]);
     }
 
     const product = await productModel.findById(id);
     if (!product) {
-      return errorResponse(res, 404, 'Product not found');
+      return errorResponse(res, 404, 'Không tìm thấy sản phẩm');
     }
 
     const review = await reviewModel.create({
@@ -91,7 +91,7 @@ const createProductReview = async (req, res, next) => {
       comment: parsed.data.comment,
     });
 
-    return successResponse(res, 201, 'Review created successfully', { review });
+    return successResponse(res, 201, 'Đã tạo đánh giá thành công', { review });
   } catch (error) {
     next(error);
   }
@@ -107,14 +107,14 @@ const hideReview = async (req, res, next) => {
     const review = await reviewModel.findById(id);
 
     if (!review) {
-      return errorResponse(res, 404, 'Review not found');
+      return errorResponse(res, 404, 'Không tìm thấy đánh giá');
     }
 
     const hiddenReview = await reviewModel.hide(id);
-    return successResponse(res, 200, 'Review hidden successfully', { review: hiddenReview });
+    return successResponse(res, 200, 'Đã ẩn đánh giá thành công', { review: hiddenReview });
   } catch (error) {
     if (error.code === 'P2025') {
-      return errorResponse(res, 404, 'Review not found');
+      return errorResponse(res, 404, 'Không tìm thấy đánh giá');
     }
     next(error);
   }

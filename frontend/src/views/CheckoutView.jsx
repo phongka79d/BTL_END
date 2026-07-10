@@ -29,15 +29,15 @@ const validate = (values) => {
   const errors = {};
 
   if (!values.fullName.trim()) {
-    errors.fullName = 'Full name is required.';
+    errors.fullName = 'Vui lòng nhập họ và tên.';
   }
 
   if (!values.phone.trim()) {
-    errors.phone = 'Phone number is required.';
+    errors.phone = 'Vui lòng nhập số điện thoại.';
   }
 
   if (!values.shippingAddress.trim()) {
-    errors.shippingAddress = 'Shipping address is required.';
+    errors.shippingAddress = 'Vui lòng nhập địa chỉ giao hàng.';
   }
 
   return errors;
@@ -173,7 +173,7 @@ export const CheckoutView = () => {
 
       if (!order || !order.id) {
         setApiError(
-          'The server did not return order details. Please try again.'
+          'Máy chủ không trả về thông tin đơn hàng. Vui lòng thử lại.'
         );
         setIsSubmitting(false);
         return;
@@ -184,7 +184,7 @@ export const CheckoutView = () => {
       await refreshCart();
     } catch (err) {
       const message =
-        err?.message || 'Unable to place your order. Please try again.';
+        err?.message || 'Không thể đặt đơn hàng. Vui lòng thử lại.';
       setApiError(message);
     } finally {
       setIsSubmitting(false);
@@ -230,9 +230,9 @@ export const CheckoutView = () => {
         }}
       >
         <Alert
-          title="Unable to load cart"
+          title="Không thể tải giỏ hàng"
           description={error}
-          actionLabel="Retry"
+          actionLabel="Thử lại"
           onAction={refreshCart}
         />
       </VStack>
@@ -251,18 +251,18 @@ export const CheckoutView = () => {
         }}
       >
         <EmptyState
-          title="Your cart is empty"
-          description="Add products to your cart before checking out."
+          title="Giỏ hàng trống"
+          description="Hãy thêm sản phẩm vào giỏ hàng trước khi thanh toán."
           icon={<CartIcon />}
           actions={
             <HStack gap={3} style={{ justifyContent: 'center', flexWrap: 'wrap' }}>
               <Button
-                label="Browse products"
+                label="Xem sản phẩm"
                 variant="primary"
                 onClick={() => navigate('/products')}
               />
               <Button
-                label="Return home"
+                label="Về trang chủ"
                 variant="secondary"
                 onClick={() => navigate('/')}
               />
@@ -285,13 +285,13 @@ export const CheckoutView = () => {
         }}
       >
         <EmptyState
-          title="No products selected"
-          description="Return to your cart and select at least one product before checkout."
+          title="Chưa chọn sản phẩm"
+          description="Hãy quay lại giỏ hàng và chọn ít nhất một sản phẩm trước khi thanh toán."
           icon={<CartIcon />}
           actions={(
             <HStack gap={3} style={{ justifyContent: 'center', flexWrap: 'wrap' }}>
-              <Button label="Return to cart" variant="primary" onClick={() => navigate('/cart')} />
-              <Button label="Browse products" variant="secondary" onClick={() => navigate('/products')} />
+              <Button label="Quay lại giỏ hàng" variant="primary" onClick={() => navigate('/cart')} />
+              <Button label="Xem sản phẩm" variant="secondary" onClick={() => navigate('/products')} />
             </HStack>
           )}
         />
@@ -310,18 +310,18 @@ export const CheckoutView = () => {
       }}
     >
       <VStack gap={1}>
-        <Heading level={1}>Checkout</Heading>
+        <Heading level={1}>Thanh toán</Heading>
         <Text color="secondary">
-          Review your order, fill in shipping details, and place your order.
-          You will pay via Cash on Delivery.
+          Kiểm tra đơn hàng, điền thông tin giao hàng và đặt hàng.
+          Bạn sẽ thanh toán khi nhận hàng.
         </Text>
       </VStack>
 
       {apiError && (
         <Alert
-          title="Order could not be placed"
+          title="Không thể đặt đơn hàng"
           description={apiError}
-          actionLabel="Try again"
+          actionLabel="Thử lại"
           onAction={handleSubmit}
         />
       )}

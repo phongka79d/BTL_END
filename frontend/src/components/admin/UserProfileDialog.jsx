@@ -55,7 +55,7 @@ export const UserProfileDialog = ({
     const payload = createUserProfilePayload(values);
 
     if (!payload.username) {
-      setError('Username cannot be empty');
+      setError('Tên người dùng không được để trống');
       return;
     }
 
@@ -64,7 +64,7 @@ export const UserProfileDialog = ({
       await onSubmit(payload);
       onOpenChange(false);
     } catch (submitError) {
-      setError(submitError?.message || 'Unable to save user profile.');
+      setError(submitError?.message || 'Không thể lưu hồ sơ người dùng.');
     } finally {
       setIsSubmitting(false);
     }
@@ -75,8 +75,8 @@ export const UserProfileDialog = ({
       <Layout
         header={(
           <DialogHeader
-            title="Edit profile"
-            subtitle={user?.email || 'Update soft account information.'}
+            title="Chỉnh sửa hồ sơ"
+            subtitle={user?.email || 'Cập nhật thông tin tài khoản cơ bản.'}
             onOpenChange={onOpenChange}
             hasDivider
           />
@@ -87,34 +87,34 @@ export const UserProfileDialog = ({
               <VStack gap={4}>
                 {error && (
                   <Alert
-                    title="Unable to save profile"
+                    title="Không thể lưu hồ sơ"
                     description={error}
                   />
                 )}
                 <FormLayout>
                   <TextInput
-                    label="Username"
+                    label="Tên người dùng"
                     value={values.username}
                     onChange={(value) => updateField('username', value)}
                     isRequired
                     width="100%"
                   />
                   <TextInput
-                    label="Full name"
+                    label="Họ và tên"
                     value={values.fullName}
                     onChange={(value) => updateField('fullName', value)}
                     isOptional
                     width="100%"
                   />
                   <TextInput
-                    label="Phone"
+                    label="Số điện thoại"
                     value={values.phone}
                     onChange={(value) => updateField('phone', value)}
                     isOptional
                     width="100%"
                   />
                   <TextInput
-                    label="Address"
+                    label="Địa chỉ"
                     value={values.address}
                     onChange={(value) => updateField('address', value)}
                     isOptional
@@ -129,13 +129,13 @@ export const UserProfileDialog = ({
           <LayoutFooter hasDivider>
             <HStack gap={2} justify="end">
               <Button
-                label="Cancel"
+                label="Hủy"
                 variant="secondary"
                 onClick={() => onOpenChange(false)}
                 isDisabled={isSubmitting}
               />
               <Button
-                label="Save profile"
+                label="Lưu hồ sơ"
                 type="submit"
                 form={formId}
                 variant="primary"
