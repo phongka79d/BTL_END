@@ -13,11 +13,11 @@ import {
 /**
  * CheckoutForm
  *
- * Collects shipping address and shows COD payment method (informational only).
- * Validation errors are rendered inline via Astryx field status props.
+ * Thu thập địa chỉ giao hàng và hiển thị phương thức thanh toán COD (chỉ mang tính thông tin).
+ * Lỗi kiểm tra được hiển thị nội tuyến thông qua các thuộc tính status của trường Astryx.
  *
- * ponytail: If additional payment methods or address fields are added later,
- *           extend this component without changing the submit contract.
+ * ponytail: Nếu bổ sung phương thức thanh toán hoặc trường địa chỉ,
+ *           hãy mở rộng thành phần này mà không thay đổi hợp đồng gửi dữ liệu.
  */
 
 const fieldStatus = (message) =>

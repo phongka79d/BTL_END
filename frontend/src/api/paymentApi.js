@@ -1,16 +1,16 @@
 import { apiClient } from './apiClient';
 
 /**
- * Payment API helpers
- * Communicates with backend /api/payments routes.
- * COD-only — no online payment gateway integration.
+ * Các hàm hỗ trợ API thanh toán
+ * Giao tiếp với các route /api/payments của backend.
+ * Chỉ COD — không tích hợp cổng thanh toán trực tuyến.
  */
 export const paymentApi = {
   /**
-   * Create or return an existing COD payment record for an order.
+   * Tạo hoặc trả về bản ghi thanh toán COD hiện có của một đơn hàng.
    * @param {Object} params
-   * @param {string|number} params.orderId - The order ID
-   * @returns {Promise<Object>} Payment record
+   * @param {string|number} params.orderId - ID đơn hàng
+   * @returns {Promise<Object>} Bản ghi thanh toán
    */
   createCODPayment: ({ orderId }) => apiClient.post('/payments/cod', { orderId }),
 };

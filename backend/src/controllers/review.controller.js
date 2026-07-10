@@ -33,7 +33,7 @@ const parseReviewPayload = (body = {}) => {
 };
 
 /**
- * Get visible reviews for admin moderation
+ * Lấy các đánh giá hiển thị để admin kiểm duyệt
  * GET /api/admin/reviews
  */
 const getAdminReviews = async (req, res, next) => {
@@ -47,7 +47,7 @@ const getAdminReviews = async (req, res, next) => {
 };
 
 /**
- * Get visible reviews for a product
+ * Lấy các đánh giá hiển thị của một sản phẩm
  * GET /api/products/:id/reviews
  */
 const getProductReviews = async (req, res, next) => {
@@ -67,7 +67,7 @@ const getProductReviews = async (req, res, next) => {
 };
 
 /**
- * Create a visible review for a product
+ * Tạo đánh giá hiển thị cho một sản phẩm
  * POST /api/products/:id/reviews
  */
 const createProductReview = async (req, res, next) => {
@@ -98,7 +98,7 @@ const createProductReview = async (req, res, next) => {
 };
 
 /**
- * Hide a review for admin moderation
+ * Ẩn đánh giá để admin kiểm duyệt
  * DELETE /api/admin/reviews/:id
  */
 const hideReview = async (req, res, next) => {

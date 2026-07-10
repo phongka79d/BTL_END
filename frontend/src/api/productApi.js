@@ -14,7 +14,7 @@ const buildProductQuery = (filters = {}) => {
 };
 
 /**
- * Product API helpers for public catalog and admin product management routes.
+ * Các hàm hỗ trợ API sản phẩm cho danh mục công khai và route quản lý sản phẩm của admin.
  */
 export const productApi = {
   getProducts: (filters = {}) => apiClient.get(`/products${buildProductQuery(filters)}`),

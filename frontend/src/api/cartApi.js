@@ -1,7 +1,7 @@
 import { apiClient } from './apiClient';
 
 /**
- * Cart API helpers for authenticated cart reads and item mutations.
+ * Các hàm hỗ trợ API giỏ hàng cho việc đọc giỏ đã xác thực và thay đổi mục.
  */
 export const cartApi = {
   getCart: () => apiClient.get('/cart'),

@@ -8,8 +8,8 @@ import {
 } from '../../constants/orderConstants';
 
 /**
- * Maps order status values to Selector option objects consumed by the
- * Astryx Selector component.
+ * Ánh xạ các giá trị trạng thái đơn hàng thành đối tượng tùy chọn Selector
+ * được thành phần Selector của Astryx sử dụng.
  */
 const STATUS_OPTIONS = ORDER_STATUS_VALUES.map((value) => ({
   label: ORDER_STATUS_LABELS[value] || value,
@@ -19,27 +19,27 @@ const STATUS_OPTIONS = ORDER_STATUS_VALUES.map((value) => ({
 /**
  * OrderStatusSelect
  *
- * Inline admin status selector that calls PUT /api/admin/orders/:id/status
- * on change and shows transient success/error feedback.
+ * Selector trạng thái nội tuyến của admin gọi PUT /api/admin/orders/:id/status
+ * khi thay đổi và hiển thị phản hồi thành công/lỗi tạm thời.
  *
- * Design doc: §17.2 OrderStatusSelector
+ * Tài liệu thiết kế: §17.2 OrderStatusSelector
  * Options: pending, confirmed, shipping, completed, cancelled
  * Astryx: Selector
  *
  * Props:
- *   order         – the order object (must have id and status)
- *   onStatusUpdated – callback invoked after a successful status update
- *                     so the parent can refresh the row or list state
+ *   order         – đối tượng đơn hàng (phải có id và status)
+ *   onStatusUpdated – hàm callback được gọi sau khi cập nhật trạng thái thành công
+ *                     để thành phần cha có thể làm mới dòng hoặc trạng thái danh sách
  *
- * States:
- *   idle          – Selector shows current status, enabled
- *   pending       – Selector disabled, API call in-flight
- *   success       – brief green "Saved" text, auto-clears
- *   error         – brief red error text, auto-clears
+ * Trạng thái:
+ *   idle          – Selector hiển thị trạng thái hiện tại, được bật
+ *   pending       – Selector bị tắt, yêu cầu API đang thực hiện
+ *   success       – dòng chữ màu xanh "Đã lưu" ngắn hạn, tự xóa
+ *   error         – dòng chữ lỗi màu đỏ ngắn hạn, tự xóa
  *
- * ponytail: If the backend ever requires a confirmation step before
- *           certain transitions (e.g., completed → cancelled), add an
- *           AlertDialog gate here before calling the API.
+ * ponytail: Nếu backend yêu cầu bước xác nhận trước một số chuyển đổi
+ *           (ví dụ completed → cancelled), hãy thêm lớp chặn AlertDialog
+ *           tại đây trước khi gọi API.
  */
 export const OrderStatusSelect = ({ order, onStatusUpdated }) => {
   const notification = useNotification();

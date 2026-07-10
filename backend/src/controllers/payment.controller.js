@@ -3,9 +3,9 @@ const orderModel = require('../models/order.model');
 const { successResponse, errorResponse } = require('../utils/response');
 
 /**
- * Explicit COD payment endpoint for demo/API completeness.
- * Returns an existing payment for the order, or creates one if none exists.
- * Idempotent — never creates a duplicate payment.
+ * Endpoint thanh toán COD rõ ràng để phục vụ demo và đầy đủ API.
+ * Trả về thanh toán hiện có của đơn hàng hoặc tạo mới nếu chưa tồn tại.
+ * Có tính lũy đẳng — không bao giờ tạo thanh toán trùng lặp.
  * POST /api/payments/cod
  */
 const createCODPayment = async (req, res, next) => {
@@ -14,23 +14,23 @@ const createCODPayment = async (req, res, next) => {
     const isAdmin = req.user.role === 'admin';
     const { orderId } = req.body;
 
-    // Validate required orderId
+  // Kiểm tra orderId bắt buộc
     if (!orderId || typeof orderId !== 'string') {
       return errorResponse(res, 400, 'Order ID là bắt buộc');
     }
 
-    // Verify the order exists
+  // Xác minh đơn hàng tồn tại
     const order = await orderModel.findById(orderId);
     if (!order) {
       return errorResponse(res, 404, 'Không tìm thấy đơn hàng');
     }
 
-    // Enforce access: customer sees only their own order; admin sees any
+  // Kiểm soát quyền truy cập: customer chỉ thấy đơn hàng của mình; admin thấy mọi đơn hàng
     if (order.userId !== userId && !isAdmin) {
       return errorResponse(res, 403, 'Không được phép truy cập đơn hàng này');
     }
 
-    // Return existing payment or create a new COD payment via the idempotent model helper
+  // Trả về thanh toán hiện có hoặc tạo thanh toán COD mới qua hàm hỗ trợ model lũy đẳng
     const payment = await paymentModel.createOrGetCODPayment(orderId);
     return successResponse(res, 200, 'Đã lấy thông tin thanh toán COD thành công', payment);
   } catch (error) {

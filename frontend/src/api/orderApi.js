@@ -1,34 +1,34 @@
 import { apiClient } from './apiClient';
 
 /**
- * Order API helpers
- * Communicates with backend /api/orders and /api/admin/orders routes.
+ * Các hàm hỗ trợ API đơn hàng
+ * Giao tiếp với các route /api/orders và /api/admin/orders của backend.
  */
 export const orderApi = {
   /**
-   * Create a new order (checkout) from the authenticated user's cart.
-   * @param {Object} shippingAddress - Shipping address object
-   * @returns {Promise<Object>} Created order with details and payment
+   * Tạo đơn hàng mới (checkout) từ giỏ hàng của người dùng đã xác thực.
+   * @param {Object} shippingAddress - Đối tượng địa chỉ giao hàng
+   * @returns {Promise<Object>} Đơn hàng đã tạo cùng chi tiết và thanh toán
    */
   createOrder: (shippingAddress) => apiClient.post('/orders', shippingAddress),
 
   /**
-   * Retrieve the authenticated customer's orders, newest first.
-   * @returns {Promise<Object>} Array of orders with status and payment summary
+   * Lấy các đơn hàng của khách hàng đã xác thực, mới nhất trước.
+   * @returns {Promise<Object>} Mảng đơn hàng cùng trạng thái và tóm tắt thanh toán
    */
   getMyOrders: () => apiClient.get('/orders/my-orders'),
 
   /**
-   * Retrieve a single order by ID (own order for customer, any order for admin).
-   * @param {string|number} id - Order ID
-   * @returns {Promise<Object>} Order with details, product summary, and payment
+   * Lấy một đơn hàng theo ID (đơn của chính khách hàng, mọi đơn hàng đối với admin).
+   * @param {string|number} id - ID đơn hàng
+   * @returns {Promise<Object>} Đơn hàng cùng chi tiết, tóm tắt sản phẩm và thanh toán
    */
   getOrderById: (id) => apiClient.get(`/orders/${id}`),
 
   /**
-   * Retrieve all orders for admin, newest first.
-   * @param {string} [status] - Optional status filter value
-   * @returns {Promise<Object>} Array of orders
+   * Lấy tất cả đơn hàng cho admin, mới nhất trước.
+   * @param {string} [status] - Giá trị bộ lọc trạng thái tùy chọn
+   * @returns {Promise<Object>} Mảng đơn hàng
    */
   getAdminOrders: (status) => {
     const query = status ? `?status=${encodeURIComponent(status)}` : '';
@@ -36,10 +36,10 @@ export const orderApi = {
   },
 
   /**
-   * Update an order's status (admin only).
-   * @param {string|number} id - Order ID
-   * @param {string} status - New status value
-   * @returns {Promise<Object>} Updated order
+   * Cập nhật trạng thái đơn hàng (chỉ admin).
+   * @param {string|number} id - ID đơn hàng
+   * @param {string} status - Giá trị trạng thái mới
+   * @returns {Promise<Object>} Đơn hàng đã cập nhật
    */
   updateOrderStatus: (id, status) =>
     apiClient.put(`/admin/orders/${id}/status`, { status }),

@@ -23,15 +23,15 @@ const sectionLabelStyle = {
 /**
  * OrderDetailPanel
  *
- * Presents a single order's full detail: shipping address, order items,
- * order status, payment status, and total.
+ * Trình bày đầy đủ chi tiết một đơn hàng: địa chỉ giao hàng, các mục đơn hàng,
+ * trạng thái đơn hàng, trạng thái thanh toán và tổng tiền.
  *
- * Design doc compliance: §12.2 OrderDetailPanel (Order information,
- * Shipping address, Payment information, Order items, Order status).
+ * Tuân thủ tài liệu thiết kế: §12.2 OrderDetailPanel (thông tin đơn hàng,
+ * địa chỉ giao hàng, thông tin thanh toán, các mục đơn hàng, trạng thái đơn hàng).
  *
- * ponytail: If the backend response adds tracking numbers, delivery dates,
- *           or additional payment fields, extend the relevant sections
- *           without changing the panel's overall layout strategy.
+ * ponytail: Nếu phản hồi backend bổ sung mã theo dõi, ngày giao hàng
+ *           hoặc các trường thanh toán khác, hãy mở rộng các phần liên quan
+ *           mà không thay đổi chiến lược bố cục tổng thể của bảng.
  */
 export const OrderDetailPanel = ({ order }) => {
   const {
@@ -87,7 +87,7 @@ export const OrderDetailPanel = ({ order }) => {
 
   return (
     <VStack gap={4} style={{ width: '100%' }}>
-      {/* Order Information */}
+      {/* Thông tin đơn hàng */}
       <Card padding={4}>
         <VStack gap={3}>
           <Text size="supporting" color="accent" weight="semibold" style={sectionLabelStyle}>
@@ -107,7 +107,7 @@ export const OrderDetailPanel = ({ order }) => {
         </VStack>
       </Card>
 
-      {/* Shipping Address */}
+      {/* Địa chỉ giao hàng */}
       <Card padding={4}>
         <VStack gap={2}>
           <Text size="supporting" color="accent" weight="semibold" style={sectionLabelStyle}>
@@ -117,7 +117,7 @@ export const OrderDetailPanel = ({ order }) => {
         </VStack>
       </Card>
 
-      {/* Payment Information */}
+      {/* Thông tin thanh toán */}
       {payment && (
         <Card padding={4}>
           <VStack gap={3}>
@@ -142,7 +142,7 @@ export const OrderDetailPanel = ({ order }) => {
         </Card>
       )}
 
-      {/* Order Items */}
+      {/* Các mục đơn hàng */}
       <Card padding={0}>
         <VStack gap={0}>
           <VStack gap={1} style={{ padding: 'var(--spacing-4)' }}>
@@ -162,7 +162,7 @@ export const OrderDetailPanel = ({ order }) => {
         </VStack>
       </Card>
 
-      {/* Order Total */}
+      {/* Tổng tiền đơn hàng */}
       <Card padding={4}>
         <HStack style={{ justifyContent: 'space-between', alignItems: 'center' }}>
           <Text weight="semibold" size="supporting">

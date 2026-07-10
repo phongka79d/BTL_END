@@ -13,30 +13,30 @@ const {
   storefrontContentAdminRouter,
 } = require('./storefrontContent.routes');
 
-// Mount routes under their path prefixes
-// Public product/category endpoints will match e.g. GET /api/products, GET /api/categories
-// Admin product/category endpoints will match e.g. POST /api/admin/products, POST /api/admin/categories
+// Gắn các route dưới tiền tố đường dẫn tương ứng
+// Endpoint sản phẩm/danh mục công khai sẽ khớp, ví dụ GET /api/products, GET /api/categories
+// Endpoint sản phẩm/danh mục admin sẽ khớp, ví dụ POST /api/admin/products, POST /api/admin/categories
 router.use('/products', productRoutes);
 router.use('/admin/products', productRoutes);
 router.use('/categories', categoryRoutes);
 router.use('/admin/categories', categoryRoutes);
 router.use('/cart', cartRoutes);
 
-// Order routes: customer and admin order paths share the same router (auth/admin enforced at route level)
-// e.g. POST /api/orders, GET /api/orders/my-orders, GET /api/orders/:id
-// e.g. GET /api/admin/orders, PUT /api/admin/orders/:id/status
+// Route đơn hàng: đường dẫn đơn hàng của customer và admin dùng chung router (auth/admin được áp dụng ở cấp route)
+// Ví dụ: POST /api/orders, GET /api/orders/my-orders, GET /api/orders/:id
+// Ví dụ: GET /api/admin/orders, PUT /api/admin/orders/:id/status
 router.use('/orders', orderRoutes);
 router.use('/admin/orders', orderRoutes);
 
-// Payment routes: COD-only endpoint
-// e.g. POST /api/payments/cod
+// Route thanh toán: endpoint chỉ COD
+// Ví dụ: POST /api/payments/cod
 router.use('/payments', paymentRoutes);
 
-// Review routes keep the exact Plan 4 paths:
-// e.g. GET/POST /api/products/:id/reviews, DELETE /api/admin/reviews/:id
+// Route đánh giá giữ nguyên các đường dẫn chính xác của Plan 4:
+// Ví dụ: GET/POST /api/products/:id/reviews, DELETE /api/admin/reviews/:id
 router.use('/', reviewRoutes);
 
-// Admin-only report endpoints
+// Các endpoint báo cáo chỉ dành cho admin
 router.use('/admin/reports', reportRoutes);
 
 router.use('/storefront', storefrontContentPublicRouter);

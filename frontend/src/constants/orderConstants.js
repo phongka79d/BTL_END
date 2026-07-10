@@ -1,12 +1,12 @@
 /**
- * Shared order and payment status constants.
+ * Các hằng số trạng thái đơn hàng và thanh toán dùng chung.
  *
- * These values must exactly match the backend Prisma schema enums
- * (backend/prisma/schema.prisma). They are the single source of truth for
- * status values consumed by admin status selectors, order status badges,
- * payment status badges, and any UI that needs status-aware rendering.
+ * Các giá trị này phải khớp tuyệt đối với enum schema Prisma của backend
+ * (backend/prisma/schema.prisma). Đây là nguồn dữ liệu chuẩn duy nhất cho
+ * các giá trị trạng thái được selector trạng thái admin, badge trạng thái đơn hàng,
+ * badge trạng thái thanh toán và mọi giao diện cần hiển thị theo trạng thái sử dụng.
  *
- * ponytail: If backend enums grow new values, only this file needs updating.
+ * ponytail: Nếu enum backend có thêm giá trị mới, chỉ cần cập nhật tệp này.
  */
 
 export const ORDER_STATUS_VALUES = [

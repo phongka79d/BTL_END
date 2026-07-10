@@ -44,24 +44,24 @@ const buildOrderId = (id) => {
 /**
  * AdminOrderView
  *
- * Displays all orders for admin users in a table with customer info,
- * status badges, totals, dates, and action controls.
+ * Hiển thị tất cả đơn hàng cho người dùng admin trong bảng cùng thông tin khách hàng,
+ * badge trạng thái, tổng tiền, ngày tháng và các điều khiển thao tác.
  *
- * Columns (per §17.1 AdminOrderTable + (05A) handoff):
- *   Customer    – user name + email (VStack)
- *   Order ID    – truncated hash
- *   Date        – formatted createdAt
- *   Total       – formatted totalAmount
- *   Order Status– OrderStatusSelect (inline Selector, (05D) wired)
+ * Các cột (theo §17.1 AdminOrderTable + bàn giao (05A)):
+ *   Customer    – tên người dùng + email (VStack)
+ *   Order ID    – hash rút gọn
+ *   Date        – createdAt đã định dạng
+ *   Total       – totalAmount đã định dạng
+ *   Order Status– OrderStatusSelect (Selector nội tuyến, đã kết nối ở (05D))
  *   Payment     – PaymentStatusBadge
- *   Actions     – MoreMenu (View Details, Update Status)
+ *   Thao tác     – MoreMenu (Xem chi tiết, Cập nhật trạng thái)
  *
- * States handled: loading, success, empty, error, permission denied.
+ * Các trạng thái xử lý: loading, success, empty, error, bị từ chối quyền.
  *
- * ponytail: Status filtering uses client-side pagination; upgrade to
- *           server-side pagination+filter when order volume grows.
- *           (05D) wired OrderStatusSelect — inline status updates with
- *           selector + success/error feedback + row refresh.
+ * ponytail: Lọc trạng thái sử dụng phân trang phía máy khách; nâng cấp lên
+ *           phân trang và bộ lọc phía máy chủ khi số lượng đơn hàng tăng.
+ *           OrderStatusSelect đã kết nối ở (05D) — cập nhật trạng thái nội tuyến với
+ *           selector + phản hồi thành công/lỗi + làm mới dòng.
  */
 export const AdminOrderView = () => {
   const [orders, setOrders] = useState([]);
@@ -227,7 +227,7 @@ export const AdminOrderView = () => {
     [handleViewDetails, handleStatusUpdated]
   );
 
-  /* ---------- Permission Denied ---------- */
+  /* ---------- Bị từ chối quyền ---------- */
   if (error && error.includes('permission')) {
     return (
       <VStack
@@ -253,7 +253,7 @@ export const AdminOrderView = () => {
     );
   }
 
-  /* ---------- Loading ---------- */
+  /* ---------- Đang tải ---------- */
   if (isLoading) {
     return (
       <VStack
@@ -279,7 +279,7 @@ export const AdminOrderView = () => {
     );
   }
 
-  /* ---------- API Error (non-permission) ---------- */
+  /* ---------- Lỗi API (không phải lỗi quyền) ---------- */
   if (error) {
     return (
       <VStack
@@ -306,7 +306,7 @@ export const AdminOrderView = () => {
     );
   }
 
-  /* ---------- Empty ---------- */
+  /* ---------- Trống ---------- */
   if (!orders.length) {
     return (
       <VStack
@@ -363,7 +363,7 @@ export const AdminOrderView = () => {
     );
   }
 
-  /* ---------- Success ---------- */
+  /* ---------- Thành công ---------- */
   return (
     <VStack
       style={{

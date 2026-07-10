@@ -14,13 +14,13 @@ export const AuthProvider = ({ children }) => {
       const savedToken = localStorage.getItem('token');
       if (savedToken) {
         try {
-          // Token is present in localStorage, fetch the profile to verify it
+          // Token tồn tại trong localStorage, tải hồ sơ để xác minh token
           const res = await authApi.getMe();
           if (res.success && res.data && res.data.user) {
             setUser(res.data.user);
             setToken(savedToken);
           } else {
-            // Token is invalid or expired
+            // Token không hợp lệ hoặc đã hết hạn
             localStorage.removeItem('token');
             setUser(null);
             setToken(null);

@@ -31,8 +31,8 @@ import {
 } from '../components/common/LayoutIcons';
 
 /**
- * AdminLayout component that serves as the page shell for administrative pages.
- * It provides a collapsible sidebar (SideNav) with management links and a simplified top nav.
+ * Thành phần AdminLayout đóng vai trò khung trang cho các trang quản trị.
+ * Thành phần cung cấp thanh bên có thể thu gọn (SideNav) với các liên kết quản lý và thanh điều hướng trên đơn giản.
  */
 export const AdminLayout = () => {
   const { user, logout } = useAuth();

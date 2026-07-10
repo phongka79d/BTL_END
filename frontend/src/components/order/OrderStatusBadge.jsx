@@ -3,21 +3,21 @@ import { Badge } from '@astryxdesign/core';
 import { ORDER_STATUS_LABELS } from '../../constants/orderConstants';
 
 /**
- * Maps order status values to Astryx Badge variants.
+ * Ánh xạ các giá trị trạng thái đơn hàng thành các biến thể Badge của Astryx.
  *
- * Variant map (per (04A) established mappings):
- *   pending   → neutral   (awaiting action)
- *   confirmed → info      (positive progression)
- *   shipping  → warning   (in transit)
- *   completed → success   (terminal success)
- *   cancelled → error     (terminal failure)
+ * Bản đồ biến thể (theo ánh xạ đã thiết lập ở (04A)):
+ *   pending   → neutral   (đang chờ xử lý)
+ *   confirmed → info      (tiến trình tích cực)
+ *   shipping  → warning   (đang vận chuyển)
+ *   completed → success   (thành công cuối cùng)
+ *   cancelled → error     (thất bại cuối cùng)
  *
- * Labels are sourced from the shared ORDER_STATUS_LABELS constant
- * (frontend/src/constants/orderConstants.js), keeping the UI
- * consistent with the admin status selector and batch handoff.
+ * Nhãn được lấy từ hằng số ORDER_STATUS_LABELS dùng chung
+ * (frontend/src/constants/orderConstants.js), giúp giao diện
+ * nhất quán với selector trạng thái admin và bàn giao lô xử lý.
  *
- * ponytail: If backend enums grow new values, update the variant map
- *           here and add the label to orderConstants.js.
+ * ponytail: Nếu enum backend có thêm giá trị mới, hãy cập nhật bản đồ biến thể
+ *           tại đây và thêm nhãn vào orderConstants.js.
  */
 const ORDER_STATUS_VARIANT_MAP = {
   pending: 'neutral',

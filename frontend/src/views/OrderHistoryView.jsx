@@ -34,14 +34,14 @@ const formatDate = (dateString) => {
 /**
  * OrderHistoryView
  *
- * Displays the authenticated customer's order history in a table
- * with status badges, totals, dates, and navigation to detail pages.
+ * Hiển thị lịch sử đơn hàng của khách hàng đã xác thực trong một bảng
+ * cùng badge trạng thái, tổng tiền, ngày tháng và điều hướng đến các trang chi tiết.
  *
- * States handled: loading, error, empty, success.
+ * Các trạng thái xử lý: loading, error, empty, success.
  *
- * ponytail: If backend adds server-side pagination or sorting params,
- *           replace client-side pagination with API-driven pagination
- *           without changing the column-render or badge mapping logic.
+ * ponytail: Nếu backend bổ sung tham số phân trang hoặc sắp xếp phía máy chủ,
+ *           hãy thay phân trang phía máy khách bằng phân trang qua API
+ *           mà không thay đổi logic hiển thị cột hoặc ánh xạ badge.
  */
 export const OrderHistoryView = () => {
   const navigate = useNavigate();
@@ -148,7 +148,7 @@ export const OrderHistoryView = () => {
     [navigate]
   );
 
-  /* ---------- Loading ---------- */
+  /* ---------- Đang tải ---------- */
   if (isLoading) {
     return (
       <VStack
@@ -182,7 +182,7 @@ export const OrderHistoryView = () => {
     );
   }
 
-  /* ---------- Error ---------- */
+  /* ---------- Lỗi ---------- */
   if (error) {
     return (
       <VStack
@@ -211,7 +211,7 @@ export const OrderHistoryView = () => {
     );
   }
 
-  /* ---------- Empty ---------- */
+  /* ---------- Trống ---------- */
   if (!orders.length) {
     return (
       <VStack
@@ -252,7 +252,7 @@ export const OrderHistoryView = () => {
     );
   }
 
-  /* ---------- Success ---------- */
+  /* ---------- Thành công ---------- */
   return (
     <VStack
       style={{

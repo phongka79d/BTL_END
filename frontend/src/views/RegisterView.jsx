@@ -14,17 +14,17 @@ import { useNotification } from '../contexts/NotificationContext';
 import { validatePasswordPolicy } from '../utils/passwordPolicy';
 
 /**
- * RegisterView Component
- * Renders the user registration form with username, email, password, confirm password,
- * full name, phone, and address fields.
- * Handles client-side validation, loading states, success redirection, and API error banners.
+ * Thành phần RegisterView
+ * Hiển thị biểu mẫu đăng ký người dùng với các trường username, email, password, confirm password,
+ * họ tên, điện thoại và địa chỉ.
+ * Xử lý kiểm tra phía máy khách, trạng thái loading, chuyển hướng khi thành công và banner lỗi API.
  */
 export const RegisterView = () => {
   const { register } = useAuth();
   const notification = useNotification();
   const navigate = useNavigate();
 
-  // Field states
+  // Trạng thái các trường
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -33,7 +33,7 @@ export const RegisterView = () => {
   const [phone, setPhone] = useState('');
   const [address, setAddress] = useState('');
 
-  // Field validation states (for Astryx status prop)
+  // Trạng thái kiểm tra của các trường (cho thuộc tính status của Astryx)
   const [usernameStatus, setUsernameStatus] = useState(null);
   const [emailStatus, setEmailStatus] = useState(null);
   const [passwordStatus, setPasswordStatus] = useState(null);
@@ -42,25 +42,25 @@ export const RegisterView = () => {
   const [phoneStatus, setPhoneStatus] = useState(null);
   const [addressStatus, setAddressStatus] = useState(null);
 
-  // Form submission and API feedback states
+  // Trạng thái gửi biểu mẫu và phản hồi API
   const [isLoading, setIsLoading] = useState(false);
 
   /**
-   * Helper to validate email format
+   * Hàm hỗ trợ kiểm tra định dạng email
    */
   const isValidEmail = (val) => {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val);
   };
 
   /**
-   * Handle form submission
+   * Xử lý việc gửi biểu mẫu
    */
   const handleSubmit = async (e) => {
     e.preventDefault();
     
     let hasError = false;
 
-    // Reset all field statuses
+    // Đặt lại trạng thái của tất cả các trường
     setUsernameStatus(null);
     setEmailStatus(null);
     setPasswordStatus(null);
@@ -69,7 +69,7 @@ export const RegisterView = () => {
     setPhoneStatus(null);
     setAddressStatus(null);
 
-    // Client-side validations
+    // Kiểm tra phía máy khách
     if (!username) {
       setUsernameStatus({ type: 'error', message: 'Vui lòng nhập tên người dùng' });
       hasError = true;
@@ -110,7 +110,7 @@ export const RegisterView = () => {
       hasError = true;
     }
 
-    // Phone is optional but if filled, it should look like a number
+    // Phone là tùy chọn nhưng nếu được nhập thì phải có dạng số
     if (phone && !/^\+?[0-9\s-]{8,15}$/.test(phone)) {
       setPhoneStatus({ type: 'error', message: 'Vui lòng nhập số điện thoại hợp lệ' });
       hasError = true;
@@ -134,7 +134,7 @@ export const RegisterView = () => {
           title: 'Tạo tài khoản thành công',
           description: 'Tạo tài khoản thành công! Chào mừng bạn đến với tsshop.',
         });
-        // Small delay to allow user to read success message before routing
+        // Tạm dừng ngắn để người dùng kịp đọc thông báo thành công trước khi chuyển route
         setTimeout(() => {
           navigate('/');
         }, 1200);

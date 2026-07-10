@@ -116,7 +116,7 @@ const sortByOrderedQuantity = async (items) => {
 };
 
 /**
- * Validate product creation data
+ * Kiểm tra dữ liệu tạo sản phẩm
  * @param {Object} data 
  */
 const validateProductData = (data) => {
@@ -139,7 +139,7 @@ const validateProductData = (data) => {
 };
 
 /**
- * Validate product update data
+ * Kiểm tra dữ liệu cập nhật sản phẩm
  * @param {Object} data 
  */
 const validateProductUpdateData = (data) => {
@@ -162,7 +162,7 @@ const validateProductUpdateData = (data) => {
 };
 
 /**
- * Find product by ID with category info
+ * Tìm sản phẩm theo ID kèm thông tin danh mục
  * @param {string} id 
  * @returns {Promise<Object|null>}
  */
@@ -181,7 +181,7 @@ const findById = async (id) => {
 };
 
 /**
- * Find all products matching filters with pagination
+ * Tìm tất cả sản phẩm phù hợp với bộ lọc và phân trang
  * @param {Object} params 
  * @param {string} [params.keyword]
  * @param {string} [params.categoryId]
@@ -230,7 +230,7 @@ const findAll = async (params = {}) => {
   const take = limitNum;
 
   if (sort === PRODUCT_SORTS.REVIEW || sort === PRODUCT_SORTS.ORDERS) {
-    // ponytail: aggregate sort pages after loading matching products; move to SQL/precomputed metrics when catalog size demands it.
+    // ponytail: tổng hợp và sắp xếp trang sau khi tải sản phẩm phù hợp; chuyển sang SQL/chỉ số tính sẵn khi quy mô danh mục yêu cầu.
     const matchingItems = await prisma.product.findMany({
       where,
       include: productInclude,
@@ -282,7 +282,7 @@ const findAll = async (params = {}) => {
 };
 
 /**
- * Create a new product (admin)
+ * Tạo sản phẩm mới (admin)
  * @param {Object} data 
  * @returns {Promise<Object>}
  */
@@ -307,7 +307,7 @@ const create = async (data) => {
 };
 
 /**
- * Update an existing product (admin)
+ * Cập nhật sản phẩm hiện có (admin)
  * @param {string} id 
  * @param {Object} data 
  * @returns {Promise<Object>}
@@ -336,7 +336,7 @@ const update = async (id, data) => {
 };
 
 /**
- * Delete a product (admin)
+ * Xóa sản phẩm (admin)
  * @param {string} id 
  * @returns {Promise<Object>}
  */

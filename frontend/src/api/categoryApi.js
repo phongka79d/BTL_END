@@ -1,7 +1,7 @@
 import { apiClient } from './apiClient';
 
 /**
- * Category API helpers for public listing and admin category management routes.
+ * Các hàm hỗ trợ API danh mục cho route liệt kê công khai và quản lý danh mục của admin.
  */
 export const categoryApi = {
   getCategories: () => apiClient.get('/categories'),

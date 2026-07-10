@@ -1,9 +1,9 @@
 const jwt = require('jsonwebtoken');
 
 /**
- * Generate a JWT token for a user
- * @param {string} userId - The user ID
- * @returns {string} JWT token
+ * Tạo token JWT cho người dùng
+ * @param {string} userId - ID người dùng
+ * @returns {string} Token JWT
  */
 const generateToken = (userId) => {
   const secret = process.env.JWT_SECRET;

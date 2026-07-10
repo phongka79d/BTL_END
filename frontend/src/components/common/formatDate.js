@@ -1,15 +1,15 @@
 /**
- * Format an ISO date string for display.
+ * Định dạng chuỗi ngày ISO để hiển thị.
  *
- * Uses en-GB locale for consistent UK-style date rendering across
- * customer order views, admin order tables, and order detail panels.
+ * Sử dụng locale en-GB để hiển thị ngày theo kiểu Vương quốc Anh nhất quán
+ * trong các giao diện đơn hàng khách hàng, bảng đơn hàng admin và bảng chi tiết đơn hàng.
  *
- * Returns an em-dash when the input is falsy so callers never render
- * "Invalid Date" in the UI.
+ * Trả về em dash khi input là giá trị falsy để nơi gọi không bao giờ hiển thị
+ * "Invalid Date" trong giao diện.
  *
- * ponytail: Existing inline formatDate() clones in OrderHistoryView
- *           and OrderDetailPanel can be replaced with this import
- *           during the next safe refactor pass.
+ * ponytail: Các bản sao formatDate() nội tuyến hiện có trong OrderHistoryView
+ *           và OrderDetailPanel có thể được thay thế bằng import này
+ *           trong lần refactor an toàn tiếp theo.
  *
  * @param {string|null|undefined} dateString
  * @returns {string}

@@ -2,7 +2,7 @@ const productModel = require('../models/product.model');
 const { successResponse, errorResponse } = require('../utils/response');
 
 /**
- * Get all products with filters and pagination
+ * Lấy tất cả sản phẩm với bộ lọc và phân trang
  * GET /api/products
  */
 const getProducts = async (req, res, next) => {
@@ -24,7 +24,7 @@ const getProducts = async (req, res, next) => {
 };
 
 /**
- * Get product detail by ID
+ * Lấy chi tiết sản phẩm theo ID
  * GET /api/products/:id
  */
 const getProductById = async (req, res, next) => {
@@ -41,7 +41,7 @@ const getProductById = async (req, res, next) => {
 };
 
 /**
- * Create a new product (admin)
+ * Tạo sản phẩm mới (admin)
  * POST /api/admin/products
  */
 const createProduct = async (req, res, next) => {
@@ -70,13 +70,13 @@ const createProduct = async (req, res, next) => {
 };
 
 /**
- * Update an existing product (admin)
+ * Cập nhật sản phẩm hiện có (admin)
  * PUT /api/admin/products/:id
  */
 const updateProduct = async (req, res, next) => {
   try {
     const { id } = req.params;
-    // Pre-check existence for precise 404 response
+    // Kiểm tra trước sự tồn tại để trả về phản hồi 404 chính xác
     const existing = await productModel.findById(id);
     if (!existing) {
       return errorResponse(res, 404, 'Không tìm thấy sản phẩm');
@@ -100,13 +100,13 @@ const updateProduct = async (req, res, next) => {
 };
 
 /**
- * Delete a product (admin)
+ * Xóa sản phẩm (admin)
  * DELETE /api/admin/products/:id
  */
 const deleteProduct = async (req, res, next) => {
   try {
     const { id } = req.params;
-    // Pre-check existence for precise 404 response
+    // Kiểm tra trước sự tồn tại để trả về phản hồi 404 chính xác
     const existing = await productModel.findById(id);
     if (!existing) {
       return errorResponse(res, 404, 'Không tìm thấy sản phẩm');

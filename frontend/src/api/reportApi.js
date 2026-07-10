@@ -1,7 +1,7 @@
 import { apiClient } from './apiClient';
 
 /**
- * Admin report API helpers.
+ * Các hàm hỗ trợ API báo cáo của admin.
  */
 export const reportApi = {
   getRevenueReport: () => apiClient.get('/admin/reports/revenue'),

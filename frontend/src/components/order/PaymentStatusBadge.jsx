@@ -3,19 +3,19 @@ import { Badge } from '@astryxdesign/core';
 import { PAYMENT_STATUS_LABELS } from '../../constants/orderConstants';
 
 /**
- * Maps payment status values to Astryx Badge variants.
+ * Ánh xạ các giá trị trạng thái thanh toán thành các biến thể Badge của Astryx.
  *
- * Variant map (per (04A) established mappings):
- *   unpaid → neutral   (awaiting payment)
- *   paid   → success   (payment received)
- *   failed → danger    (payment problem)
+ * Bản đồ biến thể (theo ánh xạ đã thiết lập ở (04A)):
+ *   unpaid → neutral   (đang chờ thanh toán)
+ *   paid   → success   (đã nhận thanh toán)
+ *   failed → danger    (sự cố thanh toán)
  *
- * Labels are sourced from the shared PAYMENT_STATUS_LABELS constant
- * (frontend/src/constants/orderConstants.js), keeping the UI
- * consistent with the admin views and batch handoff.
+ * Nhãn được lấy từ hằng số PAYMENT_STATUS_LABELS dùng chung
+ * (frontend/src/constants/orderConstants.js), giúp giao diện
+ * nhất quán với các giao diện admin và bàn giao lô xử lý.
  *
- * ponytail: If backend enums grow new payment status values, update
- *           the variant map here and add the label to orderConstants.js.
+ * ponytail: Nếu enum backend có thêm giá trị trạng thái thanh toán, hãy cập nhật
+ *           bản đồ biến thể tại đây và thêm nhãn vào orderConstants.js.
  */
 const PAYMENT_STATUS_VARIANT_MAP = {
   unpaid: 'neutral',

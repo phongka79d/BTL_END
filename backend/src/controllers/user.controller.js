@@ -2,7 +2,7 @@ const userModel = require('../models/user.model');
 const { successResponse, errorResponse } = require('../utils/response');
 
 /**
- * Helper to remove passwordHash from user object
+ * Hàm hỗ trợ loại bỏ passwordHash khỏi đối tượng người dùng
  * @param {Object} user 
  * @returns {Object|null}
  */
@@ -36,7 +36,7 @@ const getAdminUserUpdateData = (body) => {
 };
 
 /**
- * Get current user profile
+ * Lấy hồ sơ người dùng hiện tại
  * GET /api/users/profile
  */
 const getProfile = async (req, res, next) => {
@@ -59,7 +59,7 @@ const getProfile = async (req, res, next) => {
 };
 
 /**
- * Update current user profile
+ * Cập nhật hồ sơ người dùng hiện tại
  * PUT /api/users/profile
  */
 const updateProfile = async (req, res, next) => {
@@ -71,7 +71,7 @@ const updateProfile = async (req, res, next) => {
     const { username, fullName, phone, address } = req.body;
     const updateData = {};
 
-    // Validate and limit updates to Plan 1 fields
+    // Kiểm tra và giới hạn cập nhật trong các trường của Plan 1
     if (username !== undefined) {
       if (username === null || String(username).trim() === '') {
         return errorResponse(res, 400, 'Tên người dùng không được để trống');
@@ -82,7 +82,7 @@ const updateProfile = async (req, res, next) => {
     if (phone !== undefined) updateData.phone = phone;
     if (address !== undefined) updateData.address = address;
 
-    // Check if there is anything to update
+    // Kiểm tra có dữ liệu nào cần cập nhật hay không
     if (Object.keys(updateData).length === 0) {
       return errorResponse(res, 400, 'Chưa cung cấp trường nào để cập nhật');
     }
@@ -98,7 +98,7 @@ const updateProfile = async (req, res, next) => {
 };
 
 /**
- * Get all users for admin
+ * Lấy tất cả người dùng cho admin
  * GET /api/admin/users
  */
 const getUsers = async (req, res, next) => {
@@ -117,7 +117,7 @@ const getUsers = async (req, res, next) => {
 };
 
 /**
- * Update user role for admin
+ * Cập nhật vai trò người dùng cho admin
  * PUT /api/admin/users/:id/role
  */
 const updateUserRole = async (req, res, next) => {
@@ -144,7 +144,7 @@ const updateUserRole = async (req, res, next) => {
 };
 
 /**
- * Update soft user profile fields for admin
+ * Cập nhật các trường hồ sơ người dùng cho admin
  * PUT /api/admin/users/:id
  */
 const updateAdminUser = async (req, res, next) => {
@@ -171,7 +171,7 @@ const updateAdminUser = async (req, res, next) => {
 };
 
 /**
- * Update user blocked status for admin
+ * Cập nhật trạng thái chặn người dùng cho admin
  * PUT /api/admin/users/:id/block
  */
 const updateUserBlocked = async (req, res, next) => {

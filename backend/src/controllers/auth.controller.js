@@ -130,10 +130,10 @@ const register = async (req, res, next) => {
       return errorResponse(res, 400, 'Email đã được đăng ký');
     }
 
-    // Hash mật khẩu
+    // Băm mật khẩu
     const passwordHash = await bcrypt.hash(password, SALT_ROUNDS);
 
-    // Tạo người dùng mới trong database
+    // Tạo người dùng mới trong cơ sở dữ liệu
     const user = await userModel.create({
       username,
       email,
@@ -239,7 +239,7 @@ const getMe = async (req, res, next) => {
 };
 
 /**
- * Send email OTP for authenticated password change.
+ * Gửi OTP qua email cho quy trình đổi mật khẩu của người dùng đã xác thực.
  * POST /api/auth/change-password/request-otp
  */
 const requestPasswordChangeOtp = async (req, res, next) => {
@@ -266,7 +266,7 @@ const requestPasswordChangeOtp = async (req, res, next) => {
 };
 
 /**
- * Confirm OTP and change authenticated user's password.
+ * Xác nhận OTP và đổi mật khẩu của người dùng đã xác thực.
  * POST /api/auth/change-password/confirm
  */
 const confirmPasswordChange = async (req, res, next) => {
@@ -327,7 +327,7 @@ const confirmPasswordChange = async (req, res, next) => {
 };
 
 /**
- * Send email OTP for public forgot password flow.
+ * Gửi OTP qua email cho quy trình quên mật khẩu công khai.
  * POST /api/auth/forgot-password/request-otp
  */
 const requestForgotPasswordOtp = async (req, res, next) => {
@@ -346,7 +346,7 @@ const requestForgotPasswordOtp = async (req, res, next) => {
 };
 
 /**
- * Verify forgot password OTP before showing the new password form.
+ * Xác minh OTP quên mật khẩu trước khi hiển thị biểu mẫu mật khẩu mới.
  * POST /api/auth/forgot-password/verify-otp
  */
 const verifyForgotPasswordOtp = async (req, res, next) => {
@@ -376,7 +376,7 @@ const verifyForgotPasswordOtp = async (req, res, next) => {
 };
 
 /**
- * Reset password using a valid forgot password OTP.
+ * Đặt lại mật khẩu bằng OTP quên mật khẩu hợp lệ.
  * POST /api/auth/forgot-password/reset
  */
 const resetForgotPassword = async (req, res, next) => {

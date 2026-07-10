@@ -11,12 +11,12 @@ import {
 /**
  * CheckoutSuccessDialog
  *
- * Shown after a successful order placement. Displays the new order ID
- * and offers navigation to view the order or continue shopping.
+ * Hiển thị sau khi đặt đơn hàng thành công. Hiển thị ID đơn hàng mới
+ * và cung cấp điều hướng để xem đơn hàng hoặc tiếp tục mua sắm.
  *
- * ponytail: If email confirmation is added in a later phase,
- *           add a note about email delivery here without breaking
- *           the existing dialog layout.
+ * ponytail: Nếu bổ sung xác nhận email trong giai đoạn sau,
+ *           hãy thêm ghi chú về việc gửi email tại đây mà không phá vỡ
+ *           bố cục dialog hiện có.
  */
 
 export const CheckoutSuccessDialog = ({

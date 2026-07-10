@@ -2,7 +2,7 @@ const orderModel = require('../models/order.model');
 const { successResponse, errorResponse } = require('../utils/response');
 
 /**
- * Perform customer checkout / create order
+ * Thực hiện checkout của khách hàng / tạo đơn hàng
  * POST /api/orders
  */
 const checkout = async (req, res, next) => {
@@ -10,7 +10,7 @@ const checkout = async (req, res, next) => {
     const userId = req.user.id;
     const { shippingAddress, cartItemIds } = req.body;
 
-    // Validate shippingAddress payload
+    // Kiểm tra payload shippingAddress
     if (!shippingAddress || typeof shippingAddress !== 'string' || shippingAddress.trim() === '') {
       return errorResponse(res, 400, 'Địa chỉ giao hàng là bắt buộc');
     }
@@ -46,7 +46,7 @@ const checkout = async (req, res, next) => {
 };
 
 /**
- * Get current customer's orders
+ * Lấy các đơn hàng hiện tại của khách hàng
  * GET /api/orders/my-orders
  */
 const getMyOrders = async (req, res, next) => {
@@ -60,7 +60,7 @@ const getMyOrders = async (req, res, next) => {
 };
 
 /**
- * Get detailed order by ID
+ * Lấy chi tiết đơn hàng theo ID
  * GET /api/orders/:id
  */
 const getOrderById = async (req, res, next) => {
@@ -69,18 +69,18 @@ const getOrderById = async (req, res, next) => {
     const userId = req.user.id;
     const isAdmin = req.user.role === 'admin';
 
-    // Verify order exists
+    // Xác minh đơn hàng tồn tại
     const order = await orderModel.findById(id);
     if (!order) {
       return errorResponse(res, 404, 'Không tìm thấy đơn hàng');
     }
 
-    // Verify access permission
+    // Xác minh quyền truy cập
     if (order.userId !== userId && !isAdmin) {
       return errorResponse(res, 403, 'Không được phép truy cập đơn hàng này');
     }
 
-    // Retrieve full order details using helper
+    // Lấy đầy đủ chi tiết đơn hàng bằng hàm hỗ trợ
     const detailedOrder = await orderModel.findOwnedOrAdminVisible(id, userId, isAdmin);
     return successResponse(res, 200, 'Đã lấy đơn hàng thành công', detailedOrder);
   } catch (error) {
@@ -89,7 +89,7 @@ const getOrderById = async (req, res, next) => {
 };
 
 /**
- * Admin: List all orders with optional status filter
+ * Admin: Liệt kê tất cả đơn hàng với bộ lọc trạng thái tùy chọn
  * GET /api/admin/orders
  */
 const getAdminOrders = async (req, res, next) => {
@@ -107,7 +107,7 @@ const getAdminOrders = async (req, res, next) => {
 };
 
 /**
- * Admin: Update order status
+ * Admin: Cập nhật trạng thái đơn hàng
  * PUT /api/admin/orders/:id/status
  */
 const updateOrderStatus = async (req, res, next) => {

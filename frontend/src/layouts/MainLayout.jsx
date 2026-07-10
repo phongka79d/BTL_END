@@ -48,15 +48,15 @@ const CustomerAccountMenu = ({ items, user }) => {
 };
 
 /**
- * MainLayout component that serves as the page shell for normal customers.
- * It provides top navigation (logo, home, products, user actions, cart) and a footer.
+ * Thành phần MainLayout đóng vai trò khung trang cho khách hàng thông thường.
+ * Thành phần cung cấp điều hướng trên (logo, trang chủ, sản phẩm, thao tác người dùng, giỏ hàng) và chân trang.
  */
 export const MainLayout = () => {
   const { user, isAuthenticated, logout } = useAuth();
   const { itemCount } = useCart();
   const navigate = useNavigate();
 
-  // Define dropdown items for logged-in user dynamically based on role
+  // Xác định động các mục dropdown cho người dùng đang đăng nhập dựa trên role
   const getDropdownItems = () => {
     const items = [
       {
@@ -153,12 +153,12 @@ export const MainLayout = () => {
           gap: 'var(--spacing-8)'
         }}
       >
-        {/* Main Content Area */}
+        {/* Khu vực nội dung chính */}
         <VStack style={{ flex: 1, padding: 'var(--spacing-4)' }}>
           <Outlet />
         </VStack>
 
-        {/* Footer component */}
+        {/* Thành phần chân trang */}
         <VStack
           style={{
             paddingBlock: 'var(--spacing-8)',

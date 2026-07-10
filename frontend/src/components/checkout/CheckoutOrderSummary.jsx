@@ -13,12 +13,12 @@ import { formatPrice } from '../product/productUtils';
 /**
  * CheckoutOrderSummary
  *
- * Displays cart-derived order summary with item list, subtotal,
- * COD badge, and the submit button. Totals are displayed from
- * backend data — this component is display-only.
+ * Hiển thị tóm tắt đơn hàng lấy từ giỏ hàng cùng danh sách mục, tạm tính,
+ * badge COD và nút gửi. Tổng tiền được hiển thị từ dữ liệu backend —
+ * thành phần này chỉ có nhiệm vụ hiển thị.
  *
- * ponytail: If the backend adds shipping fees or discounts,
- *           add those rows to the summary and accept them via props.
+ * ponytail: Nếu backend bổ sung phí giao hàng hoặc giảm giá,
+ *           hãy thêm các dòng đó vào phần tóm tắt và nhận chúng qua thuộc tính.
  */
 
 const SummaryRow = ({ label, value, isTotal = false }) => (

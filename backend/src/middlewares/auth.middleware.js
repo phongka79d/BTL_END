@@ -3,7 +3,7 @@ const userModel = require('../models/user.model');
 const { errorResponse } = require('../utils/response');
 
 /**
- * Middleware xác thực request bằng JWT.
+ * Middleware xác thực yêu cầu bằng JWT.
  * Đọc header `Authorization: Bearer <token>`, xác minh token,
  * tải người dùng không kèm `passwordHash` và gán vào `req.user`.
  */
@@ -30,7 +30,7 @@ const protect = async (req, res, next) => {
     // Xác minh token.
     const decoded = jwt.verify(token, secret);
 
-    // Tải người dùng từ database.
+    // Tải người dùng từ cơ sở dữ liệu.
     const user = await userModel.findById(decoded.id);
     if (!user) {
       return errorResponse(res, 401, 'Không được phép, không tìm thấy người dùng');
@@ -40,7 +40,7 @@ const protect = async (req, res, next) => {
       return errorResponse(res, 403, 'Tài khoản của bạn đã bị khóa');
     }
 
-    // Loại bỏ `passwordHash` trước khi gán người dùng vào request.
+    // Loại bỏ `passwordHash` trước khi gán người dùng vào yêu cầu.
     const { passwordHash, ...userWithoutPassword } = user;
     req.user = userWithoutPassword;
 

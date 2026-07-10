@@ -5,7 +5,7 @@ import MainLayout from '../layouts/MainLayout';
 import AuthLayout from '../layouts/AuthLayout';
 import AdminLayout from '../layouts/AdminLayout';
 
-// View Imports
+// Nhập các giao diện
 import HomeView from '../views/HomeView';
 import LoginView from '../views/LoginView';
 import RegisterView from '../views/RegisterView';
@@ -28,8 +28,8 @@ import UnauthorizedView from '../views/UnauthorizedView';
 import NotFoundView from '../views/NotFoundView';
 
 /**
- * Route guard for authenticated users (Customer/Admin).
- * Redirects to /login if the user is not authenticated.
+ * Lớp bảo vệ route cho người dùng đã xác thực (Customer/Admin).
+ * Chuyển hướng đến /login nếu người dùng chưa xác thực.
  */
 export const PrivateRoute = () => {
   const { isAuthenticated, loading } = useAuth();
@@ -53,8 +53,8 @@ export const PrivateRoute = () => {
 };
 
 /**
- * Route guard for admin users only.
- * Redirects to /login if not authenticated, or /unauthorized if authenticated but not an admin.
+ * Lớp bảo vệ route chỉ dành cho người dùng admin.
+ * Chuyển hướng đến /login nếu chưa xác thực hoặc /unauthorized nếu đã xác thực nhưng không phải admin.
  */
 export const AdminRoute = () => {
   const { isAuthenticated, isAdmin, loading } = useAuth();
@@ -82,8 +82,8 @@ export const AdminRoute = () => {
 };
 
 /**
- * Route guard for unauthenticated users only (e.g. login, register pages).
- * Redirects authenticated users to their home/dashboard path.
+ * Lớp bảo vệ route chỉ dành cho người dùng chưa xác thực (ví dụ các trang login, register).
+ * Chuyển hướng người dùng đã xác thực đến đường dẫn trang chủ/dashboard của họ.
  */
 export const PublicOnlyRoute = () => {
   const { isAuthenticated, isAdmin, loading } = useAuth();
@@ -111,21 +111,21 @@ export const PublicOnlyRoute = () => {
 };
 
 /**
- * AppRoutes Component
- * Sets up the routing tree using React Router v6.
- * Note: Actual views are mapped dynamically. Sibling tasks will import real views.
+ * Thành phần AppRoutes
+ * Thiết lập cây routing bằng React Router v6.
+ * Lưu ý: Các giao diện thực tế được ánh xạ động. Các task liên quan sẽ import giao diện thật.
  */
 export const AppRoutes = () => {
   return (
     <Routes>
-      {/* Customer Area: Wrapped in MainLayout */}
+      {/* Khu vực khách hàng: được bọc trong MainLayout */}
       <Route element={<MainLayout />}>
         <Route path="/" element={<HomeView />} />
         <Route path="/products" element={<ProductListView />} />
         <Route path="/products/:id" element={<ProductDetailView />} />
         <Route path="/unauthorized" element={<UnauthorizedView />} />
 
-        {/* Protected Customer Routes inside MainLayout */}
+        {/* Các route khách hàng được bảo vệ bên trong MainLayout */}
         <Route element={<PrivateRoute />}>
           <Route path="/cart" element={<CartView />} />
           <Route path="/checkout" element={<CheckoutView />} />
@@ -137,7 +137,7 @@ export const AppRoutes = () => {
         <Route path="*" element={<NotFoundView />} />
       </Route>
 
-      {/* Guest Only Routes: Wrapped in AuthLayout */}
+        {/* Các route chỉ dành cho khách: được bọc trong AuthLayout */}
       <Route element={<PublicOnlyRoute />}>
         <Route element={<AuthLayout />}>
           <Route path="/login" element={<LoginView />} />
@@ -145,7 +145,7 @@ export const AppRoutes = () => {
         </Route>
       </Route>
 
-      {/* Admin Only Area: Wrapped in AdminLayout */}
+        {/* Khu vực chỉ dành cho admin: được bọc trong AdminLayout */}
       <Route element={<AdminRoute />}>
         <Route element={<AdminLayout />}>
           <Route path="/admin" element={<AdminDashboardView />} />

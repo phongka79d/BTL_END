@@ -2,7 +2,7 @@ const categoryModel = require('../models/category.model');
 const { successResponse, errorResponse } = require('../utils/response');
 
 /**
- * Get all categories
+ * Lấy tất cả danh mục
  * GET /api/categories
  */
 const getCategories = async (req, res, next) => {
@@ -15,7 +15,7 @@ const getCategories = async (req, res, next) => {
 };
 
 /**
- * Create a new category (admin)
+ * Tạo danh mục mới (admin)
  * POST /api/admin/categories
  */
 const createCategory = async (req, res, next) => {
@@ -35,13 +35,13 @@ const createCategory = async (req, res, next) => {
 };
 
 /**
- * Update an existing category (admin)
+ * Cập nhật danh mục hiện có (admin)
  * PUT /api/admin/categories/:id
  */
 const updateCategory = async (req, res, next) => {
   try {
     const { id } = req.params;
-    // Pre-check existence for precise 404 response
+    // Kiểm tra trước sự tồn tại để trả về phản hồi 404 chính xác
     const existing = await categoryModel.findById(id);
     if (!existing) {
       return errorResponse(res, 404, 'Không tìm thấy danh mục');
@@ -64,13 +64,13 @@ const updateCategory = async (req, res, next) => {
 };
 
 /**
- * Delete a category (admin)
+ * Xóa danh mục (admin)
  * DELETE /api/admin/categories/:id
  */
 const deleteCategory = async (req, res, next) => {
   try {
     const { id } = req.params;
-    // Pre-check existence for precise 404 response
+    // Kiểm tra trước sự tồn tại để trả về phản hồi 404 chính xác
     const existing = await categoryModel.findById(id);
     if (!existing) {
       return errorResponse(res, 404, 'Không tìm thấy danh mục');

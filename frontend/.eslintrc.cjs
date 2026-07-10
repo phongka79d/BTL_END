@@ -15,7 +15,7 @@ module.exports = {
   ignorePatterns: ['dist/', 'node_modules/'],
   extends: ['eslint:recommended'],
   rules: {
-    // Core ESLint does not mark JSX component identifiers as used without a React lint plugin.
+    // ESLint Core không đánh dấu các định danh thành phần JSX là đã được sử dụng nếu thiếu plugin lint React.
     'no-unused-vars': [
       'error',
       {

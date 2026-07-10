@@ -24,47 +24,47 @@ const getLoginErrorDescription = (message) => (
 );
 
 /**
- * LoginView Component
- * Renders the login page with email and password fields.
- * Handles client-side validation, loading states, success redirection, and API error banners.
+ * Thành phần LoginView
+ * Hiển thị trang đăng nhập với các trường email và password.
+ * Xử lý kiểm tra phía máy khách, trạng thái loading, chuyển hướng khi thành công và banner lỗi API.
  */
 export const LoginView = () => {
   const { login } = useAuth();
   const notification = useNotification();
   const navigate = useNavigate();
 
-  // Field states
+  // Trạng thái các trường
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
-  // Field validation states (for Astryx status prop)
+  // Trạng thái kiểm tra của các trường (cho thuộc tính status của Astryx)
   const [emailStatus, setEmailStatus] = useState(null);
   const [passwordStatus, setPasswordStatus] = useState(null);
 
-  // Form submission and API feedback states
+  // Trạng thái gửi biểu mẫu và phản hồi API
   const [isLoading, setIsLoading] = useState(false);
   const [mode, setMode] = useState('login');
 
   /**
-   * Helper to validate email format
+   * Hàm hỗ trợ kiểm tra định dạng email
    */
   const isValidEmail = (val) => {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val);
   };
 
   /**
-   * Handle form submission
+   * Xử lý việc gửi biểu mẫu
    */
   const handleSubmit = async (e) => {
     e.preventDefault();
     
     let hasError = false;
 
-    // Reset status
+    // Đặt lại trạng thái
     setEmailStatus(null);
     setPasswordStatus(null);
 
-    // Client-side validations
+    // Kiểm tra phía máy khách
     if (!email) {
       setEmailStatus({ type: 'error', message: 'Vui lòng nhập email' });
       hasError = true;
@@ -88,7 +88,7 @@ export const LoginView = () => {
           title: 'Thành công',
           description: 'Đăng nhập thành công! Đang chuyển hướng...',
         });
-        // Small delay to allow the user to see the success message
+        // Tạm dừng ngắn để người dùng kịp đọc thông báo thành công
         setTimeout(() => {
           if (res.user.role === 'admin') {
             navigate('/admin');

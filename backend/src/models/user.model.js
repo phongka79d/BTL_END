@@ -14,7 +14,7 @@ const USER_SAFE_SELECT = {
 };
 
 /**
- * Find user by email
+ * Tìm người dùng theo email
  * @param {string} email 
  * @returns {Promise<Object|null>}
  */
@@ -25,7 +25,7 @@ const findByEmail = async (email) => {
 };
 
 /**
- * Find user by ID
+ * Tìm người dùng theo ID
  * @param {string} id 
  * @returns {Promise<Object|null>}
  */
@@ -36,7 +36,7 @@ const findById = async (id) => {
 };
 
 /**
- * Create a new user
+ * Tạo người dùng mới
  * @param {Object} userData 
  * @returns {Promise<Object>}
  */
@@ -47,7 +47,7 @@ const create = async (userData) => {
 };
 
 /**
- * Update user profile details
+ * Cập nhật chi tiết hồ sơ người dùng
  * @param {string} id 
  * @param {Object} userData 
  * @returns {Promise<Object>}
@@ -60,7 +60,7 @@ const update = async (id, userData) => {
 };
 
 /**
- * Retrieve users for admin with search and pagination.
+ * Lấy danh sách người dùng cho admin với tìm kiếm và phân trang.
  * @param {Object} params
  * @param {string} [params.keyword]
  * @param {number|string} [params.page]
@@ -110,7 +110,7 @@ const findAll = async (params = {}) => {
 };
 
 /**
- * Update a user's role.
+ * Cập nhật vai trò của người dùng.
  * @param {string} id
  * @param {'customer'|'admin'} role
  * @returns {Promise<Object>}
@@ -124,7 +124,7 @@ const updateRole = async (id, role) => {
 };
 
 /**
- * Update admin-editable user profile fields.
+ * Cập nhật các trường hồ sơ người dùng mà admin có thể chỉnh sửa.
  * @param {string} id
  * @param {Object} userData
  * @returns {Promise<Object>}
@@ -138,7 +138,7 @@ const updateAdminProfile = async (id, userData) => {
 };
 
 /**
- * Update a user's blocked status.
+ * Cập nhật trạng thái chặn của người dùng.
  * @param {string} id
  * @param {boolean} isBlocked
  * @returns {Promise<Object>}

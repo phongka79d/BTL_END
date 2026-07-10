@@ -1,12 +1,12 @@
 import { API_BASE_URL } from '../config';
 
 /**
- * Shared fetch-based request helper
- * Handles HTTP requests, bearer token insertion, and response parsing.
+ * Hàm hỗ trợ yêu cầu dùng chung dựa trên fetch
+ * Xử lý yêu cầu HTTP, chèn bearer token và phân tích phản hồi.
  * 
- * @param {string} endpoint - The API endpoint path (e.g. '/auth/login')
- * @param {Object} options - Fetch options
- * @returns {Promise<Object>} The parsed API response
+ * @param {string} endpoint - Đường dẫn endpoint API (ví dụ '/auth/login')
+ * @param {Object} options - Tùy chọn fetch
+ * @returns {Promise<Object>} Phản hồi API đã được phân tích
  */
 const request = async (endpoint, options = {}) => {
   const token = localStorage.getItem('token');
@@ -16,7 +16,7 @@ const request = async (endpoint, options = {}) => {
     ...options.headers,
   };
 
-  // Attach bearer token if it exists in localStorage
+  // Gắn bearer token nếu token tồn tại trong localStorage
   if (token) {
     headers['Authorization'] = `Bearer ${token}`;
   }
@@ -33,7 +33,7 @@ const request = async (endpoint, options = {}) => {
   try {
     const response = await fetch(`${API_BASE_URL}${endpoint}`, config);
     
-    // Parse response body, fallback to empty object if response is not JSON
+    // Phân tích phần thân phản hồi, dùng đối tượng rỗng nếu phản hồi không phải JSON
     const result = await response.json().catch(() => ({}));
 
     if (!response.ok) {
@@ -46,7 +46,7 @@ const request = async (endpoint, options = {}) => {
 
     return result;
   } catch (error) {
-    // Handle network errors or server downtime
+    // Xử lý lỗi mạng hoặc tình trạng máy chủ ngừng hoạt động
     if (!error.status) {
       error.message = 'Lỗi mạng: Không thể kết nối đến máy chủ';
     }

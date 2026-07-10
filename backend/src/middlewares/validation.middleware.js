@@ -2,11 +2,11 @@ const { errorResponse } = require('../utils/response');
 const { validatePasswordPolicy } = require('../utils/passwordPolicy');
 
 /**
- * Factory tạo middleware kiểm tra các trường bắt buộc trong request body.
- * Hỗ trợ validation định dạng email và độ dài tối thiểu của password.
+ * Hàm tạo middleware kiểm tra các trường bắt buộc trong phần thân yêu cầu.
+ * Hỗ trợ kiểm tra định dạng email và độ dài tối thiểu của password.
  * 
  * @param {string[]} requiredFields - Danh sách các trường bắt buộc phải có trong req.body.
- * @returns {Function} Express middleware function.
+ * @returns {Function} Hàm middleware Express.
  */
 const validateBody = (requiredFields, options = {}) => {
   return (req, res, next) => {
@@ -22,7 +22,7 @@ const validateBody = (requiredFields, options = {}) => {
       }
     });
 
-    // Validate định dạng email nếu có trường email
+    // Kiểm tra định dạng email nếu có trường email
     if (body.email && typeof body.email === 'string') {
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!emailRegex.test(body.email)) {
@@ -33,7 +33,7 @@ const validateBody = (requiredFields, options = {}) => {
       }
     }
 
-    // Validate độ dài password nếu có trường password
+    // Kiểm tra độ dài password nếu có trường password
     if (options.validatePasswordPolicy && body.password && typeof body.password === 'string') {
       const passwordPolicy = validatePasswordPolicy(body.password);
       if (!passwordPolicy.isValid) {

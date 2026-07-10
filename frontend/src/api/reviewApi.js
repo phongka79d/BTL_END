@@ -14,7 +14,7 @@ const buildReviewQuery = (filters = {}) => {
 };
 
 /**
- * Review API helpers for product detail review UI.
+ * Các hàm hỗ trợ API đánh giá cho giao diện đánh giá trong chi tiết sản phẩm.
  */
 export const reviewApi = {
   getAdminReviews: (filters = {}) => apiClient.get(`/admin/reviews${buildReviewQuery(filters)}`),

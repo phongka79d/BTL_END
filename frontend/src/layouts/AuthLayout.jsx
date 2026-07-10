@@ -10,8 +10,8 @@ import {
 } from '@astryxdesign/core';
 
 /**
- * AuthLayout component that serves as the page shell for authentication pages (Login, Register).
- * It centers the card-based auth form and adds branding elements.
+ * Thành phần AuthLayout đóng vai trò khung trang cho các trang xác thực (Login, Register).
+ * Thành phần căn giữa biểu mẫu xác thực dạng card và thêm các thành phần nhận diện thương hiệu.
  */
 export const AuthLayout = () => {
   return (
@@ -34,7 +34,7 @@ export const AuthLayout = () => {
         }}
       >
         <VStack gap={6}>
-          {/* Logo & Branding */}
+          {/* Biểu trưng và nhận diện thương hiệu */}
           <VStack style={{ alignItems: 'center', gap: 'var(--spacing-1)' }}>
             <HStack style={{ alignItems: 'center', gap: 'var(--spacing-2)' }}>
               <Icon icon="wrench" color="accent" size="lg" />
@@ -45,10 +45,10 @@ export const AuthLayout = () => {
             </Text>
           </VStack>
 
-          {/* Render target form (Login / Register view) */}
+          {/* Hiển thị biểu mẫu đích (giao diện Login / Register) */}
           <Outlet />
 
-          {/* Footer branding link */}
+          {/* Liên kết nhận diện thương hiệu ở chân trang */}
           <Center>
             <Link
               to="/"

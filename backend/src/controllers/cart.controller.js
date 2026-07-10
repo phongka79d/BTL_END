@@ -4,7 +4,7 @@ const productModel = require('../models/product.model');
 const { successResponse, errorResponse } = require('../utils/response');
 
 /**
- * Get user's cart
+ * Lấy giỏ hàng của người dùng
  * GET /api/cart
  */
 const getCart = async (req, res, next) => {
@@ -18,7 +18,7 @@ const getCart = async (req, res, next) => {
 };
 
 /**
- * Add item to cart
+ * Thêm sản phẩm vào giỏ hàng
  * POST /api/cart/items
  */
 const addCartItem = async (req, res, next) => {
@@ -26,7 +26,7 @@ const addCartItem = async (req, res, next) => {
     const userId = req.user.id;
     const { productId, quantity } = req.body;
 
-    // Validate productId and quantity payloads before mutation
+    // Kiểm tra payload productId và quantity trước khi thay đổi dữ liệu
     if (!productId || typeof productId !== 'string') {
       return errorResponse(res, 400, 'Product ID là bắt buộc và phải là chuỗi');
     }
@@ -38,18 +38,18 @@ const addCartItem = async (req, res, next) => {
       return errorResponse(res, 400, 'Số lượng phải ít nhất là 1');
     }
 
-    // Load the product record needed for price and stock checks
+    // Tải bản ghi sản phẩm cần thiết để kiểm tra giá và tồn kho
     const product = await productModel.findById(productId);
     if (!product) {
       return errorResponse(res, 404, 'Không tìm thấy sản phẩm');
     }
 
-    // Load the cart to check total quantity
+    // Tải giỏ hàng để kiểm tra tổng số lượng
     const cart = await cartModel.getOrCreateCart(userId);
     const existingItem = cart.items.find(item => item.productId === productId);
     const newQuantity = existingItem ? (existingItem.quantity + parsedQuantity) : parsedQuantity;
 
-    // Reject total cart quantity above product stock
+    // Từ chối tổng số lượng trong giỏ vượt quá tồn kho sản phẩm
     if (newQuantity > product.quantity) {
       return errorResponse(res, 400, `Số lượng yêu cầu vượt quá tồn kho (${product.quantity})`);
     }
@@ -68,7 +68,7 @@ const addCartItem = async (req, res, next) => {
 };
 
 /**
- * Update cart item quantity
+ * Cập nhật số lượng mục trong giỏ hàng
  * PUT /api/cart/items/:id
  */
 const updateCartItem = async (req, res, next) => {
@@ -85,19 +85,19 @@ const updateCartItem = async (req, res, next) => {
       return errorResponse(res, 400, 'Số lượng phải ít nhất là 1');
     }
 
-    // Pre-check existence and ownership for precise 404/403 response
+    // Kiểm tra trước sự tồn tại và quyền sở hữu để trả về phản hồi 404/403 chính xác
     const cartItem = await cartItemModel.findById(id);
     if (!cartItem) {
       return errorResponse(res, 404, 'Không tìm thấy sản phẩm trong giỏ hàng');
     }
 
-    // Retrieve cart to check ownership
+    // Lấy giỏ hàng để kiểm tra quyền sở hữu
     const cart = await cartModel.getOrCreateCart(userId);
     if (cartItem.cartId !== cart.id) {
       return errorResponse(res, 403, 'Không được phép truy cập sản phẩm trong giỏ hàng');
     }
 
-    // Load product for stock check
+    // Tải sản phẩm để kiểm tra tồn kho
     const product = await productModel.findById(cartItem.productId);
     if (!product) {
       return errorResponse(res, 404, 'Không tìm thấy sản phẩm');
@@ -124,7 +124,7 @@ const updateCartItem = async (req, res, next) => {
 };
 
 /**
- * Update multiple cart item quantities in one request.
+ * Cập nhật số lượng nhiều mục trong giỏ hàng bằng một yêu cầu.
  * PUT /api/cart/items
  */
 const updateCartItems = async (req, res, next) => {
@@ -153,7 +153,7 @@ const updateCartItems = async (req, res, next) => {
 };
 
 /**
- * Remove item from cart
+ * Xóa mục khỏi giỏ hàng
  * DELETE /api/cart/items/:id
  */
 const deleteCartItem = async (req, res, next) => {
@@ -166,7 +166,7 @@ const deleteCartItem = async (req, res, next) => {
       return errorResponse(res, 404, 'Không tìm thấy sản phẩm trong giỏ hàng');
     }
 
-    // Retrieve cart to check ownership
+    // Lấy giỏ hàng để kiểm tra quyền sở hữu
     const cart = await cartModel.getOrCreateCart(userId);
     if (cartItem.cartId !== cart.id) {
       return errorResponse(res, 403, 'Không được phép truy cập sản phẩm trong giỏ hàng');

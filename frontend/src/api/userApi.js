@@ -18,51 +18,51 @@ const buildUserQuery = (filters = {}) => {
 };
 
 /**
- * User and Profile management API helpers
- * Communicates with backend /api/users/* and /api/admin/users routes.
+ * Các hàm hỗ trợ API quản lý người dùng và hồ sơ
+ * Giao tiếp với các route /api/users/* và /api/admin/users của backend.
  */
 export const userApi = {
   /**
-   * Retrieve the current logged-in user profile details
-   * @returns {Promise<Object>} The user profile object
+   * Lấy chi tiết hồ sơ người dùng đang đăng nhập
+ * @returns {Promise<Object>} Đối tượng hồ sơ người dùng
    */
   getProfile: () => apiClient.get('/users/profile'),
 
   /**
-   * Update the current logged-in user profile details
-   * @param {Object} profileData - Profile data to update (username, fullName, phone, address)
-   * @returns {Promise<Object>} The updated user profile object
+   * Cập nhật chi tiết hồ sơ người dùng đang đăng nhập
+   * @param {Object} profileData - Dữ liệu hồ sơ cần cập nhật (username, fullName, phone, address)
+ * @returns {Promise<Object>} Đối tượng hồ sơ người dùng đã cập nhật
    */
   updateProfile: (profileData) => apiClient.put('/users/profile', profileData),
 
   /**
-   * Retrieve a paginated list of users (Admin only)
+   * Lấy danh sách người dùng có phân trang (chỉ Admin)
    * @param {Object} filters - keyword, page, limit
-   * @returns {Promise<Object>} Array of all users
+   * @returns {Promise<Object>} Mảng tất cả người dùng
    */
   getAdminUsers: (filters = {}) => apiClient.get(`/admin/users${buildUserQuery(filters)}`),
 
   /**
-   * Update soft user details (Admin only)
+   * Cập nhật thông tin mềm của người dùng (chỉ Admin)
    * @param {string} userId
    * @param {Object} payload
-   * @returns {Promise<Object>} Updated user
+   * @returns {Promise<Object>} Người dùng đã cập nhật
    */
   updateAdminUser: (userId, payload) => apiClient.put(`/admin/users/${userId}`, payload),
 
   /**
-   * Update a user's role (Admin only)
+   * Cập nhật vai trò người dùng (chỉ Admin)
    * @param {string} userId
    * @param {'customer'|'admin'} role
-   * @returns {Promise<Object>} Updated user
+   * @returns {Promise<Object>} Người dùng đã cập nhật
    */
   updateUserRole: (userId, role) => apiClient.put(`/admin/users/${userId}/role`, { role }),
 
   /**
-   * Update a user's blocked status (Admin only)
+   * Cập nhật trạng thái chặn người dùng (chỉ Admin)
    * @param {string} userId
    * @param {boolean} isBlocked
-   * @returns {Promise<Object>} Updated user
+   * @returns {Promise<Object>} Người dùng đã cập nhật
    */
   updateUserBlocked: (userId, isBlocked) => apiClient.put(`/admin/users/${userId}/block`, { isBlocked }),
 };

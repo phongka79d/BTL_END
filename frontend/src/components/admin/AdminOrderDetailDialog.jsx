@@ -25,21 +25,21 @@ const sectionLabelStyle = {
 /**
  * AdminOrderDetailDialog
  *
- * Displays full order details in a dialog shell for admin users.
- * Wraps the shared OrderDetailPanel with additional customer metadata
- * (name, email, phone) that the customer-scoped panel intentionally omits.
+ * Hiển thị đầy đủ chi tiết đơn hàng trong dialog dành cho admin.
+ * Bọc OrderDetailPanel dùng chung cùng metadata khách hàng bổ sung
+ * (name, email, phone) mà bảng dành cho khách hàng cố ý lược bỏ.
  *
- * Design doc: §17.3 AdminOrderDetailDialog
- * Sections: Customer information, Shipping address, Payment information,
- *           Order items, Order status.
+ * Tài liệu thiết kế: §17.3 AdminOrderDetailDialog
+ * Các phần: thông tin khách hàng, địa chỉ giao hàng, thông tin thanh toán,
+ *           các mục đơn hàng, trạng thái đơn hàng.
  *
- * States handled: loading (skeleton), success (customer + panel), error
- * (Alert with retry), not-found (EmptyState-style fallback).
+ * Các trạng thái xử lý: loading (skeleton), success (thông tin khách hàng + bảng), error
+ * (Alert có retry), not-found (fallback kiểu EmptyState).
  *
- * ponytail: If the backend adds an admin-specific order detail endpoint
- *           with extra customer fields, use it here instead of the shared
- *           GET /api/orders/:id endpoint. Currently the shared endpoint
- *           works because admin can access any order.
+ * ponytail: Nếu backend bổ sung endpoint chi tiết đơn hàng riêng cho admin
+ *           với các trường khách hàng bổ sung, hãy dùng endpoint đó thay cho
+ *           endpoint GET /api/orders/:id dùng chung. Hiện tại endpoint dùng chung
+ *           hoạt động vì admin có thể truy cập mọi đơn hàng.
  */
 export const AdminOrderDetailDialog = ({ isOpen, orderId, onOpenChange }) => {
   const [order, setOrder] = useState(null);
@@ -80,10 +80,10 @@ export const AdminOrderDetailDialog = ({ isOpen, orderId, onOpenChange }) => {
     onOpenChange?.(false);
   }, [onOpenChange]);
 
-  /* ---------- Render helpers ---------- */
+  /* ---------- Các hàm hỗ trợ hiển thị ---------- */
 
   const renderContent = () => {
-    /* ---- Loading ---- */
+    /* ---- Đang tải ---- */
     if (isLoading) {
       return (
         <LayoutContent isScrollable>
@@ -99,7 +99,7 @@ export const AdminOrderDetailDialog = ({ isOpen, orderId, onOpenChange }) => {
       );
     }
 
-    /* ---- Error ---- */
+    /* ---- Lỗi ---- */
     if (error) {
       return (
         <LayoutContent isScrollable>
@@ -113,7 +113,7 @@ export const AdminOrderDetailDialog = ({ isOpen, orderId, onOpenChange }) => {
       );
     }
 
-    /* ---- Not found / no order ---- */
+    /* ---- Không tìm thấy / không có đơn hàng ---- */
     if (!order) {
       return (
         <LayoutContent isScrollable>
@@ -128,13 +128,13 @@ export const AdminOrderDetailDialog = ({ isOpen, orderId, onOpenChange }) => {
       );
     }
 
-    /* ---- Success ---- */
+    /* ---- Thành công ---- */
     const customer = order.user || {};
 
     return (
       <LayoutContent isScrollable>
         <VStack gap={4} style={{ width: '100%' }}>
-          {/* Customer Information */}
+          {/* Thông tin khách hàng */}
           <Card padding={4}>
             <VStack gap={3}>
               <Text
@@ -176,7 +176,7 @@ export const AdminOrderDetailDialog = ({ isOpen, orderId, onOpenChange }) => {
             </VStack>
           </Card>
 
-          {/* Order detail (shipping, payment, items, status, total) */}
+          {/* Chi tiết đơn hàng (giao hàng, thanh toán, mục hàng, trạng thái, tổng tiền) */}
           <OrderDetailPanel order={order} />
         </VStack>
       </LayoutContent>

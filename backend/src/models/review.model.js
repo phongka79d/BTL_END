@@ -7,7 +7,7 @@ const REVIEW_USER_SELECT = {
 };
 
 /**
- * List visible reviews for admin moderation, newest first.
+ * Liệt kê đánh giá hiển thị để admin kiểm duyệt, mới nhất trước.
  * @param {Object} filters
  * @param {string} [filters.productId]
  * @returns {Promise<Array>}
@@ -37,7 +37,7 @@ const listVisibleForAdmin = async ({ productId } = {}) => {
 };
 
 /**
- * List visible reviews for a product, newest first
+ * Liệt kê đánh giá hiển thị của một sản phẩm, mới nhất trước
  * @param {string} productId
  * @returns {Promise<Array>}
  */
@@ -59,7 +59,7 @@ const listVisibleByProductId = async (productId) => {
 };
 
 /**
- * Find review by ID
+ * Tìm đánh giá theo ID
  * @param {string} id 
  * @returns {Promise<Object|null>}
  */
@@ -82,7 +82,7 @@ const findById = async (id) => {
 };
 
 /**
- * Create a visible review for a product
+ * Tạo đánh giá hiển thị cho một sản phẩm
  * @param {Object} data
  * @param {string} data.userId
  * @param {string} data.productId
@@ -110,7 +110,7 @@ const create = async ({ userId, productId, rating, comment }) => {
 };
 
 /**
- * Hide a review without deleting the row
+ * Ẩn đánh giá mà không xóa dòng dữ liệu
  * @param {string} id
  * @returns {Promise<Object>}
  */

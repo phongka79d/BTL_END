@@ -4,13 +4,13 @@ const http = require('http');
 async function runTest() {
   const server = http.createServer(app);
   
-  // Listen on a random/free port
+  // Lắng nghe trên một cổng ngẫu nhiên/còn trống
   await new Promise((resolve) => server.listen(0, resolve));
   const port = server.address().port;
   console.log(`Test server running on port ${port}`);
 
   try {
-    // 1. Test GET /api/cart (should reject anonymous request with 401)
+    // 1. Kiểm tra GET /api/cart (phải từ chối yêu cầu ẩn danh với 401)
     const resGet = await fetch(`http://localhost:${port}/api/cart`);
     console.log(`GET /api/cart status: ${resGet.status}`);
     const dataGet = await resGet.json();
@@ -19,7 +19,7 @@ async function runTest() {
       throw new Error(`Expected status 401 for anonymous GET /api/cart, got ${resGet.status}`);
     }
 
-    // 2. Test POST /api/cart/items (should reject anonymous request with 401)
+    // 2. Kiểm tra POST /api/cart/items (phải từ chối yêu cầu ẩn danh với 401)
     const resPost = await fetch(`http://localhost:${port}/api/cart/items`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -32,7 +32,7 @@ async function runTest() {
       throw new Error(`Expected status 401 for anonymous POST /api/cart/items, got ${resPost.status}`);
     }
 
-    // 3. Test PUT /api/cart/items/some-id (should reject anonymous request with 401)
+    // 3. Kiểm tra PUT /api/cart/items/some-id (phải từ chối yêu cầu ẩn danh với 401)
     const resPut = await fetch(`http://localhost:${port}/api/cart/items/some-id`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
@@ -45,7 +45,7 @@ async function runTest() {
       throw new Error(`Expected status 401 for anonymous PUT /api/cart/items/some-id, got ${resPut.status}`);
     }
 
-    // 4. Test DELETE /api/cart/items/some-id (should reject anonymous request with 401)
+    // 4. Kiểm tra DELETE /api/cart/items/some-id (phải từ chối yêu cầu ẩn danh với 401)
     const resDelete = await fetch(`http://localhost:${port}/api/cart/items/some-id`, {
       method: 'DELETE'
     });

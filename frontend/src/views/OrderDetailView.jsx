@@ -17,19 +17,19 @@ import OrderDetailPanel from '../components/order/OrderDetailPanel';
 /**
  * OrderDetailView
  *
- * Displays the full detail for a single customer-owned order.
- * Consumes GET /api/orders/:id via orderApi.getOrderById.
+ * Hiển thị đầy đủ chi tiết một đơn hàng thuộc khách hàng.
+ * Sử dụng GET /api/orders/:id thông qua orderApi.getOrderById.
  *
- * States handled: loading, not found (404), permission denied (403),
- * API error (other 4xx/5xx/network), and success.
+ * Các trạng thái xử lý: loading, không tìm thấy (404), bị từ chối quyền (403),
+ * lỗi API (4xx/5xx/mạng khác) và success.
  *
- * Design doc compliance: §§12.2, 24.9 (OrderDetailPanel with order
- * information, shipping address, payment information, order items,
- * order status, navigation back to order history).
+ * Tuân thủ tài liệu thiết kế: §§12.2, 24.9 (OrderDetailPanel với thông tin
+ * đơn hàng, địa chỉ giao hàng, thông tin thanh toán, các mục đơn hàng,
+ * trạng thái đơn hàng và điều hướng quay lại lịch sử đơn hàng).
  *
- * ponytail: If order detail API grows new fields (tracking, delivery
- *           timeline, multiple payments), extend OrderDetailPanel
- *           rather than adding more sections to this view directly.
+ * ponytail: Nếu API chi tiết đơn hàng có thêm trường mới (tracking, timeline
+ *           giao hàng, nhiều thanh toán), hãy mở rộng OrderDetailPanel
+ *           thay vì thêm trực tiếp nhiều phần hơn vào giao diện này.
  */
 export const OrderDetailView = () => {
   const { id } = useParams();
@@ -70,7 +70,7 @@ export const OrderDetailView = () => {
     fetchOrder();
   }, [fetchOrder]);
 
-  /* ---------- Loading ---------- */
+  /* ---------- Đang tải ---------- */
   if (isLoading) {
     return (
       <VStack
@@ -103,7 +103,7 @@ export const OrderDetailView = () => {
     );
   }
 
-  /* ---------- Not Found ---------- */
+  /* ---------- Không tìm thấy ---------- */
   if (httpStatus === 404) {
     return (
       <VStack
@@ -140,7 +140,7 @@ export const OrderDetailView = () => {
     );
   }
 
-  /* ---------- Permission Denied ---------- */
+  /* ---------- Bị từ chối quyền ---------- */
   if (httpStatus === 403) {
     return (
       <VStack
@@ -177,7 +177,7 @@ export const OrderDetailView = () => {
     );
   }
 
-  /* ---------- API Error ---------- */
+  /* ---------- Lỗi API ---------- */
   if (error) {
     return (
       <VStack
@@ -207,7 +207,7 @@ export const OrderDetailView = () => {
     );
   }
 
-  /* ---------- Success ---------- */
+  /* ---------- Thành công ---------- */
   return (
     <VStack
       style={{

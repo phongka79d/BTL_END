@@ -5,9 +5,9 @@ const { errorResponse } = require('../utils/response');
  * Tránh rò rỉ stack trace ở môi trường production.
  * 
  * @param {Error} err - Đối tượng lỗi.
- * @param {Object} req - Request object.
- * @param {Object} res - Response object.
- * @param {Function} next - Next function.
+ * @param {Object} req - Đối tượng request.
+ * @param {Object} res - Đối tượng response.
+ * @param {Function} next - Hàm next.
  * @returns {void}
  */
 const errorMiddleware = (err, req, res, next) => {
