@@ -24,7 +24,7 @@ export const NotFoundView = () => {
             <Heading level={1}>Không tìm thấy trang này</Heading>
             <Text color="secondary">
               Địa chỉ có thể không chính xác hoặc trang đã được chuyển. Hãy chọn một
-              trong các tùy chọn bên dưới để tiếp tục duyệt tsshop.
+              trong các tùy chọn bên dưới để tiếp tục duyệt TSShop.
             </Text>
           </VStack>
           <HStack gap={3} style={{ justifyContent: 'center', flexWrap: 'wrap' }}>
