@@ -4,7 +4,8 @@ import { useAuth } from '../contexts/AuthContext';
 import MainLayout from '../layouts/MainLayout';
 import AuthLayout from '../layouts/AuthLayout';
 import AdminLayout from '../layouts/AdminLayout';
-
+import StaffLayout from '../layouts/StaffLayout';
+import { PERMISSIONS } from '../constants/permissions';
 // Nhập các giao diện
 import HomeView from '../views/HomeView';
 import LoginView from '../views/LoginView';
@@ -27,6 +28,12 @@ import ProfileView from '../views/ProfileView';
 import UnauthorizedView from '../views/UnauthorizedView';
 import NotFoundView from '../views/NotFoundView';
 
+// Nhập các giao diện khu vực nhân viên vận hành
+import StaffDashboardView from '../views/staff/StaffDashboardView';
+import StaffOrderView from '../views/staff/StaffOrderView';
+import StaffInventoryView from '../views/staff/StaffInventoryView';
+import StaffReviewView from '../views/staff/StaffReviewView';
+import StaffReportView from '../views/staff/StaffReportView';
 /**
  * Lớp bảo vệ route cho người dùng đã xác thực (Customer/Admin).
  * Chuyển hướng đến /login nếu người dùng chưa xác thực.
@@ -81,6 +88,38 @@ export const AdminRoute = () => {
   return isAdmin ? <Outlet /> : <Navigate to="/unauthorized" replace />;
 };
 
+/**
+ * Lớp bảo vệ route dành cho nhân viên vận hành hoặc admin.
+ * Chuyển hướng đến /login nếu chưa xác thực hoặc /unauthorized nếu không có quyền vận hành.
+ */
+export const StaffRoute = () => {
+  const { isAuthenticated, hasPermission, loading } = useAuth();
+
+  if (loading) {
+    return (
+      <div style={{
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        height: '100vh',
+        fontFamily: 'system-ui, -apple-system, sans-serif',
+        color: 'var(--color-text-secondary, #666)'
+      }}>
+        Đang tải...
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return <Navigate to="/login" replace />;
+  }
+
+  return hasPermission(PERMISSIONS.ORDERS_VIEW_ALL) ? (
+    <Outlet />
+  ) : (
+    <Navigate to="/unauthorized" replace />
+  );
+};
 /**
  * Lớp bảo vệ route chỉ dành cho người dùng chưa xác thực (ví dụ các trang login, register).
  * Chuyển hướng người dùng đã xác thực đến đường dẫn trang chủ/dashboard của họ.
@@ -145,7 +184,18 @@ export const AppRoutes = () => {
         </Route>
       </Route>
 
-        {/* Khu vực chỉ dành cho admin: được bọc trong AdminLayout */}
+      {/* Khu vực dành cho nhân viên vận hành: được bọc trong StaffLayout */}
+      <Route element={<StaffRoute />}>
+        <Route element={<StaffLayout />}>
+          <Route path="/staff" element={<StaffDashboardView />} />
+          <Route path="/staff/orders" element={<StaffOrderView />} />
+          <Route path="/staff/inventory" element={<StaffInventoryView />} />
+          <Route path="/staff/reviews" element={<StaffReviewView />} />
+          <Route path="/staff/reports" element={<StaffReportView />} />
+        </Route>
+      </Route>
+
+      {/* Khu vực chỉ dành cho admin: được bọc trong AdminLayout */}
       <Route element={<AdminRoute />}>
         <Route element={<AdminLayout />}>
           <Route path="/admin" element={<AdminDashboardView />} />

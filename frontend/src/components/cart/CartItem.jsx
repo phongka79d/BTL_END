@@ -131,7 +131,7 @@ export const CartItem = ({
                 size="sm"
                 isIntegerOnly
                 isDisabled={isBusy}
-                width="var(--spacing-16)"
+                width="64px"
               />
               <Button
                 label="+"
@@ -160,7 +160,7 @@ export const CartItem = ({
             <Text size="supporting" color="secondary">
               Tổng dòng
             </Text>
-            <Text weight="bold" color="accent" style={{ fontSize: 'var(--text-title-3-size)' }}>
+            <Text weight="bold" color="accent" style={{ fontSize: 'var(--text-heading-3-size)' }}>
               {lineSubtotal}
             </Text>
           </VStack>

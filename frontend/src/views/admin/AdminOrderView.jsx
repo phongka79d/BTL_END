@@ -57,11 +57,7 @@ const buildOrderId = (id) => {
  *   Thao tác     – MoreMenu (Xem chi tiết, Cập nhật trạng thái)
  *
  * Các trạng thái xử lý: loading, success, empty, error, bị từ chối quyền.
- *
- * ponytail: Lọc trạng thái sử dụng phân trang phía máy khách; nâng cấp lên
- *           phân trang và bộ lọc phía máy chủ khi số lượng đơn hàng tăng.
- *           OrderStatusSelect đã kết nối ở (05D) — cập nhật trạng thái nội tuyến với
- *           selector + phản hồi thành công/lỗi + làm mới dòng.
+ * Sử dụng phân trang và lọc trạng thái phía máy chủ thông qua orderApi.
  */
 export const AdminOrderView = () => {
   const [orders, setOrders] = useState([]);
@@ -69,6 +65,8 @@ export const AdminOrderView = () => {
   const [error, setError] = useState(null);
   const [statusFilter, setStatusFilter] = useState('');
   const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalCount, setTotalCount] = useState(0);
   const [detailDialogOrderId, setDetailDialogOrderId] = useState(null);
   const [isDetailDialogOpen, setIsDetailDialogOpen] = useState(false);
 
@@ -77,21 +75,30 @@ export const AdminOrderView = () => {
     setError(null);
 
     try {
-      const response = await orderApi.getAdminOrders(
-        statusFilter || undefined
-      );
-      const data = response?.data || [];
+      const response = await orderApi.getAdminOrders({
+        status: statusFilter || undefined,
+        page,
+        limit: PAGE_SIZE
+      });
+      const data = response?.data;
 
-      if (!Array.isArray(data)) {
+      if (data && data.items) {
+        setOrders(data.items);
+        if (data.pagination) {
+          setTotalPages(data.pagination.totalPages || 1);
+          setTotalCount(data.pagination.total || data.items.length);
+        }
+      } else if (Array.isArray(data)) {
+        setOrders(data);
+        setTotalPages(Math.max(1, Math.ceil(data.length / PAGE_SIZE)));
+        setTotalCount(data.length);
+      } else {
         setOrders([]);
-        return;
+        setTotalPages(1);
+        setTotalCount(0);
       }
-
-      setOrders(data);
-      setPage(1);
     } catch (err) {
       setOrders([]);
-
       if (err?.status === 403) {
         setError('Bạn không có quyền truy cập đơn hàng quản trị.');
       } else {
@@ -100,18 +107,16 @@ export const AdminOrderView = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [statusFilter]);
+  }, [statusFilter, page]);
+
+  const handleStatusFilterChange = useCallback((newStatus) => {
+    setStatusFilter(newStatus);
+    setPage(1);
+  }, []);
 
   useEffect(() => {
     fetchOrders();
   }, [fetchOrders]);
-
-  const totalPages = Math.max(1, Math.ceil(orders.length / PAGE_SIZE));
-
-  const pagedOrders = useMemo(() => {
-    const startIndex = (page - 1) * PAGE_SIZE;
-    return orders.slice(startIndex, startIndex + PAGE_SIZE);
-  }, [orders, page]);
 
   const handlePageChange = useCallback((newPage) => {
     setPage(newPage);
@@ -376,8 +381,8 @@ export const AdminOrderView = () => {
         <Heading level={1}>Quản lý đơn hàng</Heading>
         <Text color="secondary">
           {statusFilter
-            ? `${orders.length} đơn hàng với trạng thái "${ORDER_STATUS_LABELS[statusFilter] || statusFilter}"`
-            : `Tổng cộng ${orders.length} đơn hàng`}
+            ? `${totalCount || orders.length} đơn hàng với trạng thái "${ORDER_STATUS_LABELS[statusFilter] || statusFilter}"`
+            : `Tổng cộng ${totalCount || orders.length} đơn hàng`}
         </Text>
       </VStack>
 
@@ -388,7 +393,7 @@ export const AdminOrderView = () => {
             label="Lọc theo trạng thái"
             isLabelHidden
             value={statusFilter}
-            onChange={setStatusFilter}
+            onChange={handleStatusFilterChange}
             options={STATUS_FILTER_OPTIONS}
             placeholder="Tất cả trạng thái"
             width="220px"
@@ -399,7 +404,7 @@ export const AdminOrderView = () => {
             <Button
               label="Xóa bộ lọc"
               variant="ghost"
-              onClick={() => setStatusFilter('')}
+              onClick={() => handleStatusFilterChange('')}
             />
           ) : null
         }
@@ -407,8 +412,7 @@ export const AdminOrderView = () => {
 
       <AdminTable
         columns={columns}
-        data={pagedOrders}
-        emptyTitle="Không tìm thấy đơn hàng"
+        data={orders}
         emptyDescription="Không có đơn hàng phù hợp với bộ lọc hiện tại. Hãy thử trạng thái khác."
         isLoading={false}
         error={null}

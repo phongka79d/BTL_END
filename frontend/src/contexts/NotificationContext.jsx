@@ -95,11 +95,13 @@ export const useNotification = () => {
   }, [toast]);
 
   return useMemo(() => ({
-    success: (options) => notify('success', options),
-    error: (options) => notify('error', options),
-    warning: (options) => notify('warning', options),
-    info: (options) => notify('info', options),
+    success: (options) => notify('success', typeof options === 'string' ? { message: options } : options),
+    error: (options) => notify('error', typeof options === 'string' ? { message: options } : options),
+    warning: (options) => notify('warning', typeof options === 'string' ? { message: options } : options),
+    info: (options) => notify('info', typeof options === 'string' ? { message: options } : options),
     show: (options) => notify(options?.type || 'info', options),
+    notifySuccess: (options) => notify('success', typeof options === 'string' ? { message: options } : options),
+    notifyError: (options) => notify('error', typeof options === 'string' ? { message: options } : options),
   }), [notify]);
 };
 

@@ -50,7 +50,7 @@ export const CartSummary = ({
         <VStack gap={3}>
           <HStack style={{ justifyContent: 'space-between', alignItems: 'center', gap: 'var(--spacing-4)' }}>
             <Text weight="bold">Tổng hiện tại</Text>
-            <Text weight="bold" color="accent" style={{ fontSize: 'var(--text-title-3-size)' }}>
+            <Text weight="bold" color="accent" style={{ fontSize: 'var(--text-heading-3-size)' }}>
               {formatPrice(subtotal)}
             </Text>
           </HStack>

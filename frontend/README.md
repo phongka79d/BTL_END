@@ -4,10 +4,10 @@
 
 The `frontend/` directory contains the Single Page Application (SPA) for the **tsshop** electronics e-commerce storefront. It is built with **React 19**, **React Router 6**, and **Vite 5**, and styled using the **Astryx Design System** (`@astryxdesign/core`).
 
-The frontend delivers an intuitive user experience for both storefront shoppers and store administrators:
+The frontend delivers an intuitive user experience for shoppers, operations staff, and administrators:
 - **Shoppers:** Discover products via the dynamic mega-menu and homepage carousel, search and filter the catalog, view rich product details and ratings, manage their shopping cart, complete checkout with Cash on Delivery (COD), track past orders, manage profile details, and securely reset/change passwords via email OTPs.
-- **Administrators:** Access a dedicated administrative workspace to manage products, categories, user accounts and access blocking, order status transitions, review moderation, business analytics reports, and storefront content (carousel, navigation tree, and featured products).
-
+- **Operations Staff:** Access a dedicated operations workspace (`/staff/*`) to fulfill orders, monitor and adjust stock levels, moderate reviews, and inspect operational fulfillment reports.
+- **Administrators:** Access a dedicated administrative workspace (`/admin/*`) to manage products, categories, user accounts and roles (`customer` / `staff` / `admin`), access blocking, order status transitions, review moderation, business analytics reports, and storefront content (carousel, navigation tree, and featured products).
 - **Backend API Documentation:** [../backend/README.md](../backend/README.md)
 - **Root Repository Overview:** [../README.md](../README.md)
 
@@ -76,9 +76,19 @@ frontend/
 │   │   │   └── CheckoutSuccessDialog.jsx
 │   │   ├── common/              # Reusable UI primitives and utilities
 │   │   │   ├── Alert.jsx
+│   │   │   ├── Can.jsx          # Declarative permission/role guard
+│   │   │   ├── ConfirmationDialog.jsx # Standard confirmation modal
+│   │   │   ├── DataTable.jsx    # Standardized data table with skeleton & empty states
+│   │   │   ├── Drawer.jsx       # Slide-over side panel
+│   │   │   ├── EmptyState.jsx   # Cohesive empty state container
+│   │   │   ├── FilterBar.jsx    # Unified search & filter toolbar
 │   │   │   ├── formatDate.js
 │   │   │   ├── LayoutIcons.jsx
-│   │   │   └── Pagination.jsx
+│   │   │   ├── LoadingSkeleton.jsx # Skeleton loaders (table, card grid, detail)
+│   │   │   ├── PageHeader.jsx   # Standardized page header with breadcrumb & actions
+│   │   │   ├── Pagination.jsx
+│   │   │   ├── StatCard.jsx     # Metric KPI card
+│   │   │   └── StatusBadge.jsx  # Standardized semantic status badge
 │   │   ├── home/                # Homepage sections
 │   │   │   ├── HomeAllProductsSection.jsx
 │   │   │   ├── HomeCategoryShowcase.jsx
@@ -105,8 +115,9 @@ frontend/
 │   │   │   └── RevenueSummaryCard.jsx
 │   │   └── storefront/          # Storefront navigation link utilities
 │   │       └── storefrontLinkUtils.js
-│   ├── constants/               # Application-wide constants
-│   │   └── orderConstants.js    # Order status definitions, labels, and badge colors
+│   ├── constants/               # Application-wide constants & permissions
+│   │   ├── orderConstants.js    # Order status definitions, labels, and badge colors
+│   │   └── permissions.js       # Centralized capability definitions matching backend
 │   ├── contexts/                # Global state providers
 │   │   ├── AuthContext.jsx      # Authentication state, token sync, user session
 │   │   ├── CartContext.jsx      # Cart items, total count, sync with backend
@@ -114,7 +125,8 @@ frontend/
 │   ├── layouts/                 # Page layout shells
 │   │   ├── AdminLayout.jsx      # Admin sidebar, header, and management content shell
 │   │   ├── AuthLayout.jsx       # Centered card layout for login and registration
-│   │   └── MainLayout.jsx       # Public storefront layout with header, navigation, footer
+│   │   ├── MainLayout.jsx       # Public storefront layout with Staff & Admin header tabs
+│   │   └── StaffLayout.jsx      # Staff operational workspace sidebar and header
 │   ├── routes/                  # Route definitions and route guards
 │   │   └── AppRoutes.jsx        # Route registry with PrivateRoute, AdminRoute, PublicOnlyRoute
 │   ├── utils/                   # Helper functions and business logic
@@ -128,11 +140,13 @@ frontend/
 │   │   │   ├── AdminStorefrontView.jsx
 │   │   │   ├── AdminUserView.jsx
 │   │   │   └── ReportView.jsx
+│   │   ├── staff/               # Operations staff views
+│   │   │   ├── StaffDashboardView.jsx
+│   │   │   ├── StaffInventoryView.jsx
+│   │   │   ├── StaffOrderView.jsx
+│   │   │   ├── StaffReportView.jsx
+│   │   │   └── StaffReviewView.jsx
 │   │   ├── AdminDashboardView.jsx
-│   │   ├── CartView.jsx
-│   │   ├── CheckoutView.jsx
-│   │   ├── HomeView.jsx
-│   │   ├── LoginView.jsx
 │   │   ├── NotFoundView.jsx
 │   │   ├── OrderDetailView.jsx
 │   │   ├── OrderHistoryView.jsx
@@ -162,29 +176,34 @@ The routing architecture is declared in `src/routes/AppRoutes.jsx` using React R
 | `/` | `MainLayout` | Public | `HomeView` | Homepage with carousel, categories, and featured products |
 | `/products` | `MainLayout` | Public | `ProductListView` | Catalog search, category filter, sorting, and pagination |
 | `/products/:id`| `MainLayout` | Public | `ProductDetailView` | Product specs, images, inventory, reviews, add-to-cart |
-| `/login` | `AuthLayout` | `PublicOnlyRoute` | `LoginView` | Customer & admin login, forgot password OTP flow |
+| `/login` | `AuthLayout` | `PublicOnlyRoute` | `LoginView` | Customer & staff/admin login, forgot password OTP flow |
 | `/register` | `AuthLayout` | `PublicOnlyRoute` | `RegisterView` | New customer account registration |
 | `/cart` | `MainLayout` | `PrivateRoute` | `CartView` | Shopping cart items, quantity modification, price total |
 | `/checkout` | `MainLayout` | `PrivateRoute` | `CheckoutView` | Shipping address entry and COD order confirmation |
 | `/orders` | `MainLayout` | `PrivateRoute` | `OrderHistoryView` | Customer order history list with status badges |
 | `/orders/:id` | `MainLayout` | `PrivateRoute` | `OrderDetailView` | Single order details, line items, and payment status |
 | `/profile` | `MainLayout` | `PrivateRoute` | `ProfileView` | User details update and authenticated OTP password change |
+| `/staff` | `StaffLayout` | `StaffRoute` | `StaffDashboardView` | Operations dashboard (order backlog, stock alerts, review queue) |
+| `/staff/orders` | `StaffLayout` | `StaffRoute` | `StaffOrderView` | Order fulfillment queue and status transitions |
+| `/staff/inventory` | `StaffLayout` | `StaffRoute` | `StaffInventoryView` | Fast product stock and inventory adjustment |
+| `/staff/reviews` | `StaffLayout` | `StaffRoute` | `StaffReviewView` | Review moderation and hiding inappropriate comments |
+| `/staff/reports` | `StaffLayout` | `StaffRoute` | `StaffReportView` | Operational order counts and top product volume |
 | `/admin` | `AdminLayout`| `AdminRoute` | `AdminDashboardView` | Admin dashboard overview |
-| `/admin/products` | `AdminLayout` | `AdminRoute` | `AdminProductView` | Product catalog CRUD and inventory controls |
+| `/admin/products` | `AdminLayout` | `AdminRoute` | `AdminProductView` | Full product catalog CRUD, pricing, and inventory |
 | `/admin/categories` | `AdminLayout` | `AdminRoute` | `AdminCategoryView` | Category hierarchy management |
-| `/admin/users` | `AdminLayout` | `AdminRoute` | `AdminUserView` | User list, role management, and account blocking |
+| `/admin/users` | `AdminLayout` | `AdminRoute` | `AdminUserView` | User list, role management (`customer`/`staff`/`admin`), account blocking |
 | `/admin/orders` | `AdminLayout` | `AdminRoute` | `AdminOrderView` | System order monitoring and status transitions |
-| `/admin/reviews`| `AdminLayout` | `AdminRoute` | `AdminReviewView` | Product review moderation and visibility toggling |
-| `/admin/reports`| `AdminLayout` | `AdminRoute` | `ReportView` | Revenue charts, sales reports, and order metrics |
+| `/admin/reviews`| `AdminLayout` | `AdminRoute` | `AdminReviewView` | Product review moderation (hiding inappropriate reviews) |
+| `/admin/reports`| `AdminLayout` | `AdminRoute` | `ReportView` | Financial revenue reports and best sellers |
 | `/admin/storefront` | `AdminLayout` | `AdminRoute` | `AdminStorefrontView` | Carousel, navigation tree, and featured products |
 | `/unauthorized` | `MainLayout` | Public | `UnauthorizedView` | Access denied notification |
 | `*` | `MainLayout` | Public | `NotFoundView` | 404 page |
 
 ### Route Guards Explained
-1. **`PrivateRoute`**: Verifies user authentication. If unauthenticated, saves the target route and redirects to `/login`.
-2. **`AdminRoute`**: Verifies that the user is authenticated and possesses the `admin` role. Non-admins are redirected to `/unauthorized`.
-3. **`PublicOnlyRoute`**: Prevents already-logged-in users from visiting `/login` or `/register`, redirecting them to `/admin` or `/` depending on their role.
-
+1. **`PrivateRoute`**: Verifies user authentication. If unauthenticated, redirects to `/login`.
+2. **`StaffRoute`**: Verifies that the user has operational capability (`hasPermission(PERMISSIONS.ORDERS_VIEW_ALL)`). Non-staff/customers are redirected to `/unauthorized`.
+3. **`AdminRoute`**: Verifies that the user is authenticated and possesses the `admin` role. Non-admins are redirected to `/unauthorized`.
+4. **`PublicOnlyRoute`**: Prevents already-logged-in users from visiting `/login` or `/register`, redirecting them to `/admin` or `/` depending on their role.
 ---
 
 ## State Management & Context Architecture
@@ -194,9 +213,8 @@ The application uses three React Context providers declared in `src/contexts/`:
 1. **`AuthContext` (`src/contexts/AuthContext.jsx`)**
    - Stores JWT token in `localStorage` under key `token`.
    - Fetches and validates current user session via `GET /api/auth/me` on startup.
-   - Exposes `user`, `token`, `isAuthenticated`, `isAdmin`, `loading`, `login()`, `register()`, `logout()`, `updateProfile()`, and `changePassword()`.
+   - Exposes `user`, `token`, `isAuthenticated`, `isAdmin`, `isStaff`, `isStaffOrAdmin`, `hasPermission(permission)`, `loading`, `login()`, `register()`, `logout()`, and `changePassword()`.
    - Handles automatic logout and state cleanup when a 401/403 or account block is detected.
-
 2. **`CartContext` (`src/contexts/CartContext.jsx`)**
    - Automatically loads the authenticated user's cart from `GET /api/cart`.
    - Exposes `cart`, `cartItems`, `cartCount`, `cartTotal`, `addToCart()`, `updateQuantity()`, `removeFromCart()`, and `clearCart()`.

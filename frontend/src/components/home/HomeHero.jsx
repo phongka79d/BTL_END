@@ -61,7 +61,7 @@ const HomeHeroSlide = ({ isActive, slide }) => {
           <Heading
             level={1}
             style={{
-              fontSize: 'var(--text-title-1-size)',
+              fontSize: 'var(--text-heading-1-size)',
               fontWeight: 'var(--font-weight-bold)'
             }}
           >

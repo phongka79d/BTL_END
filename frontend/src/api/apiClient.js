@@ -1,4 +1,4 @@
-import { API_BASE_URL } from '../config';
+import { API_BASE_URL } from '../config.js';
 
 /**
  * Hàm hỗ trợ yêu cầu dùng chung dựa trên fetch

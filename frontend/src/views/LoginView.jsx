@@ -125,7 +125,7 @@ export const LoginView = () => {
   return (
     <VStack gap={4} style={{ width: '100%' }}>
       <VStack gap={1} style={{ alignItems: 'center' }}>
-        <Heading level={2} style={{ fontSize: 'var(--text-title-2-size)' }}>
+        <Heading level={2} style={{ fontSize: 'var(--text-heading-2-size)' }}>
           Chào mừng bạn quay trở lại
         </Heading>
         <Text size="supporting" color="secondary">

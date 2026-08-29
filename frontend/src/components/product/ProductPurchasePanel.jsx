@@ -73,7 +73,7 @@ export const ProductPurchasePanel = ({
           </VStack>
 
           <HStack gap={3} style={{ alignItems: 'center', flexWrap: 'wrap' }}>
-            <Text weight="semibold" color="accent" style={{ fontSize: 'var(--text-title-3-size)' }}>
+            <Text weight="semibold" color="accent" style={{ fontSize: 'var(--text-heading-3-size)' }}>
               {formatPrice(product.price)}
             </Text>
             {isReviewsLoading ? (

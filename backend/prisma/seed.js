@@ -8,8 +8,8 @@ async function main() {
 
   // 1. Tạo người dùng
   const adminPasswordHash = await bcrypt.hash('admin123', 10);
+  const staffPasswordHash = await bcrypt.hash('staff123', 10);
   const customerPasswordHash = await bcrypt.hash('customer123', 10);
-
   const adminUser = await prisma.user.upsert({
     where: { email: 'admin@example.com' },
     update: {
@@ -30,7 +30,26 @@ async function main() {
       role: 'admin',
     },
   });
-
+  const staffUser = await prisma.user.upsert({
+    where: { email: 'staff@example.com' },
+    update: {
+      username: 'staff',
+      passwordHash: staffPasswordHash,
+      fullName: 'Demo Staff',
+      phone: '0912345678',
+      address: '789 Staff Ave',
+      role: 'staff',
+    },
+    create: {
+      email: 'staff@example.com',
+      username: 'staff',
+      passwordHash: staffPasswordHash,
+      fullName: 'Demo Staff',
+      phone: '0912345678',
+      address: '789 Staff Ave',
+      role: 'staff',
+    },
+  });
   const customerUser = await prisma.user.upsert({
     where: { email: 'customer@example.com' },
     update: {
@@ -54,9 +73,9 @@ async function main() {
 
   console.log('Users seeded successfully:', {
     admin: adminUser.email,
+    staff: staffUser.email,
     customer: customerUser.email,
   });
-
   // 2. Tạo danh mục
   const categoriesData = [
     { name: 'Smartphones', description: 'Latest mobile devices and smartphones' },

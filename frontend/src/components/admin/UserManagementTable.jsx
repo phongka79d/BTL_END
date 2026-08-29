@@ -58,13 +58,19 @@ export const UserManagementTable = ({
     {
       key: 'role',
       header: 'Vai trò',
-      width: pixel(120),
-      renderCell: (item) => (
-        <Badge
-          variant={item.role === 'admin' ? 'blue' : 'neutral'}
-          label={item.role === 'admin' ? 'Quản trị viên' : 'Khách hàng'}
-        />
-      )
+      width: pixel(140),
+      renderCell: (item) => {
+        let label = 'Khách hàng';
+        let variant = 'neutral';
+        if (item.role === 'admin') {
+          label = 'Quản trị viên';
+          variant = 'blue';
+        } else if (item.role === 'staff') {
+          label = 'Nhân viên vận hành';
+          variant = 'purple';
+        }
+        return <Badge variant={variant} label={label} />;
+      }
     },
     {
       key: 'status',
@@ -93,9 +99,31 @@ export const UserManagementTable = ({
       width: pixel(90),
       align: 'end',
       renderCell: (item) => {
-        const nextRole = item.role === 'admin' ? 'customer' : 'admin';
         const nextBlockedState = !item.isBlocked;
         const isSelf = currentUserId === item.id;
+
+        const roleItems = [];
+        if (item.role !== 'admin') {
+          roleItems.push({
+            label: 'Đổi thành Quản trị viên (Admin)',
+            onClick: () => onRoleChange(item, 'admin'),
+            isDisabled: isSelf
+          });
+        }
+        if (item.role !== 'staff') {
+          roleItems.push({
+            label: 'Đổi thành Nhân viên vận hành (Staff)',
+            onClick: () => onRoleChange(item, 'staff'),
+            isDisabled: isSelf
+          });
+        }
+        if (item.role !== 'customer') {
+          roleItems.push({
+            label: 'Đổi thành Khách hàng (Customer)',
+            onClick: () => onRoleChange(item, 'customer'),
+            isDisabled: isSelf
+          });
+        }
 
         return (
           <MoreMenu
@@ -106,11 +134,7 @@ export const UserManagementTable = ({
                 label: 'Chỉnh sửa hồ sơ',
                 onClick: () => onEdit(item)
               },
-              {
-                label: nextRole === 'admin' ? 'Đổi thành quản trị viên' : 'Đổi thành khách hàng',
-                onClick: () => onRoleChange(item, nextRole),
-                isDisabled: isSelf
-              },
+              ...roleItems,
               {
                 label: nextBlockedState ? 'Khóa người dùng' : 'Mở khóa người dùng',
                 onClick: () => onBlockedChange(item, nextBlockedState),

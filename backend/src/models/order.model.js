@@ -201,11 +201,11 @@ const listByUser = async (userId) => {
  * 
  * @param {string} id 
  * @param {string} userId 
- * @param {boolean} isAdmin 
+ * @param {boolean} canViewAll 
  * @returns {Promise<Object|null>}
  */
-const findOwnedOrAdminVisible = async (id, userId, isAdmin) => {
-  const where = isAdmin ? { id } : { id, userId };
+const findOwnedOrAdminVisible = async (id, userId, canViewAll) => {
+  const where = canViewAll ? { id } : { id, userId };
   return prisma.order.findFirst({
     where,
     include: {
@@ -245,15 +245,18 @@ const findOwnedOrAdminVisible = async (id, userId, isAdmin) => {
 };
 
 /**
- * Liệt kê toàn bộ đơn hàng cho quản trị viên, sắp xếp mới nhất trước.
- * Hỗ trợ bộ lọc trạng thái tùy chọn với các giá trị hợp lệ.
- * Bao gồm chi tiết đơn hàng, tóm tắt thương hiệu/tên sản phẩm, thanh toán và thông tin khách hàng không nhạy cảm.
+ * Liệt kê toàn bộ đơn hàng cho quản trị viên và nhân viên, sắp xếp mới nhất trước.
+ * Hỗ trợ bộ lọc trạng thái và từ khóa tìm kiếm.
  * 
- * @param {string} [status] 
+ * @param {string|Object} [filters] 
  * @returns {Promise<Array>}
  */
-const listForAdmin = async (status) => {
+const listForAdmin = async (filters) => {
+  const opts = typeof filters === 'string' ? { status: filters } : (filters || {});
+  const { status, keyword } = opts;
   const where = {};
+
+  // 1. Kiểm tra bộ lọc trạng thái
   if (status) {
     const validStatuses = ['pending', 'confirmed', 'shipping', 'completed', 'cancelled'];
     if (!validStatuses.includes(status)) {
@@ -262,9 +265,43 @@ const listForAdmin = async (status) => {
     where.status = status;
   }
 
-  return prisma.order.findMany({
+  // 2. Kiểm tra bộ lọc từ khóa
+  if (keyword && typeof keyword === 'string' && keyword.trim()) {
+    const term = keyword.trim();
+    where.OR = [
+      { id: { contains: term, mode: 'insensitive' } },
+      { shippingAddress: { contains: term, mode: 'insensitive' } },
+      { user: { fullName: { contains: term, mode: 'insensitive' } } },
+      { user: { username: { contains: term, mode: 'insensitive' } } },
+      { user: { email: { contains: term, mode: 'insensitive' } } },
+      { user: { phone: { contains: term, mode: 'insensitive' } } },
+    ];
+  }
+
+  // 3. Phân tích và kiểm tra tính hợp lệ của page và limit
+  let pageNum = 1;
+  if (opts.page !== undefined && opts.page !== null && opts.page !== '') {
+    const parsed = Number(opts.page);
+    if (!Number.isInteger(parsed) || parsed < 1) {
+      throw new Error('Trang phải là số nguyên dương (>= 1)');
+    }
+    pageNum = parsed;
+  }
+
+  let limitNum = 10;
+  if (opts.limit !== undefined && opts.limit !== null && opts.limit !== '') {
+    const parsed = Number(opts.limit);
+    if (!Number.isInteger(parsed) || parsed < 1 || parsed > 100) {
+      throw new Error('Giới hạn phải là số nguyên từ 1 đến 100');
+    }
+    limitNum = parsed;
+  }
+
+  const queryOptions = {
     where,
     orderBy: { createdAt: 'desc' },
+    skip: (pageNum - 1) * limitNum,
+    take: limitNum,
     include: {
       user: {
         select: {
@@ -298,7 +335,22 @@ const listForAdmin = async (status) => {
         }
       }
     }
-  });
+  };
+
+  const [total, items] = await Promise.all([
+    prisma.order.count({ where }),
+    prisma.order.findMany(queryOptions)
+  ]);
+
+  return {
+    items,
+    pagination: {
+      page: pageNum,
+      limit: limitNum,
+      total,
+      totalPages: Math.ceil(total / limitNum) || 1
+    }
+  };
 };
 
 /**

@@ -1,6 +1,6 @@
 const orderModel = require('../models/order.model');
+const { hasRolePermission, PERMISSIONS } = require('../config/permissions');
 const { successResponse, errorResponse } = require('../utils/response');
-
 /**
  * Thực hiện checkout của khách hàng / tạo đơn hàng
  * POST /api/orders
@@ -66,8 +66,8 @@ const getMyOrders = async (req, res, next) => {
 const getOrderById = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const userId = req.user.id;
-    const isAdmin = req.user.role === 'admin';
+    const userId = req.user?.id;
+    const canViewAll = hasRolePermission(req.user?.role, PERMISSIONS.ORDERS_VIEW_ALL);
 
     // Xác minh đơn hàng tồn tại
     const order = await orderModel.findById(id);
@@ -76,12 +76,12 @@ const getOrderById = async (req, res, next) => {
     }
 
     // Xác minh quyền truy cập
-    if (order.userId !== userId && !isAdmin) {
+    if (order.userId !== userId && !canViewAll) {
       return errorResponse(res, 403, 'Không được phép truy cập đơn hàng này');
     }
 
     // Lấy đầy đủ chi tiết đơn hàng bằng hàm hỗ trợ
-    const detailedOrder = await orderModel.findOwnedOrAdminVisible(id, userId, isAdmin);
+    const detailedOrder = await orderModel.findOwnedOrAdminVisible(id, userId, canViewAll);
     return successResponse(res, 200, 'Đã lấy đơn hàng thành công', detailedOrder);
   } catch (error) {
     next(error);
@@ -89,23 +89,29 @@ const getOrderById = async (req, res, next) => {
 };
 
 /**
- * Admin: Liệt kê tất cả đơn hàng với bộ lọc trạng thái tùy chọn
+ * Admin / Staff: Liệt kê tất cả đơn hàng với bộ lọc trạng thái, từ khóa và phân trang
  * GET /api/admin/orders
  */
 const getAdminOrders = async (req, res, next) => {
   try {
-    const { status } = req.query;
+    const keyword = req.query.keyword || req.query.search;
+    const { status, page, limit } = req.query;
 
-    const orders = await orderModel.listForAdmin(status || undefined);
-    return successResponse(res, 200, 'Đã lấy đơn hàng quản trị thành công', orders);
+    const result = await orderModel.listForAdmin({ status, keyword, page, limit });
+    return successResponse(res, 200, 'Đã lấy đơn hàng quản trị thành công', result);
   } catch (error) {
-    if (error.message && error.message.startsWith('Invalid status filter')) {
+    if (
+      error.message &&
+      (error.message.includes('không hợp lệ') ||
+       error.message.startsWith('Invalid status') ||
+       error.message.includes('Trang phải') ||
+       error.message.includes('Giới hạn phải'))
+    ) {
       return errorResponse(res, 400, error.message);
     }
     next(error);
   }
 };
-
 /**
  * Admin: Cập nhật trạng thái đơn hàng
  * PUT /api/admin/orders/:id/status

@@ -1,17 +1,21 @@
 const express = require('express');
 const reportController = require('../controllers/report.controller');
 const { protect } = require('../middlewares/auth.middleware');
-const { admin } = require('../middlewares/admin.middleware');
+const { requirePermission } = require('../middlewares/permission.middleware');
+const { PERMISSIONS } = require('../config/permissions');
 
 const router = express.Router();
 
-router.get('/revenue', protect, admin, reportController.getRevenueReport);
+// Báo cáo doanh thu (chỉ dành cho Admin)
+router.get('/revenue', protect, requirePermission(PERMISSIONS.REPORTS_VIEW_REVENUE), reportController.getRevenueReport);
+
+// Báo cáo vận hành: sản phẩm bán chạy và tổng quan đơn hàng (Staff & Admin)
 router.get(
   '/best-selling-products',
   protect,
-  admin,
+  requirePermission(PERMISSIONS.REPORTS_VIEW_OPERATIONAL),
   reportController.getBestSellingProductsReport
 );
-router.get('/order-summary', protect, admin, reportController.getOrderSummaryReport);
+router.get('/order-summary', protect, requirePermission(PERMISSIONS.REPORTS_VIEW_OPERATIONAL), reportController.getOrderSummaryReport);
 
 module.exports = router;

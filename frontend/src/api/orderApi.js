@@ -1,4 +1,4 @@
-import { apiClient } from './apiClient';
+import { apiClient } from './apiClient.js';
 
 /**
  * Các hàm hỗ trợ API đơn hàng
@@ -26,15 +26,31 @@ export const orderApi = {
   getOrderById: (id) => apiClient.get(`/orders/${id}`),
 
   /**
-   * Lấy tất cả đơn hàng cho admin, mới nhất trước.
-   * @param {string} [status] - Giá trị bộ lọc trạng thái tùy chọn
+   * Lấy tất cả đơn hàng cho admin / staff, mới nhất trước.
+   * @param {string|Object} [params] - Trạng thái hoặc đối tượng bộ lọc { status }
    * @returns {Promise<Object>} Mảng đơn hàng
    */
-  getAdminOrders: (status) => {
-    const query = status ? `?status=${encodeURIComponent(status)}` : '';
-    return apiClient.get(`/admin/orders${query}`);
+  getAdminOrders: (params) => {
+    if (!params) return apiClient.get('/admin/orders');
+    if (typeof params === 'string') {
+      return apiClient.get(`/admin/orders?status=${encodeURIComponent(params)}`);
+    }
+    const searchParams = new URLSearchParams();
+    if (params.status) searchParams.set('status', params.status);
+    const kw = params.keyword || params.search;
+    if (kw) {
+      searchParams.set('keyword', kw);
+      searchParams.set('search', kw);
+    }
+    if (params.page !== undefined && params.page !== null && params.page !== '') {
+      searchParams.set('page', String(params.page));
+    }
+    if (params.limit !== undefined && params.limit !== null && params.limit !== '') {
+      searchParams.set('limit', String(params.limit));
+    }
+    const query = searchParams.toString();
+    return apiClient.get(`/admin/orders${query ? `?${query}` : ''}`);
   },
-
   /**
    * Cập nhật trạng thái đơn hàng (chỉ admin).
    * @param {string|number} id - ID đơn hàng

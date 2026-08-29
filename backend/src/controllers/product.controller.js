@@ -98,6 +98,33 @@ const updateProduct = async (req, res, next) => {
     next(error);
   }
 };
+/**
+ * Cập nhật số lượng tồn kho sản phẩm (staff & admin)
+ * PUT /api/products/:id/stock hoặc PUT /api/admin/products/:id/stock
+ */
+const updateStock = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const { quantity } = req.body;
+
+    if (quantity === undefined || quantity === null) {
+      return errorResponse(res, 400, 'Số lượng tồn kho là bắt buộc');
+    }
+
+    const existing = await productModel.findById(id);
+    if (!existing) {
+      return errorResponse(res, 404, 'Không tìm thấy sản phẩm');
+    }
+
+    const product = await productModel.updateStock(id, quantity);
+    return successResponse(res, 200, 'Đã cập nhật số lượng tồn kho thành công', { product });
+  } catch (error) {
+    if (error.message && error.message.includes('không âm')) {
+      return errorResponse(res, 400, error.message);
+    }
+    next(error);
+  }
+};
 
 /**
  * Xóa sản phẩm (admin)
@@ -127,5 +154,6 @@ module.exports = {
   getProductById,
   createProduct,
   updateProduct,
+  updateStock,
   deleteProduct
 };

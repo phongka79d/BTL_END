@@ -92,7 +92,7 @@ export const AdminOrderDetailDialog = ({ isOpen, orderId, onOpenChange }) => {
             <Skeleton width="100%" height="var(--spacing-12)" radius="rounded" />
             <Skeleton width="100%" height="var(--spacing-8)" radius="rounded" />
             <Skeleton width="100%" height="var(--spacing-12)" radius="rounded" />
-            <Skeleton width="100%" height="var(--spacing-16)" radius="rounded" />
+            <Skeleton width="100%" height="64px" radius="rounded" />
             <Skeleton width="100%" height="var(--spacing-8)" radius="rounded" />
           </VStack>
         </LayoutContent>

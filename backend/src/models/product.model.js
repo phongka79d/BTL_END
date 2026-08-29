@@ -345,6 +345,30 @@ const destroy = async (id) => {
     where: { id }
   });
 };
+/**
+ * Cập nhật số lượng tồn kho của sản phẩm (dành cho staff và admin)
+ * @param {string} id 
+ * @param {number|string} quantity 
+ * @returns {Promise<Object>}
+ */
+const updateStock = async (id, quantity) => {
+  const parsedQuantity = parseInt(quantity, 10);
+  if (isNaN(parsedQuantity) || parsedQuantity < 0) {
+    throw new Error('Số lượng tồn kho phải là số nguyên không âm');
+  }
+  return prisma.product.update({
+    where: { id },
+    data: { quantity: parsedQuantity },
+    include: {
+      category: {
+        select: {
+          id: true,
+          name: true
+        }
+      }
+    }
+  });
+};
 
 module.exports = {
   findById,
@@ -352,5 +376,6 @@ module.exports = {
   attachReviewSummaries,
   create,
   update,
+  updateStock,
   destroy,
 };

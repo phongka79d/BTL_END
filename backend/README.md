@@ -31,8 +31,9 @@ backend/
 ├── prisma/
 │   ├── migrations/              # Database schema migrations
 │   │   ├── 20260708193000_add_user_blocked_status/
-│   │   └── 20260709000000_add_password_change_otp/
-│   ├── schema.prisma            # Authoritative Prisma database schema
+│   │   ├── 20260709000000_add_password_change_otp/
+│   │   └── 20260710000000_add_staff_role/
+│   ├── schema.prisma            # Authoritative Prisma database schema (customer, staff, admin)
 │   └── seed.js                  # Database seeding script for demo data
 ├── src/
 │   ├── config/
@@ -51,9 +52,10 @@ backend/
 │   │   ├── user.controller.js   # Profile management, admin user management & blocking
 │   │   └── index.js             # Re-exports all controllers
 │   ├── middlewares/             # Express middlewares
-│   │   ├── admin.middleware.js  # Restricts route access to users with role "admin"
+│   │   ├── admin.middleware.js  # Legacy admin guard
 │   │   ├── auth.middleware.js   # Validates Bearer JWT, fetches user, rejects blocked accounts
 │   │   ├── error.middleware.js  # Global centralized error handler and JSON formatter
+│   │   ├── permission.middleware.js # Granular capability authorization middleware
 │   │   ├── validation.middleware.js # Request body field validation and password policy checks
 │   │   └── index.js             # Re-exports middlewares
 │   ├── models/                  # Database access layer encapsulating Prisma queries
@@ -105,7 +107,7 @@ backend/
 The database is defined in `backend/prisma/schema.prisma` and runs on PostgreSQL:
 
 ### Enums
-- **`Role`**: `customer` | `admin`
+- **`Role`**: `customer` | `staff` | `admin`
 - **`OrderStatus`**: `pending` | `confirmed` | `shipping` | `completed` | `cancelled`
 - **`PaymentMethod`**: `COD` (Cash on Delivery)
 - **`PaymentStatus`**: `unpaid` | `paid` | `failed`
@@ -160,7 +162,7 @@ All API routes are served under the `/api` prefix. Standard JSON envelopes are r
 | `PUT` | `/api/users/profile` | Authenticated | Updates name, phone, or address |
 | `GET` | `/api/admin/users` | Admin | Lists users with pagination and search |
 | `PUT` | `/api/admin/users/:id` | Admin | Updates user information |
-| `PUT` | `/api/admin/users/:id/role` | Admin | Changes user role (`customer` / `admin`) |
+| `PUT` | `/api/admin/users/:id/role` | Admin | Changes user role (`customer` / `staff` / `admin`) |
 | `PUT` | `/api/admin/users/:id/block` | Admin | Blocks or unblocks a user account |
 
 ### 4. Products & Categories (`/api/products`, `/api/categories`)
@@ -168,8 +170,9 @@ All API routes are served under the `/api` prefix. Standard JSON envelopes are r
 | :--- | :--- | :--- | :--- |
 | `GET` | `/api/products` | Public | Lists products with search, filters, pagination, sort |
 | `GET` | `/api/products/:id` | Public | Retrieves detailed product information |
+| `PUT` | `/api/products/:id/stock` | Staff / Admin | Fast inventory stock adjustment |
 | `POST` | `/api/admin/products` | Admin | Creates a new product |
-| `PUT` | `/api/admin/products/:id` | Admin | Updates product attributes and stock |
+| `PUT` | `/api/admin/products/:id` | Admin | Updates product attributes and catalog data |
 | `DELETE` | `/api/admin/products/:id` | Admin | Deletes a product from catalog |
 | `GET` | `/api/categories` | Public | Lists all categories |
 | `POST` | `/api/admin/categories` | Admin | Creates a new category |
@@ -190,9 +193,9 @@ All API routes are served under the `/api` prefix. Standard JSON envelopes are r
 | :--- | :--- | :--- | :--- |
 | `POST` | `/api/orders` | Authenticated | Creates order from cart with COD payment (transactional) |
 | `GET` | `/api/orders/my-orders` | Authenticated | Lists orders belonging to authenticated user |
-| `GET` | `/api/orders/:id` | Authenticated | Retrieves specific order details |
-| `GET` | `/api/admin/orders` | Admin | Lists all system orders with filters and pagination |
-| `PUT` | `/api/admin/orders/:id/status` | Admin | Updates order status (`pending`, `confirmed`, etc.) |
+| `GET` | `/api/orders/:id` | Owner / Staff / Admin | Retrieves specific order details |
+| `GET` | `/api/admin/orders` | Staff / Admin | Lists all system orders with filters and keyword search |
+| `PUT` | `/api/admin/orders/:id/status` | Staff / Admin | Updates order status (`pending`, `confirmed`, `shipping`, `completed`, `cancelled`) |
 | `POST` | `/api/payments/cod` | Authenticated | Processes COD payment creation |
 
 ### 7. Product Reviews (`/api/products/:id/reviews`, `/api/admin/reviews`)
@@ -200,8 +203,8 @@ All API routes are served under the `/api` prefix. Standard JSON envelopes are r
 | :--- | :--- | :--- | :--- |
 | `GET` | `/api/products/:id/reviews` | Public | Lists visible reviews and average rating |
 | `POST` | `/api/products/:id/reviews` | Authenticated | Submits a customer rating and review |
-| `GET` | `/api/admin/reviews` | Admin | Lists all reviews for administrative moderation |
-| `DELETE` | `/api/admin/reviews/:id` | Admin | Hides review from public storefront |
+| `GET` | `/api/admin/reviews` | Staff / Admin | Lists all reviews for administrative/staff moderation |
+| `DELETE` | `/api/admin/reviews/:id` | Staff / Admin | Hides review from public storefront |
 
 ### 8. Storefront Content Management (`/api/storefront`, `/api/admin/storefront`)
 | Method | Endpoint | Access | Description |
@@ -222,13 +225,37 @@ All API routes are served under the `/api` prefix. Standard JSON envelopes are r
 | `PUT` | `/api/admin/storefront/featured-products/reorder` | Admin | Reorders featured products |
 | `PUT` | `/api/admin/storefront/settings` | Admin | Updates storefront display settings |
 
-### 9. Administrative Reports (`/api/admin/reports`)
+### 9. Operational & Financial Reports (`/api/admin/reports`)
 | Method | Endpoint | Access | Description |
 | :--- | :--- | :--- | :--- |
-| `GET` | `/api/admin/reports/revenue` | Admin | Generates revenue statistics by time period |
-| `GET` | `/api/admin/reports/best-selling-products` | Admin | Aggregates best-selling products by quantity and revenue |
-| `GET` | `/api/admin/reports/order-summary` | Admin | Returns status breakdown count of all orders |
+| `GET` | `/api/admin/reports/order-summary` | Staff / Admin | Status breakdown count of all orders |
+| `GET` | `/api/admin/reports/best-selling-products` | Staff / Admin | Best-selling products by quantity volume |
+| `GET` | `/api/admin/reports/revenue` | Admin | Financial totals, completed revenue, and metrics |
 
+---
+
+## Capability-Based Authorization Matrix
+
+Defined in `backend/src/config/permissions.js` and enforced by `permission.middleware.js`:
+
+| Capability | Purpose | Staff | Admin |
+| :--- | :--- | :---: | :---: |
+| `orders.view_all` | View system-wide order queue | ✅ | ✅ |
+| `orders.update_status` | Update fulfillment state | ✅ | ✅ |
+| `products.view_catalog` | View catalog lists | ✅ | ✅ |
+| `products.update_stock` | Adjust stock count | ✅ | ✅ |
+| `products.manage_catalog`| Create/edit product catalog | ❌ | ✅ |
+| `products.delete` | Delete product | ❌ | ✅ |
+| `categories.view` | View categories | ✅ | ✅ |
+| `categories.manage` | Create/edit/delete categories | ❌ | ✅ |
+| `reviews.view_all` | View all reviews | ✅ | ✅ |
+| `reviews.moderate` | Hide inappropriate reviews | ✅ | ✅ |
+| `reports.view_operational`| View order summary & top products | ✅ | ✅ |
+| `reports.view_revenue` | View financial revenue | ❌ | ✅ |
+| `users.view_all` | View user accounts | ❌ | ✅ |
+| `users.manage_role` | Assign customer / staff / admin | ❌ | ✅ |
+| `users.block` | Block / unblock users | ❌ | ✅ |
+| `storefront.manage` | Manage banners & mega-menu | ❌ | ✅ |
 ---
 
 ## Environment Configuration

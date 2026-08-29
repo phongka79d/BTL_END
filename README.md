@@ -2,12 +2,11 @@
 
 ## Overview
 
-**tsshop** is a modern full-stack electronics e-commerce storefront and administrative management system. It provides an end-to-end shopping experience for customers and a comprehensive back-office operations center for administrators.
+**tsshop** is a modern full-stack electronics e-commerce storefront, operations management, and administrative control platform. It provides a customer shopping storefront, a dedicated operations workspace for store staff, and an administration suite.
 
 The platform is structured as a monorepo with two decoupled, independently runnable applications:
-- **Backend (`backend/`):** Express 5 REST API server built on Node.js, Prisma ORM 6, and PostgreSQL. It manages authentication, authorization, catalog data, persistent user shopping carts, transactional Cash-on-Delivery (COD) checkout, customer reviews, admin business analytics, storefront content trees, and OTP-based email password verification.
-- **Frontend (`frontend/`):** Single Page Application (SPA) built on React 19, React Router 6, and Vite 5, styled with the `@astryxdesign/core` design system.
-
+- **Backend (`backend/`):** Express 5 REST API server built on Node.js, Prisma ORM 6, and PostgreSQL. It manages authentication, capability-based authorization, catalog data, persistent user shopping carts, transactional Cash-on-Delivery (COD) checkout, customer reviews, operational and financial reporting, storefront content trees, and OTP-based email password verification.
+- **Frontend (`frontend/`):** Single Page Application (SPA) built on React 19, React Router 6, and Vite 5, styled with the `@astryxdesign/core` design system. It provides role-aware navigation (including direct **Staff** and **Admin** tabs in the header for authorized users) and specialized workspaces (`/` for customers, `/staff/*` for operations staff, and `/admin/*` for administrators).
 ---
 
 ## Sub-Module Documentation
@@ -36,12 +35,21 @@ This repository root coordinates the full development, build, and deployment lif
 ├── backend/                     # Express 5 REST API & Prisma persistence layer
 │   ├── prisma/                  # Prisma schema, SQL migrations, database seed scripts
 │   │   ├── migrations/          # Version-controlled migration history
-│   │   ├── schema.prisma        # Authoritative PostgreSQL data schema
+│   │   │   ├── 20260708193000_add_user_blocked_status/
+│   │   │   ├── 20260709000000_add_password_change_otp/
+│   │   │   └── 20260710000000_add_staff_role/
+│   │   ├── schema.prisma        # Authoritative PostgreSQL data schema (customer, staff, admin)
 │   │   └── seed.js              # Initial database seed script (admin, categories, products)
 │   ├── src/                     # Backend application source code
-│   │   ├── config/              # Prisma database client singleton
+│   │   ├── config/              # Database client and centralized capability permissions matrix
+│   │   │   ├── database.js
+│   │   │   └── permissions.js
 │   │   ├── controllers/         # HTTP request controllers for all domains
-│   │   ├── middlewares/         # JWT auth, admin authorization, validation, error handling
+│   │   ├── middlewares/         # JWT auth, capability authorization, validation, error handling
+│   │   │   ├── auth.middleware.js
+│   │   │   ├── permission.middleware.js
+│   │   │   ├── validation.middleware.js
+│   │   │   └── error.middleware.js
 │   │   ├── models/              # Prisma database query encapsulation models
 │   │   ├── routes/              # Express route declarations & route index
 │   │   ├── services/            # Nodemailer email & OTP delivery service
@@ -54,13 +62,18 @@ This repository root coordinates the full development, build, and deployment lif
 ├── frontend/                    # Vite + React 19 Single Page Application
 │   ├── src/                     # Frontend application source code
 │   │   ├── api/                 # Domain API client modules (auth, products, orders, etc.)
-│   │   ├── components/          # Feature UI components (product, cart, checkout, admin, etc.)
-│   │   ├── constants/           # Order status and UI constants
+│   │   ├── components/          # Feature UI components (product, cart, checkout, admin, common)
+│   │   │   ├── common/          # Reusable UI primitives (PageHeader, DataTable, FilterBar, StatusBadge, etc.)
+│   │   │   └── ...
+│   │   ├── constants/           # Order constants & permissions capability matrix
 │   │   ├── contexts/            # React Context providers (AuthContext, CartContext, NotificationContext)
-│   │   ├── layouts/             # Layout shells (MainLayout, AuthLayout, AdminLayout)
-│   │   ├── routes/              # React Router v6 route table & navigation guards
+│   │   ├── layouts/             # Layout shells (MainLayout with Staff/Admin tabs, AuthLayout, AdminLayout, StaffLayout)
+│   │   ├── routes/              # React Router v6 route table & guards (PrivateRoute, StaffRoute, AdminRoute)
 │   │   ├── utils/               # Frontend password policy and date formatters
-│   │   ├── views/               # Page views (customer storefront & admin workspace)
+│   │   ├── views/               # Page views (Storefront, Staff workspace, Admin workspace)
+│   │   │   ├── staff/           # Dedicated staff operations views (Dashboard, Orders, Inventory, Reviews, Reports)
+│   │   │   ├── admin/           # Dedicated admin management views
+│   │   │   └── ...
 │   │   ├── App.jsx              # Root component with providers and router
 │   │   ├── config.js            # Frontend configuration (API base URL)
 │   │   └── main.jsx             # SPA entrypoint mounting React and Astryx styles
@@ -69,6 +82,7 @@ This repository root coordinates the full development, build, and deployment lif
 │   ├── package.json             # Frontend dependencies and scripts
 │   ├── vite.config.js           # Vite build and dev configuration
 │   └── README.md                # Dedicated frontend documentation
+├── openspec/                    # OpenSpec specifications, design docs, and implementation tasks
 ├── docs/                        # Project documentation and specifications
 └── README.md                    # Root project documentation (this file)
 ```
@@ -106,7 +120,7 @@ flowchart TB
     subgraph Server ["Express 5 REST API (Backend)"]
         App["app.js / server.js (Port 5000)"]
         AuthMid["auth.middleware.js (JWT & Block Check)"]
-        AdminMid["admin.middleware.js (Role Guard)"]
+        PermMid["permission.middleware.js (Capability Authorization)"]
         Controllers["Express Controllers"]
         EmailSvc["email.service.js (Nodemailer / Console)"]
         Models["Data Access Layer (src/models)"]
@@ -123,7 +137,7 @@ flowchart TB
     AuthCtx & CartCtx & AstryxUI --> ApiClient
 
     ApiClient -- "HTTP / JSON (/api/*)" --> App
-    App --> AuthMid --> AdminMid --> Controllers
+    App --> AuthMid --> PermMid --> Controllers
     Controllers --> EmailSvc
     Controllers --> Models
     Models --> Prisma --> Postgres
@@ -131,7 +145,7 @@ flowchart TB
 
 ### Communication Flow
 1. **Client Requests:** The React SPA communicates with the backend exclusively via standard HTTP JSON requests sent to the `/api` prefix (configured via `VITE_API_BASE_URL`).
-2. **Authentication Token Injection:** When a customer or admin logs in, the API returns a signed JWT. The frontend stores this token in `localStorage` and `apiClient.js` automatically attaches it as an `Authorization: Bearer <token>` header to all subsequent requests.
+2. **Authentication Token Injection:** When a customer, staff member, or administrator logs in, the API returns a signed JWT. The frontend stores this token in `localStorage` and `apiClient.js` automatically attaches it as an `Authorization: Bearer <token>` header to all subsequent requests.
 3. **Session Verification & Blocking:** On every protected API call, `auth.middleware.js` verifies the JWT signature, reloads the user from the database, and checks `isBlocked`. If the account is blocked, the request is immediately rejected with HTTP 403.
 4. **Data Transactions:** Order placement executes inside a transactional boundary (`prisma.$transaction`), creating order records, updating payment records, and purging cart items atomically.
 
@@ -158,14 +172,14 @@ flowchart TB
 - **Cart Management:** Authenticated users add products to their cart. Cart state is persisted to PostgreSQL (`Cart` and `CartItem` tables) and synchronized with `CartContext`.
 - **Checkout:** The user enters shipping details in `CheckoutView`. Submitting the order triggers `POST /api/orders`. The backend creates the `Order`, creates `OrderDetail` line items, creates a `Payment` record with method `COD` and status `unpaid`, and clears the user's `CartItem` entries in a single atomic database transaction.
 
-### 5. Administration & Storefront Management
-- **Catalog Management:** Administrators create, edit, and delete categories and products, adjust stock levels, and upload product images.
-- **User Moderation:** Administrators list users, inspect profiles, change roles (`customer` / `admin`), and block/unblock accounts.
+### 5. Administration & Staff Operations
+- **Operations Staff Workspace (`/staff/*`):** Staff members process customer orders (`orders.view_all`, `orders.update_status`), monitor and adjust inventory counts (`products.update_stock`), hide inappropriate customer reviews (`reviews.moderate`), and view fulfillment summaries (`reports.view_operational`).
+- **Catalog Management:** Administrators create, edit, and delete categories and products, set pricing, adjust stock levels, and upload product images.
+- **User Moderation & Roles:** Administrators list users, inspect profiles, assign user roles (`customer` / `staff` / `admin`), and block/unblock accounts.
 - **Order Processing:** Administrators view system-wide orders and update status (`pending` -> `confirmed` -> `shipping` -> `completed` / `cancelled`).
-- **Review Moderation:** Administrators inspect customer reviews and toggle visibility (`visible` / `hidden`) to soft-moderate content.
-- **Business Analytics:** Administrators view real-time revenue breakdowns, top-selling products, and order status summaries via `/api/admin/reports`.
+- **Review Moderation:** Administrators and Staff inspect customer reviews and hide inappropriate comments (`status = 'hidden'`) from the storefront.
+- **Financial & Operational Analytics:** Administrators inspect financial revenue reports via `/api/admin/reports/revenue`, while Staff and Administrators inspect operational order status distributions and top-selling product volume via `/api/admin/reports/order-summary` and `/api/admin/reports/best-selling-products`.
 - **Storefront Management:** Administrators manage homepage carousel slides, navigation menu items, and featured product displays.
-
 ---
 
 ## Environment & Configuration

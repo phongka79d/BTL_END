@@ -18,15 +18,16 @@ import {
 } from '@astryxdesign/core';
 import { useAuth } from '../contexts/AuthContext';
 import { useCart } from '../contexts/CartContext';
+import { PERMISSIONS } from '../constants/permissions';
 import StorefrontMegaNav from '../components/layout/StorefrontMegaNav';
 import {
   AdminIcon,
   CartIcon,
+  DashboardIcon,
   LogOutIcon,
   OrdersIcon,
   UserIcon
 } from '../components/common/LayoutIcons';
-
 const CustomerAccountMenu = ({ items, user }) => {
   const { isMobile } = useAppShellMobile();
   const accountLabel = user.username || user.email || 'Tài khoản';
@@ -52,9 +53,12 @@ const CustomerAccountMenu = ({ items, user }) => {
  * Thành phần cung cấp điều hướng trên (logo, trang chủ, sản phẩm, thao tác người dùng, giỏ hàng) và chân trang.
  */
 export const MainLayout = () => {
-  const { user, isAuthenticated, logout } = useAuth();
+  const { user, isAuthenticated, isAdmin, hasPermission, logout } = useAuth();
   const { itemCount } = useCart();
   const navigate = useNavigate();
+
+  const canAccessStaff = isAuthenticated && hasPermission(PERMISSIONS.ORDERS_VIEW_ALL);
+  const canAccessAdmin = isAuthenticated && isAdmin;
 
   // Xác định động các mục dropdown cho người dùng đang đăng nhập dựa trên role
   const getDropdownItems = () => {
@@ -63,20 +67,25 @@ export const MainLayout = () => {
         label: 'Hồ sơ',
         onClick: () => navigate('/profile'),
         icon: UserIcon
-      }
-    ];
-
-    if (!user || user.role === 'customer') {
-      items.push({
+      },
+      {
         label: 'Đơn hàng của tôi',
         onClick: () => navigate('/orders'),
         icon: OrdersIcon
+      }
+    ];
+
+    if (canAccessStaff) {
+      items.push({
+        label: 'Khu vực Vận hành (Staff)',
+        onClick: () => navigate('/staff'),
+        icon: DashboardIcon
       });
     }
 
-    if (user && user.role === 'admin') {
+    if (canAccessAdmin) {
       items.push({
-        label: 'Bảng điều khiển quản trị',
+        label: 'Bảng điều khiển quản trị (Admin)',
         onClick: () => navigate('/admin'),
         icon: AdminIcon
       });
@@ -108,7 +117,7 @@ export const MainLayout = () => {
         </HStack>
       }
       endContent={
-        <HStack gap={3} style={{ alignItems: 'center' }}>
+        <HStack gap={2} style={{ alignItems: 'center' }}>
           <IconButton
             label="Tìm kiếm sản phẩm"
             tooltip="Tìm kiếm"
@@ -116,6 +125,28 @@ export const MainLayout = () => {
             icon={<Icon icon="search" size="sm" />}
             onClick={() => navigate('/products')}
           />
+
+          {/* Staff Tab trực tiếp trên Header */}
+          {canAccessStaff && (
+            <Button
+              label="Staff"
+              variant="secondary"
+              size="sm"
+              icon={<DashboardIcon size={14} />}
+              onClick={() => navigate('/staff')}
+            />
+          )}
+
+          {/* Admin Tab trực tiếp trên Header */}
+          {canAccessAdmin && (
+            <Button
+              label="Admin"
+              variant="secondary"
+              size="sm"
+              icon={<AdminIcon size={14} />}
+              onClick={() => navigate('/admin')}
+            />
+          )}
 
           {isAuthenticated && user ? (
             <CustomerAccountMenu

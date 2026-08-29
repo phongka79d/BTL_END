@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { authApi } from '../api/authApi';
-
+import { hasRolePermission } from '../constants/permissions';
 const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
@@ -100,6 +100,11 @@ export const AuthProvider = ({ children }) => {
     setError(null);
   };
 
+  const hasPermission = (permission) => {
+    if (!user) return false;
+    return hasRolePermission(user.role, permission);
+  };
+
   const value = {
     user,
     token,
@@ -109,9 +114,11 @@ export const AuthProvider = ({ children }) => {
     register,
     logout,
     isAuthenticated: !!user,
-    isAdmin: user?.role === 'admin'
+    isAdmin: user?.role === 'admin',
+    isStaff: user?.role === 'staff',
+    isStaffOrAdmin: user?.role === 'staff' || user?.role === 'admin',
+    hasPermission
   };
-
   return (
     <AuthContext.Provider value={value}>
       {children}

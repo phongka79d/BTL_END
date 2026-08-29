@@ -1,51 +1,20 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import {
-  Button,
-  Card,
-  EmptyState,
-  Heading,
-  HStack,
-  Skeleton,
-  Table,
-  Text,
-  VStack,
-} from '@astryxdesign/core';
+import { Button } from '@astryxdesign/core';
 import { orderApi } from '../api/orderApi';
 import { formatPrice } from '../components/product/productUtils';
+import { formatDate } from '../components/common/formatDate';
+import PageHeader from '../components/common/PageHeader';
+import DataTable from '../components/common/DataTable';
+import StatusBadge from '../components/common/StatusBadge';
+import EmptyState from '../components/common/EmptyState';
 import Alert from '../components/common/Alert';
-import OrderStatusBadge from '../components/order/OrderStatusBadge';
-import PaymentStatusBadge from '../components/order/PaymentStatusBadge';
-import Pagination from '../components/common/Pagination';
+import { OrderBagIcon, RefreshIcon } from '../components/common/LayoutIcons';
 
 const PAGE_SIZE = 10;
 
-const formatDate = (dateString) => {
-  if (!dateString) return '—';
-  return new Intl.DateTimeFormat('en-GB', {
-    day: '2-digit',
-    month: 'short',
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-  }).format(new Date(dateString));
-};
-
-/**
- * OrderHistoryView
- *
- * Hiển thị lịch sử đơn hàng của khách hàng đã xác thực trong một bảng
- * cùng badge trạng thái, tổng tiền, ngày tháng và điều hướng đến các trang chi tiết.
- *
- * Các trạng thái xử lý: loading, error, empty, success.
- *
- * ponytail: Nếu backend bổ sung tham số phân trang hoặc sắp xếp phía máy chủ,
- *           hãy thay phân trang phía máy khách bằng phân trang qua API
- *           mà không thay đổi logic hiển thị cột hoặc ánh xạ badge.
- */
 export const OrderHistoryView = () => {
   const navigate = useNavigate();
-
   const [orders, setOrders] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -58,15 +27,10 @@ export const OrderHistoryView = () => {
     try {
       const response = await orderApi.getMyOrders();
       const data = response?.data || [];
-
-      if (!Array.isArray(data)) {
-        setOrders([]);
-        return;
-      }
-
-      setOrders(data);
+      setOrders(Array.isArray(data) ? data : []);
     } catch (err) {
-      setError(err?.message || 'Không thể tải đơn hàng của bạn. Vui lòng thử lại.');
+      setOrders([]);
+      setError(err?.message || 'Không thể tải đơn hàng. Vui lòng thử lại.');
     } finally {
       setIsLoading(false);
     }
@@ -83,213 +47,112 @@ export const OrderHistoryView = () => {
     return orders.slice(startIndex, startIndex + PAGE_SIZE);
   }, [orders, page]);
 
-  const handlePageChange = useCallback((newPage) => {
-    setPage(newPage);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  }, []);
-
-  const columns = useMemo(
-    () => [
-      {
-        key: 'id',
-        header: 'Mã đơn hàng',
-        renderCell: (order) => (
-          <Text size="supporting" hasTabularNumbers>
-            {`#${order.id.slice(0, 8)}…`}
-          </Text>
-        ),
-      },
-      {
-        key: 'createdAt',
-        header: 'Ngày',
-        renderCell: (order) => (
-          <Text size="supporting" color="secondary">
-            {formatDate(order.createdAt)}
-          </Text>
-        ),
-      },
-      {
-        key: 'totalAmount',
-        header: 'Tổng cộng',
-        align: 'end',
-        renderCell: (order) => (
-          <Text weight="semibold" hasTabularNumbers>
-            {formatPrice(order.totalAmount)}
-          </Text>
-        ),
-      },
-      {
-        key: 'status',
-        header: 'Trạng thái',
-        renderCell: (order) => <OrderStatusBadge status={order.status} />,
-      },
-      {
-        key: 'paymentStatus',
-        header: 'Thanh toán',
-        renderCell: (order) => {
-          const paymentStatus = order.payment?.paymentStatus || 'unpaid';
-          return <PaymentStatusBadge status={paymentStatus} />;
-        },
-      },
-      {
-        key: 'actions',
-        header: 'Thao tác',
-        align: 'end',
-        renderCell: (order) => (
-          <Button
-            label="Xem"
-            variant="ghost"
-            size="small"
-            onClick={() => navigate(`/orders/${order.id}`)}
-          />
-        ),
-      },
-    ],
-    [navigate]
-  );
-
-  /* ---------- Đang tải ---------- */
-  if (isLoading) {
-    return (
-      <VStack
-        style={{
-          width: '100%',
-          maxWidth: '1100px',
-          marginInline: 'auto',
-          paddingBlock: 'var(--spacing-6)',
-          gap: 'var(--spacing-6)',
-        }}
-      >
-        <VStack gap={1}>
-          <Heading level={1}>Đơn hàng của tôi</Heading>
-          <Text color="secondary">
-            Xem và theo dõi lịch sử đơn hàng của bạn.
-          </Text>
-        </VStack>
-
-        <Card padding={4}>
-          <VStack gap={3}>
-            {[0, 1, 2, 3, 4].map((index) => (
-              <Skeleton
-                key={index}
-                height="var(--spacing-10)"
-                radius={2}
-              />
-            ))}
-          </VStack>
-        </Card>
-      </VStack>
-    );
-  }
-
-  /* ---------- Lỗi ---------- */
-  if (error) {
-    return (
-      <VStack
-        style={{
-          width: '100%',
-          maxWidth: '1100px',
-          marginInline: 'auto',
-          paddingBlock: 'var(--spacing-6)',
-          gap: 'var(--spacing-6)',
-        }}
-      >
-        <VStack gap={1}>
-          <Heading level={1}>Đơn hàng của tôi</Heading>
-          <Text color="secondary">
-            Xem và theo dõi lịch sử đơn hàng của bạn.
-          </Text>
-        </VStack>
-
-        <Alert
-          title="Không thể tải đơn hàng"
-          description={error}
-          actionLabel="Thử lại"
-          onAction={fetchOrders}
+  const columns = [
+    {
+      key: 'id',
+      title: 'Mã đơn hàng',
+      render: (id) => (
+        <span style={{ fontFamily: 'monospace', fontWeight: 600 }}>
+          #{id?.slice(0, 8)}
+        </span>
+      )
+    },
+    {
+      key: 'createdAt',
+      title: 'Ngày đặt',
+      render: (date) => formatDate(date)
+    },
+    {
+      key: 'totalAmount',
+      title: 'Tổng tiền',
+      render: (amount) => (
+        <span style={{ fontWeight: 600, color: 'var(--color-text-primary, #111827)' }}>
+          {formatPrice(amount)}
+        </span>
+      )
+    },
+    {
+      key: 'status',
+      title: 'Trạng thái đơn hàng',
+      render: (status) => <StatusBadge status={status} type="order" />
+    },
+    {
+      key: 'payment',
+      title: 'Thanh toán',
+      render: (payment) => (
+        <StatusBadge status={payment?.paymentStatus || 'unpaid'} type="payment" />
+      )
+    },
+    {
+      key: 'actions',
+      title: 'Chi tiết',
+      align: 'right',
+      render: (_, order) => (
+        <Button
+          label="Xem chi tiết"
+          variant="secondary"
+          size="sm"
+          onClick={(e) => {
+            e.stopPropagation();
+            navigate(`/orders/${order.id}`);
+          }}
         />
-      </VStack>
-    );
-  }
+      )
+    }
+  ];
 
-  /* ---------- Trống ---------- */
-  if (!orders.length) {
-    return (
-      <VStack
-        style={{
-          width: '100%',
-          maxWidth: '1100px',
-          marginInline: 'auto',
-          paddingBlock: 'var(--spacing-6)',
-          gap: 'var(--spacing-6)',
-        }}
-      >
-        <VStack gap={1}>
-          <Heading level={1}>Đơn hàng của tôi</Heading>
-          <Text color="secondary">
-            Xem và theo dõi lịch sử đơn hàng của bạn.
-          </Text>
-        </VStack>
-
-        <EmptyState
-          title="Chưa có đơn hàng"
-          description="Bạn chưa đặt đơn hàng nào. Hãy bắt đầu mua sắm để xem lịch sử đơn hàng tại đây."
-          actions={
-            <HStack gap={3} style={{ justifyContent: 'center', flexWrap: 'wrap' }}>
-              <Button
-                label="Xem sản phẩm"
-                variant="primary"
-                onClick={() => navigate('/products')}
-              />
-              <Button
-                label="Xem giỏ hàng"
-                variant="secondary"
-                onClick={() => navigate('/cart')}
-              />
-            </HStack>
-          }
-        />
-      </VStack>
-    );
-  }
-
-  /* ---------- Thành công ---------- */
   return (
-    <VStack
-      style={{
-        width: '100%',
-        maxWidth: '1100px',
-        marginInline: 'auto',
-        paddingBlock: 'var(--spacing-6)',
-        gap: 'var(--spacing-6)',
-      }}
-    >
-      <VStack gap={1}>
-        <Heading level={1}>Đơn hàng của tôi</Heading>
-        <Text color="secondary">
-          Bạn có {orders.length} đơn hàng.
-        </Text>
-      </VStack>
+    <div style={{ maxWidth: '1100px', margin: '0 auto', width: '100%' }}>
+      <PageHeader
+        title="Đơn hàng của tôi"
+        subtitle="Xem lại và theo dõi tiến độ các đơn hàng bạn đã đặt trên tsshop."
+        actions={
+          <Button
+            label="Làm mới"
+            variant="secondary"
+            size="sm"
+            onClick={fetchOrders}
+            icon={<RefreshIcon size={14} />}
+          />
+        }
+      />
 
-      <Card padding={0} style={{ width: '100%', minWidth: 0 }}>
-        <Table
-          columns={columns}
-          data={pagedOrders}
-          idKey="id"
-          density="balanced"
-          dividers="rows"
-          hasHover
-          textOverflow="truncate"
-        />
-      </Card>
-
-      {totalPages > 1 && (
-        <Pagination
-          page={page}
-          totalPages={totalPages}
-          onPageChange={handlePageChange}
-        />
+      {error && (
+        <div style={{ marginBottom: 'var(--spacing-4)' }}>
+          <Alert
+            title="Không thể tải đơn hàng"
+            description={error}
+            actionLabel="Thử lại"
+            onAction={fetchOrders}
+          />
+        </div>
       )}
-    </VStack>
+
+      <DataTable
+        columns={columns}
+        data={pagedOrders}
+        loading={isLoading}
+        onRowClick={(order) => navigate(`/orders/${order.id}`)}
+        emptyState={
+          <EmptyState
+            icon={<OrderBagIcon size={36} />}
+            title="Chưa có đơn hàng nào"
+            description="Bạn chưa đặt đơn hàng nào. Hãy khám phá danh mục sản phẩm để bắt đầu mua sắm!"
+            actionLabel="Khám phá sản phẩm"
+            onAction={() => navigate('/products')}
+          />
+        }
+        pagination={{
+          page,
+          totalPages,
+          totalItems: orders.length,
+          onPageChange: (p) => {
+            setPage(p);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          }
+        }}
+      />
+    </div>
   );
 };
 

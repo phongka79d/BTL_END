@@ -54,7 +54,7 @@ const CheckoutSkeleton = () => (
       <VStack gap={3} style={{ padding: 'var(--spacing-4)' }}>
         <Skeleton width="100%" height="var(--spacing-10)" radius="rounded" />
         <Skeleton width="100%" height="var(--spacing-10)" radius="rounded" />
-        <Skeleton width="100%" height="var(--spacing-16)" radius="rounded" />
+        <Skeleton width="100%" height="64px" radius="rounded" />
         <Skeleton width="100%" height="var(--spacing-10)" radius="rounded" />
       </VStack>
 

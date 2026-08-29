@@ -12,7 +12,7 @@ const serializeUser = (user) => {
   return safeUser;
 };
 
-const VALID_ROLES = ['customer', 'admin'];
+const VALID_ROLES = ['customer', 'staff', 'admin'];
 const ADMIN_EDITABLE_FIELDS = ['username', 'fullName', 'phone', 'address'];
 
 const normalizeEditableValue = (value) => {
@@ -126,7 +126,7 @@ const updateUserRole = async (req, res, next) => {
     const { role } = req.body;
 
     if (!VALID_ROLES.includes(role)) {
-      return errorResponse(res, 400, 'Vai trò phải là customer hoặc admin');
+      return errorResponse(res, 400, 'Vai trò phải là customer, staff hoặc admin');
     }
 
     if (req.user?.id === id) {
