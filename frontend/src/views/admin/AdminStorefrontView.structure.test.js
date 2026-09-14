@@ -11,11 +11,11 @@ const linkFieldsSource = readFileSync(new URL('../../components/admin/storefront
 const featuredManagerSource = readFileSync(new URL('../../components/admin/storefront/FeaturedProductManager.jsx', import.meta.url), 'utf8');
 
 test('AdminStorefrontView loads carousel navigation and categories without preloading products', () => {
-  assert.match(viewSource, /<Heading level=\{1\}>Storefront<\/Heading>/);
+  assert.match(viewSource, /<Heading level=\{1\}>Cửa hàng<\/Heading>/);
   assert.match(viewSource, /<TabList/);
-  assert.match(viewSource, /<Tab value="carousel" label="Carousel" \/>/);
-  assert.match(viewSource, /<Tab value="navigation" label="Navigation" \/>/);
-  assert.match(viewSource, /<Tab value="featuredProducts" label="Featured products" \/>/);
+  assert.match(viewSource, /<Tab value="carousel" label="Băng chuyền" \/>/);
+  assert.match(viewSource, /<Tab value="navigation" label="Điều hướng" \/>/);
+  assert.match(viewSource, /<Tab value="featuredProducts" label="Sản phẩm nổi bật" \/>/);
   assert.match(viewSource, /storefrontContentApi\.getAdminCarousel\(\)/);
   assert.match(viewSource, /storefrontContentApi\.getAdminNavigation\(\)/);
   assert.match(viewSource, /storefrontContentApi\.getAdminFeaturedProducts\(\)/);
@@ -35,7 +35,7 @@ test('admin storefront route and side nav are protected by the admin layout', ()
     routesSource,
     /<Route element=\{<AdminRoute \/>\}>[\s\S]*?<Route element=\{<AdminLayout \/>\}>[\s\S]*?<Route path="\/admin\/storefront" element=\{<AdminStorefrontView \/>\} \/>/
   );
-  assert.match(layoutSource, /label="Storefront"/);
+  assert.match(layoutSource, /label="Cửa hàng"/);
   assert.match(layoutSource, /href="\/admin\/storefront"/);
   assert.match(layoutSource, /location\.pathname\.startsWith\('\/admin\/storefront'\)/);
 });
@@ -44,7 +44,7 @@ test('storefront forms use product and category selectors instead of pasted inte
   assert.match(carouselFormSource, /<LinkTargetFields/);
   assert.match(navigationFormSource, /<LinkTargetFields/);
   assert.match(linkFieldsSource, /<ProductPicker/);
-  assert.match(linkFieldsSource, /label="Category target"/);
-  assert.match(linkFieldsSource, /placeholder="Select category"/);
+  assert.match(linkFieldsSource, /label="Danh mục đích"/);
+  assert.match(linkFieldsSource, /placeholder="Chọn danh mục"/);
   assert.match(featuredManagerSource, /<FeaturedProductBulkPicker/);
 });

@@ -116,7 +116,7 @@ test('completePasswordChange does not update password when otp claim fails', asy
       userId: 'user-1',
       passwordHash: 'new-hash',
     }),
-    /OTP is no longer valid/
+    /OTP không còn hợp lệ/
   );
   assert.equal(userUpdateCalled, false);
 });

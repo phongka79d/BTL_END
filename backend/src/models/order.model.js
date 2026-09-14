@@ -2,6 +2,26 @@ const prisma = require('../config/database');
 const { Prisma } = require('@prisma/client');
 
 /**
+ * Sơ đồ chuyển trạng thái đơn hàng được phép.
+ * Nguồn chân lý duy nhất cho vòng đời đơn hàng:
+ * pending → confirmed → shipping → completed, và mọi trạng thái chưa kết thúc
+ * đều có thể chuyển sang cancelled. completed/cancelled là trạng thái cuối.
+ */
+const ORDER_STATUS_TRANSITIONS = {
+  pending: ['confirmed', 'cancelled'],
+  confirmed: ['shipping', 'cancelled'],
+  shipping: ['completed', 'cancelled'],
+  completed: [],
+  cancelled: []
+};
+
+/**
+ * Các trạng thái mà khách hàng được phép tự hủy đơn
+ * (trước khi cửa hàng bàn giao đơn cho vận chuyển).
+ */
+const CUSTOMER_CANCELLABLE_STATUSES = ['pending', 'confirmed'];
+
+/**
  * Tìm đơn hàng theo ID.
  * @param {string} id 
  * @returns {Promise<Object|null>}
@@ -354,15 +374,17 @@ const listForAdmin = async (filters) => {
 };
 
 /**
- * Cập nhật trạng thái đơn hàng và xử lý tác dụng phụ (cập nhật thanh toán) trong giao dịch.
- * Từ chối giá trị trạng thái không xác định.
+ * Cập nhật trạng thái đơn hàng và xử lý tác dụng phụ trong giao dịch.
+ * - Từ chối giá trị trạng thái không xác định.
+ * - Từ chối chuyển trạng thái không nằm trong ORDER_STATUS_TRANSITIONS.
+ * - Hủy đơn sẽ hoàn trả tồn kho; hoàn tất đơn sẽ đánh dấu thanh toán đã trả.
  * 
  * @param {string} id - ID đơn hàng.
  * @param {string} status - Trạng thái đơn hàng mới.
  * @returns {Promise<Object>}
  */
 const updateStatus = async (id, status) => {
-  const allowedStatuses = ['pending', 'confirmed', 'shipping', 'completed', 'cancelled'];
+  const allowedStatuses = Object.keys(ORDER_STATUS_TRANSITIONS);
   if (!allowedStatuses.includes(status)) {
     throw new Error(`Trạng thái không hợp lệ: ${status}`);
   }
@@ -370,18 +392,38 @@ const updateStatus = async (id, status) => {
   return prisma.$transaction(async (tx) => {
     const order = await tx.order.findUnique({
       where: { id },
-      include: { payment: true }
+      include: { payment: true, details: true }
     });
 
     if (!order) {
       throw new Error(`Không tìm thấy đơn hàng có ID ${id}.`);
     }
 
-    // Cập nhật trạng thái.
-    await tx.order.update({
-      where: { id },
+    const allowedNextStatuses = ORDER_STATUS_TRANSITIONS[order.status] || [];
+    if (!allowedNextStatuses.includes(status)) {
+      throw new Error(`Không thể chuyển trạng thái từ ${order.status} sang ${status}.`);
+    }
+
+    // Cập nhật trạng thái kèm điều kiện trạng thái hiện tại chưa thay đổi,
+    // tránh xử lý trùng khi có nhiều yêu cầu đồng thời.
+    const updateResult = await tx.order.updateMany({
+      where: { id, status: order.status },
       data: { status }
     });
+
+    if (updateResult.count !== 1) {
+      throw new Error('Trạng thái đơn hàng đã thay đổi, vui lòng thử lại.');
+    }
+
+    // Tác dụng phụ: hủy đơn sẽ hoàn trả số lượng tồn kho đã trừ lúc đặt hàng.
+    if (status === 'cancelled') {
+      for (const detail of order.details) {
+        await tx.product.update({
+          where: { id: detail.productId },
+          data: { quantity: { increment: detail.quantity } }
+        });
+      }
+    }
 
     // Tác dụng phụ: trạng thái hoàn thành sẽ chuyển thanh toán sang đã trả.
     if (status === 'completed' && order.payment) {
@@ -434,6 +476,81 @@ const updateStatus = async (id, status) => {
   });
 };
 
+/**
+ * Khách hàng tự hủy đơn hàng của mình.
+ * Chỉ cho phép khi đơn thuộc về khách hàng và đang ở trạng thái chờ xác nhận
+ * hoặc đã xác nhận (trước khi bàn giao vận chuyển). Tồn kho được hoàn trả
+ * trong cùng giao dịch để tránh thất thoát số lượng.
+ * 
+ * @param {string} orderId - ID đơn hàng.
+ * @param {string} userId - ID khách hàng đang đăng nhập.
+ * @returns {Promise<Object>} Đơn hàng đã hủy kèm chi tiết và thanh toán.
+ */
+const cancelOwnOrder = async (orderId, userId) => {
+  return prisma.$transaction(async (tx) => {
+    const order = await tx.order.findUnique({
+      where: { id: orderId },
+      include: { details: true }
+    });
+
+    if (!order) {
+      throw new Error(`Không tìm thấy đơn hàng có ID ${orderId}.`);
+    }
+
+    if (order.userId !== userId) {
+      throw new Error('Không được phép hủy đơn hàng của người dùng khác.');
+    }
+
+    if (!CUSTOMER_CANCELLABLE_STATUSES.includes(order.status)) {
+      throw new Error(
+        'Chỉ có thể hủy đơn hàng đang chờ xác nhận hoặc đã xác nhận.'
+      );
+    }
+
+    const updateResult = await tx.order.updateMany({
+      where: { id: orderId, status: { in: CUSTOMER_CANCELLABLE_STATUSES } },
+      data: { status: 'cancelled' }
+    });
+
+    if (updateResult.count !== 1) {
+      throw new Error('Trạng thái đơn hàng đã thay đổi, vui lòng thử lại.');
+    }
+
+    for (const detail of order.details) {
+      await tx.product.update({
+        where: { id: detail.productId },
+        data: { quantity: { increment: detail.quantity } }
+      });
+    }
+
+    return tx.order.findUnique({
+      where: { id: orderId },
+      include: {
+        details: {
+          include: {
+            product: {
+              select: {
+                id: true,
+                name: true,
+                brand: true
+              }
+            }
+          }
+        },
+        payment: {
+          select: {
+            id: true,
+            paymentMethod: true,
+            paymentStatus: true,
+            amount: true,
+            paymentDate: true
+          }
+        }
+      }
+    });
+  });
+};
+
 module.exports = {
   findById,
   checkout,
@@ -441,4 +558,7 @@ module.exports = {
   findOwnedOrAdminVisible,
   listForAdmin,
   updateStatus,
+  cancelOwnOrder,
+  ORDER_STATUS_TRANSITIONS,
+  CUSTOMER_CANCELLABLE_STATUSES,
 };

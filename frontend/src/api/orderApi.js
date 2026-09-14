@@ -52,7 +52,15 @@ export const orderApi = {
     return apiClient.get(`/admin/orders${query ? `?${query}` : ''}`);
   },
   /**
-   * Cập nhật trạng thái đơn hàng (chỉ admin).
+   * Khách hàng tự hủy đơn hàng của mình
+   * (chỉ khi đơn đang chờ xác nhận hoặc đã xác nhận).
+   * @param {string|number} id - ID đơn hàng
+   * @returns {Promise<Object>} Đơn hàng đã hủy
+   */
+  cancelOrder: (id) => apiClient.put(`/orders/${id}/cancel`),
+
+  /**
+   * Cập nhật trạng thái đơn hàng (admin / staff).
    * @param {string|number} id - ID đơn hàng
    * @param {string} status - Giá trị trạng thái mới
    * @returns {Promise<Object>} Đơn hàng đã cập nhật

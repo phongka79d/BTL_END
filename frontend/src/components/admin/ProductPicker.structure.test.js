@@ -24,11 +24,11 @@ test('ProductPicker can show paginated products immediately for review moderatio
 });
 
 test('ProductPicker presents searchable result context for admin selection', () => {
-  assert.match(source, /label="Search products"/);
+  assert.match(source, /label="Tìm kiếm sản phẩm"/);
   assert.match(source, /product\.brand/);
   assert.match(source, /product\.category\?\.name/);
   assert.match(source, /formatPrice\(product\.price\)/);
-  assert.match(source, /Stock/);
+  assert.match(source, /Tồn kho/);
   assert.match(source, /onChange\(product\.id\)/);
 });
 
@@ -36,10 +36,10 @@ test('ProductPicker uses compact selected entity state instead of keeping search
   assert.match(source, /const \[isLoadingSelected, setIsLoadingSelected\] = useState\(false\);/);
   assert.match(source, /setIsLoadingSelected\(true\)/);
   assert.match(source, /setIsLoadingSelected\(false\)/);
-  assert.match(source, /Loading selected product\.\.\./);
+  assert.match(source, /Đang tải sản phẩm đã chọn\.\.\./);
   assert.match(source, /if \(isLoadingSelected\) \{/);
   assert.match(source, /if \(selectedProduct\) \{/);
-  assert.match(source, /label="Change Product"/);
+  assert.match(source, /label="Đổi sản phẩm"/);
   assert.match(source, /const handleChangeProduct = \(\) => \{/);
   assert.match(source, /onChange\(''\)/);
 });

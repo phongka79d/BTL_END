@@ -116,7 +116,7 @@ frontend/
 │   │   └── storefront/          # Storefront navigation link utilities
 │   │       └── storefrontLinkUtils.js
 │   ├── constants/               # Application-wide constants & permissions
-│   │   ├── orderConstants.js    # Order status definitions, labels, and badge colors
+│   │   ├── orderConstants.js    # Order status definitions, labels, badge colors, and allowed transition map
 │   │   └── permissions.js       # Centralized capability definitions matching backend
 │   ├── contexts/                # Global state providers
 │   │   ├── AuthContext.jsx      # Authentication state, token sync, user session
@@ -130,6 +130,7 @@ frontend/
 │   ├── routes/                  # Route definitions and route guards
 │   │   └── AppRoutes.jsx        # Route registry with PrivateRoute, AdminRoute, PublicOnlyRoute
 │   ├── utils/                   # Helper functions and business logic
+│   │   ├── csvExport.js         # Excel-ready UTF-8 (BOM) CSV builder and browser download helper
 │   │   └── passwordPolicy.js    # Client-side password validation matching backend policy
 │   ├── views/                   # Route page components
 │   │   ├── admin/               # Admin workspace views
@@ -181,7 +182,7 @@ The routing architecture is declared in `src/routes/AppRoutes.jsx` using React R
 | `/cart` | `MainLayout` | `PrivateRoute` | `CartView` | Shopping cart items, quantity modification, price total |
 | `/checkout` | `MainLayout` | `PrivateRoute` | `CheckoutView` | Shipping address entry and COD order confirmation |
 | `/orders` | `MainLayout` | `PrivateRoute` | `OrderHistoryView` | Customer order history list with status badges |
-| `/orders/:id` | `MainLayout` | `PrivateRoute` | `OrderDetailView` | Single order details, line items, and payment status |
+| `/orders/:id` | `MainLayout` | `PrivateRoute` | `OrderDetailView` | Single order details, line items, payment status, and customer self-cancel (`Hủy đơn hàng`) while the order is cancellable |
 | `/profile` | `MainLayout` | `PrivateRoute` | `ProfileView` | User details update and authenticated OTP password change |
 | `/staff` | `StaffLayout` | `StaffRoute` | `StaffDashboardView` | Operations dashboard (order backlog, stock alerts, review queue) |
 | `/staff/orders` | `StaffLayout` | `StaffRoute` | `StaffOrderView` | Order fulfillment queue and status transitions |
@@ -191,10 +192,10 @@ The routing architecture is declared in `src/routes/AppRoutes.jsx` using React R
 | `/admin` | `AdminLayout`| `AdminRoute` | `AdminDashboardView` | Admin dashboard overview |
 | `/admin/products` | `AdminLayout` | `AdminRoute` | `AdminProductView` | Full product catalog CRUD, pricing, and inventory |
 | `/admin/categories` | `AdminLayout` | `AdminRoute` | `AdminCategoryView` | Category hierarchy management |
-| `/admin/users` | `AdminLayout` | `AdminRoute` | `AdminUserView` | User list, role management (`customer`/`staff`/`admin`), account blocking |
-| `/admin/orders` | `AdminLayout` | `AdminRoute` | `AdminOrderView` | System order monitoring and status transitions |
+| `/admin/users` | `AdminLayout` | `AdminRoute` | `AdminUserView` | User list, role management (`customer`/`staff`/`admin`), account blocking, and the `UserCreateDialog` account-creation form |
+| `/admin/orders` | `AdminLayout` | `AdminRoute` | `AdminOrderView` | System order monitoring and lifecycle-limited status transitions |
 | `/admin/reviews`| `AdminLayout` | `AdminRoute` | `AdminReviewView` | Product review moderation (hiding inappropriate reviews) |
-| `/admin/reports`| `AdminLayout` | `AdminRoute` | `ReportView` | Financial revenue reports and best sellers |
+| `/admin/reports`| `AdminLayout` | `AdminRoute` | `ReportView` | Revenue, order-summary, and best-seller reports with date-range filtering and CSV export (`utils/csvExport.js`) |
 | `/admin/storefront` | `AdminLayout` | `AdminRoute` | `AdminStorefrontView` | Carousel, navigation tree, and featured products |
 | `/unauthorized` | `MainLayout` | Public | `UnauthorizedView` | Access denied notification |
 | `*` | `MainLayout` | Public | `NotFoundView` | 404 page |

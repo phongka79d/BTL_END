@@ -13,12 +13,12 @@ test('admin dashboard reuses report APIs and report components', () => {
   assert.match(source, /<RevenueSummaryCard/);
   assert.match(source, /<OrderSummaryCards/);
   assert.match(source, /<Alert/);
-  assert.match(source, /actionLabel="Retry"/);
+  assert.match(source, /actionLabel="Thử lại"/);
 });
 
 test('admin dashboard links to reports without unsupported UI or calculations', () => {
   assert.match(source, /navigate\('\/admin\/reports'\)/);
-  assert.match(source, /label="View reports"/);
+  assert.match(source, /label="Xem báo cáo"/);
   assert.doesNotMatch(source, /chart/i);
   assert.doesNotMatch(source, /reduce\(/);
   assert.doesNotMatch(source, /<div\b/);

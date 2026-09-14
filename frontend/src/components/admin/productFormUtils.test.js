@@ -26,11 +26,11 @@ test('validateProductForm requires core product fields', () => {
       categoryId: ''
     }),
     {
-      name: 'Product name is required.',
-      brand: 'Brand is required.',
-      price: 'Price is required.',
-      quantity: 'Quantity is required.',
-      categoryId: 'Category is required.'
+      name: 'Vui lòng nhập tên sản phẩm.',
+      brand: 'Vui lòng nhập thương hiệu.',
+      price: 'Vui lòng nhập giá.',
+      quantity: 'Vui lòng nhập số lượng.',
+      categoryId: 'Vui lòng chọn danh mục.'
     }
   );
 });

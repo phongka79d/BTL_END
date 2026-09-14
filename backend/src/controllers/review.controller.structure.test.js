@@ -8,6 +8,6 @@ test('review controller exposes admin all-review listing with optional product f
   assert.match(source, /const getAdminReviews = async \(req, res, next\) => \{/);
   assert.match(source, /const \{ productId \} = req\.query;/);
   assert.match(source, /reviewModel\.listVisibleForAdmin\(\{ productId \}\)/);
-  assert.match(source, /successResponse\(res, 200, 'Reviews retrieved successfully', reviews\)/);
+  assert.match(source, /successResponse\(res, 200, 'Đã lấy đánh giá thành công', reviews\)/);
   assert.match(source, /getAdminReviews,/);
 });

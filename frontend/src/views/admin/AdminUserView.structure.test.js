@@ -21,27 +21,37 @@ test('AdminUserView loads searchable paginated users and updates roles', () => {
   assert.match(viewSource, /<Pagination[\s\S]*page=\{pagination\.page\}[\s\S]*totalPages=\{pagination\.totalPages\}[\s\S]*onPageChange=\{setPage\}/);
 });
 
+test('AdminUserView creates accounts through the dedicated dialog and API', () => {
+  assert.match(viewSource, /import UserCreateDialog from '\.\.\/\.\.\/components\/admin\/UserCreateDialog';/);
+  assert.match(viewSource, /userApi\.createAdminUser\(payload\)/);
+  assert.match(viewSource, /label="Thêm tài khoản"/);
+  assert.match(viewSource, /<UserCreateDialog[\s\S]*onSubmit=\{handleCreateUser\}/);
+  assert.match(viewSource, /emailDelivery/);
+});
+
 test('AdminUserView provides admin user manager UI states', () => {
-  assert.match(viewSource, /Manage Users/);
-  assert.match(viewSource, /Search users/);
-  assert.match(viewSource, /Unable to load users/);
-  assert.match(viewSource, /Role updated/);
-  assert.match(viewSource, /User blocked/);
-  assert.match(viewSource, /Profile updated/);
+  assert.match(viewSource, /Quản lý người dùng/);
+  assert.match(viewSource, /Tìm kiếm người dùng/);
+  assert.match(viewSource, /Không thể tải người dùng/);
+  assert.match(viewSource, /Đã cập nhật vai trò/);
+  assert.match(viewSource, /Đã khóa người dùng/);
+  assert.match(viewSource, /Đã cập nhật hồ sơ/);
+  assert.match(viewSource, /Đã tạo tài khoản/);
 });
 
 test('UserManagementTable provides three-dot admin user actions and status badges', () => {
   assert.match(tableSource, /MoreMenu/);
   assert.match(tableSource, /AdminTable/);
-  assert.match(tableSource, /Change to admin/);
-  assert.match(tableSource, /Change to customer/);
-  assert.match(tableSource, /Block user/);
-  assert.match(tableSource, /Unblock user/);
-  assert.match(tableSource, /Edit profile/);
-  assert.match(tableSource, /Blocked/);
-  assert.match(tableSource, /Active/);
-  assert.match(tableSource, /No matching users/);
-  assert.match(tableSource, /No users yet/);
+  assert.match(tableSource, /Đổi thành Quản trị viên/);
+  assert.match(tableSource, /Đổi thành Nhân viên vận hành/);
+  assert.match(tableSource, /Đổi thành Khách hàng/);
+  assert.match(tableSource, /Khóa người dùng/);
+  assert.match(tableSource, /Mở khóa người dùng/);
+  assert.match(tableSource, /Chỉnh sửa hồ sơ/);
+  assert.match(tableSource, /Bị khóa/);
+  assert.match(tableSource, /Đang hoạt động/);
+  assert.match(tableSource, /Không có người dùng phù hợp/);
+  assert.match(tableSource, /Chưa có người dùng/);
   assert.match(tableSource, /isSelf/);
 });
 

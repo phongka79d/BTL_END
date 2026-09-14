@@ -11,14 +11,14 @@ test('RevenueSummaryCard uses Astryx cards and the shared currency formatter', (
   assert.match(source, /Card/);
   assert.match(source, /Skeleton/);
   assert.match(source, /formatPrice\(totalRevenue\)/);
-  assert.match(source, /Completed orders/);
+  assert.match(source, /Đơn hàng hoàn tất/);
   assert.doesNotMatch(source, /<div\b/);
 });
 
 test('BestSellingProductsTable reuses AdminTable with meaningful columns', () => {
   const source = readComponent('BestSellingProductsTable');
 
-  for (const header of ['Product', 'Brand', 'Sold quantity', 'Revenue']) {
+  for (const header of ['Sản phẩm', 'Thương hiệu', 'Số lượng đã bán', 'Doanh thu']) {
     assert.match(source, new RegExp(`header: '${header}'`));
   }
 

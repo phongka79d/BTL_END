@@ -57,7 +57,7 @@ test('login rejects blocked users before issuing a token', async () => {
   );
 
   assert.equal(response.statusCode, 403);
-  assert.equal(response.body.message, 'Your account has been blocked');
+  assert.equal(response.body.message, 'Tài khoản của bạn đã bị khóa');
   assert.equal(response.body.data, undefined);
 });
 
@@ -82,7 +82,7 @@ test('login accepts existing weak passwords when the hash matches', async () => 
   );
 
   assert.equal(response.statusCode, 200);
-  assert.equal(response.body.message, 'Login successful');
+  assert.equal(response.body.message, 'Đăng nhập thành công');
   assert.equal(response.body.data.user.email, 'legacy@example.com');
 });
 
@@ -107,7 +107,7 @@ test('login rejects existing weak passwords when the hash does not match', async
   );
 
   assert.equal(response.statusCode, 401);
-  assert.equal(response.body.message, 'Invalid email or password');
+  assert.equal(response.body.message, 'Email hoặc mật khẩu không hợp lệ');
 });
 
 test('requestPasswordChangeOtp rejects unauthenticated users', async () => {
@@ -121,7 +121,7 @@ test('requestPasswordChangeOtp rejects unauthenticated users', async () => {
   );
 
   assert.equal(response.statusCode, 401);
-  assert.equal(response.body.message, 'User not authenticated');
+  assert.equal(response.body.message, 'Người dùng chưa được xác thực');
 });
 
 test('requestPasswordChangeOtp verifies current password before creating otp', async () => {
@@ -147,7 +147,7 @@ test('requestPasswordChangeOtp verifies current password before creating otp', a
   );
 
   assert.equal(response.statusCode, 400);
-  assert.equal(response.body.message, 'Current password is incorrect');
+  assert.equal(response.body.message, 'Mật khẩu hiện tại không chính xác');
   assert.equal(created, false);
 });
 
@@ -180,7 +180,7 @@ test('requestPasswordChangeOtp creates and sends otp after current password pass
   );
 
   assert.equal(response.statusCode, 200);
-  assert.equal(response.body.message, 'Password change OTP sent');
+  assert.equal(response.body.message, 'Đã gửi OTP đổi mật khẩu');
   assert.equal(createdPayload.userId, 'user-1');
   assert.match(createdPayload.otpHash, /^\$2/);
   assert.equal(emailPayload.to, 'ada@example.com');
@@ -211,7 +211,7 @@ test('confirmPasswordChange rejects mismatched new password confirmation without
   );
 
   assert.equal(response.statusCode, 400);
-  assert.equal(response.body.message, 'New password and confirmation password must match');
+  assert.equal(response.body.message, 'Mật khẩu mới và mật khẩu xác nhận phải khớp nhau');
   assert.equal(completed, false);
 });
 
@@ -239,7 +239,7 @@ test('confirmPasswordChange rejects new passwords outside the shared policy with
   );
 
   assert.equal(response.statusCode, 400);
-  assert.equal(response.body.message, PASSWORD_POLICY_MESSAGE.replace('Password', 'New password'));
+  assert.equal(response.body.message, PASSWORD_POLICY_MESSAGE.replace('Mật khẩu', 'Mật khẩu mới'));
   assert.equal(completed, false);
 });
 
@@ -287,7 +287,7 @@ test('confirmPasswordChange rejects invalid otp and does not update password', a
   );
 
   assert.equal(response.statusCode, 400);
-  assert.equal(response.body.message, 'Invalid OTP');
+  assert.equal(response.body.message, 'OTP không hợp lệ');
   assert.equal(attemptsIncremented, true);
   assert.equal(completed, false);
 });
@@ -332,7 +332,7 @@ test('confirmPasswordChange updates password only after current password and otp
   );
 
   assert.equal(response.statusCode, 200);
-  assert.equal(response.body.message, 'Password changed successfully');
+  assert.equal(response.body.message, 'Đổi mật khẩu thành công');
   assert.equal(completedPayload.otpId, 'otp-1');
   assert.equal(completedPayload.userId, 'user-1');
   assert.equal(await bcrypt.compare('NewPassword1!', completedPayload.passwordHash), true);
@@ -359,7 +359,7 @@ test('requestForgotPasswordOtp returns generic success without creating otp for 
   );
 
   assert.equal(response.statusCode, 200);
-  assert.equal(response.body.message, 'If an account exists, a password reset OTP has been sent');
+  assert.equal(response.body.message, 'Nếu tài khoản tồn tại, OTP đặt lại mật khẩu đã được gửi');
   assert.equal(created, false);
   assert.equal(emailed, false);
 });
@@ -390,7 +390,7 @@ test('requestForgotPasswordOtp creates and emails otp for an existing user', asy
   );
 
   assert.equal(response.statusCode, 200);
-  assert.equal(response.body.message, 'If an account exists, a password reset OTP has been sent');
+  assert.equal(response.body.message, 'Nếu tài khoản tồn tại, OTP đặt lại mật khẩu đã được gửi');
   assert.equal(createdPayload.userId, 'user-1');
   assert.match(createdPayload.otpHash, /^\$2/);
   assert.equal(emailPayload.to, 'ada@example.com');
@@ -431,7 +431,7 @@ test('verifyForgotPasswordOtp rejects invalid otp without updating password', as
   );
 
   assert.equal(response.statusCode, 400);
-  assert.equal(response.body.message, 'Invalid OTP');
+  assert.equal(response.body.message, 'OTP không hợp lệ');
   assert.equal(attemptsIncremented, true);
   assert.equal(completed, false);
 });
@@ -466,7 +466,7 @@ test('verifyForgotPasswordOtp rejects expired otp with a clear message', async (
   );
 
   assert.equal(response.statusCode, 400);
-  assert.equal(response.body.message, 'OTP has expired');
+  assert.equal(response.body.message, 'OTP đã hết hạn');
   assert.equal(invalidatedUserId, 'user-1');
 });
 
@@ -507,7 +507,7 @@ test('resetForgotPassword updates password only after otp and password confirmat
   );
 
   assert.equal(response.statusCode, 200);
-  assert.equal(response.body.message, 'Password reset successfully');
+  assert.equal(response.body.message, 'Đặt lại mật khẩu thành công');
   assert.equal(completedPayload.otpId, 'otp-1');
   assert.equal(completedPayload.userId, 'user-1');
   assert.equal(await bcrypt.compare('NewPassword1!', completedPayload.passwordHash), true);
@@ -541,6 +541,6 @@ test('resetForgotPassword rejects new passwords outside the shared policy withou
   );
 
   assert.equal(response.statusCode, 400);
-  assert.equal(response.body.message, PASSWORD_POLICY_MESSAGE.replace('Password', 'New password'));
+  assert.equal(response.body.message, PASSWORD_POLICY_MESSAGE.replace('Mật khẩu', 'Mật khẩu mới'));
   assert.equal(completed, false);
 });

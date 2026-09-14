@@ -49,6 +49,6 @@ test('protect rejects blocked users even when their token is otherwise valid', a
   );
 
   assert.equal(response.statusCode, 403);
-  assert.equal(response.body.message, 'Your account has been blocked');
+  assert.equal(response.body.message, 'Tài khoản của bạn đã bị khóa');
   assert.equal(nextCalled, false);
 });

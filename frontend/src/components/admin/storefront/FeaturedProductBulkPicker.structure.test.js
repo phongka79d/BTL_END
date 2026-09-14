@@ -12,7 +12,7 @@ test('FeaturedProductBulkPicker uses Astryx checkboxes to select multiple search
   assert.match(source, /<CheckboxList[\s\S]*value=\{selectedProductIds\}[\s\S]*onChange=\{setSelectedProductIds\}/);
   assert.match(source, /<CheckboxListItem[\s\S]*value=\{product\.id\}/);
   assert.match(source, /onAddProducts\(\{ productIds: selectedProductIds \}\)/);
-  assert.match(source, /label=\{`Add \$\{selectedProductIds\.length\} selected products`\}/);
+  assert.match(source, /label=\{`Thêm \$\{selectedProductIds\.length\} sản phẩm đã chọn`\}/);
 });
 
 test('FeaturedProductManager delegates adding to the bulk picker instead of manual sort order input', () => {

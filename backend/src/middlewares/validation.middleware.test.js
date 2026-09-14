@@ -60,7 +60,7 @@ test('validateBody applies shared password policy to registration passwords when
   );
 
   assert.equal(response.statusCode, 400);
-  assert.equal(response.body.message, 'Validation failed');
+  assert.equal(response.body.message, 'Xác thực thất bại');
   assert.deepEqual(response.body.errors, [
     {
       field: 'password',

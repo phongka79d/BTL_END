@@ -136,7 +136,7 @@ test('validateLinkTarget rejects missing product targets', async () => {
       linkType: 'product',
       productId: 'missing-product',
     }),
-    /Product link target was not found/
+    /Không tìm thấy đích liên kết sản phẩm/
   );
 });
 
@@ -158,7 +158,7 @@ test('validateLinkTarget rejects invalid custom URLs', async () => {
       linkType: 'customUrl',
       customUrl: 'products',
     }),
-    /Custom URL must start/
+    /URL tùy chỉnh phải bắt đầu/
   );
 });
 

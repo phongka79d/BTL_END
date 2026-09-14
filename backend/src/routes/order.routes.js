@@ -15,6 +15,9 @@ router.get('/my-orders', protect, orderController.getMyOrders);
 // GET /api/orders/:id
 router.get('/:id', protect, orderController.getOrderById);
 
+// PUT /api/orders/:id/cancel — khách hàng tự hủy đơn của mình khi còn cho phép.
+router.put('/:id/cancel', protect, orderController.cancelMyOrder);
+
 // Route quản trị/vận hành — yêu cầu quyền xem và xử lý đơn hàng (Staff & Admin).
 // GET /api/admin/orders
 router.get('/', protect, requirePermission(PERMISSIONS.ORDERS_VIEW_ALL), orderController.getAdminOrders);

@@ -9,7 +9,7 @@ import {
 
 test('validateCategoryForm requires a category name', () => {
   assert.deepEqual(validateCategoryForm({ name: '', description: '' }), {
-    name: 'Category name is required.'
+    name: 'Vui lòng nhập tên danh mục.'
   });
 });
 

@@ -17,10 +17,10 @@ test('carousel form validation requires active slide content and link target', (
     productId: '',
     isActive: true,
   }), {
-    title: 'Title is required.',
-    imageUrl: 'Image URL is required for active slides.',
-    primaryButtonLabel: 'Button label is required.',
-    productId: 'Product target is required.',
+    title: 'Tiêu đề là bắt buộc.',
+    imageUrl: 'URL hình ảnh là bắt buộc đối với slide đang kích hoạt.',
+    primaryButtonLabel: 'Nhãn nút là bắt buộc.',
+    productId: 'Đích sản phẩm là bắt buộc.',
   });
 });
 
@@ -64,8 +64,8 @@ test('navigation validation enforces mega-menu child parent and target', () => {
     categoryId: '',
     isActive: true,
   }), {
-    label: 'Label is required.',
-    categoryId: 'Category target is required.',
+    label: 'Nhãn là bắt buộc.',
+    categoryId: 'Đích danh mục là bắt buộc.',
   });
 });
 

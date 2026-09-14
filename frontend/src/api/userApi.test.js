@@ -12,6 +12,7 @@ test('user API helper exposes admin list and role update calls', () => {
   assert.match(source, /params\.set\('limit', String\(filters\.limit\)\)/);
   assert.match(source, /getAdminUsers:\s*\(filters = \{\}\)\s*=>\s*apiClient\.get\(`\/admin\/users\$\{buildUserQuery\(filters\)\}`\)/);
   assert.match(source, /updateAdminUser:\s*\(userId,\s*payload\)\s*=>\s*apiClient\.put\(`\/admin\/users\/\$\{userId\}`,\s*payload\)/);
+  assert.match(source, /createAdminUser:\s*\(payload\)\s*=>\s*apiClient\.post\('\/admin\/users',\s*payload\)/);
   assert.match(source, /updateUserRole:\s*\(userId,\s*role\)\s*=>\s*apiClient\.put\(`\/admin\/users\/\$\{userId\}\/role`,\s*\{ role \}\)/);
   assert.match(source, /updateUserBlocked:\s*\(userId,\s*isBlocked\)\s*=>\s*apiClient\.put\(`\/admin\/users\/\$\{userId\}\/block`,\s*\{ isBlocked \}\)/);
 });

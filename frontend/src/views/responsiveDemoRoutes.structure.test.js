@@ -71,7 +71,7 @@ test('customer and auth shells use the tsshop title', () => {
 
   assert.match(index, /<title>tsshop<\/title>/);
   assert.match(authLayout, />tsshop<\/Text>/);
-  assert.match(mainLayout, /label="tsshop storefront navigation"/);
+  assert.match(mainLayout, /label="Điều hướng cửa hàng tsshop"/);
   assert.match(mainLayout, /heading="tsshop"/);
   assert.match(mainLayout, /2026 tsshop/);
   assert.doesNotMatch(`${index}\n${authLayout}\n${mainLayout}`, /TechMart|Lumen|Electronics E-Commerce/);
@@ -80,13 +80,14 @@ test('customer and auth shells use the tsshop title', () => {
 test('customer and admin order tables are constrained scroll containers', () => {
   const orderHistory = readView('OrderHistoryView.jsx');
   const adminTable = readComponent('admin/AdminTable.jsx');
+  const dataTable = readComponent('common/DataTable.jsx');
 
-  for (const source of [orderHistory, adminTable]) {
-    assert.match(
-      source,
-      /<Card padding=\{0\} style=\{\{ width: '100%', minWidth: 0 \}\}>/
-    );
-  }
+  assert.match(adminTable, /<Card padding=\{0\} style=\{\{ width: '100%', minWidth: 0 \}\}>/);
+
+  // The customer order table renders the shared DataTable, which owns the constrained scroll container.
+  assert.match(orderHistory, /<DataTable[\s\S]*?data=\{pagedOrders\}/);
+  assert.match(dataTable, /<Card\s+padding=\{0\}[\s\S]*?style=\{\{[\s\S]*?overflow: 'hidden'/);
+  assert.match(dataTable, /<div style=\{\{ overflowX: 'auto', width: '100%' \}\}>/);
 });
 
 test('empty cart renders one Browse products action', () => {
@@ -96,7 +97,7 @@ test('empty cart renders one Browse products action', () => {
   ].join('\n');
 
   assert.equal(
-    (cartSources.match(/label="Browse products"/g) || []).length,
+    (cartSources.match(/label="Xem sản phẩm"/g) || []).length,
     1
   );
 });

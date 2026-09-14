@@ -22,5 +22,5 @@ test('describeLinkTarget creates admin table copy', () => {
   assert.equal(describeLinkTarget({ type: 'product', productId: 'p1' }), 'Product p1');
   assert.equal(describeLinkTarget({ type: 'category', categoryId: 'c1' }), 'Category c1');
   assert.equal(describeLinkTarget({ type: 'customUrl', customUrl: '/sale' }), '/sale');
-  assert.equal(describeLinkTarget(null), 'No link target');
+  assert.equal(describeLinkTarget(null), 'Chưa có đích liên kết');
 });

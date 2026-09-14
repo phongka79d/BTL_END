@@ -18,7 +18,7 @@ test('ProductDetailView renders review states and refreshes after submit', () =>
   assert.match(source, /await loadReviews\(\);/);
   assert.match(source, /<ProductReviewList[\s\S]*reviews=\{reviews\}[\s\S]*isLoading=\{isReviewsLoading\}[\s\S]*error=\{reviewsError\}[\s\S]*onRetry=\{loadReviews\}/);
   assert.match(source, /<ProductReviewForm[\s\S]*onSubmit=\{handleReviewSubmit\}[\s\S]*isSubmitting=\{isReviewSubmitting\}/);
-  assert.match(source, /Sign in to write a review/);
+  assert.match(source, /Đăng nhập để viết đánh giá/);
 });
 
 test('ProductDetailView keeps review integration in the view layer only', () => {

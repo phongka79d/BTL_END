@@ -11,7 +11,7 @@ test('RegisterView validates password with the shared password policy', () => {
 });
 
 test('RegisterView uses the tsshop title in registration copy', () => {
-  assert.match(source, /Welcome to tsshop/);
-  assert.match(source, /Join tsshop to start shopping/);
+  assert.match(source, /Chào mừng bạn đến với tsshop/);
+  assert.match(source, /Tham gia tsshop để bắt đầu mua sắm/);
   assert.doesNotMatch(source, /TechMart/);
 });

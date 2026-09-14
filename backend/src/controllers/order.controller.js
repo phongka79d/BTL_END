@@ -113,7 +113,36 @@ const getAdminOrders = async (req, res, next) => {
   }
 };
 /**
- * Admin: Cập nhật trạng thái đơn hàng
+ * Khách hàng tự hủy đơn hàng của mình (trước khi bàn giao vận chuyển).
+ * PUT /api/orders/:id/cancel
+ */
+const cancelMyOrder = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const userId = req.user.id;
+
+    const cancelledOrder = await orderModel.cancelOwnOrder(id, userId);
+    return successResponse(res, 200, 'Đã hủy đơn hàng thành công', cancelledOrder);
+  } catch (error) {
+    const message = error.message || '';
+    if (/Không tìm thấy đơn hàng|not found/i.test(message)) {
+      return errorResponse(res, 404, message);
+    }
+    if (/Không được phép|Unauthorized|permission/i.test(message)) {
+      return errorResponse(res, 403, message);
+    }
+    if (/đã thay đổi/.test(message)) {
+      return errorResponse(res, 409, message);
+    }
+    if (/Chỉ có thể hủy/.test(message)) {
+      return errorResponse(res, 400, message);
+    }
+    next(error);
+  }
+};
+
+/**
+ * Admin / Staff: Cập nhật trạng thái đơn hàng
  * PUT /api/admin/orders/:id/status
  */
 const updateOrderStatus = async (req, res, next) => {
@@ -128,11 +157,15 @@ const updateOrderStatus = async (req, res, next) => {
     const updatedOrder = await orderModel.updateStatus(id, status.trim().toLowerCase());
     return successResponse(res, 200, 'Đã cập nhật trạng thái đơn hàng thành công', updatedOrder);
   } catch (error) {
-    if (error.message && error.message.startsWith('Invalid status')) {
-      return errorResponse(res, 400, error.message);
+    const message = error.message || '';
+    if (/Trạng thái không hợp lệ|Không thể chuyển trạng thái|Invalid status/.test(message)) {
+      return errorResponse(res, 400, message);
     }
-    if (error.message && error.message.includes('not found')) {
-      return errorResponse(res, 404, error.message);
+    if (/Không tìm thấy đơn hàng|not found/i.test(message)) {
+      return errorResponse(res, 404, message);
+    }
+    if (/đã thay đổi/.test(message)) {
+      return errorResponse(res, 409, message);
     }
     next(error);
   }
@@ -143,5 +176,6 @@ module.exports = {
   getMyOrders,
   getOrderById,
   getAdminOrders,
+  cancelMyOrder,
   updateOrderStatus,
 };

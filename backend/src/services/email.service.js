@@ -77,11 +77,11 @@ const createSmtpTransport = (config) => {
   });
 };
 
-const sendPasswordChangeOtpEmail = async ({ to, otp }) => {
+const sendMail = async ({ to, subject, text, consoleMessage }) => {
   const mode = getDeliveryMode();
 
   if (mode === 'console') {
-    console.info(`Password change OTP for ${to}: ${otp}`);
+    console.info(consoleMessage);
     return { delivery: 'console' };
   }
 
@@ -95,13 +95,51 @@ const sendPasswordChangeOtpEmail = async ({ to, otp }) => {
   await transporter.sendMail({
     from: smtpConfig.from,
     to,
-    subject: 'Your tsshop password change OTP',
-    text: `Your password change OTP is ${otp}. It expires in ${process.env.PASSWORD_OTP_EXPIRES_MINUTES || 10} minutes.`,
+    subject,
+    text,
   });
 
   return { delivery: 'smtp' };
 };
 
+const sendPasswordChangeOtpEmail = async ({ to, otp }) => {
+  return sendMail({
+    to,
+    subject: 'Your tsshop password change OTP',
+    text: `Your password change OTP is ${otp}. It expires in ${process.env.PASSWORD_OTP_EXPIRES_MINUTES || 10} minutes.`,
+    consoleMessage: `Password change OTP for ${to}: ${otp}`,
+  });
+};
+
+/**
+ * Gửi thông tin đăng nhập cho tài khoản vừa được quản trị viên tạo.
+ * @param {Object} params
+ * @param {string} params.to - Email đăng nhập của tài khoản mới.
+ * @param {string} params.temporaryPassword - Mật khẩu tạm thời do quản trị viên đặt.
+ * @param {string} [params.fullName] - Tên người nhận.
+ * @param {string} [params.role] - Vai trò của tài khoản mới.
+ * @returns {Promise<Object>}
+ */
+const sendAccountCredentialsEmail = async ({ to, temporaryPassword, fullName, role = 'staff' }) => {
+  const greeting = fullName ? `Xin chào ${fullName},` : 'Xin chào,';
+
+  return sendMail({
+    to,
+    subject: 'Thông tin tài khoản tsshop',
+    text: [
+      greeting,
+      '',
+      `Tài khoản ${role} của bạn trên tsshop đã được tạo.`,
+      `Email đăng nhập: ${to}`,
+      `Mật khẩu tạm thời: ${temporaryPassword}`,
+      '',
+      'Vui lòng đăng nhập và đổi mật khẩu ngay sau lần đăng nhập đầu tiên.',
+    ].join('\n'),
+    consoleMessage: `Account credentials for ${to} (${role}): ${temporaryPassword}`,
+  });
+};
+
 module.exports = {
   sendPasswordChangeOtpEmail,
+  sendAccountCredentialsEmail,
 };

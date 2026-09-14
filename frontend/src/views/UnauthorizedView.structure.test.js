@@ -11,9 +11,9 @@ test('unauthorized view gives clear recovery actions without direct data access'
 
   assert.match(source, /export const UnauthorizedView/);
   assert.match(source, /useAuth\(\)/);
-  assert.match(source, /Access restricted/);
-  assert.match(source, /label: 'Back to store'/);
-  assert.match(source, /label: 'My profile'/);
-  assert.match(source, /label: 'Sign in'/);
+  assert.match(source, /Quyền truy cập bị hạn chế/);
+  assert.match(source, /label="Quay lại cửa hàng"/);
+  assert.match(source, /'Hồ sơ của tôi'/);
+  assert.match(source, /'Đăng nhập'/);
   assert.doesNotMatch(source, /fetch\(|supabase|DATABASE_URL|PrismaClient/);
 });

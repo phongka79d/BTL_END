@@ -11,9 +11,27 @@ const COMPLETED_PAID_COD_ORDER = {
   },
 };
 
-const getRevenue = async () => {
+/**
+ * Tạo điều kiện lọc theo khoảng thời gian đặt hàng.
+ * Trả về null khi không có khoảng để giữ nguyên hình dạng truy vấn cũ.
+ * @param {{startDate?: Date, endDate?: Date}|null} range
+ * @returns {Object|null}
+ */
+const buildCreatedAtRange = (range) => {
+  if (!range || (!range.startDate && !range.endDate)) {
+    return null;
+  }
+
+  const createdAt = {};
+  if (range.startDate) createdAt.gte = range.startDate;
+  if (range.endDate) createdAt.lte = range.endDate;
+
+  return { createdAt };
+};
+
+const getRevenue = async (range) => {
   const result = await prisma.order.aggregate({
-    where: COMPLETED_PAID_COD_ORDER,
+    where: { ...COMPLETED_PAID_COD_ORDER, ...buildCreatedAtRange(range) },
     _sum: { totalAmount: true },
     _count: { _all: true },
   });
@@ -24,10 +42,10 @@ const getRevenue = async () => {
   };
 };
 
-const getBestSellingProducts = async () => {
+const getBestSellingProducts = async (range) => {
   const groups = await prisma.orderDetail.groupBy({
     by: ['productId', 'price'],
-    where: { order: COMPLETED_PAID_COD_ORDER },
+    where: { order: { ...COMPLETED_PAID_COD_ORDER, ...buildCreatedAtRange(range) } },
     _sum: { quantity: true },
   });
 
@@ -78,9 +96,11 @@ const getBestSellingProducts = async () => {
     });
 };
 
-const getOrderSummary = async () => {
+const getOrderSummary = async (range) => {
+  const rangeFilter = buildCreatedAtRange(range);
   const groups = await prisma.order.groupBy({
     by: ['status'],
+    ...(rangeFilter ? { where: rangeFilter } : {}),
     _count: { _all: true },
   });
   const summary = {

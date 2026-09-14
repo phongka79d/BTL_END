@@ -11,7 +11,10 @@ import {
   VStack,
 } from '@astryxdesign/core';
 import { orderApi } from '../api/orderApi';
+import { useNotification } from '../contexts/NotificationContext';
+import { isCustomerCancellable } from '../constants/orderConstants';
 import Alert from '../components/common/Alert';
+import ConfirmationDialog from '../components/common/ConfirmationDialog';
 import OrderDetailPanel from '../components/order/OrderDetailPanel';
 
 /**
@@ -34,11 +37,43 @@ import OrderDetailPanel from '../components/order/OrderDetailPanel';
 export const OrderDetailView = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const notification = useNotification();
 
   const [order, setOrder] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [httpStatus, setHttpStatus] = useState(null);
+  const [isCancelDialogOpen, setIsCancelDialogOpen] = useState(false);
+  const [isCancelling, setIsCancelling] = useState(false);
+
+  const handleCancelOrder = useCallback(async () => {
+    if (!order?.id) return;
+
+    setIsCancelling(true);
+
+    try {
+      const response = await orderApi.cancelOrder(order.id);
+      const cancelledOrder = response?.data || response;
+
+      setOrder((currentOrder) => ({
+        ...(currentOrder || {}),
+        ...(cancelledOrder || {}),
+        status: 'cancelled'
+      }));
+      setIsCancelDialogOpen(false);
+      notification.success({
+        title: 'Đã hủy đơn hàng',
+        description: 'Đơn hàng của bạn đã được hủy thành công.'
+      });
+    } catch (err) {
+      notification.error({
+        title: 'Không thể hủy đơn hàng',
+        description: err?.message || 'Không thể hủy đơn hàng. Vui lòng thử lại.'
+      });
+    } finally {
+      setIsCancelling(false);
+    }
+  }, [order, notification]);
 
   const fetchOrder = useCallback(async () => {
     setIsLoading(true);
@@ -230,16 +265,39 @@ export const OrderDetailView = () => {
         </Text>
       </VStack>
 
-      <HStack style={{ justifyContent: 'flex-start' }}>
+      <HStack justify="between" align="center" style={{ flexWrap: 'wrap' }}>
         <Button
           label="← Quay lại đơn hàng"
           variant="ghost"
           size="small"
           onClick={() => navigate('/orders')}
         />
+
+        {isCustomerCancellable(order.status) && (
+          <Button
+            label="Hủy đơn hàng"
+            variant="destructive"
+            size="small"
+            isLoading={isCancelling}
+            isDisabled={isCancelling}
+            onClick={() => setIsCancelDialogOpen(true)}
+          />
+        )}
       </HStack>
 
       <OrderDetailPanel order={order} />
+
+      <ConfirmationDialog
+        isOpen={isCancelDialogOpen}
+        onClose={() => setIsCancelDialogOpen(false)}
+        onConfirm={handleCancelOrder}
+        title="Hủy đơn hàng"
+        message="Bạn có chắc muốn hủy đơn hàng này? Số lượng sản phẩm sẽ được hoàn trả về kho và hành động này không thể hoàn tác."
+        confirmLabel="Hủy đơn hàng"
+        cancelLabel="Giữ đơn hàng"
+        variant="danger"
+        loading={isCancelling}
+      />
     </VStack>
   );
 };

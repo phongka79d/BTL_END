@@ -45,13 +45,13 @@ const createResponse = () => {
 test('report controllers return the three Plan 4 response shapes', async () => {
   const reportController = require('./report.controller');
   const cases = [
-    ['getRevenueReport', 'Revenue report retrieved successfully', modelResults.revenue],
+    ['getRevenueReport', 'Đã lấy báo cáo doanh thu thành công', { ...modelResults.revenue, range: null }],
     [
       'getBestSellingProductsReport',
-      'Best-selling products report retrieved successfully',
+      'Đã lấy báo cáo sản phẩm bán chạy thành công',
       modelResults.bestSellingProducts,
     ],
-    ['getOrderSummaryReport', 'Order summary report retrieved successfully', modelResults.orderSummary],
+    ['getOrderSummaryReport', 'Đã lấy báo cáo tổng quan đơn hàng thành công', { ...modelResults.orderSummary, range: null }],
   ];
 
   for (const [method, message, data] of cases) {
@@ -84,10 +84,9 @@ test('report controllers forward aggregation failures to error middleware', asyn
   assert.equal(response.statusCode, null);
 });
 
-test('report routes protect every endpoint with authentication and admin middleware', () => {
+test('report routes protect every endpoint with authentication and a capability gate', () => {
   const reportController = require('./report.controller');
   const { protect } = require('../middlewares/auth.middleware');
-  const { admin } = require('../middlewares/admin.middleware');
   const reportRouter = require('../routes/report.routes');
 
   const routes = reportRouter.stack
@@ -98,23 +97,66 @@ test('report routes protect every endpoint with authentication and admin middlew
       handlers: layer.route.stack.map((routeLayer) => routeLayer.handle),
     }));
 
-  assert.deepEqual(routes, [
-    {
-      path: '/revenue',
-      method: 'get',
-      handlers: [protect, admin, reportController.getRevenueReport],
+  assert.deepEqual(
+    routes.map((route) => `${route.method} ${route.path}`),
+    ['get /revenue', 'get /best-selling-products', 'get /order-summary']
+  );
+
+  const controllersByPath = {
+    '/revenue': reportController.getRevenueReport,
+    '/best-selling-products': reportController.getBestSellingProductsReport,
+    '/order-summary': reportController.getOrderSummaryReport,
+  };
+
+  for (const route of routes) {
+    assert.equal(route.handlers.length, 3);
+    assert.equal(route.handlers[0], protect);
+    assert.equal(typeof route.handlers[1], 'function');
+    assert.equal(route.handlers[2], controllersByPath[route.path]);
+  }
+});
+
+test('report capability gate rejects customers without touching the controller', () => {
+  const reportRouter = require('../routes/report.routes');
+  const revenueRoute = reportRouter.stack
+    .filter((layer) => layer.route && layer.route.path === '/revenue')[0];
+  const capabilityGate = revenueRoute.route.stack[1].handle;
+
+  const createResponse = () => ({
+    statusCode: null,
+    body: null,
+    status(code) {
+      this.statusCode = code;
+      return this;
     },
-    {
-      path: '/best-selling-products',
-      method: 'get',
-      handlers: [protect, admin, reportController.getBestSellingProductsReport],
+    json(data) {
+      this.body = data;
+      return this;
     },
-    {
-      path: '/order-summary',
-      method: 'get',
-      handlers: [protect, admin, reportController.getOrderSummaryReport],
-    },
-  ]);
+  });
+
+  const forbidden = createResponse();
+  let reachedController = false;
+
+  capabilityGate(
+    { user: { id: 'customer_1', role: 'customer' } },
+    forbidden,
+    () => {
+      reachedController = true;
+    }
+  );
+
+  assert.equal(reachedController, false);
+  assert.equal(forbidden.statusCode, 403);
+  assert.equal(forbidden.body.success, false);
+
+  const unauthenticated = createResponse();
+  capabilityGate({}, unauthenticated, () => {
+    reachedController = true;
+  });
+
+  assert.equal(reachedController, false);
+  assert.equal(unauthenticated.statusCode, 401);
 });
 
 test('report router is mounted at /api/admin/reports', async () => {
@@ -129,7 +171,7 @@ test('report router is mounted at /api/admin/reports', async () => {
     const body = await response.json();
 
     assert.equal(response.status, 401);
-    assert.equal(body.message, 'Not authorized, no token provided');
+    assert.equal(body.message, 'Không được phép, chưa cung cấp token');
   } finally {
     await new Promise((resolve, reject) => {
       server.close((error) => (error ? reject(error) : resolve()));

@@ -3,18 +3,23 @@ import { Selector, VStack } from '@astryxdesign/core';
 import { orderApi } from '../../api/orderApi';
 import { useNotification } from '../../contexts/NotificationContext';
 import {
-  ORDER_STATUS_VALUES,
   ORDER_STATUS_LABELS,
+  getAllowedNextStatuses,
 } from '../../constants/orderConstants';
 
 /**
- * Ánh xạ các giá trị trạng thái đơn hàng thành đối tượng tùy chọn Selector
- * được thành phần Selector của Astryx sử dụng.
+ * Chỉ cho phép chọn trạng thái hiện tại hoặc trạng thái kế tiếp hợp lệ,
+ * khớp với sơ đồ chuyển trạng thái mà backend thực thi.
  */
-const STATUS_OPTIONS = ORDER_STATUS_VALUES.map((value) => ({
-  label: ORDER_STATUS_LABELS[value] || value,
-  value,
-}));
+const buildStatusOptions = (currentStatus) => {
+  const selectableStatuses = [currentStatus, ...getAllowedNextStatuses(currentStatus)]
+    .filter(Boolean);
+
+  return selectableStatuses.map((value) => ({
+    label: ORDER_STATUS_LABELS[value] || value,
+    value,
+  }));
+};
 
 /**
  * OrderStatusSelect
@@ -78,6 +83,9 @@ export const OrderStatusSelect = ({ order, onStatusUpdated }) => {
     [notification, order, onStatusUpdated]
   );
 
+  const statusOptions = buildStatusOptions(order.status);
+  const hasTransitions = getAllowedNextStatuses(order.status).length > 0;
+
   return (
     <VStack gap={1} align="start" style={{ minWidth: 140 }}>
       <Selector
@@ -85,8 +93,8 @@ export const OrderStatusSelect = ({ order, onStatusUpdated }) => {
         isLabelHidden
         value={order.status}
         onChange={handleStatusChange}
-        options={STATUS_OPTIONS}
-        isDisabled={isUpdating}
+        options={statusOptions}
+        isDisabled={isUpdating || !hasTransitions}
         width="148px"
       />
 

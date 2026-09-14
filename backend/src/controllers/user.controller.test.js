@@ -94,7 +94,7 @@ test('updateUserRole rejects invalid roles and any current admin self role chang
     assert.fail
   );
   assert.equal(invalidResponse.statusCode, 400);
-  assert.equal(invalidResponse.body.message, 'Role must be customer or admin');
+  assert.equal(invalidResponse.body.message, 'Vai trò phải là customer, staff hoặc admin');
 
   const selfResponse = createResponse();
   await controller.updateUserRole(
@@ -103,7 +103,7 @@ test('updateUserRole rejects invalid roles and any current admin self role chang
     assert.fail
   );
   assert.equal(selfResponse.statusCode, 400);
-  assert.equal(selfResponse.body.message, 'You cannot change your own admin role');
+  assert.equal(selfResponse.body.message, 'Bạn không thể thay đổi vai trò quản trị viên của chính mình');
 });
 
 test('updateUserRole updates another user role through the model', async () => {
@@ -175,7 +175,7 @@ test('updateAdminUser rejects empty username and empty profile payload', async (
     assert.fail
   );
   assert.equal(emptyUsernameResponse.statusCode, 400);
-  assert.equal(emptyUsernameResponse.body.message, 'Username cannot be empty');
+  assert.equal(emptyUsernameResponse.body.message, 'Tên người dùng không được để trống');
 
   const emptyPayloadResponse = createResponse();
   await controller.updateAdminUser(
@@ -184,7 +184,7 @@ test('updateAdminUser rejects empty username and empty profile payload', async (
     assert.fail
   );
   assert.equal(emptyPayloadResponse.statusCode, 400);
-  assert.equal(emptyPayloadResponse.body.message, 'No editable fields provided for update');
+  assert.equal(emptyPayloadResponse.body.message, 'Chưa cung cấp trường có thể chỉnh sửa để cập nhật');
 });
 
 test('updateUserBlocked blocks other users but rejects current admin self-block', async () => {
@@ -202,7 +202,7 @@ test('updateUserBlocked blocks other users but rejects current admin self-block'
     assert.fail
   );
   assert.equal(selfResponse.statusCode, 400);
-  assert.equal(selfResponse.body.message, 'You cannot block your own admin account');
+  assert.equal(selfResponse.body.message, 'Bạn không thể khóa tài khoản quản trị viên của chính mình');
 
   const response = createResponse();
   await controller.updateUserBlocked(

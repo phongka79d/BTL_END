@@ -51,9 +51,16 @@ export const userApi = {
   updateAdminUser: (userId, payload) => apiClient.put(`/admin/users/${userId}`, payload),
 
   /**
+   * Tạo tài khoản người dùng / nhân viên mới (chỉ Admin)
+   * @param {Object} payload - username, email, password, role, fullName, phone, address
+   * @returns {Promise<Object>} Người dùng đã tạo kèm trạng thái gửi email
+   */
+  createAdminUser: (payload) => apiClient.post('/admin/users', payload),
+
+  /**
    * Cập nhật vai trò người dùng (chỉ Admin)
    * @param {string} userId
-   * @param {'customer'|'admin'} role
+   * @param {'customer'|'staff'|'admin'} role
    * @returns {Promise<Object>} Người dùng đã cập nhật
    */
   updateUserRole: (userId, role) => apiClient.put(`/admin/users/${userId}/role`, { role }),

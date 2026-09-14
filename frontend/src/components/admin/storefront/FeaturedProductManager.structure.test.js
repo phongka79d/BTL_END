@@ -8,7 +8,7 @@ test('FeaturedProductManager uses Astryx controls and bulk picker for admin-sele
   assert.match(source, /import FeaturedProductBulkPicker from '\.\/FeaturedProductBulkPicker';/);
   assert.match(source, /import AdminTable from '\.\.\/AdminTable';/);
   assert.match(source, /NumberInput/);
-  assert.match(source, /label="Featured product count"/);
+  assert.match(source, /label="Số lượng sản phẩm nổi bật"/);
   assert.match(source, /<FeaturedProductBulkPicker/);
   assert.match(source, /onSaveSettings/);
   assert.match(source, /onCreateFeaturedProductsBulk/);

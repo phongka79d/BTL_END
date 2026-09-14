@@ -161,6 +161,7 @@ All API routes are served under the `/api` prefix. Standard JSON envelopes are r
 | `GET` | `/api/users/profile` | Authenticated | Retrieves authenticated user profile |
 | `PUT` | `/api/users/profile` | Authenticated | Updates name, phone, or address |
 | `GET` | `/api/admin/users` | Admin | Lists users with pagination and search |
+| `POST` | `/api/admin/users` | Admin | Creates a `customer` / `staff` / `admin` account (password policy enforced) and sends login credentials by email |
 | `PUT` | `/api/admin/users/:id` | Admin | Updates user information |
 | `PUT` | `/api/admin/users/:id/role` | Admin | Changes user role (`customer` / `staff` / `admin`) |
 | `PUT` | `/api/admin/users/:id/block` | Admin | Blocks or unblocks a user account |
@@ -194,9 +195,16 @@ All API routes are served under the `/api` prefix. Standard JSON envelopes are r
 | `POST` | `/api/orders` | Authenticated | Creates order from cart with COD payment (transactional) |
 | `GET` | `/api/orders/my-orders` | Authenticated | Lists orders belonging to authenticated user |
 | `GET` | `/api/orders/:id` | Owner / Staff / Admin | Retrieves specific order details |
+| `PUT` | `/api/orders/:id/cancel` | Owner | Cancels the customer's own order while it is `pending` or `confirmed` and restocks every line item |
 | `GET` | `/api/admin/orders` | Staff / Admin | Lists all system orders with filters and keyword search |
-| `PUT` | `/api/admin/orders/:id/status` | Staff / Admin | Updates order status (`pending`, `confirmed`, `shipping`, `completed`, `cancelled`) |
+| `PUT` | `/api/admin/orders/:id/status` | Staff / Admin | Moves an order to an allowed next status (see lifecycle rules below) |
 | `POST` | `/api/payments/cod` | Authenticated | Processes COD payment creation |
+
+**Order lifecycle enforcement** (`backend/src/models/order.model.js`):
+- Allowed transitions: `pending → confirmed | cancelled`, `confirmed → shipping | cancelled`, `shipping → completed | cancelled`; `completed` and `cancelled` are terminal.
+- Invalid transitions and unknown statuses are rejected with HTTP 400, and the status write is conditional on the current status being unchanged (guards against concurrent updates).
+- Side effects inside the same transaction: moving to `cancelled` (admin or customer cancel) increments each product's `quantity` by the ordered amount; moving to `completed` marks the linked payment as `paid`.
+- Customer self-cancel is limited to `pending` / `confirmed` orders (`CUSTOMER_CANCELLABLE_STATUSES`); staff and admins can cancel up to `shipping` through the admin status endpoint.
 
 ### 7. Product Reviews (`/api/products/:id/reviews`, `/api/admin/reviews`)
 | Method | Endpoint | Access | Description |
@@ -228,9 +236,11 @@ All API routes are served under the `/api` prefix. Standard JSON envelopes are r
 ### 9. Operational & Financial Reports (`/api/admin/reports`)
 | Method | Endpoint | Access | Description |
 | :--- | :--- | :--- | :--- |
-| `GET` | `/api/admin/reports/order-summary` | Staff / Admin | Status breakdown count of all orders |
+| `GET` | `/api/admin/reports/order-summary` | Staff / Admin | Status breakdown count of orders |
 | `GET` | `/api/admin/reports/best-selling-products` | Staff / Admin | Best-selling products by quantity volume |
 | `GET` | `/api/admin/reports/revenue` | Admin | Financial totals, completed revenue, and metrics |
+
+**Date-range filtering:** every report endpoint accepts optional `startDate` and `endDate` query parameters (`YYYY-MM-DD`, inclusive of the whole end day). When both are omitted the report covers all time and echoes `range: null`; when supplied, the response includes the resolved `range: { startDate, endDate }` boundaries. An invalid range — start after end, or an unparseable date — returns HTTP 400.
 
 ---
 

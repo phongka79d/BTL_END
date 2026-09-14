@@ -1,4 +1,6 @@
+const bcrypt = require('bcrypt');
 const userModel = require('../models/user.model');
+const emailService = require('../services/email.service');
 const { successResponse, errorResponse } = require('../utils/response');
 
 /**
@@ -13,6 +15,7 @@ const serializeUser = (user) => {
 };
 
 const VALID_ROLES = ['customer', 'staff', 'admin'];
+const SALT_ROUNDS = 10;
 const ADMIN_EDITABLE_FIELDS = ['username', 'fullName', 'phone', 'address'];
 
 const normalizeEditableValue = (value) => {
@@ -197,10 +200,71 @@ const updateUserBlocked = async (req, res, next) => {
   }
 };
 
+/**
+ * Tạo tài khoản người dùng / nhân viên mới cho admin.
+ * POST /api/admin/users
+ */
+const createUser = async (req, res, next) => {
+  try {
+    const { username, email, password, fullName, phone, address, role } = req.body;
+    const requestedRole = role === undefined || role === null || role === ''
+      ? 'staff'
+      : String(role).trim();
+
+    if (!VALID_ROLES.includes(requestedRole)) {
+      return errorResponse(res, 400, 'Vai trò phải là customer, staff hoặc admin');
+    }
+
+    const normalizedEmail = String(email).trim();
+    const existingUser = await userModel.findByEmail(normalizedEmail);
+    if (existingUser) {
+      return errorResponse(res, 400, 'Email đã được đăng ký');
+    }
+
+    const passwordHash = await bcrypt.hash(password, SALT_ROUNDS);
+
+    const user = await userModel.create({
+      username: String(username).trim(),
+      email: normalizedEmail,
+      passwordHash,
+      fullName: fullName ? String(fullName).trim() : null,
+      phone: phone ? String(phone).trim() : null,
+      address: address ? String(address).trim() : null,
+      role: requestedRole
+    });
+
+    // Gửi thông tin đăng nhập qua email ở chế độ tốt nhất có thể:
+    // tài khoản vẫn được tạo ngay cả khi kênh email chưa được cấu hình.
+    let emailDelivery = 'skipped';
+    try {
+      const delivery = await emailService.sendAccountCredentialsEmail({
+        to: normalizedEmail,
+        temporaryPassword: password,
+        fullName: user.fullName,
+        role: requestedRole
+      });
+      emailDelivery = delivery?.delivery || 'sent';
+    } catch (emailError) {
+      console.warn('Không thể gửi email thông tin tài khoản:', emailError.message);
+    }
+
+    return successResponse(res, 201, 'Đã tạo tài khoản người dùng thành công', {
+      user: serializeUser(user),
+      emailDelivery
+    });
+  } catch (error) {
+    if (error.code === 'P2002') {
+      return errorResponse(res, 400, 'Email đã được đăng ký');
+    }
+    next(error);
+  }
+};
+
 module.exports = {
   getProfile,
   updateProfile,
   getUsers,
+  createUser,
   updateUserRole,
   updateAdminUser,
   updateUserBlocked

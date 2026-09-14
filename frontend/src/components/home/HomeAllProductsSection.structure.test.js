@@ -7,11 +7,11 @@ const source = readFileSync(new URL('./HomeAllProductsSection.jsx', import.meta.
 test('HomeAllProductsSection renders all products with four Astryx sort buttons and ProductList pagination', () => {
   assert.match(source, /import \{[\s\S]*Button,[\s\S]*HStack,[\s\S]*VStack/);
   assert.match(source, /import ProductList from '\.\.\/product\/ProductList';/);
-  assert.match(source, /title="All products"/);
-  assert.match(source, /label: 'Default'/);
-  assert.match(source, /label: 'Price'/);
-  assert.match(source, /label: 'Good review'/);
-  assert.match(source, /label: 'Order number'/);
+  assert.match(source, /title="Tất cả sản phẩm"/);
+  assert.match(source, /label: 'Mặc định'/);
+  assert.match(source, /label: 'Giá'/);
+  assert.match(source, /label: 'Đánh giá tốt'/);
+  assert.match(source, /label: 'Số đơn hàng'/);
   assert.match(source, /sortOptions\.map/);
   assert.match(source, /onSortChange\(option\.value\)/);
   assert.match(source, /<ProductList/);

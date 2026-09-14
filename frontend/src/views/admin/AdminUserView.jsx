@@ -13,6 +13,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import Alert from '../../components/common/Alert';
 import Pagination from '../../components/common/Pagination';
 import UserProfileDialog from '../../components/admin/UserProfileDialog';
+import UserCreateDialog from '../../components/admin/UserCreateDialog';
 import UserManagementTable, { getUserDisplayName } from '../../components/admin/UserManagementTable';
 
 const DEFAULT_PAGINATION = {
@@ -34,6 +35,7 @@ export const AdminUserView = () => {
   const [loadError, setLoadError] = useState('');
   const [feedback, setFeedback] = useState(null);
   const [editingUser, setEditingUser] = useState(null);
+  const [isCreateOpen, setIsCreateOpen] = useState(false);
 
   const loadUsers = useCallback(async () => {
     setIsLoading(true);
@@ -130,6 +132,38 @@ export const AdminUserView = () => {
     }
   };
 
+  const handleCreateUser = async (payload) => {
+    setIsUpdating(true);
+    setFeedback(null);
+
+    try {
+      const response = await userApi.createAdminUser(payload);
+      const createdUser = response?.data?.user;
+      const emailDelivery = response?.data?.emailDelivery;
+      const deliveryNote = emailDelivery === 'smtp'
+        ? ' Thông tin đăng nhập đã được gửi qua email.'
+        : emailDelivery === 'console'
+          ? ' Thông tin đăng nhập đã được ghi ra log máy chủ (SMTP chưa cấu hình).'
+          : '';
+
+      setFeedback({
+        title: 'Đã tạo tài khoản',
+        description: `${getUserDisplayName(createdUser || payload)} đã được tạo.${deliveryNote}`,
+        status: 'success'
+      });
+      await loadUsers();
+    } catch (error) {
+      setFeedback({
+        title: 'Không thể tạo tài khoản',
+        description: error?.message || 'Không thể tạo tài khoản người dùng.',
+        status: 'error'
+      });
+      throw error;
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
   const handleProfileSave = async (payload) => {
     if (!editingUser) return;
 
@@ -199,6 +233,12 @@ export const AdminUserView = () => {
               onClick={loadUsers}
               isDisabled={isLoading}
             />
+            <Button
+              label="Thêm tài khoản"
+              variant="primary"
+              onClick={() => setIsCreateOpen(true)}
+              isDisabled={isLoading}
+            />
           </HStack>
         )}
       />
@@ -234,6 +274,12 @@ export const AdminUserView = () => {
         }}
         onSubmit={handleProfileSave}
         user={editingUser}
+      />
+
+      <UserCreateDialog
+        isOpen={isCreateOpen}
+        onOpenChange={setIsCreateOpen}
+        onSubmit={handleCreateUser}
       />
     </VStack>
   );

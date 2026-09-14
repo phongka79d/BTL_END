@@ -171,14 +171,15 @@ flowchart TB
 ### 4. Shopping Cart & Transactional COD Checkout
 - **Cart Management:** Authenticated users add products to their cart. Cart state is persisted to PostgreSQL (`Cart` and `CartItem` tables) and synchronized with `CartContext`.
 - **Checkout:** The user enters shipping details in `CheckoutView`. Submitting the order triggers `POST /api/orders`. The backend creates the `Order`, creates `OrderDetail` line items, creates a `Payment` record with method `COD` and status `unpaid`, and clears the user's `CartItem` entries in a single atomic database transaction.
+- **Order Tracking & Self-Cancel:** `OrderHistoryView` lists the customer's orders and `OrderDetailView` shows one order with a `Hủy đơn hàng` action. `PUT /api/orders/:id/cancel` is accepted only while the order is `pending` or `confirmed`; the backend cancels it transactionally and restocks every line item. The page then renders the `cancelled` state and hides the cancel action.
 
 ### 5. Administration & Staff Operations
 - **Operations Staff Workspace (`/staff/*`):** Staff members process customer orders (`orders.view_all`, `orders.update_status`), monitor and adjust inventory counts (`products.update_stock`), hide inappropriate customer reviews (`reviews.moderate`), and view fulfillment summaries (`reports.view_operational`).
 - **Catalog Management:** Administrators create, edit, and delete categories and products, set pricing, adjust stock levels, and upload product images.
-- **User Moderation & Roles:** Administrators list users, inspect profiles, assign user roles (`customer` / `staff` / `admin`), and block/unblock accounts.
-- **Order Processing:** Administrators view system-wide orders and update status (`pending` -> `confirmed` -> `shipping` -> `completed` / `cancelled`).
+- **User Moderation & Roles:** Administrators list users, inspect profiles, assign user roles (`customer` / `staff` / `admin`), and block/unblock accounts. The `Thêm tài khoản` dialog (`UserCreateDialog`) posts to `POST /api/admin/users`, which applies the shared password policy and emails the new account its login credentials (email failures are logged without failing the request).
+- **Order Processing:** Administrators and Staff view system-wide orders and move them through the enforced lifecycle (`pending → confirmed → shipping → completed`, with `cancelled` reachable from those three states). Illegal transitions are rejected with HTTP 400, cancelling restocks inventory, and completing marks the COD payment as `paid`. The admin status selector only offers the current status plus its allowed next statuses.
 - **Review Moderation:** Administrators and Staff inspect customer reviews and hide inappropriate comments (`status = 'hidden'`) from the storefront.
-- **Financial & Operational Analytics:** Administrators inspect financial revenue reports via `/api/admin/reports/revenue`, while Staff and Administrators inspect operational order status distributions and top-selling product volume via `/api/admin/reports/order-summary` and `/api/admin/reports/best-selling-products`.
+- **Financial & Operational Analytics:** Administrators inspect financial revenue reports via `/api/admin/reports/revenue`, while Staff and Administrators inspect operational order status distributions and top-selling product volume via `/api/admin/reports/order-summary` and `/api/admin/reports/best-selling-products`. `ReportView` can narrow all reports to a date range (`startDate` / `endDate`) and export the projected revenue and order-summary figures as Excel-ready UTF-8 CSV files.
 - **Storefront Management:** Administrators manage homepage carousel slides, navigation menu items, and featured product displays.
 ---
 

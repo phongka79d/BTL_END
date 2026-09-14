@@ -49,7 +49,7 @@ test('public storefront controllers return carousel and navigation response shap
   assert.equal(carouselResponse.statusCode, 200);
   assert.deepEqual(carouselResponse.body, {
     success: true,
-    message: 'Storefront carousel retrieved successfully',
+    message: 'Đã lấy băng chuyền cửa hàng thành công',
     data: { slides: [] },
   });
 
@@ -58,7 +58,7 @@ test('public storefront controllers return carousel and navigation response shap
   assert.equal(navResponse.statusCode, 200);
   assert.deepEqual(navResponse.body, {
     success: true,
-    message: 'Storefront navigation retrieved successfully',
+    message: 'Đã lấy điều hướng cửa hàng thành công',
     data: { items: [] },
   });
 });
@@ -105,23 +105,52 @@ test('storefront routes mount public and admin endpoints with protection', async
       handlers: layer.route.stack.map((routeLayer) => routeLayer.handle),
     }));
 
-  assert.deepEqual(adminRoutes.map((route) => route.handlers.slice(0, 2)), [
-    [protect, admin],
-    [protect, admin],
-    [protect, admin],
-    [protect, admin],
-    [protect, admin],
-    [protect, admin],
-    [protect, admin],
-    [protect, admin],
-    [protect, admin],
-    [protect, admin],
-    [protect, admin],
-    [protect, admin],
-    [protect, admin],
-    [protect, admin],
-    [protect, admin],
-  ]);
+  assert.deepEqual(
+    adminRoutes.map((route) => `${route.method} ${route.path}`),
+    [
+      'get /carousel',
+      'post /carousel',
+      'put /carousel/:id',
+      'delete /carousel/:id',
+      'get /navigation',
+      'post /navigation',
+      'put /navigation/:id',
+      'delete /navigation/:id',
+      'get /featured-products',
+      'post /featured-products/bulk',
+      'post /featured-products',
+      'put /featured-products/reorder',
+      'put /featured-products/:id',
+      'delete /featured-products/:id',
+      'put /settings',
+    ]
+  );
+
+  // Mỗi route quản trị phải đi qua xác thực và cổng kiểm tra quyền trước controller.
+  adminRoutes.forEach((route) => {
+    assert.equal(route.handlers.length, 3);
+    assert.equal(route.handlers[0], protect);
+    assert.equal(typeof route.handlers[1], 'function');
+    assert.equal(typeof route.handlers[2], 'function');
+  });
+
+  const carouselGate = adminRoutes
+    .find((route) => route.path === '/carousel' && route.method === 'get')
+    .handlers[1];
+
+  const forbidden = createResponse();
+  let reachedController = false;
+
+  carouselGate(
+    { user: { id: 'staff_1', role: 'staff' } },
+    forbidden,
+    () => {
+      reachedController = true;
+    }
+  );
+
+  assert.equal(reachedController, false);
+  assert.equal(forbidden.statusCode, 403);
 });
 
 test('public and admin storefront routes are mounted under /api', async () => {
@@ -136,12 +165,12 @@ test('public and admin storefront routes are mounted under /api', async () => {
     const publicResponse = await fetch(`http://localhost:${port}/api/storefront/carousel`);
     const publicBody = await publicResponse.json();
     assert.equal(publicResponse.status, 200);
-    assert.equal(publicBody.message, 'Storefront carousel retrieved successfully');
+    assert.equal(publicBody.message, 'Đã lấy băng chuyền cửa hàng thành công');
 
     const adminResponse = await fetch(`http://localhost:${port}/api/admin/storefront/carousel`);
     const adminBody = await adminResponse.json();
     assert.equal(adminResponse.status, 401);
-    assert.equal(adminBody.message, 'Not authorized, no token provided');
+    assert.equal(adminBody.message, 'Không được phép, chưa cung cấp token');
   } finally {
     await new Promise((resolve, reject) => {
       server.close((error) => (error ? reject(error) : resolve()));

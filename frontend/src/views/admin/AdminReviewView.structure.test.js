@@ -26,15 +26,15 @@ test('AdminReviewView loads all visible reviews by default and filters by select
 });
 
 test('AdminReviewView provides admin review moderation states and action UI', () => {
-  assert.match(viewSource, /Manage Reviews/);
-  assert.match(viewSource, /Product reviews/);
-  assert.match(viewSource, /Showing all visible reviews\. Search and select a product to filter\./);
+  assert.match(viewSource, /Quản lý đánh giá/);
+  assert.match(viewSource, /label="Đánh giá sản phẩm"/);
+  assert.match(viewSource, /Đang hiển thị tất cả đánh giá hiện có\. Tìm kiếm và chọn sản phẩm để lọc\./);
   assert.match(viewSource, /const productId = review\.productId \|\| review\.product\?\.id \|\| selectedProductId;/);
-  assert.match(viewSource, /label="View product"[\s\S]*navigate\(`\/products\/\$\{productId\}`\)/);
-  assert.match(viewSource, /Hide review/);
-  assert.match(viewSource, /Unable to load reviews/);
-  assert.match(viewSource, /No visible reviews/);
-  assert.match(viewSource, /Review hidden/);
+  assert.match(viewSource, /label="Xem sản phẩm"[\s\S]*navigate\(`\/products\/\$\{productId\}`\)/);
+  assert.match(viewSource, /Ẩn đánh giá/);
+  assert.match(viewSource, /Không thể tải đánh giá/);
+  assert.match(viewSource, /Không có đánh giá hiển thị/);
+  assert.match(viewSource, /Đã ẩn đánh giá/);
   assert.match(viewSource, /AdminTable/);
   assert.match(viewSource, /AlertDialog/);
 });
