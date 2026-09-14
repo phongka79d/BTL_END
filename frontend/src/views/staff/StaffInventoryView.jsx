@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Button, HStack, VStack, Text, TextInput, Selector, Badge, Dialog } from '@astryxdesign/core';
+import { Button, Dialog, Heading, HStack, VStack, Text, TextInput, Selector, Badge } from '@astryxdesign/core';
 import PageHeader from '../../components/common/PageHeader';
 import FilterBar from '../../components/common/FilterBar';
 import DataTable from '../../components/common/DataTable';
