@@ -21,12 +21,13 @@ export const CartSummary = ({
   hasUnsavedChanges = false,
   isSaving = false,
   isDisabled = false,
+  isSaveDisabled = false,
+  isCheckoutDisabled = false,
   onSaveChanges,
   onCheckout,
   onContinueShopping
 }) => {
-  const checkoutDisabled = isDisabled || hasUnsavedChanges || selectedProductCount === 0;
-
+  const checkoutDisabled = isDisabled || isCheckoutDisabled || hasUnsavedChanges || selectedProductCount === 0;
   return (
     <Card padding={4} style={{ position: 'sticky', top: 'var(--spacing-4)' }}>
       <VStack gap={4}>
@@ -76,7 +77,7 @@ export const CartSummary = ({
             <Button
               label="Lưu thay đổi"
               variant="secondary"
-              isDisabled={!hasUnsavedChanges || isDisabled}
+              isDisabled={!hasUnsavedChanges || isDisabled || isSaveDisabled}
               isLoading={isSaving}
               onClick={onSaveChanges}
               width="100%"

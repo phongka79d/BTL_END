@@ -1,4 +1,5 @@
 const prisma = require('../config/database');
+const { toQuantity, validateInventoryQuantity } = require('../utils/quantityValidation');
 
 const emptyReviewSummary = () => ({
   averageRating: null,
@@ -20,6 +21,15 @@ const PRODUCT_SORTS = {
   REVIEW: 'review',
   ORDERS: 'orders',
 };
+
+// Ánh xạ trạng thái tồn kho được phép sang điều kiện lọc quantity.
+// low giữ nguyên ngữ nghĩa cũ của giao diện: quantity <= 5 (bao gồm cả 0).
+const STOCK_STATUS_FILTERS = {
+  low: { lte: 5 },
+  out: { equals: 0 },
+};
+
+const STOCK_STATUSES = Object.keys(STOCK_STATUS_FILTERS);
 
 const normalizeSort = (sort) => (
   Object.values(PRODUCT_SORTS).includes(sort) ? sort : PRODUCT_SORTS.DEFAULT
@@ -127,16 +137,18 @@ const validateProductData = (data) => {
   if (!brand || typeof brand !== 'string' || brand.trim() === '') {
     throw new Error('Thương hiệu sản phẩm là bắt buộc.');
   }
-  if (price === undefined || price === null || isNaN(parseFloat(price)) || parseFloat(price) < 0) {
+  if (price === undefined || price === null || (typeof price === 'string' && price.trim() === '') || typeof price === 'boolean' || !Number.isFinite(Number(price)) || Number(price) < 0) {
     throw new Error('Giá phải là số không âm.');
   }
-  if (quantity === undefined || quantity === null || !Number.isInteger(Number(quantity)) || Number(quantity) < 0) {
-    throw new Error('Số lượng phải là số nguyên không âm.');
+  const quantityError = validateInventoryQuantity(quantity);
+  if (quantityError) {
+    throw new Error(quantityError);
   }
   if (!categoryId || typeof categoryId !== 'string' || categoryId.trim() === '') {
     throw new Error('Category ID là bắt buộc.');
   }
 };
+
 
 /**
  * Kiểm tra dữ liệu cập nhật sản phẩm
@@ -150,11 +162,14 @@ const validateProductUpdateData = (data) => {
   if (brand !== undefined && (!brand || typeof brand !== 'string' || brand.trim() === '')) {
     throw new Error('Thương hiệu sản phẩm không được để trống.');
   }
-  if (price !== undefined && (price === null || isNaN(parseFloat(price)) || parseFloat(price) < 0)) {
+  if (price !== undefined && (price === null || (typeof price === 'string' && price.trim() === '') || typeof price === 'boolean' || !Number.isFinite(Number(price)) || Number(price) < 0)) {
     throw new Error('Giá phải là số không âm.');
   }
-  if (quantity !== undefined && (quantity === null || !Number.isInteger(Number(quantity)) || Number(quantity) < 0)) {
-    throw new Error('Số lượng phải là số nguyên không âm.');
+  if (quantity !== undefined) {
+    const quantityError = validateInventoryQuantity(quantity);
+    if (quantityError) {
+      throw new Error(quantityError);
+    }
   }
   if (categoryId !== undefined && (!categoryId || typeof categoryId !== 'string' || categoryId.trim() === '')) {
     throw new Error('Category ID không được để trống.');
@@ -189,10 +204,12 @@ const findById = async (id) => {
  * @param {number|string} [params.maxPrice]
  * @param {number|string} [params.page]
  * @param {number|string} [params.limit]
+ * @param {string} [params.sort]
+ * @param {string} [params.stockStatus] - 'low' (quantity <= 5, gồm cả 0) hoặc 'out' (quantity = 0)
  * @returns {Promise<Object>}
  */
 const findAll = async (params = {}) => {
-  const { keyword, categoryId, minPrice, maxPrice, page, limit } = params;
+  const { keyword, categoryId, minPrice, maxPrice, page, limit, stockStatus } = params;
   const sort = normalizeSort(params.sort);
   const where = {};
 
@@ -219,6 +236,11 @@ const findAll = async (params = {}) => {
       ...where.price,
       lte: parseFloat(maxPrice)
     };
+  }
+
+  // Chỉ ánh xạ các giá trị chuỗi đã được allowlist; giá trị khác không tạo thêm field Prisma.
+  if (typeof stockStatus === 'string' && Object.prototype.hasOwnProperty.call(STOCK_STATUS_FILTERS, stockStatus)) {
+    where.quantity = STOCK_STATUS_FILTERS[stockStatus];
   }
 
   const total = await prisma.product.count({ where });
@@ -352,10 +374,11 @@ const destroy = async (id) => {
  * @returns {Promise<Object>}
  */
 const updateStock = async (id, quantity) => {
-  const parsedQuantity = parseInt(quantity, 10);
-  if (isNaN(parsedQuantity) || parsedQuantity < 0) {
-    throw new Error('Số lượng tồn kho phải là số nguyên không âm');
+  const quantityError = validateInventoryQuantity(quantity);
+  if (quantityError) {
+    throw new Error(quantityError);
   }
+  const parsedQuantity = toQuantity(quantity);
   return prisma.product.update({
     where: { id },
     data: { quantity: parsedQuantity },
@@ -371,6 +394,7 @@ const updateStock = async (id, quantity) => {
 };
 
 module.exports = {
+  STOCK_STATUSES,
   findById,
   findAll,
   attachReviewSummaries,

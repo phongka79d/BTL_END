@@ -37,7 +37,8 @@ This repository root coordinates the full development, build, and deployment lif
 │   │   ├── migrations/          # Version-controlled migration history
 │   │   │   ├── 20260708193000_add_user_blocked_status/
 │   │   │   ├── 20260709000000_add_password_change_otp/
-│   │   │   └── 20260710000000_add_staff_role/
+│   │   │   ├── 20260710000000_add_staff_role/
+│   │   │   └── 20260930000000_add_order_recipient_snapshot/
 │   │   ├── schema.prisma        # Authoritative PostgreSQL data schema (customer, staff, admin)
 │   │   └── seed.js              # Initial database seed script (admin, categories, products)
 │   ├── src/                     # Backend application source code
@@ -53,7 +54,7 @@ This repository root coordinates the full development, build, and deployment lif
 │   │   ├── models/              # Prisma database query encapsulation models
 │   │   ├── routes/              # Express route declarations & route index
 │   │   ├── services/            # Nodemailer email & OTP delivery service
-│   │   ├── utils/               # Response envelopes, password policy, token & OTP helpers
+│   │   ├── utils/               # Response envelopes, password/phone/quantity validators, token & OTP helpers
 │   │   ├── app.js               # Express application initialization & middleware stack
 │   │   └── server.js            # Server entrypoint listening on PORT
 │   ├── .env.example             # Backend environment variable template
@@ -69,7 +70,7 @@ This repository root coordinates the full development, build, and deployment lif
 │   │   ├── contexts/            # React Context providers (AuthContext, CartContext, NotificationContext)
 │   │   ├── layouts/             # Layout shells (MainLayout with Staff/Admin tabs, AuthLayout, AdminLayout, StaffLayout)
 │   │   ├── routes/              # React Router v6 route table & guards (PrivateRoute, StaffRoute, AdminRoute)
-│   │   ├── utils/               # Frontend password policy and date formatters
+│   │   ├── utils/               # Frontend validators (password, phone, quantity) and formatters
 │   │   ├── views/               # Page views (Storefront, Staff workspace, Admin workspace)
 │   │   │   ├── staff/           # Dedicated staff operations views (Dashboard, Orders, Inventory, Reviews, Reports)
 │   │   │   ├── admin/           # Dedicated admin management views
@@ -170,7 +171,7 @@ flowchart TB
 
 ### 4. Shopping Cart & Transactional COD Checkout
 - **Cart Management:** Authenticated users add products to their cart. Cart state is persisted to PostgreSQL (`Cart` and `CartItem` tables) and synchronized with `CartContext`.
-- **Checkout:** The user enters shipping details in `CheckoutView`. Submitting the order triggers `POST /api/orders`. The backend creates the `Order`, creates `OrderDetail` line items, creates a `Payment` record with method `COD` and status `unpaid`, and clears the user's `CartItem` entries in a single atomic database transaction.
+- **Checkout:** The user enters shipping details in `CheckoutView`. The request requires `fullName`, a digits-only `phone` (kept as a string so leading zeros survive), and `shippingAddress`, with optional `note` and optional `cartItemIds` for partial-cart checkout. Submitting the order triggers `POST /api/orders`: the backend creates the `Order` (including a recipient snapshot — `recipientName`, `recipientPhone`, `note` — so later profile edits never change an existing order), creates `OrderDetail` line items, creates a `Payment` record with method `COD` and status `unpaid`, decrements stock with a conditional `quantity >= ordered` write, and clears the user's `CartItem` entries in a single atomic database transaction. Concurrent stock or cart changes abort with HTTP 409 instead of overselling, and cart/product reads are served `no-store` so displayed stock is never stale.
 - **Order Tracking & Self-Cancel:** `OrderHistoryView` lists the customer's orders and `OrderDetailView` shows one order with a `Hủy đơn hàng` action. `PUT /api/orders/:id/cancel` is accepted only while the order is `pending` or `confirmed`; the backend cancels it transactionally and restocks every line item. The page then renders the `cancelled` state and hides the cancel action.
 
 ### 5. Administration & Staff Operations
@@ -179,7 +180,7 @@ flowchart TB
 - **User Moderation & Roles:** Administrators list users, inspect profiles, assign user roles (`customer` / `staff` / `admin`), and block/unblock accounts. The `Thêm tài khoản` dialog (`UserCreateDialog`) posts to `POST /api/admin/users`, which applies the shared password policy and emails the new account its login credentials (email failures are logged without failing the request).
 - **Order Processing:** Administrators and Staff view system-wide orders and move them through the enforced lifecycle (`pending → confirmed → shipping → completed`, with `cancelled` reachable from those three states). Illegal transitions are rejected with HTTP 400, cancelling restocks inventory, and completing marks the COD payment as `paid`. The admin status selector only offers the current status plus its allowed next statuses.
 - **Review Moderation:** Administrators and Staff inspect customer reviews and hide inappropriate comments (`status = 'hidden'`) from the storefront.
-- **Financial & Operational Analytics:** Administrators inspect financial revenue reports via `/api/admin/reports/revenue`, while Staff and Administrators inspect operational order status distributions and top-selling product volume via `/api/admin/reports/order-summary` and `/api/admin/reports/best-selling-products`. `ReportView` can narrow all reports to a date range (`startDate` / `endDate`) and export the projected revenue and order-summary figures as Excel-ready UTF-8 CSV files.
+- **Financial & Operational Analytics:** Administrators inspect financial revenue reports via `/api/admin/reports/revenue`, while Staff and Administrators inspect operational order status distributions and top-selling product volume via `/api/admin/reports/order-summary` and `/api/admin/reports/best-selling-products`. `ReportView` filters all reports by date range and exports true XLSX workbooks with `Revenue`, `Order Summary`, and `Best Selling Products` sheets; the existing UTF-8 CSV exports remain available.
 - **Storefront Management:** Administrators manage homepage carousel slides, navigation menu items, and featured product displays.
 ---
 
@@ -204,6 +205,8 @@ Create `backend/.env` using `backend/.env.example` as a template:
 | `SMTP_USER` | If SMTP | - | SMTP server authentication username |
 | `SMTP_PASS` | If SMTP | - | SMTP server authentication password |
 | `SMTP_FROM` | If SMTP | `no-reply@example.com` | Sender address for system emails |
+
+> **Local QA migration safety:** point **both** `DATABASE_URL` and `DIRECT_URL` at the same isolated local database before running any Prisma command. `backend/prisma/schema.prisma` declares `directUrl = env("DIRECT_URL")`, and Prisma uses that URL for schema and migration work, overriding the connection otherwise used by the CLI — if `DIRECT_URL` points anywhere else, `prisma migrate` writes there instead. Never point local QA at a shared or remote database, and never commit `.env` files.
 
 ### Frontend Environment (`frontend/.env`)
 Create `frontend/.env` using `frontend/.env.example` as a template:
@@ -242,6 +245,8 @@ cd ..
 # Configure backend environment
 cp backend/.env.example backend/.env
 # Edit backend/.env with your DATABASE_URL and JWT_SECRET
+# For local QA, set BOTH DATABASE_URL and DIRECT_URL to the same isolated local database
+# (schema.prisma's directUrl is what Prisma uses for migrations)
 
 # Configure frontend environment
 cp frontend/.env.example frontend/.env
@@ -255,6 +260,8 @@ cd backend
 npm run prisma:generate
 
 # Apply database migrations
+# (local QA: DATABASE_URL and DIRECT_URL must both target the same isolated local
+#  database — see Environment & Configuration above)
 npm run prisma:migrate
 
 # Seed demo data (admin account, sample categories, sample products)
@@ -282,6 +289,8 @@ cd frontend
 npm run dev
 # Vite dev server running at http://localhost:5173
 ```
+
+In local development the SPA at `http://localhost:5173` calls the API at `http://localhost:5000/api` (the frontend default `VITE_API_BASE_URL`); CORS is enabled on the Express app, so no extra origin configuration is required.
 
 ### Option B: Production Build
 ```bash
@@ -339,9 +348,13 @@ When modifying or extending this codebase, adhere to the following rules:
      - Success: `successResponse(res, statusCode, message, data)`
      - Paginated: `paginatedResponse(res, statusCode, message, data, pagination)`
      - Error: `errorResponse(res, statusCode, message, errors)`
-6. **Password Policy Contract:**
+6. **Password & Shared Validation Contracts:**
    - Client validation (`frontend/src/utils/passwordPolicy.js`) and backend validation (`backend/src/utils/passwordPolicy.js`) must remain strictly synchronized.
-7. **Cross-Links Between READMEs:**
+   - Phone validation (`frontend/src/utils/phoneValidation.js`, `backend/src/utils/phoneValidation.js`) accepts digits-only strings and must never coerce a phone number to a number (leading zeros must survive); profile edits allow an empty phone, checkout requires it.
+   - Quantity validators (`frontend/src/utils/quantityValidation.js`, `backend/src/utils/quantityValidation.js`) reject invalid values instead of clamping: inventory counts are non-negative integers, purchase quantities must be `1..stock`.
+7. **Stock Freshness:**
+   - Keep cart/product reads (`GET /cart`, `GET /products`, `GET /products/:id`) `no-store` on both sides; checkout must keep the conditional `quantity >= ordered` stock decrement inside the transaction so races fail with HTTP 409 instead of overselling.
+8. **Cross-Links Between READMEs:**
    - Maintain the direct relative links between root `README.md`, `backend/README.md`, and `frontend/README.md` whenever reorganizing files.
 
 ---
@@ -350,4 +363,5 @@ When modifying or extending this codebase, adhere to the following rules:
 
 - **Payment Methods:** Currently, only Cash on Delivery (`COD`) is supported (`PaymentMethod` enum has only `COD`). Online payment gateways (e.g. Stripe, PayPal, VNPay) are not yet implemented.
 - **Image Storage:** Product and carousel images currently use URLs (`imageUrl: String`). Direct multipart file upload to S3 or cloud storage is not yet configured.
+- **Seed Photo Coverage:** All 40 models have photos: 17 licensed local WebP assets retain public attribution, and 23 use direct manufacturer/retailer URLs with unverified reuse permission. External links can change; unavailable photos use the generic fallback. See the [image-only update and photo QA commands](backend/README.md#3-database-migration--seeding); do not re-run a full seed on a populated database just to change photos.
 - **Live WebSocket Notifications:** Order status changes are polled on page load/navigation rather than pushed in real time via WebSockets.

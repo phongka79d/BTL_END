@@ -54,8 +54,17 @@ const request = async (endpoint, options = {}) => {
   }
 };
 
+const isStockRead = (endpoint) => {
+  const path = endpoint.split('?', 1)[0].replace(/\/+$/, '');
+  return path === '/cart' || /^\/products(?:\/[^/]+)?$/.test(path);
+};
+
 export const apiClient = {
-  get: (endpoint, options = {}) => request(endpoint, { ...options, method: 'GET' }),
+  get: (endpoint, options = {}) => request(endpoint, {
+    ...options,
+    method: 'GET',
+    ...(isStockRead(endpoint) ? { cache: 'no-store' } : {})
+  }),
   post: (endpoint, body, options = {}) => request(endpoint, { ...options, method: 'POST', body }),
   put: (endpoint, body, options = {}) => request(endpoint, { ...options, method: 'PUT', body }),
   delete: (endpoint, options = {}) => request(endpoint, { ...options, method: 'DELETE' }),

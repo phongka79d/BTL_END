@@ -5,6 +5,12 @@ import { useCart } from '../contexts/CartContext';
 import Alert from '../components/common/Alert';
 import CartItemList from '../components/cart/CartItemList';
 import CartSummary from '../components/cart/CartSummary';
+import {
+  buildQuantityChanges,
+  buildQuantityErrors,
+  getSelectedQuantityTotals,
+  hasInvalidItemQuantity
+} from '../utils/cartQuantityDrafts';
 
 export const CartView = () => {
   const navigate = useNavigate();
@@ -36,7 +42,7 @@ export const CartView = () => {
     setDraftQuantities((currentDrafts) => {
       const nextDrafts = {};
       items.forEach((item) => {
-        nextDrafts[item.id] = currentDrafts[item.id] ?? Number(item.quantity);
+        nextDrafts[item.id] = currentDrafts[item.id] ?? String(item.quantity);
       });
       return nextDrafts;
     });
@@ -53,35 +59,29 @@ export const CartView = () => {
     });
   }, [items]);
 
-  const quantityChanges = useMemo(() => {
-    return items
-      .map((item) => ({
-        id: item.id,
-        quantity: Number(draftQuantities[item.id] ?? item.quantity),
-        savedQuantity: Number(item.quantity)
-      }))
-      .filter((item) => item.quantity !== item.savedQuantity)
-      .map(({ id, quantity }) => ({ id, quantity }));
-  }, [draftQuantities, items]);
+  const quantityErrors = useMemo(
+    () => buildQuantityErrors(items, draftQuantities),
+    [draftQuantities, items]
+  );
+
+  const hasInvalidQuantity = hasInvalidItemQuantity(items, quantityErrors);
+
+  const quantityChanges = useMemo(
+    () => buildQuantityChanges(items, draftQuantities, quantityErrors),
+    [draftQuantities, items, quantityErrors]
+  );
 
   const selectedItems = useMemo(() => {
     const selectedItemIdSet = new Set(selectedItemIds);
     return items.filter((item) => selectedItemIdSet.has(item.id));
   }, [items, selectedItemIds]);
 
-  const selectedItemCount = useMemo(() => {
-    return selectedItems.reduce(
-      (total, item) => total + Number(draftQuantities[item.id] ?? item.quantity),
-      0
-    );
-  }, [draftQuantities, selectedItems]);
+  const hasInvalidSelectedQuantity = hasInvalidItemQuantity(selectedItems, quantityErrors);
 
-  const selectedSubtotal = useMemo(() => {
-    return selectedItems.reduce((total, item) => {
-      const quantity = Number(draftQuantities[item.id] ?? item.quantity);
-      return total + (Number(item.unitPrice) || 0) * quantity;
-    }, 0);
-  }, [draftQuantities, selectedItems]);
+  const { itemCount: selectedItemCount, subtotal: selectedSubtotal } = useMemo(
+    () => getSelectedQuantityTotals(selectedItems, draftQuantities, quantityErrors),
+    [draftQuantities, quantityErrors, selectedItems]
+  );
 
   const handleQuantityChange = useCallback((cartItemId, quantity) => {
     setDraftQuantities((currentDrafts) => ({
@@ -107,7 +107,7 @@ export const CartView = () => {
   }, []);
 
   const handleSaveChanges = useCallback(async () => {
-    if (!quantityChanges.length) {
+    if (hasInvalidQuantity || !quantityChanges.length) {
       return;
     }
 
@@ -116,14 +116,21 @@ export const CartView = () => {
     const result = await updateItems(quantityChanges);
     setIsSaving(false);
 
-    if (result.success) {
+    if (!result.success) {
       setFeedback({
-        title: 'Đã lưu thay đổi giỏ hàng',
-        description: 'Số lượng và tổng tiền đã được cập nhật từ backend.',
-        status: 'success'
+        title: 'Không thể lưu thay đổi giỏ hàng',
+        description: result.error || 'Vui lòng kiểm tra lại số lượng và thử lại.',
+        status: 'error'
       });
+      return;
     }
-  }, [quantityChanges, updateItems]);
+
+    setFeedback({
+      title: 'Đã lưu thay đổi giỏ hàng',
+      description: 'Số lượng và tổng tiền đã được cập nhật từ backend.',
+      status: 'success'
+    });
+  }, [hasInvalidQuantity, quantityChanges, updateItems]);
 
   const handleRemoveItem = useCallback(async (cartItemId) => {
     setFeedback(null);
@@ -178,6 +185,7 @@ export const CartView = () => {
           onBrowseProducts={() => navigate('/products')}
           onQuantityChange={handleQuantityChange}
           draftQuantities={draftQuantities}
+          quantityErrors={quantityErrors}
           selectedItemIds={selectedItemIds}
           onSelectAll={handleSelectAll}
           onSelectionChange={handleSelectionChange}
@@ -195,6 +203,8 @@ export const CartView = () => {
             hasUnsavedChanges={quantityChanges.length > 0}
             isSaving={isSaving}
             isDisabled={actionLoading || isSaving}
+            isSaveDisabled={hasInvalidQuantity}
+            isCheckoutDisabled={actionLoading || isSaving || hasInvalidSelectedQuantity}
             onSaveChanges={handleSaveChanges}
             onCheckout={() => navigate('/checkout', { state: { cartItemIds: selectedItemIds } })}
             onContinueShopping={() => navigate('/products')}

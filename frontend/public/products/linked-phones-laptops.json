@@ -1,0 +1,93 @@
+[
+  {
+    "productName": "OnePlus 12",
+    "brand": "OnePlus",
+    "imageUrl": "https://www.oneplus.com/content/dam/oasis/page/waffle-en/images-kv-0-d7111.png.avif",
+    "sourceUrl": "https://www.oneplus.com/us/12",
+    "reusePermission": "unverified"
+  },
+  {
+    "productName": "Edge 50 Pro",
+    "brand": "Motorola",
+    "imageUrl": "https://p4-ofp.static.pub/MOTO/edge50pro/edge50pro.f8d89c4344484255.png",
+    "sourceUrl": "https://www.motorola.com/gb/en/p/phones/motorola-edge/50-pro/pmipmgq37ml",
+    "reusePermission": "unverified"
+  },
+  {
+    "productName": "ROG Phone 8",
+    "brand": "ASUS",
+    "imageUrl": "https://dlcdnwebimgs.asus.com/gain/6CC77851-95F8-4910-808D-E0F94C840EB7",
+    "sourceUrl": "https://rog.asus.com/phones/rog-phone-8/",
+    "reusePermission": "unverified"
+  },
+  {
+    "productName": "MacBook Pro 16 M3",
+    "brand": "Apple",
+    "imageUrl": "https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/mbp16-spaceblack-select-202310?wid=904&hei=840&fmt=jpeg&qlt=90",
+    "sourceUrl": "https://www.apple.com/newsroom/2023/10/apple-unveils-new-macbook-pro-featuring-m3-chips/",
+    "reusePermission": "unverified"
+  },
+  {
+    "productName": "ROG Zephyrus G14",
+    "brand": "ASUS",
+    "imageUrl": "https://dlcdnwebimgs.asus.com/gain/E0275281-F18B-42C3-A025-3331C35A888F",
+    "sourceUrl": "https://rog.asus.com/laptops/rog-zephyrus/rog-zephyrus-g14-2024/",
+    "reusePermission": "unverified"
+  },
+  {
+    "productName": "XPS 15",
+    "brand": "Dell",
+    "imageUrl": "https://i.dell.com/is/image/DellContent/content/dam/ss2/product-images/dell-client-products/notebooks/xps-notebooks/xps-15-9530/pdp/pdp-images/notebook-xps-15-9530-pdp-mod-hero-image.psd?qlt=95",
+    "sourceUrl": "https://www.dell.com/en-us/shop/dell-laptops/xps-15-laptop/spd/xps-15-9530-laptop",
+    "reusePermission": "unverified"
+  },
+  {
+    "productName": "Spectre x360 14",
+    "brand": "HP",
+    "imageUrl": "https://www.hp.com/content/dam/sites/worldwide/personal-computers/consumer/laptops-and-2-n-1s/spectre/version-2023/HP%20Spectre%20x360%2014__Desktop@2x.png",
+    "sourceUrl": "https://www.hp.com/us-en/laptops-and-2-in-1s/spectre/hp-spectre-x360-14.html",
+    "reusePermission": "unverified"
+  },
+  {
+    "productName": "Stealth 16 Studio",
+    "brand": "MSI",
+    "imageUrl": "https://storage-asset.msi.com/global/picture/product/product_16729007768afad0b13a264c293854ad8e76ef2977.webp",
+    "sourceUrl": "https://www.msi.com/Laptop/Stealth-16-Studio-A13VX",
+    "reusePermission": "unverified"
+  },
+  {
+    "productName": "Gram 17",
+    "brand": "LG",
+    "imageUrl": "https://media.us.lg.com/transform/ecomm-PDPGallery-1100x730/781c8186-db41-445a-af1f-3f281d3d4108/17Z90S-G-AAB5U1_gallery_01_5000x5000",
+    "sourceUrl": "https://www.lg.com/us/laptops/lg-17z90s-g.aab5u1-gram-laptop",
+    "reusePermission": "unverified"
+  },
+  {
+    "productName": "Swift Go 14",
+    "brand": "Acer",
+    "imageUrl": "https://static-ecpa.acer.com/media/catalog/product/a/c/acer-swift-go-14-sfg14-73-with-fingerprint-with-backlit-on-wp-logo-pure-silver-01-1000x1000_nx.ksgaa.002.png?optimize=high&bg-color=255,255,255&fit=bounds&height=500&width=500&canvas=500:500&format=jpeg",
+    "sourceUrl": "https://store.acer.com/en-us/swift-go-14-laptop-sfg14-73-58ep",
+    "reusePermission": "unverified"
+  },
+  {
+    "productName": "Surface Laptop 6",
+    "brand": "Microsoft",
+    "imageUrl": "https://support.microsoft.com/en-us/surface/media/surface-laptop-6-for-business-2.png",
+    "sourceUrl": "https://support.microsoft.com/en-us/surface/models/surface-laptop-6-for-business-features",
+    "reusePermission": "unverified"
+  },
+  {
+    "productName": "Blade 15",
+    "brand": "Razer",
+    "imageUrl": "https://assets2.razerzone.com/images/pnx.assets/4a02e408cc50abef29a73dc54c72d7f4/razer-blade-15-2022-hero-m.webp",
+    "sourceUrl": "https://www.razer.com/gaming-laptops/razer-blade-15-2022",
+    "reusePermission": "unverified"
+  },
+  {
+    "productName": "ThinkPad X1 Carbon Gen 12",
+    "brand": "Lenovo",
+    "imageUrl": "https://p2-ofp.static.pub/fes/cms/2023/11/21/xn2mhejoktj9ttffveuotwfhqvv4yg908647.png?width=584&height=584",
+    "sourceUrl": "https://www.lenovo.com/au/outlet/en/p/laptops/thinkpad/thinkpadx1/thinkpad-x1-carbon-gen-12-14-inch-intel/21kccto1ww-pf54z3r6",
+    "reusePermission": "unverified"
+  }
+]

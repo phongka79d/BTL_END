@@ -1,4 +1,5 @@
 const prisma = require('../config/database');
+const { PURCHASE_INVALID_MESSAGE, toQuantity, validatePurchaseQuantity } = require('../utils/quantityValidation');
 
 /**
  * Tìm mục giỏ hàng theo ID.
@@ -19,9 +20,9 @@ const findById = async (id) => {
  * @returns {Promise<Object>} Mục giỏ hàng đã được cập nhật.
  */
 const updateQuantity = async (userId, cartItemId, quantity) => {
-  const parsedQuantity = parseInt(quantity, 10);
-  if (isNaN(parsedQuantity) || parsedQuantity < 1) {
-    throw new Error('Số lượng phải ít nhất là 1');
+  const parsedQuantity = toQuantity(quantity);
+  if (parsedQuantity === null || parsedQuantity < 1) {
+    throw new Error(PURCHASE_INVALID_MESSAGE);
   }
 
   const cartItem = await prisma.cartItem.findUnique({
@@ -40,9 +41,8 @@ const updateQuantity = async (userId, cartItemId, quantity) => {
     throw new Error('Không được phép truy cập sản phẩm trong giỏ hàng');
   }
 
-  // Từ chối khi tổng số lượng trong giỏ vượt quá tồn kho sản phẩm.
-  if (parsedQuantity > cartItem.product.quantity) {
-    throw new Error(`Số lượng yêu cầu vượt quá tồn kho (${cartItem.product.quantity})`);
+  if (validatePurchaseQuantity(parsedQuantity, cartItem.product.quantity)) {
+    throw new Error(PURCHASE_INVALID_MESSAGE);
   }
 
   return prisma.cartItem.update({

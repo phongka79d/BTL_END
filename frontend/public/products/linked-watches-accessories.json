@@ -1,0 +1,72 @@
+[
+  {
+    "productName": "Sense 2",
+    "brand": "Fitbit",
+    "imageUrl": "https://lh3.googleusercontent.com/TKEi8OTpR7tib3JhVAyLeV22HM3I84sFQEWDW__GD9DREsU4Kg1P980jnaOU9wI9AiiriuW6juD9TmLJRl3VB0JybUYDcH46W9g=rw-e365-w700-rj-sc0xffffffff",
+    "sourceUrl": "https://store.google.com/us/product/fitbit_sense_2",
+    "reusePermission": "unverified"
+  },
+  {
+    "productName": "Watch GT 4",
+    "brand": "Huawei",
+    "imageUrl": "https://consumer.huawei.com/dam/content/dam/huawei-cbg-site/common/mkt/pdp/wearables/watch-gt4/watch-gt4/list/46mm-green.png",
+    "sourceUrl": "https://consumer.huawei.com/ca/wearables/watch-gt4/",
+    "reusePermission": "unverified"
+  },
+  {
+    "productName": "Balance",
+    "brand": "Amazfit",
+    "imageUrl": "https://us.amazfit.com/cdn/shop/files/PDP_Balance_Beauty_Features_Gallery_1080x1080Amazfit_Balance_SideView_44f9784e-7dab-4ccf-9288-43f80607f191.jpg?v=1728940803",
+    "sourceUrl": "https://us.amazfit.com/products/amazfit-balance",
+    "reusePermission": "unverified"
+  },
+  {
+    "productName": "Gen 6",
+    "brand": "Fossil",
+    "imageUrl": "https://fossil.scene7.com/is/image/FossilPartners/FTW4059_main?wid=900&hei=900&fit=constrain&fmt=jpg",
+    "sourceUrl": "https://www.fossil.com/en-nl/products/gen-6-smartwatch-smoke-stainless-steel/FTW4059I.html",
+    "reusePermission": "unverified"
+  },
+  {
+    "productName": "PowerCore 20000",
+    "brand": "Anker",
+    "imageUrl": "https://cdn.shopify.com/s/files/1/0595/4034/0926/files/A1287011_TD01_V1-removebg-preview.png?v=1683701020",
+    "sourceUrl": "https://www.anker.com/eu-en/products/a1287",
+    "reusePermission": "unverified"
+  },
+  {
+    "productName": "K2 Wireless Keyboard",
+    "brand": "Keychron",
+    "imageUrl": "https://cdn.shopify.com/s/files/1/0059/0630/1017/products/Keychron-K2-wireless-mechanical-keyboard-for-Mac-Windows-iOS-Gateron-switch-red-with-type-C-RGB-white-backlight-exclusive-color.jpg?v=1650445595",
+    "sourceUrl": "https://www.keychron.com/products/keychron-k2-wireless-mechanical-keyboard",
+    "reusePermission": "unverified"
+  },
+  {
+    "productName": "3-in-1 MagSafe Charger",
+    "brand": "Belkin",
+    "imageUrl": "https://www.belkin.com/dw/image/v2/BGBH_PRD/on/demandware.static/-/Sites-master-product-catalog-blk/default/dwb3101a8b/images/hi-res/7/135cfdc88f5c66a4_WIZ009-BLK_Hero_WDevice_WEB.jpg?sw=700&sh=700&sm=fit&sfrm=png",
+    "sourceUrl": "https://www.belkin.com/my/p/3-in-1-wireless-charger-with-magsafe-15w/WIZ009dqBK.html",
+    "reusePermission": "unverified"
+  },
+  {
+    "productName": "WH-1000XM5",
+    "brand": "Sony",
+    "imageUrl": "https://m.media-amazon.com/images/I/61O3iMlnJIL._AC_SL1500_.jpg",
+    "sourceUrl": "https://www.amazon.com/dp/B09XS7JWHH",
+    "reusePermission": "unverified"
+  },
+  {
+    "productName": "T7 Shield 1TB",
+    "brand": "Samsung",
+    "imageUrl": "https://images.samsung.com/is/image/samsung/p6pim/us/mu-pe1t0s-am/gallery/us-portable-ssd-t7-shield-mu-pe1t0s-am-552408700?$product-details-jpg$",
+    "sourceUrl": "https://www.samsung.com/us/memory-storage/portable-ssd/portable-ssd-t7-shield-usb-3-2-1tb-black-sku-mu-pe1t0s-am/",
+    "reusePermission": "unverified"
+  },
+  {
+    "productName": "USB-C Hub 9-in-1",
+    "brand": "Ugreen",
+    "imageUrl": "https://us.ugreen.com/cdn/shop/products/ugreen-revodok-pro-9-in-1-usb-c-hub-971587.png?v=1700175788",
+    "sourceUrl": "https://us.ugreen.com/products/ugreen-revodok-pro-9-in-1-usb-c-hub",
+    "reusePermission": "unverified"
+  }
+]

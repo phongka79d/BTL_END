@@ -55,10 +55,10 @@ export const CheckoutForm = ({
           <TextInput
             label="Phone number *"
             value={values.phone}
+            inputMode="numeric"
             onChange={(value) => onChange('phone', value)}
             onBlur={() => onBlur('phone')}
             status={fieldStatus(touched.phone && errors.phone)}
-            width="100%"
           />
 
           <TextArea

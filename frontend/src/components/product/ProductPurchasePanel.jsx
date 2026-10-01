@@ -9,7 +9,7 @@ import {
   Grid,
   Heading,
   HStack,
-  NumberInput,
+  TextInput,
   Text,
   VStack
 } from '@astryxdesign/core';
@@ -37,6 +37,13 @@ const ProductMetaItem = ({ label, value }) => (
   </VStack>
 );
 
+const getSteppedQuantity = (quantity, step, maxQuantity) => {
+  const parsed = Number(quantity);
+  const baseQuantity = Number.isInteger(parsed) ? parsed : 1;
+  const upperBound = Math.max(1, Number(maxQuantity) || 1);
+  return String(Math.min(Math.max(1, baseQuantity + step), upperBound));
+};
+
 export const ProductPurchasePanel = ({
   actionLoading,
   availableQuantity,
@@ -55,6 +62,8 @@ export const ProductPurchasePanel = ({
 }) => {
   const averageRating = useMemo(() => getAverageRating(reviews), [reviews]);
   const reviewCount = reviews.length;
+  const currentQuantity = Number.isFinite(Number(quantity)) ? Number(quantity) : 1;
+  const upperBound = Math.max(1, Number(maxSelectableQuantity) || 1);
 
   return (
     <Card padding={5}>
@@ -98,22 +107,38 @@ export const ProductPurchasePanel = ({
         <Divider />
 
         <VStack gap={3}>
-          <NumberInput
-            label="Quantity"
-            value={quantity}
-            onChange={onQuantityChange}
-            min={1}
-            max={maxSelectableQuantity}
-            step={1}
-            isIntegerOnly
-            isDisabled={availableQuantity < 1 || actionLoading}
-            description={
-              availableQuantity > 0
-                ? `Choose a quantity from 1 to ${maxSelectableQuantity}. Final stock validation still happens on the backend.`
-                : 'Sản phẩm này chưa khả dụng cho đến khi được bổ sung tồn kho.'
-            }
-            status={quantityStatus || undefined}
-          />
+          <HStack gap={1} style={{ alignItems: 'flex-start' }}>
+            <Button
+              label="-"
+              variant="secondary"
+              size="sm"
+              isDisabled={availableQuantity < 1 || actionLoading || currentQuantity <= 1}
+              onClick={() => onQuantityChange?.(getSteppedQuantity(quantity, -1, upperBound))}
+              aria-label="Giảm số lượng"
+            />
+            <TextInput
+              label="Quantity"
+              value={String(quantity ?? '')}
+              onChange={onQuantityChange}
+              inputMode="numeric"
+              isDisabled={availableQuantity < 1 || actionLoading}
+              description={
+                availableQuantity > 0
+                  ? `Choose a quantity from 1 to ${maxSelectableQuantity}. Final stock validation still happens on the backend.`
+                  : 'Sản phẩm này chưa khả dụng cho đến khi được bổ sung tồn kho.'
+              }
+              status={quantityStatus || undefined}
+              width="100%"
+            />
+            <Button
+              label="+"
+              variant="secondary"
+              size="sm"
+              isDisabled={availableQuantity < 1 || actionLoading || currentQuantity >= upperBound}
+              onClick={() => onQuantityChange?.(getSteppedQuantity(quantity, 1, upperBound))}
+              aria-label="Tăng số lượng"
+            />
+          </HStack>
 
           <VStack gap={2}>
             <Button
@@ -121,7 +146,7 @@ export const ProductPurchasePanel = ({
               variant="primary"
               size="lg"
               isLoading={actionLoading}
-              isDisabled={availableQuantity < 1}
+              isDisabled={availableQuantity < 1 || actionLoading || quantityStatus?.type === 'error'}
               onClick={onAddToCart}
             />
             <Button

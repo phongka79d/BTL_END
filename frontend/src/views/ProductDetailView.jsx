@@ -26,17 +26,7 @@ import {
   getStockLabel,
   getStockVariant
 } from '../components/product/productUtils';
-
-const clampQuantity = (value, maxQuantity) => {
-  const parsed = Number(value);
-
-  if (!Number.isFinite(parsed)) {
-    return 1;
-  }
-
-  const upperBound = Math.max(1, Number(maxQuantity) || 1);
-  return Math.min(Math.max(1, Math.floor(parsed)), upperBound);
-};
+import { getPurchasableQuantity, validatePurchaseQuantity } from '../utils/quantityValidation';
 
 const DetailSkeleton = () => {
   return (
@@ -161,7 +151,7 @@ export const ProductDetailView = () => {
   const { isAuthenticated, user } = useAuth();
   const { addItem, actionLoading } = useCart();
   const [product, setProduct] = useState(null);
-  const [quantity, setQuantity] = useState(1);
+  const [quantity, setQuantity] = useState('1');
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [isNotFound, setIsNotFound] = useState(false);
@@ -204,7 +194,7 @@ export const ProductDetailView = () => {
       }
 
       setProduct(nextProduct);
-      setQuantity(1);
+      setQuantity('1');
     } catch (err) {
       if (requestId !== requestIdRef.current) {
         return;
@@ -282,40 +272,45 @@ export const ProductDetailView = () => {
   const maxSelectableQuantity = availableQuantity > 0 ? availableQuantity : 1;
   const currentTitle = product?.name || (isLoading ? 'Đang tải sản phẩm' : `Sản phẩm ${id}`);
 
-  useEffect(() => {
-    setQuantity((currentValue) => clampQuantity(currentValue, maxSelectableQuantity));
-  }, [maxSelectableQuantity, product?.id]);
-
+  const quantityError = validatePurchaseQuantity(quantity, availableQuantity);
   const quantityStatus = useMemo(() => {
-    if (availableQuantity > 0) {
-      return null;
+    if (availableQuantity < 1) {
+      return {
+        type: 'warning',
+        message: 'Sản phẩm này hiện đã hết hàng.'
+      };
     }
 
-    return {
-      type: 'warning',
-      message: 'Sản phẩm này hiện đã hết hàng.'
-    };
-  }, [availableQuantity]);
+    if (quantityError) {
+      return {
+        type: 'error',
+        message: quantityError
+      };
+    }
+
+    return null;
+  }, [availableQuantity, quantityError]);
 
   const handleQuantityChange = (value) => {
     setFeedback(null);
-    setQuantity(clampQuantity(value, maxSelectableQuantity));
+    setQuantity(value);
   };
 
   const handleAddToCart = async () => {
-    if (!product || availableQuantity < 1) {
+    const purchasableQuantity = getPurchasableQuantity(quantity, availableQuantity);
+
+    if (!product || purchasableQuantity === null) {
       return;
     }
 
     setFeedback(null);
 
-    const result = await addItem(product.id, quantity);
-
+    const result = await addItem(product.id, purchasableQuantity);
     if (result.success) {
       setFeedback({
         status: 'success',
         title: 'Đã thêm vào giỏ hàng',
-        description: `${quantity} ${quantity === 1 ? 'đơn vị' : 'đơn vị'} của ${product.name} đã được thêm vào giỏ hàng.`,
+        description: `${purchasableQuantity} ${purchasableQuantity === 1 ? 'đơn vị' : 'đơn vị'} của ${product.name} đã được thêm vào giỏ hàng.`,
         actionLabel: 'Xem giỏ hàng',
         onAction: () => navigate('/cart')
       });

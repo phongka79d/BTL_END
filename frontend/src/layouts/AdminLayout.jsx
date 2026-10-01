@@ -16,7 +16,7 @@ import {
   VStack
 } from '@astryxdesign/core';
 import { useAuth } from '../contexts/AuthContext';
-import { PERMISSIONS } from '../constants/permissions';
+import { canAccessStaffArea } from '../constants/permissions';
 import {
   AdminIcon,
   CategoriesIcon,
@@ -36,10 +36,10 @@ import {
  * Thành phần cung cấp thanh bên có thể thu gọn (SideNav) với các liên kết quản lý và thanh điều hướng trên đơn giản.
  */
 export const AdminLayout = () => {
-  const { user, hasPermission, logout } = useAuth();
+  const { user, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  const canAccessStaff = hasPermission(PERMISSIONS.ORDERS_VIEW_ALL);
+  const canAccessStaff = canAccessStaffArea(user?.role);
 
   const sidebar = (
     <SideNav

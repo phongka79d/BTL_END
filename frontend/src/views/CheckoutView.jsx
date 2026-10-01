@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import {
   Button,
@@ -11,36 +11,23 @@ import {
   VStack
 } from '@astryxdesign/core';
 import { useCart } from '../contexts/CartContext';
+import { useNotification } from '../contexts/NotificationContext';
 import { orderApi } from '../api/orderApi';
 import Alert from '../components/common/Alert';
 import { CartIcon } from '../components/common/LayoutIcons';
 import CheckoutForm from '../components/checkout/CheckoutForm';
 import CheckoutOrderSummary from '../components/checkout/CheckoutOrderSummary';
-import CheckoutSuccessDialog from '../components/checkout/CheckoutSuccessDialog';
+import {
+  createCheckoutRequest,
+  createSubmissionGuard,
+  validateCheckoutValues
+} from '../components/checkout/checkoutFormUtils.js';
 
 const INITIAL_VALUES = {
   fullName: '',
   phone: '',
   shippingAddress: '',
   note: ''
-};
-
-const validate = (values) => {
-  const errors = {};
-
-  if (!values.fullName.trim()) {
-    errors.fullName = 'Vui lòng nhập họ và tên.';
-  }
-
-  if (!values.phone.trim()) {
-    errors.phone = 'Vui lòng nhập số điện thoại.';
-  }
-
-  if (!values.shippingAddress.trim()) {
-    errors.shippingAddress = 'Vui lòng nhập địa chỉ giao hàng.';
-  }
-
-  return errors;
 };
 
 const CheckoutSkeleton = () => (
@@ -72,6 +59,7 @@ export const CheckoutView = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { items, subtotal, loading, error, refreshCart } = useCart();
+  const { notifySuccess } = useNotification();
 
   const selectedCartItemIds = useMemo(() => {
     return Array.isArray(location.state?.cartItemIds)
@@ -104,15 +92,11 @@ export const CheckoutView = () => {
   const [touched, setTouched] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [apiError, setApiError] = useState(null);
-  const [placedOrderId, setPlacedOrderId] = useState(null);
+  const submissionGuardRef = useRef(null);
 
-  const resetCheckoutState = useCallback(() => {
-    setValues(INITIAL_VALUES);
-    setErrors({});
-    setTouched({});
-    setApiError(null);
-    setPlacedOrderId(null);
-  }, []);
+  if (!submissionGuardRef.current) {
+    submissionGuardRef.current = createSubmissionGuard();
+  }
 
   const handleFieldChange = useCallback((field, value) => {
     setValues((prev) => ({ ...prev, [field]: value }));
@@ -132,7 +116,7 @@ export const CheckoutView = () => {
     (field) => {
       setTouched((prev) => ({ ...prev, [field]: true }));
 
-      const fieldErrors = validate(values);
+      const fieldErrors = validateCheckoutValues(values);
       if (fieldErrors[field]) {
         setErrors((prev) => ({ ...prev, [field]: fieldErrors[field] }));
       }
@@ -141,7 +125,18 @@ export const CheckoutView = () => {
   );
 
   const handleSubmit = useCallback(async () => {
-    const validationErrors = validate(values);
+    const submissionGuard = submissionGuardRef.current;
+
+    if (!submissionGuard.begin()) {
+      return;
+    }
+
+    const checkoutRequest = createCheckoutRequest({
+      values,
+      selectedItems,
+      createOrder: (payload) => orderApi.createOrder(payload)
+    });
+    const validationErrors = checkoutRequest.errors;
     const allTouched = {
       fullName: true,
       phone: true,
@@ -154,53 +149,45 @@ export const CheckoutView = () => {
     setApiError(null);
 
     if (Object.keys(validationErrors).length > 0) {
+      submissionGuard.end();
       return;
     }
 
     setIsSubmitting(true);
 
     try {
-      const payload = {
-        fullName: values.fullName.trim(),
-        phone: values.phone.trim(),
-        shippingAddress: values.shippingAddress.trim(),
-        note: values.note.trim() || undefined,
-        cartItemIds: selectedItems.map((item) => item.id)
-      };
-
-      const response = await orderApi.createOrder(payload);
+      const response = await checkoutRequest.run();
       const order = response?.data || response;
 
       if (!order || !order.id) {
         setApiError(
           'Máy chủ không trả về thông tin đơn hàng. Vui lòng thử lại.'
         );
-        setIsSubmitting(false);
         return;
       }
 
-      setPlacedOrderId(order.id);
+      try {
+        await refreshCart();
+      } catch {
+        // Đơn đã được tạo thành công; lỗi tải lại giỏ hàng hiển thị trên
+        // trang giỏ hàng kèm nút thử lại nên không chặn điều hướng.
+      }
 
-      await refreshCart();
+      notifySuccess({
+        message: 'Đặt hàng thành công',
+        description: `Mã đơn hàng #${order.id}`
+      });
+
+      navigate('/cart', { replace: true });
     } catch (err) {
       const message =
         err?.message || 'Không thể đặt đơn hàng. Vui lòng thử lại.';
       setApiError(message);
     } finally {
+      submissionGuard.end();
       setIsSubmitting(false);
     }
-  }, [refreshCart, selectedItems, values]);
-
-  const handleViewOrder = useCallback(() => {
-    if (placedOrderId) {
-      navigate(`/orders/${placedOrderId}`);
-    }
-  }, [navigate, placedOrderId]);
-
-  const handleContinueShopping = useCallback(() => {
-    resetCheckoutState();
-    navigate('/products');
-  }, [navigate, resetCheckoutState]);
+  }, [navigate, notifySuccess, refreshCart, selectedItems, values]);
 
   if (loading) {
     return (
@@ -346,13 +333,6 @@ export const CheckoutView = () => {
           onSubmit={handleSubmit}
         />
       </Grid>
-
-      <CheckoutSuccessDialog
-        isOpen={!!placedOrderId}
-        orderId={placedOrderId}
-        onViewOrder={handleViewOrder}
-        onContinueShopping={handleContinueShopping}
-      />
     </VStack>
   );
 };

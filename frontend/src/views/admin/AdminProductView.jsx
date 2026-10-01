@@ -1,5 +1,5 @@
-import React, { useCallback, useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import {
   AlertDialog,
   Button,
@@ -16,6 +16,12 @@ import ProductForm from '../../components/admin/ProductForm';
 import ProductTable from '../../components/admin/ProductTable';
 import Alert from '../../components/common/Alert';
 import Pagination from '../../components/common/Pagination';
+import {
+  getProductListEmptyCopy,
+  normalizeCategoryId,
+  removeCategoryFilter,
+  resolveCategoryLabel
+} from './adminProductListUtils';
 
 const DEFAULT_PAGINATION = {
   page: 1,
@@ -26,10 +32,13 @@ const DEFAULT_PAGINATION = {
 
 export const AdminProductView = () => {
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const categoryId = normalizeCategoryId(searchParams.get('categoryId'));
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
   const [pagination, setPagination] = useState(DEFAULT_PAGINATION);
   const [page, setPage] = useState(1);
+  const [pageCategoryId, setPageCategoryId] = useState(categoryId);
   const [draftSearch, setDraftSearch] = useState('');
   const [search, setSearch] = useState('');
   const [isLoading, setIsLoading] = useState(true);
@@ -40,30 +49,49 @@ export const AdminProductView = () => {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [isDeleting, setIsDeleting] = useState(false);
+  const latestRequestRef = useRef(0);
+
+  // Đổi danh mục (kể cả back/forward khi view còn mounted) phải quay về trang 1
+  // ngay trong render để lần tải đầu của danh mục mới không dùng trang cũ.
+  if (pageCategoryId !== categoryId) {
+    setPageCategoryId(categoryId);
+    setPage(1);
+  }
 
   const loadProducts = useCallback(async () => {
+    const requestId = latestRequestRef.current + 1;
+    latestRequestRef.current = requestId;
     setIsLoading(true);
     setLoadError('');
 
     try {
       const response = await productApi.getProducts({
         keyword: search,
+        categoryId,
         page,
         limit: DEFAULT_PAGINATION.limit
       });
+      if (requestId !== latestRequestRef.current) {
+        return;
+      }
       setProducts(response?.data?.items || []);
       setPagination(response?.data?.pagination || {
         ...DEFAULT_PAGINATION,
         page
       });
     } catch (error) {
+      if (requestId !== latestRequestRef.current) {
+        return;
+      }
       setProducts([]);
       setPagination({ ...DEFAULT_PAGINATION, page });
-        setLoadError(error?.message || 'Không thể tải sản phẩm.');
+      setLoadError(error?.message || 'Không thể tải sản phẩm.');
     } finally {
-      setIsLoading(false);
+      if (requestId === latestRequestRef.current) {
+        setIsLoading(false);
+      }
     }
-  }, [page, search]);
+  }, [categoryId, page, search]);
 
   const loadCategories = useCallback(async () => {
     setCategoryError('');
@@ -152,6 +180,23 @@ export const AdminProductView = () => {
     setSearch('');
   };
 
+  const clearCategoryFilter = () => {
+    setSearchParams((currentParams) => removeCategoryFilter(currentParams));
+  };
+
+  const categoryLabel = resolveCategoryLabel(categories, categoryId);
+  const emptyCopy = getProductListEmptyCopy({
+    categoryId,
+    categoryLabel,
+    keyword: search
+  });
+  const emptyActions = {
+    clearCategory: { onClick: clearCategoryFilter, isDisabled: false },
+    clearSearch: { onClick: clearSearch, isDisabled: false },
+    create: { onClick: openCreateForm, isDisabled: categories.length === 0 }
+  };
+  const emptyAction = emptyActions[emptyCopy.action] || emptyActions.create;
+
   return (
     <VStack gap={6} width="100%">
       <VStack gap={1}>
@@ -176,6 +221,20 @@ export const AdminProductView = () => {
           description={feedback.description}
           status={feedback.status}
         />
+      )}
+
+      {categoryId && (
+        <HStack gap={2} align="center" wrap="wrap">
+          <Text type="supporting">Đang lọc theo danh mục:</Text>
+          <Text weight="semibold">{categoryLabel}</Text>
+          <Button
+            label="Xóa bộ lọc danh mục"
+            variant="ghost"
+            size="sm"
+            onClick={clearCategoryFilter}
+            isDisabled={isLoading}
+          />
+        </HStack>
       )}
 
       <Toolbar
@@ -227,15 +286,11 @@ export const AdminProductView = () => {
         onEdit={openEditForm}
         onDelete={setDeleteTarget}
         onRetry={loadProducts}
-        emptyTitle={search ? 'Không có sản phẩm phù hợp' : 'Chưa có sản phẩm'}
-        emptyDescription={
-          search
-            ? 'Hãy xóa tìm kiếm hoặc thử tên sản phẩm hay thương hiệu khác.'
-            : 'Hãy tạo sản phẩm đầu tiên để bổ sung vào danh mục.'
-        }
-        emptyActionLabel={search ? 'Xóa tìm kiếm' : 'Tạo sản phẩm'}
-        emptyActionDisabled={!search && categories.length === 0}
-        onEmptyAction={search ? clearSearch : openCreateForm}
+        emptyTitle={emptyCopy.title}
+        emptyDescription={emptyCopy.description}
+        emptyActionLabel={emptyCopy.actionLabel}
+        emptyActionDisabled={emptyAction.isDisabled}
+        onEmptyAction={emptyAction.onClick}
       />
 
       {!isLoading && !loadError && products.length > 0 && (

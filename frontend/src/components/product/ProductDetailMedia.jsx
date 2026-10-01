@@ -1,6 +1,6 @@
 import React from 'react';
 import { AspectRatio, Card, SelectableCard, Text, VStack } from '@astryxdesign/core';
-import { getProductImageSrc } from './productUtils';
+import { getProductImageSrc, handleProductImageError } from './productUtils';
 
 export const ProductDetailMedia = ({ product }) => {
   const imageSrc = getProductImageSrc(product?.imageUrl);
@@ -22,6 +22,7 @@ export const ProductDetailMedia = ({ product }) => {
           <img
             src={imageSrc}
             alt={imageAlt}
+            onError={handleProductImageError}
             style={{
               width: '100%',
               height: '100%',
@@ -44,6 +45,7 @@ export const ProductDetailMedia = ({ product }) => {
         <img
           src={imageSrc}
           alt={imageAlt}
+          onError={handleProductImageError}
           style={{
             width: '100%',
             height: '100%',

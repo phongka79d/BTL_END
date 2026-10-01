@@ -11,9 +11,9 @@ import {
   Avatar,
   DropdownMenu,
   Icon,
-  Button,
   HStack,
-  VStack
+  VStack,
+  useAppShellMobile
 } from '@astryxdesign/core';
 import { useAuth } from '../contexts/AuthContext';
 import {
@@ -27,6 +27,13 @@ import {
   LogOutIcon,
   AdminIcon
 } from '../components/common/LayoutIcons';
+import { canAccessStaffRoute } from '../routes/staffRoutePermissions';
+import { ResponsiveNavButton } from '../components/common/ResponsiveNavButton';
+
+const StaffHeading = () => {
+  const { isMobile } = useAppShellMobile();
+  return <TopNavHeading heading={isMobile ? 'Vận hành' : 'Cổng thông tin vận hành & xử lý đơn hàng'} />;
+};
 
 /**
  * StaffLayout Component - Cổng thông tin vận hành & xử lý đơn hàng chuẩn hóa với AppShell & SideNav của Astryx
@@ -35,6 +42,8 @@ export const StaffLayout = () => {
   const { user, isAdmin, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+  // Chỉ hiển thị các mục điều hướng mà vai trò hiện tại có capability tương ứng.
+  const canAccess = (routeKey) => canAccessStaffRoute(user?.role, routeKey);
 
   const handleLogout = () => {
     logout();
@@ -97,54 +106,64 @@ export const StaffLayout = () => {
           as={Link}
           isSelected={location.pathname === '/staff'}
         />
-        <SideNavItem
-          label="Xử lý đơn hàng"
-          href="/staff/orders"
-          icon={<OrdersIcon />}
-          as={Link}
-          isSelected={location.pathname.startsWith('/staff/orders')}
-        />
-        <SideNavItem
-          label="Kiểm kê tồn kho"
-          href="/staff/inventory"
-          icon={<ProductsIcon />}
-          as={Link}
-          isSelected={location.pathname.startsWith('/staff/inventory')}
-        />
-        <SideNavItem
-          label="Kiểm duyệt đánh giá"
-          href="/staff/reviews"
-          icon={<ReviewsIcon />}
-          as={Link}
-          isSelected={location.pathname.startsWith('/staff/reviews')}
-        />
-        <SideNavItem
-          label="Báo cáo vận hành"
-          href="/staff/reports"
-          icon={<ReportsIcon />}
-          as={Link}
-          isSelected={location.pathname.startsWith('/staff/reports')}
-        />
+        {canAccess('orders') && (
+          <SideNavItem
+            label="Xử lý đơn hàng"
+            href="/staff/orders"
+            icon={<OrdersIcon />}
+            as={Link}
+            isSelected={location.pathname.startsWith('/staff/orders')}
+          />
+        )}
+        {canAccess('inventory') && (
+          <SideNavItem
+            label="Kiểm kê tồn kho"
+            href="/staff/inventory"
+            icon={<ProductsIcon />}
+            as={Link}
+            isSelected={location.pathname.startsWith('/staff/inventory')}
+          />
+        )}
+        {canAccess('reviews') && (
+          <SideNavItem
+            label="Kiểm duyệt đánh giá"
+            href="/staff/reviews"
+            icon={<ReviewsIcon />}
+            as={Link}
+            isSelected={location.pathname.startsWith('/staff/reviews')}
+          />
+        )}
+        {canAccess('reports') && (
+          <SideNavItem
+            label="Báo cáo vận hành"
+            href="/staff/reports"
+            icon={<ReportsIcon />}
+            as={Link}
+            isSelected={location.pathname.startsWith('/staff/reports')}
+          />
+        )}
       </SideNavSection>
     </SideNav>
   );
 
   const topNav = (
     <TopNav
-      heading={<TopNavHeading heading="Cổng thông tin vận hành & xử lý đơn hàng" />}
+      heading={<StaffHeading />}
       endContent={
         <HStack gap={2}>
-          <Button
+          <ResponsiveNavButton
             label="Xem cửa hàng"
             variant="secondary"
             size="sm"
+            icon={<HomeIcon />}
             onClick={() => navigate('/')}
           />
           {isAdmin && (
-            <Button
+            <ResponsiveNavButton
               label="Trang Admin"
               variant="secondary"
               size="sm"
+              icon={<AdminIcon />}
               onClick={() => navigate('/admin')}
             />
           )}

@@ -27,7 +27,8 @@ export const orderApi = {
 
   /**
    * Lấy tất cả đơn hàng cho admin / staff, mới nhất trước.
-   * @param {string|Object} [params] - Trạng thái hoặc đối tượng bộ lọc { status }
+   * @param {string|Object} [params] - Trạng thái hoặc đối tượng bộ lọc
+   *   { status, keyword|search, searchField, page, limit }
    * @returns {Promise<Object>} Mảng đơn hàng
    */
   getAdminOrders: (params) => {
@@ -42,6 +43,7 @@ export const orderApi = {
       searchParams.set('keyword', kw);
       searchParams.set('search', kw);
     }
+    if (params.searchField) searchParams.set('searchField', params.searchField);
     if (params.page !== undefined && params.page !== null && params.page !== '') {
       searchParams.set('page', String(params.page));
     }

@@ -8,27 +8,47 @@ import {
   Grid,
   HStack,
   IconButton,
-  NumberInput,
+  TextInput,
   Text,
   VStack
 } from '@astryxdesign/core';
 import { TrashIcon } from '../common/LayoutIcons';
-import { formatPrice, getProductImageSrc, getStockLabel, getStockVariant } from '../product/productUtils';
+import {
+  formatPrice,
+  getProductImageSrc,
+  getStockLabel,
+  getStockVariant,
+  handleProductImageError
+} from '../product/productUtils';
+import { validatePurchaseQuantity } from '../../utils/quantityValidation';
 
-const clampQuantity = (value, maxQuantity) => {
+const getNumericQuantity = (value, fallback = 1) => {
   const parsed = Number(value);
-
-  if (!Number.isFinite(parsed)) {
-    return 1;
-  }
-
-  const upperBound = Math.max(1, Number(maxQuantity) || 1);
-  return Math.min(Math.max(1, Math.floor(parsed)), upperBound);
+  return Number.isFinite(parsed) ? parsed : fallback;
 };
+
+const getBoundedStepQuantity = (value, step, maxQuantity) => {
+  const parsed = getNumericQuantity(value);
+  const baseQuantity = Number.isInteger(parsed) ? parsed : 1;
+  return String(Math.min(Math.max(1, baseQuantity + step), Math.max(1, maxQuantity)));
+};
+
+const getQuantityValue = (quantity, item) => (
+  quantity === undefined || quantity === null ? String(item?.quantity ?? '') : String(quantity)
+);
+
+const getQuantityError = (quantity, availableStock) => (
+  validatePurchaseQuantity(quantity, availableStock)
+);
+
+const getQuantityForSubtotal = (quantity, quantityError) => (
+  quantityError ? 0 : Number(quantity)
+);
 
 export const CartItem = ({
   item,
   quantity,
+  quantityError,
   isSelected = false,
   onSelectionChange,
   onQuantityChange,
@@ -37,22 +57,24 @@ export const CartItem = ({
   pendingAction = null
 }) => {
   const availableStock = Number(item?.product?.quantity ?? 0);
-  const currentQuantity = Number(quantity ?? item?.quantity ?? 1);
-  const maxQuantity = Math.max(1, availableStock, currentQuantity);
-  const stockLabel = getStockLabel(availableStock);
+  const quantityValue = getQuantityValue(quantity, item);
+  const resolvedQuantityError = quantityError ?? getQuantityError(quantityValue, availableStock);
+  const currentQuantity = getNumericQuantity(quantityValue);
+  const maxQuantity = Math.max(1, availableStock);
+  const stockLabel = `${getStockLabel(availableStock)} (${availableStock})`;
   const stockVariant = getStockVariant(availableStock);
 
   const lineSubtotal = useMemo(() => {
     const unitPrice = Number(item?.unitPrice ?? 0);
-    return formatPrice(unitPrice * currentQuantity);
-  }, [currentQuantity, item?.unitPrice]);
+    return formatPrice(unitPrice * getQuantityForSubtotal(quantityValue, resolvedQuantityError));
+  }, [item?.unitPrice, quantityValue, resolvedQuantityError]);
 
   const handleQuantityChange = (value) => {
-    onQuantityChange?.(item.id, clampQuantity(value, maxQuantity));
+    onQuantityChange?.(item.id, value);
   };
 
   const handleStepQuantity = (step) => {
-    onQuantityChange?.(item.id, clampQuantity(currentQuantity + step, maxQuantity));
+    onQuantityChange?.(item.id, getBoundedStepQuantity(quantityValue, step, maxQuantity));
   };
 
   return (
@@ -80,6 +102,7 @@ export const CartItem = ({
             <img
               src={getProductImageSrc(item?.product?.imageUrl)}
               alt={item?.product?.name || 'Sản phẩm trong giỏ hàng'}
+              onError={handleProductImageError}
               style={{
                 width: '100%',
                 height: '100%',
@@ -116,28 +139,26 @@ export const CartItem = ({
                 label="-"
                 variant="secondary"
                 size="sm"
-                isDisabled={isBusy || currentQuantity <= 1}
+                isDisabled={isBusy || availableStock < 1 || currentQuantity <= 1}
                 onClick={() => handleStepQuantity(-1)}
                 aria-label={`Giảm số lượng ${item?.product?.name || 'sản phẩm'}`}
               />
-              <NumberInput
+              <TextInput
                 label="Số lượng"
                 isLabelHidden
-                value={currentQuantity}
+                value={quantityValue}
                 onChange={handleQuantityChange}
-                min={1}
-                max={maxQuantity}
-                step={1}
+                inputMode="numeric"
                 size="sm"
-                isIntegerOnly
                 isDisabled={isBusy}
+                status={resolvedQuantityError ? { type: 'error', message: resolvedQuantityError } : undefined}
                 width="64px"
               />
               <Button
                 label="+"
                 variant="secondary"
                 size="sm"
-                isDisabled={isBusy || currentQuantity >= maxQuantity}
+                isDisabled={isBusy || availableStock < 1 || currentQuantity >= maxQuantity}
                 onClick={() => handleStepQuantity(1)}
                 aria-label={`Tăng số lượng ${item?.product?.name || 'sản phẩm'}`}
               />

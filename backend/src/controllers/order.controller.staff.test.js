@@ -89,7 +89,7 @@ test('getOrderById allows customer to view own order but blocks other customer o
   }
 });
 
-test('getAdminOrders forwards status, keyword, page, and limit to orderModel.listForAdmin', async () => {
+test('getAdminOrders forwards status, keyword, searchField, page, and limit to orderModel.listForAdmin', async () => {
   const originalListForAdmin = orderModel.listForAdmin;
 
   try {
@@ -103,7 +103,7 @@ test('getAdminOrders forwards status, keyword, page, and limit to orderModel.lis
     };
 
     const req = {
-      query: { status: 'pending', keyword: 'Alice', page: '2', limit: '5' },
+      query: { status: 'pending', keyword: 'Alice', searchField: 'customer', page: '2', limit: '5' },
       user: { id: 'staff_1', role: 'staff' }
     };
     const res = createMockResponse();
@@ -112,9 +112,52 @@ test('getAdminOrders forwards status, keyword, page, and limit to orderModel.lis
 
     assert.equal(res.statusCode, 200);
     assert.equal(res.body.success, true);
-    assert.deepEqual(capturedFilters, { status: 'pending', keyword: 'Alice', page: '2', limit: '5' });
+    assert.deepEqual(capturedFilters, {
+      status: 'pending',
+      keyword: 'Alice',
+      searchField: 'customer',
+      page: '2',
+      limit: '5'
+    });
     assert.equal(res.body.data.pagination.page, 2);
     assert.equal(res.body.data.items.length, 1);
+  } finally {
+    orderModel.listForAdmin = originalListForAdmin;
+  }
+});
+
+test('getAdminOrders rejects unknown or non-string searchField values with 400 without querying the model', async () => {
+  const originalListForAdmin = orderModel.listForAdmin;
+
+  try {
+    let listCalled = false;
+    orderModel.listForAdmin = async () => {
+      listCalled = true;
+      return { items: [], pagination: { page: 1, limit: 10, total: 0, totalPages: 1 } };
+    };
+
+    const invalidValues = [
+      'bogus',
+      'id',
+      'ALL',
+      ['orderId'],
+      ['orderId', 'customer'],
+      { value: 'customer' },
+      0,
+      5,
+      true
+    ];
+
+    for (const searchField of invalidValues) {
+      listCalled = false;
+      const res = createMockResponse();
+
+      await orderController.getAdminOrders({ query: { searchField }, user: { role: 'staff' } }, res, () => {});
+
+      assert.equal(res.statusCode, 400, `searchField=${JSON.stringify(searchField)}`);
+      assert.equal(res.body.success, false, `searchField=${JSON.stringify(searchField)}`);
+      assert.equal(listCalled, false, `searchField=${JSON.stringify(searchField)}`);
+    }
   } finally {
     orderModel.listForAdmin = originalListForAdmin;
   }

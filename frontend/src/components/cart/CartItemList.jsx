@@ -46,6 +46,7 @@ export const CartItemList = ({
   onBrowseProducts,
   onQuantityChange,
   draftQuantities = {},
+  quantityErrors = {},
   selectedItemIds = [],
   onSelectAll,
   onSelectionChange,
@@ -130,6 +131,7 @@ export const CartItemList = ({
             key={item.id}
             item={item}
             quantity={draftQuantities[item.id] ?? item.quantity}
+            quantityError={quantityErrors[item.id]}
             isSelected={selectedItemIdSet.has(item.id)}
             onSelectionChange={(isSelected) => onSelectionChange?.(item.id, isSelected)}
             onQuantityChange={onQuantityChange}

@@ -12,18 +12,19 @@ import {
   VStack
 } from '@astryxdesign/core';
 import Alert from '../common/Alert';
+import { validatePhone } from '../../utils/phoneValidation';
 
 const getProfileValues = (user) => ({
   username: user?.username || '',
   fullName: user?.fullName || '',
-  phone: user?.phone || '',
+  phone: user?.phone ?? '',
   address: user?.address || '',
 });
 
 const createUserProfilePayload = (values) => ({
   username: values.username.trim(),
   fullName: values.fullName.trim(),
-  phone: values.phone.trim(),
+  phone: values.phone,
   address: values.address.trim(),
 });
 
@@ -36,22 +37,42 @@ export const UserProfileDialog = ({
   const formId = useId();
   const [values, setValues] = useState(() => getProfileValues(user));
   const [error, setError] = useState('');
+  const [phoneStatus, setPhoneStatus] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     if (isOpen) {
-      setValues(getProfileValues(user));
+      const nextValues = getProfileValues(user);
+      const phoneError = validatePhone(nextValues.phone);
+      setValues(nextValues);
       setError('');
+      setPhoneStatus(phoneError ? { type: 'error', message: phoneError } : null);
     }
   }, [isOpen, user]);
 
   const updateField = (field, value) => {
     setValues((current) => ({ ...current, [field]: value }));
+
+    if (field === 'phone') {
+      const phoneError = validatePhone(value);
+      setPhoneStatus(phoneError ? { type: 'error', message: phoneError } : null);
+      if (!phoneError) {
+        setError('');
+      }
+      return;
+    }
+
     setError('');
   };
 
   const handleSubmit = async (event) => {
     event.preventDefault();
+    const phoneError = validatePhone(values.phone);
+    if (phoneError) {
+      setPhoneStatus({ type: 'error', message: phoneError });
+      return;
+    }
+
     const payload = createUserProfilePayload(values);
 
     if (!payload.username) {
@@ -110,6 +131,8 @@ export const UserProfileDialog = ({
                     label="Số điện thoại"
                     value={values.phone}
                     onChange={(value) => updateField('phone', value)}
+                    status={phoneStatus}
+                    inputMode="numeric"
                     isOptional
                     width="100%"
                   />
@@ -138,7 +161,7 @@ export const UserProfileDialog = ({
                 label="Lưu hồ sơ"
                 type="submit"
                 form={formId}
-                variant="primary"
+                isDisabled={isSubmitting || Boolean(validatePhone(values.phone))}
                 isLoading={isSubmitting}
               />
             </HStack>

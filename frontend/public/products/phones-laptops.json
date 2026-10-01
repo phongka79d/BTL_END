@@ -1,0 +1,79 @@
+[
+  {
+    "productName": "iPhone 15 Pro",
+    "brand": "Apple",
+    "imageUrl": "/products/smartphones/iphone-15-pro.webp",
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:Back_view_of_iPhone_15_Pro_Natural_titanium.jpg",
+    "downloadUrl": "https://upload.wikimedia.org/wikipedia/commons/4/4a/Back_view_of_iPhone_15_Pro_Natural_titanium.jpg",
+    "author": "メイド理世",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
+    "modifications": "Resized and converted to WebP; original aspect ratio preserved and centered on a white 900px square canvas."
+  },
+  {
+    "productName": "Galaxy S24 Ultra",
+    "brand": "Samsung",
+    "imageUrl": "/products/smartphones/galaxy-s24-ultra.webp",
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:Samsung_Galaxy_S24_Ultra_Backside.jpg",
+    "downloadUrl": "https://upload.wikimedia.org/wikipedia/commons/b/b7/Samsung_Galaxy_S24_Ultra_Backside.jpg",
+    "author": "SimonWaldherr",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
+    "modifications": "Resized and converted to WebP; original aspect ratio preserved and centered on a white 900px square canvas."
+  },
+  {
+    "productName": "Pixel 8 Pro",
+    "brand": "Google",
+    "imageUrl": "/products/smartphones/pixel-8-pro.webp",
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:Google_Pixel_8_Pro.jpg",
+    "downloadUrl": "https://upload.wikimedia.org/wikipedia/commons/2/21/Google_Pixel_8_Pro.jpg",
+    "author": "SimonWaldherr",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
+    "modifications": "Resized and converted to WebP; original aspect ratio preserved and centered on a white 900px square canvas."
+  },
+  {
+    "productName": "Xiaomi 14 Ultra",
+    "brand": "Xiaomi",
+    "imageUrl": "/products/smartphones/xiaomi-14-ultra.webp",
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:Shibuya-Tokyo---2024-08-28_066.jpg",
+    "downloadUrl": "https://upload.wikimedia.org/wikipedia/commons/b/b7/Shibuya-Tokyo---2024-08-28_066.jpg",
+    "author": "RuinDig/Yuki Uchida",
+    "license": "CC BY 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/4.0/",
+    "modifications": "Resized and converted to WebP; original aspect ratio preserved and centered on a white 900px square canvas."
+  },
+  {
+    "productName": "Xperia 1 V",
+    "brand": "Sony",
+    "imageUrl": "/products/smartphones/xperia-1-v.webp",
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:Sony_Xperia_1_Mk._V_with_a_White_Case.jpg",
+    "downloadUrl": "https://upload.wikimedia.org/wikipedia/commons/b/bc/Sony_Xperia_1_Mk._V_with_a_White_Case.jpg",
+    "author": "Nash Izumrud",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
+    "modifications": "Resized and converted to WebP; original aspect ratio preserved and centered on a white 900px square canvas."
+  },
+  {
+    "productName": "Nothing Phone 2",
+    "brand": "Nothing",
+    "imageUrl": "/products/smartphones/nothing-phone-2.webp",
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:Nothing_phone_(2)_(Booredatwork.com)_001.png",
+    "downloadUrl": "https://upload.wikimedia.org/wikipedia/commons/d/d0/Nothing_phone_%282%29_%28Booredatwork.com%29_001.png",
+    "author": "Booredatwork.com",
+    "license": "CC BY 3.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/3.0/",
+    "modifications": "Resized and converted to WebP; original aspect ratio preserved and centered on a white 900px square canvas."
+  },
+  {
+    "productName": "Find X7",
+    "brand": "Oppo",
+    "imageUrl": "/products/smartphones/find-x7.webp",
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:OPPO_Find_X7%EF%BC%882024%E5%B9%B42%E6%9C%8820%E6%97%A5%EF%BC%89.jpg",
+    "downloadUrl": "https://upload.wikimedia.org/wikipedia/commons/a/ad/OPPO_Find_X7%EF%BC%882024%E5%B9%B42%E6%9C%8820%E6%97%A5%EF%BC%89.jpg",
+    "author": "メイド理世",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
+    "modifications": "Resized and converted to WebP; original aspect ratio preserved and centered on a white 900px square canvas."
+  }
+]

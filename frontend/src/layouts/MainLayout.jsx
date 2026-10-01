@@ -18,8 +18,9 @@ import {
 } from '@astryxdesign/core';
 import { useAuth } from '../contexts/AuthContext';
 import { useCart } from '../contexts/CartContext';
-import { PERMISSIONS } from '../constants/permissions';
+import { canAccessStaffArea } from '../constants/permissions';
 import StorefrontMegaNav from '../components/layout/StorefrontMegaNav';
+import { ResponsiveNavButton } from '../components/common/ResponsiveNavButton';
 import {
   AdminIcon,
   CartIcon,
@@ -53,11 +54,11 @@ const CustomerAccountMenu = ({ items, user }) => {
  * Thành phần cung cấp điều hướng trên (logo, trang chủ, sản phẩm, thao tác người dùng, giỏ hàng) và chân trang.
  */
 export const MainLayout = () => {
-  const { user, isAuthenticated, isAdmin, hasPermission, logout } = useAuth();
+  const { user, isAuthenticated, isAdmin, logout } = useAuth();
   const { itemCount } = useCart();
   const navigate = useNavigate();
 
-  const canAccessStaff = isAuthenticated && hasPermission(PERMISSIONS.ORDERS_VIEW_ALL);
+  const canAccessStaff = isAuthenticated && canAccessStaffArea(user?.role);
   const canAccessAdmin = isAuthenticated && isAdmin;
 
   // Xác định động các mục dropdown cho người dùng đang đăng nhập dựa trên role
@@ -128,7 +129,7 @@ export const MainLayout = () => {
 
           {/* Staff Tab trực tiếp trên Header */}
           {canAccessStaff && (
-            <Button
+            <ResponsiveNavButton
               label="Staff"
               variant="secondary"
               size="sm"
@@ -139,7 +140,7 @@ export const MainLayout = () => {
 
           {/* Admin Tab trực tiếp trên Header */}
           {canAccessAdmin && (
-            <Button
+            <ResponsiveNavButton
               label="Admin"
               variant="secondary"
               size="sm"
@@ -162,7 +163,7 @@ export const MainLayout = () => {
             />
           )}
 
-          <Button
+          <ResponsiveNavButton
             label="Thanh toán"
             variant="primary"
             size="sm"
@@ -234,6 +235,23 @@ export const MainLayout = () => {
             >
               Điều khoản và điều kiện
             </Link>
+          </HStack>
+          <Text size="supporting" color="secondary">
+            Nguồn ảnh sản phẩm:
+          </Text>
+          <HStack gap={4} style={{ fontSize: 'var(--text-supporting-size)', flexWrap: 'wrap', justifyContent: 'center' }}>
+            <a href="/products/phones-laptops.json" style={{ color: 'var(--color-text-secondary)' }}>
+              Ảnh điện thoại
+            </a>
+            <a href="/products/watches-accessories.json" style={{ color: 'var(--color-text-secondary)' }}>
+              Ảnh đồng hồ và phụ kiện
+            </a>
+            <a href="/products/linked-phones-laptops.json" style={{ color: 'var(--color-text-secondary)' }}>
+              Điện thoại và laptop (URL)
+            </a>
+            <a href="/products/linked-watches-accessories.json" style={{ color: 'var(--color-text-secondary)' }}>
+              Đồng hồ và phụ kiện (URL)
+            </a>
           </HStack>
         </VStack>
       </VStack>

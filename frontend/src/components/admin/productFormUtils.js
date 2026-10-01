@@ -1,3 +1,5 @@
+import { validateInventoryQuantity } from '../../utils/quantityValidation.js';
+
 export const EMPTY_PRODUCT_FORM = {
   name: '',
   brand: '',
@@ -38,10 +40,9 @@ export const validateProductForm = (values) => {
   } else if (!Number.isFinite(Number(values.price)) || Number(values.price) < 0) {
     errors.price = 'Price must be a non-negative number.';
   }
-  if (values.quantity === '' || values.quantity === null || values.quantity === undefined) {
-    errors.quantity = 'Vui lòng nhập số lượng.';
-  } else if (!Number.isInteger(Number(values.quantity)) || Number(values.quantity) < 0) {
-    errors.quantity = 'Quantity must be a non-negative integer.';
+  const quantityError = validateInventoryQuantity(values.quantity);
+  if (quantityError) {
+    errors.quantity = quantityError;
   }
   if (!values.categoryId) {
     errors.categoryId = 'Vui lòng chọn danh mục.';

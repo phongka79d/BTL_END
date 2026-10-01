@@ -11,7 +11,19 @@ export const FALLBACK_PRODUCT_IMAGE =
   );
 
 export const getProductImageSrc = (imageUrl) => {
-  return imageUrl || FALLBACK_PRODUCT_IMAGE;
+  const normalizedImageUrl = typeof imageUrl === 'string' ? imageUrl.trim() : '';
+
+  return normalizedImageUrl || FALLBACK_PRODUCT_IMAGE;
+};
+
+export const handleProductImageError = (event) => {
+  const imageElement = event?.currentTarget;
+
+  if (!imageElement || imageElement.getAttribute('src') === FALLBACK_PRODUCT_IMAGE) {
+    return;
+  }
+
+  imageElement.src = FALLBACK_PRODUCT_IMAGE;
 };
 
 export const formatPrice = (value) => {

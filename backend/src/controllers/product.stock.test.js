@@ -51,6 +51,18 @@ test('updateStock rejects missing quantity with 400', async () => {
   assert.equal(res.body.success, false);
 });
 
+test('updateStock rejects non-integer and invalid quantity values with 400', async () => {
+  for (const quantity of [-1, -999, 1.5, '1.5', '', 'abc', NaN, true]) {
+    const req = { params: { id: 'p1' }, body: { quantity } };
+    const res = createMockResponse();
+
+    await productController.updateStock(req, res, () => {});
+
+    assert.equal(res.statusCode, 400, String(quantity));
+    assert.equal(res.body.success, false, String(quantity));
+  }
+});
+
 test('updateStock returns 404 when product is not found', async () => {
   const originalFindById = productModel.findById;
   try {
@@ -86,5 +98,111 @@ test('updateStock calls productModel.updateStock and returns 200 with updated pr
   } finally {
     productModel.findById = originalFindById;
     productModel.updateStock = originalUpdateStock;
+  }
+});
+
+test('updateStock accepts zero quantity without clamping and persists it', async () => {
+  const originalFindById = productModel.findById;
+  const originalUpdateStock = productModel.updateStock;
+  try {
+    productModel.findById = async (id) => ({ id, name: 'Laptop', quantity: 5 });
+    let receivedQuantity = null;
+    productModel.updateStock = async (id, quantity) => {
+      receivedQuantity = quantity;
+      return { id, name: 'Laptop', quantity: 0 };
+    };
+
+    const req = { params: { id: 'p1' }, body: { quantity: 0 } };
+    const res = createMockResponse();
+
+    await productController.updateStock(req, res, () => {});
+
+    assert.equal(res.statusCode, 200);
+    assert.equal(res.body.success, true);
+    assert.equal(receivedQuantity, 0);
+    assert.equal(res.body.data.product.quantity, 0);
+  } finally {
+    productModel.findById = originalFindById;
+    productModel.updateStock = originalUpdateStock;
+  }
+});
+
+test('getProducts forwards stockStatus filter to the model and returns the filtered page', async () => {
+  const originalFindAll = productModel.findAll;
+  let receivedParams = null;
+  try {
+    productModel.findAll = async (params) => {
+      receivedParams = params;
+      return {
+        items: [{ id: 'p1', name: 'Out of stock product', quantity: 0 }],
+        pagination: { page: 2, limit: 12, total: 13, totalPages: 2 }
+      };
+    };
+
+    const req = { query: { page: '2', limit: '12', stockStatus: 'out' } };
+    const res = createMockResponse();
+
+    await productController.getProducts(req, res, () => {});
+
+    assert.equal(res.statusCode, 200);
+    assert.equal(res.body.success, true);
+    assert.equal(receivedParams.stockStatus, 'out');
+    assert.equal(receivedParams.page, '2');
+    assert.deepEqual(res.body.data.items.map((product) => product.id), ['p1']);
+    assert.equal(res.body.data.pagination.total, 13);
+    assert.equal(res.body.data.pagination.totalPages, 2);
+  } finally {
+    productModel.findAll = originalFindAll;
+  }
+});
+
+test('getProducts rejects unknown, non-string and repeated stockStatus values with 400 without querying the model', async () => {
+  const originalFindAll = productModel.findAll;
+  const invalidValues = ['all', 'danger', 'LOW', 'in-stock', 0, 5, true, ['low'], ['low', 'out'], { value: 'low' }];
+  try {
+    let findAllCalled = false;
+    productModel.findAll = async () => {
+      findAllCalled = true;
+      return { items: [], pagination: { page: 1, limit: 12, total: 0, totalPages: 1 } };
+    };
+
+    for (const stockStatus of invalidValues) {
+      findAllCalled = false;
+      const res = createMockResponse();
+
+      await productController.getProducts({ query: { stockStatus } }, res, () => {});
+
+      assert.equal(res.statusCode, 400, JSON.stringify(stockStatus));
+      assert.equal(res.body.success, false, JSON.stringify(stockStatus));
+      assert.equal(findAllCalled, false, JSON.stringify(stockStatus));
+    }
+  } finally {
+    productModel.findAll = originalFindAll;
+  }
+});
+
+test('getProducts keeps the public list unfiltered when stockStatus is absent or empty', async () => {
+  const originalFindAll = productModel.findAll;
+  const receivedParams = [];
+  try {
+    productModel.findAll = async (params) => {
+      receivedParams.push(params);
+      return { items: [{ id: 'p1', name: 'Any product' }], pagination: { page: 1, limit: 12, total: 1, totalPages: 1 } };
+    };
+
+    for (const query of [{}, { stockStatus: undefined }, { stockStatus: '' }]) {
+      const res = createMockResponse();
+
+      await productController.getProducts({ query }, res, () => {});
+
+      assert.equal(res.statusCode, 200);
+      assert.equal(res.body.success, true);
+      assert.deepEqual(res.body.data.items.map((product) => product.id), ['p1']);
+    }
+
+    assert.equal(receivedParams.length, 3);
+    assert.ok(receivedParams.every((params) => params.stockStatus === undefined || params.stockStatus === ''));
+  } finally {
+    productModel.findAll = originalFindAll;
   }
 });

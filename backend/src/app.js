@@ -24,6 +24,14 @@ app.get('/api/health', (req, res) => {
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/admin/users', userRoutes);
+app.use('/api', (req, res, next) => {
+  const isProductStockRead = /^\/products(?:\/[^/]+)?\/?$/.test(req.path);
+  const isCartRead = req.path === '/cart';
+  if (req.method === 'GET' && (isProductStockRead || isCartRead)) {
+    res.set('Cache-Control', 'no-store');
+  }
+  next();
+});
 app.use('/api', apiRoutes);
 
 // Đăng ký middleware xử lý route không tồn tại.

@@ -147,6 +147,9 @@ model Order {
   totalAmount     Decimal       @map("total_amount") @db.Decimal(10, 2)
   status          OrderStatus   @default(pending)
   shippingAddress String        @map("shipping_address")
+  recipientName   String?       @map("recipient_name")
+  recipientPhone  String?       @map("recipient_phone")
+  note            String?
   details         OrderDetail[]
   payment         Payment?
   createdAt       DateTime      @default(now()) @map("created_at")

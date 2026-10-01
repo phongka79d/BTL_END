@@ -1,16 +1,24 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Button, Dialog, Heading, HStack, VStack, Text, TextInput, Selector, Badge } from '@astryxdesign/core';
+import { Badge, Banner, Button, Dialog, Heading, HStack, VStack, Text, TextInput, Selector } from '@astryxdesign/core';
 import PageHeader from '../../components/common/PageHeader';
 import FilterBar from '../../components/common/FilterBar';
 import DataTable from '../../components/common/DataTable';
 import { productApi } from '../../api/productApi';
-import { formatPrice, getProductImageSrc } from '../../components/product/productUtils';
+import { formatPrice, getProductImageSrc, handleProductImageError } from '../../components/product/productUtils';
 import { useNotification } from '../../contexts/NotificationContext';
 import { RefreshIcon } from '../../components/common/LayoutIcons';
+import {
+  INVENTORY_LOAD_ERROR_MESSAGE,
+  buildInventoryQuery,
+  canSaveStockDraft,
+  getStockDraftError,
+  resolveInventoryPagination
+} from './staffInventoryUtils';
 
 export const StaffInventoryView = () => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(null);
   const [search, setSearch] = useState('');
   const [stockFilter, setStockFilter] = useState('');
   const [pagination, setPagination] = useState({ page: 1, totalPages: 1, total: 0 });
@@ -19,41 +27,42 @@ export const StaffInventoryView = () => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [saving, setSaving] = useState(false);
   const { notifySuccess, notifyError } = useNotification();
+  const stockDraftError = getStockDraftError(newQuantity);
 
   const fetchProducts = useCallback(async (page = 1) => {
     setLoading(true);
     try {
-      const res = await productApi.getProducts({
-        page,
-        limit: 12,
-        keyword: search || undefined
-      });
-      if (res.success && res.data) {
-        let items = res.data.products || res.data.items || [];
-        if (stockFilter === 'low') {
-          items = items.filter((p) => (p.quantity || 0) <= 5);
-        } else if (stockFilter === 'out') {
-          items = items.filter((p) => (p.quantity || 0) === 0);
-        }
+      const res = await productApi.getProducts(
+        buildInventoryQuery({ page, keyword: search, stockStatus: stockFilter })
+      );
+
+      if (res && res.success && res.data) {
+        const items = res.data.products || res.data.items || [];
         setProducts(items);
-        const pag = res.data.pagination || { page: 1, totalPages: 1, total: items.length };
-        setPagination({
-          page: pag.page || 1,
-          totalPages: pag.totalPages || 1,
-          total: pag.total || items.length
-        });
+        setPagination(resolveInventoryPagination(res.data.pagination, items.length));
+        setLoadError(null);
+      } else {
+        setLoadError(res?.message || INVENTORY_LOAD_ERROR_MESSAGE);
       }
     } catch (err) {
       console.error('Failed to fetch inventory:', err);
-      notifyError('Không thể tải danh sách tồn kho');
+      setLoadError(err?.message || INVENTORY_LOAD_ERROR_MESSAGE);
     } finally {
       setLoading(false);
     }
-  }, [search, stockFilter, notifyError]);
+  }, [search, stockFilter]);
 
+  // Đổi từ khóa hoặc bộ lọc tồn kho thì quay về trang đầu và tải lại theo bộ lọc mới.
   useEffect(() => {
     fetchProducts(1);
   }, [search, stockFilter]);
+
+  // Sau khi lọc/cập nhật, nếu trang hiện tại vượt quá tổng số trang thì lùi về trang cuối hợp lệ.
+  useEffect(() => {
+    if (pagination.page > pagination.totalPages) {
+      fetchProducts(pagination.totalPages);
+    }
+  }, [pagination.page, pagination.totalPages, fetchProducts]);
 
   const handleOpenStockDialog = (product) => {
     setSelectedProduct(product);
@@ -63,24 +72,23 @@ export const StaffInventoryView = () => {
 
   const handleSaveStock = async () => {
     if (!selectedProduct) return;
-    const qty = parseInt(newQuantity, 10);
-    if (isNaN(qty) || qty < 0) {
-      notifyError('Số lượng tồn kho phải là số nguyên không âm');
-      return;
-    }
 
+    // Chặn mọi bản nháp không hợp lệ (1.5, số âm, rỗng, ký tự lạ) trước khi gọi API.
+    if (getStockDraftError(newQuantity)) return;
+
+    const quantity = Number(newQuantity);
     setSaving(true);
     try {
-      const res = await productApi.updateStock(selectedProduct.id, qty);
-      if (res.success) {
-        notifySuccess(`Đã cập nhật tồn kho sản phẩm "${selectedProduct.name}" thành ${qty}`);
+      const res = await productApi.updateStock(selectedProduct.id, quantity);
+      if (res && res.success) {
+        notifySuccess(`Đã cập nhật tồn kho sản phẩm "${selectedProduct.name}" thành ${quantity}`);
         setIsDialogOpen(false);
         fetchProducts(pagination.page);
       } else {
-        notifyError(res.message || 'Cập nhật tồn kho thất bại');
+        notifyError(res?.message || 'Cập nhật tồn kho thất bại');
       }
     } catch (err) {
-      notifyError(err.message || 'Đã xảy ra lỗi khi cập nhật');
+      notifyError(err?.message || 'Đã xảy ra lỗi khi cập nhật');
     } finally {
       setSaving(false);
     }
@@ -101,6 +109,7 @@ export const StaffInventoryView = () => {
         <img
           src={getProductImageSrc(row.imageUrl)}
           alt={row.name}
+          onError={handleProductImageError}
           style={{ width: '40px', height: '40px', objectFit: 'cover', borderRadius: '4px' }}
         />
       )
@@ -126,14 +135,16 @@ export const StaffInventoryView = () => {
       key: 'quantity',
       title: 'Tồn kho hiện tại',
       render: (qty) => {
+        const quantity = Number(qty) || 0;
         let variant = 'success';
-        if (qty === 0) variant = 'danger';
-        else if (qty <= 5) variant = 'warning';
+        if (quantity === 0) variant = 'error';
+        else if (quantity <= 5) variant = 'warning';
 
         return (
-          <Badge variant={variant} size="sm">
-            {qty === 0 ? 'Hết hàng (0)' : `${qty} sản phẩm`}
-          </Badge>
+          <Badge
+            variant={variant}
+            label={quantity === 0 ? 'Hết hàng (0)' : `${quantity} sản phẩm`}
+          />
         );
       }
     },
@@ -190,6 +201,24 @@ export const StaffInventoryView = () => {
         }
       />
 
+      {loadError && (
+        <Banner
+          status="error"
+          title="Không thể tải danh sách tồn kho"
+          description={loadError}
+          style={{ marginBottom: 'var(--spacing-4)' }}
+          endContent={(
+            <Button
+              label="Thử lại"
+              variant="secondary"
+              size="sm"
+              onClick={() => fetchProducts(pagination.page)}
+              isDisabled={loading}
+            />
+          )}
+        />
+      )}
+
       <DataTable
         columns={columns}
         data={products}
@@ -220,9 +249,11 @@ export const StaffInventoryView = () => {
             label="Số lượng tồn kho mới"
             type="number"
             min="0"
+            step="1"
             value={newQuantity}
             onChange={(val) => setNewQuantity(val)}
             placeholder="Nhập số lượng tồn kho mới"
+            status={stockDraftError ? { type: 'error', message: stockDraftError } : undefined}
           />
 
           <HStack justify="end" gap={2}>
@@ -239,7 +270,7 @@ export const StaffInventoryView = () => {
               size="sm"
               onClick={handleSaveStock}
               isLoading={saving}
-              isDisabled={saving}
+              isDisabled={saving || !canSaveStockDraft(newQuantity)}
             />
           </HStack>
         </VStack>

@@ -1,5 +1,39 @@
 const prisma = require('../config/database');
 const { Prisma } = require('@prisma/client');
+const { validatePhone } = require('../utils/phoneValidation');
+const { PURCHASE_INVALID_MESSAGE, toQuantity } = require('../utils/quantityValidation');
+const { ORDER_SEARCH_FIELDS, isOrderSearchField } = require('../utils/orderSearchFields');
+
+const checkoutError = (message, status = 400) => {
+  const error = new Error(message);
+  error.status = status;
+  return error;
+};
+
+const normalizeCheckoutContact = (contact) => {
+  if (!contact || typeof contact !== 'object') {
+    throw checkoutError('Thông tin người nhận là bắt buộc.');
+  }
+  if (typeof contact.fullName !== 'string' || contact.fullName.trim() === '') {
+    throw checkoutError('Họ và tên người nhận là bắt buộc.');
+  }
+
+  const phoneError = validatePhone(contact.phone, { required: true });
+  if (phoneError) {
+    throw checkoutError(phoneError);
+  }
+
+  if (contact.note !== undefined && contact.note !== null && typeof contact.note !== 'string') {
+    throw checkoutError('Ghi chú phải là chuỗi.');
+  }
+
+  return {
+    fullName: contact.fullName.trim(),
+    phone: contact.phone,
+    note: contact.note ?? null
+  };
+};
+
 
 /**
  * Sơ đồ chuyển trạng thái đơn hàng được phép.
@@ -34,30 +68,35 @@ const findById = async (id) => {
 
 /**
  * Thực hiện giao dịch checkout nguyên tử:
- * 1. Tải giỏ hàng của người dùng cùng các mục và dữ liệu sản phẩm.
- * 2. Chọn các mục giỏ hàng được yêu cầu, hoặc toàn bộ mục để tương thích ngược.
- * 3. Từ chối lựa chọn thiếu/rỗng trước khi tạo bất kỳ dòng đơn hàng nào.
- * 4. Kiểm tra số lượng từng mục được chọn so với tồn kho sản phẩm hiện tại.
- * 5. Tính tổng từ `unitPrice` nhân số lượng bằng giá trị Prisma Decimal an toàn.
- * 6. Tạo `Order` có trạng thái "pending" và địa chỉ giao hàng được cung cấp.
- * 7. Tạo các bản ghi `OrderDetail` tương ứng.
- * 8. Giảm số lượng tồn của từng sản phẩm.
- * 9. Tạo một `Payment` COD chưa thanh toán, có tổng tiền đơn hàng và `paymentDate` là null.
- * 10. Xóa các mục giỏ hàng đã đặt.
- * 11. Trả về đơn hàng gồm chi tiết, tóm tắt sản phẩm và dữ liệu thanh toán.
+ * 1. Chuẩn hóa ảnh chụp người nhận (họ tên, số điện thoại chỉ gồm chữ số, ghi chú tùy chọn).
+ * 2. Tải giỏ hàng của người dùng cùng các mục và dữ liệu sản phẩm.
+ * 3. Chọn các mục giỏ hàng được yêu cầu, hoặc toàn bộ mục để tương thích ngược.
+ * 4. Từ chối lựa chọn thiếu/rỗng trước khi tạo bất kỳ dòng đơn hàng nào.
+ * 5. Kiểm tra số lượng từng mục là số nguyên dương và không vượt tồn kho hiện tại.
+ * 6. Tính tổng từ `unitPrice` nhân số lượng bằng giá trị Prisma Decimal an toàn.
+ * 7. Trừ tồn kho bằng cập nhật có điều kiện (`quantity >= số lượng`) để chặn bán vượt tồn.
+ * 8. Tạo `Order` trạng thái "pending" kèm ảnh chụp người nhận và địa chỉ giao hàng.
+ * 9. Tạo các bản ghi `OrderDetail` tương ứng.
+ * 10. Tạo một `Payment` COD chưa thanh toán, có tổng tiền đơn hàng và `paymentDate` là null.
+ * 11. Xóa các mục giỏ hàng đã đặt và xác minh không có dòng nào bị thay đổi đồng thời.
+ * 12. Trả về đơn hàng gồm chi tiết, tóm tắt sản phẩm và dữ liệu thanh toán.
  * 
  * @param {string} userId 
  * @param {string} shippingAddress
+ * @param {{fullName: string, phone: string, note?: string|null}} contact
  * @param {string[]|undefined} cartItemIds
  * @returns {Promise<Object>}
  */
-const checkout = async (userId, shippingAddress, cartItemIds) => {
+const checkout = async (userId, shippingAddress, contact, cartItemIds) => {
   if (!shippingAddress || typeof shippingAddress !== 'string' || shippingAddress.trim() === '') {
-      throw new Error('Địa chỉ giao hàng là bắt buộc.');
+    throw checkoutError('Địa chỉ giao hàng là bắt buộc.');
   }
 
+  // 1. Ảnh chụp người nhận phải hợp lệ trước khi mở giao dịch.
+  const recipient = normalizeCheckoutContact(contact);
+
   return prisma.$transaction(async (tx) => {
-    // 1. Tải giỏ hàng, các mục và dữ liệu sản phẩm bên trong giao dịch.
+    // 2. Tải giỏ hàng, các mục và dữ liệu sản phẩm bên trong giao dịch.
     const cart = await tx.cart.findUnique({
       where: { userId },
       include: {
@@ -69,70 +108,89 @@ const checkout = async (userId, shippingAddress, cartItemIds) => {
       }
     });
 
-    // 2. Từ chối giỏ hàng thiếu/rỗng trước khi tạo bất kỳ dòng đơn hàng nào.
+    // 4. Từ chối giỏ hàng thiếu/rỗng trước khi tạo bất kỳ dòng đơn hàng nào.
     if (!cart || !cart.items || cart.items.length === 0) {
-      throw new Error('Giỏ hàng trống.');
+      throw checkoutError('Giỏ hàng trống.');
     }
 
+    // 3. Chọn các mục giỏ hàng được yêu cầu, hoặc toàn bộ mục khi không chỉ định.
     const selectedCartItemIds = cartItemIds ? new Set(cartItemIds) : null;
     const selectedItems = selectedCartItemIds
       ? cart.items.filter((item) => selectedCartItemIds.has(item.id))
       : cart.items;
 
     if (selectedCartItemIds && selectedItems.length !== selectedCartItemIds.size) {
-      throw new Error('Các sản phẩm đã chọn trong giỏ hàng không khả dụng.');
+      throw checkoutError('Các sản phẩm đã chọn trong giỏ hàng không khả dụng.');
     }
     if (selectedItems.length === 0) {
-      throw new Error('Chưa chọn sản phẩm nào trong giỏ hàng.');
+      throw checkoutError('Chưa chọn sản phẩm nào trong giỏ hàng.');
     }
 
-    // 3. Kiểm tra số lượng từng mục được chọn so với tồn kho hiện tại và tính tổng.
+    // 5. Kiểm tra số lượng là số nguyên dương, không vượt tồn kho và tính tổng bằng Prisma Decimal.
+    const orderLines = [];
     let total = new Prisma.Decimal(0);
     for (const item of selectedItems) {
       if (!item.product) {
-        throw new Error(`Không tìm thấy sản phẩm có ID ${item.productId}.`);
+        throw checkoutError(`Không tìm thấy sản phẩm có ID ${item.productId}.`, 404);
       }
-      if (item.quantity > item.product.quantity) {
-        throw new Error(`Số lượng yêu cầu của ${item.product.name} vượt quá tồn kho (${item.product.quantity}).`);
+      const quantity = toQuantity(item.quantity);
+      if (quantity === null || quantity < 1) {
+        throw checkoutError(PURCHASE_INVALID_MESSAGE);
       }
-      
-      const itemPrice = new Prisma.Decimal(item.unitPrice);
-      const itemQuantity = new Prisma.Decimal(item.quantity);
-      total = total.plus(itemPrice.times(itemQuantity));
+      if (quantity > item.product.quantity) {
+        throw checkoutError(`Số lượng yêu cầu của ${item.product.name} vượt quá tồn kho (${item.product.quantity}).`);
+      }
+
+      orderLines.push({ item, quantity });
+      total = total.plus(new Prisma.Decimal(item.unitPrice).times(quantity));
     }
 
-    // 4. Tạo đơn hàng trạng thái "pending" với địa chỉ giao hàng được cung cấp.
+    // 7. Trừ tồn kho bằng cập nhật có điều kiện; count !== 1 nghĩa là tồn kho vừa bị thay đổi.
+    for (const line of orderLines) {
+      const stockUpdate = await tx.product.updateMany({
+        where: {
+          id: line.item.productId,
+          quantity: { gte: line.quantity }
+        },
+        data: {
+          quantity: { decrement: line.quantity }
+        }
+      });
+
+      if (stockUpdate.count !== 1) {
+        throw checkoutError(
+          `Tồn kho của ${line.item.product.name} đã thay đổi, vui lòng thử lại.`,
+          409
+        );
+      }
+    }
+
+    // 8. Tạo đơn hàng trạng thái "pending" kèm ảnh chụp người nhận và địa chỉ giao hàng.
     const order = await tx.order.create({
       data: {
         userId,
         totalAmount: total,
         status: 'pending',
-        shippingAddress
+        shippingAddress: shippingAddress.trim(),
+        recipientName: recipient.fullName,
+        recipientPhone: recipient.phone,
+        note: recipient.note
       }
     });
 
-    // 5. Tạo các bản ghi `OrderDetail` tương ứng và giảm tồn kho sản phẩm.
-    for (const item of selectedItems) {
+    // 9. Tạo các bản ghi `OrderDetail` tương ứng.
+    for (const line of orderLines) {
       await tx.orderDetail.create({
         data: {
           orderId: order.id,
-          productId: item.productId,
-          quantity: item.quantity,
-          price: item.unitPrice
-        }
-      });
-
-      await tx.product.update({
-        where: { id: item.productId },
-        data: {
-          quantity: {
-            decrement: item.quantity
-          }
+          productId: line.item.productId,
+          quantity: line.quantity,
+          price: line.item.unitPrice
         }
       });
     }
 
-    // 6. Tạo một thanh toán COD chưa thanh toán với tổng tiền đơn hàng và ngày thanh toán null.
+    // 10. Tạo một thanh toán COD chưa thanh toán với tổng tiền đơn hàng và ngày thanh toán null.
     await tx.payment.create({
       data: {
         orderId: order.id,
@@ -143,15 +201,19 @@ const checkout = async (userId, shippingAddress, cartItemIds) => {
       }
     });
 
-    // 7. Chỉ xóa mục giỏ hàng khi các thay đổi đơn hàng/chi tiết/thanh toán/tồn kho đã sẵn sàng commit.
-    await tx.cartItem.deleteMany({
+    // 11. Chỉ xóa mục giỏ hàng khi các thay đổi đơn hàng/chi tiết/thanh toán/tồn kho đã sẵn sàng commit.
+    const cartDelete = await tx.cartItem.deleteMany({
       where: {
         cartId: cart.id,
-        id: { in: selectedItems.map((item) => item.id) }
+        id: { in: orderLines.map((line) => line.item.id) }
       }
     });
 
-    // 8. Trả về đơn hàng gồm chi tiết, tóm tắt sản phẩm và dữ liệu thanh toán cho controller.
+    if (cartDelete.count !== orderLines.length) {
+      throw checkoutError('Giỏ hàng đã thay đổi, vui lòng thử lại.', 409);
+    }
+
+    // 12. Trả về đơn hàng gồm chi tiết, tóm tắt sản phẩm và dữ liệu thanh toán cho controller.
     return tx.order.findUnique({
       where: { id: order.id },
       include: {
@@ -265,8 +327,88 @@ const findOwnedOrAdminVisible = async (id, userId, canViewAll) => {
 };
 
 /**
+ * Định dạng giá trị trường tìm kiếm không hợp lệ cho thông báo lỗi.
+ */
+const describeSearchField = (value) =>
+  typeof value === 'string' ? value : String(value);
+
+const invalidSearchFieldError = (value) => {
+  const error = new Error(`Trường tìm kiếm không hợp lệ: ${describeSearchField(value)}`);
+  error.status = 400;
+  return error;
+};
+
+/**
+ * Chuẩn hóa trường tìm kiếm theo allowlist dùng chung.
+ * - Không truyền / null / chuỗi rỗng → 'all' (giữ hành vi tìm rộng cho các caller cũ).
+ * - Giá trị khác phải là chuỗi nằm trong allowlist, nếu không sẽ báo lỗi 400
+ *   ngay cả khi không có từ khóa.
+ *
+ * @param {*} searchField
+ * @returns {string}
+ */
+const resolveOrderSearchField = (searchField) => {
+  if (searchField === undefined || searchField === null || searchField === '') {
+    return ORDER_SEARCH_FIELDS.ALL;
+  }
+
+  if (!isOrderSearchField(searchField)) {
+    throw invalidSearchFieldError(searchField);
+  }
+
+  return searchField;
+};
+
+/**
+ * Dựng danh sách điều kiện OR cho từ khóa theo đúng miền dữ liệu của trường tìm kiếm:
+ * - orderId: chỉ mã đơn hàng.
+ * - shippingAddress: chỉ địa chỉ giao hàng.
+ * - customer: ảnh chụp người nhận (recipientName/recipientPhone) và danh tính
+ *   người dùng hiện tại (fullName/username/email/phone).
+ * - all: hợp nhất tất cả các miền trên.
+ *
+ * Không trường nào trong allowlist được phép chạm tới miền dữ liệu của trường khác.
+ *
+ * @param {string} searchField - giá trị đã qua allowlist
+ * @param {string} term - từ khóa đã trim
+ * @returns {Array<Object>}
+ */
+const buildKeywordConditions = (searchField, term) => {
+  const recipientConditions = [
+    { recipientName: { contains: term, mode: 'insensitive' } },
+    { recipientPhone: { contains: term, mode: 'insensitive' } }
+  ];
+  const userIdentityConditions = [
+    { user: { fullName: { contains: term, mode: 'insensitive' } } },
+    { user: { username: { contains: term, mode: 'insensitive' } } },
+    { user: { email: { contains: term, mode: 'insensitive' } } },
+    { user: { phone: { contains: term, mode: 'insensitive' } } }
+  ];
+
+  switch (searchField) {
+    case ORDER_SEARCH_FIELDS.ORDER_ID:
+      return [{ id: { contains: term, mode: 'insensitive' } }];
+    case ORDER_SEARCH_FIELDS.SHIPPING_ADDRESS:
+      return [{ shippingAddress: { contains: term, mode: 'insensitive' } }];
+    case ORDER_SEARCH_FIELDS.CUSTOMER:
+      return [...recipientConditions, ...userIdentityConditions];
+    case ORDER_SEARCH_FIELDS.ALL:
+      return [
+        { id: { contains: term, mode: 'insensitive' } },
+        { shippingAddress: { contains: term, mode: 'insensitive' } },
+        ...recipientConditions,
+        ...userIdentityConditions
+      ];
+    default:
+      // Không thể xảy ra nếu resolveOrderSearchField đã chạy, nhưng vẫn từ chối
+      // mọi giá trị ngoài allowlist thay vì dựng bộ lọc tùy ý.
+      throw invalidSearchFieldError(searchField);
+  }
+};
+
+/**
  * Liệt kê toàn bộ đơn hàng cho quản trị viên và nhân viên, sắp xếp mới nhất trước.
- * Hỗ trợ bộ lọc trạng thái và từ khóa tìm kiếm.
+ * Hỗ trợ bộ lọc trạng thái, từ khóa tìm kiếm theo trường chỉ định và phân trang.
  * 
  * @param {string|Object} [filters] 
  * @returns {Promise<Array>}
@@ -285,20 +427,15 @@ const listForAdmin = async (filters) => {
     where.status = status;
   }
 
-  // 2. Kiểm tra bộ lọc từ khóa
+  // 2. Kiểm tra trường tìm kiếm theo allowlist (kể cả khi không có từ khóa)
+  const searchField = resolveOrderSearchField(opts.searchField);
+
+  // 3. Kiểm tra bộ lọc từ khóa trong đúng miền dữ liệu của trường tìm kiếm
   if (keyword && typeof keyword === 'string' && keyword.trim()) {
-    const term = keyword.trim();
-    where.OR = [
-      { id: { contains: term, mode: 'insensitive' } },
-      { shippingAddress: { contains: term, mode: 'insensitive' } },
-      { user: { fullName: { contains: term, mode: 'insensitive' } } },
-      { user: { username: { contains: term, mode: 'insensitive' } } },
-      { user: { email: { contains: term, mode: 'insensitive' } } },
-      { user: { phone: { contains: term, mode: 'insensitive' } } },
-    ];
+    where.OR = buildKeywordConditions(searchField, keyword.trim());
   }
 
-  // 3. Phân tích và kiểm tra tính hợp lệ của page và limit
+  // 4. Phân tích và kiểm tra tính hợp lệ của page và limit
   let pageNum = 1;
   if (opts.page !== undefined && opts.page !== null && opts.page !== '') {
     const parsed = Number(opts.page);

@@ -53,13 +53,70 @@ export const ROLE_CAPABILITIES = {
 };
 
 /**
+ * Các capability mở quyền truy cập khu vực vận hành (/staff).
+ * Mỗi trang vận hành vẫn được bảo vệ riêng bằng capability của trang đó, nên chỉ cần
+ * một capability như PRODUCTS_UPDATE_STOCK là đủ vào /staff/inventory, không phụ thuộc
+ * ORDERS_VIEW_ALL. Customer không có capability nào nên không được cấp quyền truy cập.
+ */
+export const STAFF_AREA_CAPABILITIES = [
+  PERMISSIONS.ORDERS_VIEW_ALL,
+  PERMISSIONS.PRODUCTS_UPDATE_STOCK,
+  PERMISSIONS.REVIEWS_VIEW_ALL,
+  PERMISSIONS.REPORTS_VIEW_OPERATIONAL
+];
+
+/**
+ * Danh sách capability của một vai trò (rỗng nếu vai trò không tồn tại).
+ * @param {string} role - Vai trò của người dùng
+ * @returns {string[]}
+ */
+export const getRoleCapabilities = (role) => (role ? ROLE_CAPABILITIES[role] || [] : []);
+
+/**
+ * Kiểm tra một danh sách capability có quyền chỉ định hay không.
+ * @param {string[]} capabilities - Danh sách capability đang có
+ * @param {string} permission - Quyền cần kiểm tra
+ * @returns {boolean}
+ */
+export const hasCapability = (capabilities = [], permission) => (
+  capabilities.includes('*') || capabilities.includes(permission)
+);
+
+/**
+ * Kiểm tra một danh sách capability có bất kỳ quyền nào trong danh sách hay không.
+ * @param {string[]} capabilities - Danh sách capability đang có
+ * @param {string[]} permissions - Danh sách capability cần kiểm tra
+ * @returns {boolean}
+ */
+export const hasAnyCapability = (capabilities = [], permissions = []) => (
+  permissions.some((permission) => hasCapability(capabilities, permission))
+);
+
+/**
  * Kiểm tra xem một vai trò có quyền thực hiện capability chỉ định hay không.
  * @param {string} role - Vai trò của người dùng ('admin' | 'staff' | 'customer')
  * @param {string} permission - Quyền cần kiểm tra
  * @returns {boolean}
  */
-export const hasRolePermission = (role, permission) => {
-  if (!role) return false;
-  const capabilities = ROLE_CAPABILITIES[role] || [];
-  return capabilities.includes('*') || capabilities.includes(permission);
-};
+export const hasRolePermission = (role, permission) => (
+  hasCapability(getRoleCapabilities(role), permission)
+);
+
+/**
+ * Kiểm tra xem một vai trò có bất kỳ capability nào trong danh sách hay không.
+ * @param {string} role - Vai trò của người dùng
+ * @param {string[]} permissions - Danh sách capability cần kiểm tra
+ * @returns {boolean}
+ */
+export const hasAnyRolePermission = (role, permissions = []) => (
+  hasAnyCapability(getRoleCapabilities(role), permissions)
+);
+
+/**
+ * Kiểm tra xem một vai trò có quyền truy cập khu vực vận hành (/staff) hay không.
+ * @param {string} role - Vai trò của người dùng
+ * @returns {boolean}
+ */
+export const canAccessStaffArea = (role) => (
+  hasAnyRolePermission(role, STAFF_AREA_CAPABILITIES)
+);

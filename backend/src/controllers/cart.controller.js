@@ -1,4 +1,5 @@
 const cartModel = require('../models/cart.model');
+const { PURCHASE_INVALID_MESSAGE, toQuantity, validatePurchaseQuantity } = require('../utils/quantityValidation');
 const cartItemModel = require('../models/cartItem.model');
 const productModel = require('../models/product.model');
 const { successResponse, errorResponse } = require('../utils/response');
@@ -30,13 +31,11 @@ const addCartItem = async (req, res, next) => {
     if (!productId || typeof productId !== 'string') {
       return errorResponse(res, 400, 'Product ID là bắt buộc và phải là chuỗi');
     }
-    if (quantity === undefined || quantity === null) {
-      return errorResponse(res, 400, 'Số lượng là bắt buộc');
+    const quantityError = validatePurchaseQuantity(quantity, Number.MAX_SAFE_INTEGER);
+    if (quantityError) {
+      return errorResponse(res, 400, PURCHASE_INVALID_MESSAGE);
     }
-    const parsedQuantity = parseInt(quantity, 10);
-    if (isNaN(parsedQuantity) || parsedQuantity < 1) {
-      return errorResponse(res, 400, 'Số lượng phải ít nhất là 1');
-    }
+    const parsedQuantity = toQuantity(quantity);
 
     // Tải bản ghi sản phẩm cần thiết để kiểm tra giá và tồn kho
     const product = await productModel.findById(productId);
@@ -49,9 +48,8 @@ const addCartItem = async (req, res, next) => {
     const existingItem = cart.items.find(item => item.productId === productId);
     const newQuantity = existingItem ? (existingItem.quantity + parsedQuantity) : parsedQuantity;
 
-    // Từ chối tổng số lượng trong giỏ vượt quá tồn kho sản phẩm
-    if (newQuantity > product.quantity) {
-      return errorResponse(res, 400, `Số lượng yêu cầu vượt quá tồn kho (${product.quantity})`);
+    if (validatePurchaseQuantity(newQuantity, product.quantity)) {
+      return errorResponse(res, 400, PURCHASE_INVALID_MESSAGE);
     }
 
     const cartItem = await cartModel.addItem(userId, productId, parsedQuantity);
@@ -60,8 +58,8 @@ const addCartItem = async (req, res, next) => {
     if (error.message === 'Product not found') {
       return errorResponse(res, 404, error.message);
     }
-    if (error.message.includes('Quantity must be at least 1') || error.message.includes('exceeds available stock')) {
-      return errorResponse(res, 400, error.message);
+    if (error.message === PURCHASE_INVALID_MESSAGE) {
+      return errorResponse(res, 400, PURCHASE_INVALID_MESSAGE);
     }
     next(error);
   }
@@ -77,13 +75,11 @@ const updateCartItem = async (req, res, next) => {
     const { id } = req.params; // cartItemId
     const { quantity } = req.body;
 
-    if (quantity === undefined || quantity === null) {
-      return errorResponse(res, 400, 'Số lượng là bắt buộc');
+    const quantityError = validatePurchaseQuantity(quantity, Number.MAX_SAFE_INTEGER);
+    if (quantityError) {
+      return errorResponse(res, 400, PURCHASE_INVALID_MESSAGE);
     }
-    const parsedQuantity = parseInt(quantity, 10);
-    if (isNaN(parsedQuantity) || parsedQuantity < 1) {
-      return errorResponse(res, 400, 'Số lượng phải ít nhất là 1');
-    }
+    const parsedQuantity = toQuantity(quantity);
 
     // Kiểm tra trước sự tồn tại và quyền sở hữu để trả về phản hồi 404/403 chính xác
     const cartItem = await cartItemModel.findById(id);
@@ -103,8 +99,8 @@ const updateCartItem = async (req, res, next) => {
       return errorResponse(res, 404, 'Không tìm thấy sản phẩm');
     }
 
-    if (parsedQuantity > product.quantity) {
-      return errorResponse(res, 400, `Số lượng yêu cầu vượt quá tồn kho (${product.quantity})`);
+    if (validatePurchaseQuantity(parsedQuantity, product.quantity)) {
+      return errorResponse(res, 400, PURCHASE_INVALID_MESSAGE);
     }
 
     const updatedItem = await cartItemModel.updateQuantity(userId, id, parsedQuantity);
@@ -116,8 +112,8 @@ const updateCartItem = async (req, res, next) => {
     if (error.message.includes('Unauthorized access')) {
       return errorResponse(res, 403, error.message);
     }
-    if (error.message.includes('Quantity must be at least 1') || error.message.includes('exceeds available stock')) {
-      return errorResponse(res, 400, error.message);
+    if (error.message === PURCHASE_INVALID_MESSAGE) {
+      return errorResponse(res, 400, PURCHASE_INVALID_MESSAGE);
     }
     next(error);
   }
@@ -139,14 +135,11 @@ const updateCartItems = async (req, res, next) => {
       return errorResponse(res, 404, error.message);
     }
     if (
-      error.message && (
-        error.message.includes('Cart item updates') ||
-        error.message.includes('Cart item ID') ||
-        error.message.includes('Quantity must be') ||
-        error.message.includes('exceeds available stock')
-      )
+      error.message === PURCHASE_INVALID_MESSAGE ||
+      error.message.includes('Quantity must be') ||
+      error.message.includes('exceeds available stock')
     ) {
-      return errorResponse(res, 400, error.message);
+      return errorResponse(res, 400, PURCHASE_INVALID_MESSAGE);
     }
     next(error);
   }

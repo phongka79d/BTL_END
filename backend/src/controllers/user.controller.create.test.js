@@ -178,3 +178,42 @@ test('createUser still succeeds when the credential email cannot be delivered', 
     }
   );
 });
+
+test('createUser rejects non-string phone values before any model invocation', async () => {
+  let findByEmailCalled = false;
+  let createCalled = false;
+
+  await withStubs(
+    {
+      findByEmail: async () => {
+        findByEmailCalled = true;
+        return null;
+      },
+      create: async () => {
+        createCalled = true;
+      },
+      sendAccountCredentialsEmail: async () => ({ delivery: 'console' })
+    },
+    async () => {
+      const res = createMockResponse();
+      await userController.createUser(
+        {
+          body: {
+            username: 'phone-invalid',
+            email: 'phone-invalid@example.com',
+            password: 'Matkhau123!',
+            phone: 987654321
+          }
+        },
+        res,
+        () => {}
+      );
+
+      assert.equal(res.statusCode, 400);
+      assert.equal(res.body.message, 'Số điện thoại chỉ được chứa chữ số.');
+    }
+  );
+
+  assert.equal(findByEmailCalled, false);
+  assert.equal(createCalled, false);
+});

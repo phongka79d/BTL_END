@@ -4,7 +4,6 @@ import {
   Button,
   MoreMenu,
   Text,
-  Thumbnail,
   VStack,
   pixel,
   proportional
@@ -13,7 +12,8 @@ import {
   formatPrice,
   getProductImageSrc,
   getStockLabel,
-  getStockVariant
+  getStockVariant,
+  handleProductImageError
 } from '../product/productUtils';
 import AdminTable from './AdminTable';
 
@@ -39,11 +39,29 @@ export const ProductTable = ({
       width: pixel(72),
       resizable: false,
       renderCell: (product) => (
-        <Thumbnail
-          src={getProductImageSrc(product.imageUrl)}
-          alt={product.name}
-          label={product.name}
-        />
+        <div
+          style={{
+            width: '64px',
+            aspectRatio: '1 / 1',
+            overflow: 'hidden',
+            borderRadius: 'var(--radius-element)',
+            backgroundColor: 'var(--color-neutral)',
+            boxShadow: 'inset 0 0 0 1px var(--color-border)'
+          }}
+        >
+          <img
+            src={getProductImageSrc(product.imageUrl)}
+            alt={product.name}
+            title={product.name}
+            onError={handleProductImageError}
+            style={{
+              width: '100%',
+              height: '100%',
+              objectFit: 'cover',
+              display: 'block'
+            }}
+          />
+        </div>
       )
     },
     {

@@ -6,6 +6,7 @@ import BestSellingProductsTable from '../../components/report/BestSellingProduct
 import OrderSummaryCards from '../../components/report/OrderSummaryCards';
 import RevenueSummaryCard from '../../components/report/RevenueSummaryCard';
 import { downloadCsv } from '../../utils/csvExport';
+import { downloadReportWorkbook } from '../../utils/excelExport.js';
 import {
   ORDER_STATUS_LABELS,
   ORDER_STATUS_VALUES,
@@ -33,6 +34,8 @@ export const ReportView = () => {
   const [endDate, setEndDate] = useState('');
   const [rangeError, setRangeError] = useState('');
   const [appliedRange, setAppliedRange] = useState(null);
+  const [isExporting, setIsExporting] = useState(false);
+  const [exportError, setExportError] = useState('');
 
   const fetchReports = useCallback(async () => {
     setIsLoading(true);
@@ -76,6 +79,7 @@ export const ReportView = () => {
     }
 
     setRangeError('');
+    setIsLoading(true);
     setAppliedRange({
       startDate: startDate || undefined,
       endDate: endDate || undefined,
@@ -83,6 +87,7 @@ export const ReportView = () => {
   };
 
   const handleResetFilter = () => {
+    if (appliedRange) setIsLoading(true);
     setStartDate('');
     setEndDate('');
     setRangeError('');
@@ -109,6 +114,18 @@ export const ReportView = () => {
         Number(orderSummary[status] || 0),
       ])
     );
+  };
+
+  const handleExportExcel = async () => {
+    setIsExporting(true);
+    setExportError('');
+    try {
+      await downloadReportWorkbook({ revenue, products, orderSummary, range: appliedRange });
+    } catch (err) {
+      setExportError(err?.message || 'Không thể xuất báo cáo Excel.');
+    } finally {
+      setIsExporting(false);
+    }
   };
 
   const hasRevenueData = Number(revenue.completedOrderCount || 0) > 0
@@ -180,6 +197,13 @@ export const ReportView = () => {
             onClick={handleResetFilter}
             isDisabled={isLoading && !appliedRange && !startDate && !endDate}
           />
+          <Button
+            label="Xuất Excel"
+            variant="primary"
+            isLoading={isExporting}
+            isDisabled={isLoading || isExporting || Boolean(error)}
+            onClick={handleExportExcel}
+          />
         </HStack>
 
         {rangeError && (
@@ -188,6 +212,7 @@ export const ReportView = () => {
             description={rangeError}
           />
         )}
+        {exportError && <Alert title="Không thể xuất báo cáo Excel" description={exportError} />}
       </VStack>
 
       {error ? (

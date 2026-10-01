@@ -1,0 +1,112 @@
+[
+  {
+    "productName": "Apple Watch Ultra 2",
+    "brand": "Apple",
+    "imageUrl": "/products/smartwatches/apple-watch-ultra-2.webp",
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:Apple_Watch_Ultra_2.jpg",
+    "downloadUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/33/Apple_Watch_Ultra_2.jpg/960px-Apple_Watch_Ultra_2.jpg",
+    "author": "Pangalau",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "modifications": "Resized to <=900px and converted to WebP; original aspect ratio preserved and centered on a white square canvas. Source identification: Apple Watch Ultra 2 shown at Apple Orchard Road (2024); source page identifies the exact model."
+  },
+  {
+    "productName": "Galaxy Watch 6 Classic",
+    "brand": "Samsung",
+    "imageUrl": "/products/smartwatches/samsung-galaxy-watch-6-classic.webp",
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:Samsung_Galaxy_Watch6_Classic_43mm.jpg",
+    "downloadUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1c/Samsung_Galaxy_Watch6_Classic_43mm.jpg/960px-Samsung_Galaxy_Watch6_Classic_43mm.jpg",
+    "author": "Mattmates",
+    "license": "CC0 1.0",
+    "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/deed.en",
+    "modifications": "Resized to <=900px and converted to WebP; original aspect ratio preserved and centered on a white square canvas. Source identification: Galaxy Watch6 Classic 43mm; physical rotating-bezel Classic casing, black leather strap (source page identifies exact model)."
+  },
+  {
+    "productName": "Venu 3",
+    "brand": "Garmin",
+    "imageUrl": "/products/smartwatches/garmin-venu-3.webp",
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:Garmin_Venu_3_(a).JPG",
+    "downloadUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d0/Garmin_Venu_3_%28a%29.JPG/960px-Garmin_Venu_3_%28a%29.JPG",
+    "author": "C.Stadler/Bwag",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "modifications": "Resized to <=900px and converted to WebP; original aspect ratio preserved and centered on a white square canvas. Source identification: Garmin Venu 3 fitness smartwatch; case/bezel match the official Garmin Venu 3 (black/slate) design."
+  },
+  {
+    "productName": "Pixel Watch 2",
+    "brand": "Google",
+    "imageUrl": "/products/smartwatches/google-pixel-watch-2.webp",
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:Google_Pixel_Watch_2,_shown_in_Shibuya_Stream.jpg",
+    "downloadUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8c/Google_Pixel_Watch_2%2C_shown_in_Shibuya_Stream.jpg/960px-Google_Pixel_Watch_2%2C_shown_in_Shibuya_Stream.jpg",
+    "author": "Syced",
+    "license": "CC0 1.0",
+    "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/deed.en",
+    "modifications": "Resized to <=900px and converted to WebP; original aspect ratio preserved and centered on a white square canvas. Source identification: Pixel Watch 2 on the Google store display stand labelled \"Google Pixel Watch 2\"."
+  },
+  {
+    "productName": "Forerunner 965",
+    "brand": "Garmin",
+    "imageUrl": "/products/smartwatches/garmin-forerunner-965.webp",
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:Garmin_Forerunner_965.jpeg",
+    "downloadUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3a/Garmin_Forerunner_965.jpeg/960px-Garmin_Forerunner_965.jpeg",
+    "author": "SUNSmania41",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "modifications": "Resized to <=900px and converted to WebP; original aspect ratio preserved and centered on a white square canvas. Source identification: Forerunner 965 on display with a plaque reading \"FORERUNNER 965 GPS RUNNING SMARTWATCH\"."
+  },
+  {
+    "productName": "ScanWatch 2",
+    "brand": "Withings",
+    "imageUrl": "/products/smartwatches/withings-scanwatch-2.webp",
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:Withings_ScanWatch_2_black.jpg",
+    "downloadUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4f/Withings_ScanWatch_2_black.jpg/960px-Withings_ScanWatch_2_black.jpg",
+    "author": "Susie Felber",
+    "license": "CC0 1.0",
+    "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/deed.en",
+    "modifications": "Resized to <=900px and converted to WebP; original aspect ratio preserved and centered on a white square canvas. Source identification: ScanWatch 2 black dial / silver case; dial layout (OLED window at 12, WITHINGS at 3, seconds sub-dial at 6) matches the official ScanWatch 2."
+  },
+  {
+    "productName": "AirPods Pro 2",
+    "brand": "Apple",
+    "imageUrl": "/products/accessories/apple-airpods-pro-2.webp",
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:AirPods_Pro_(2nd_generation).jpg",
+    "downloadUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2f/AirPods_Pro_%282nd_generation%29.jpg/960px-AirPods_Pro_%282nd_generation%29.jpg",
+    "author": "Hajoon0102",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "modifications": "Resized to <=900px and converted to WebP; original aspect ratio preserved and centered on a white square canvas. Source identification: Units and charging case of AirPods Pro (2nd generation) per source; generation-specific case marks (lanyard loop/speaker holes) not visible in this top view."
+  },
+  {
+    "productName": "Galaxy Buds2 Pro",
+    "brand": "Samsung",
+    "imageUrl": "/products/accessories/samsung-galaxy-buds2-pro.webp",
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:Samsung_Galaxy_Buds2_Pro_(Graphite).jpg",
+    "downloadUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/65/Samsung_Galaxy_Buds2_Pro_%28Graphite%29.jpg/960px-Samsung_Galaxy_Buds2_Pro_%28Graphite%29.jpg",
+    "author": "Gannu03",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "modifications": "Resized to <=900px and converted to WebP; original aspect ratio preserved and centered on a white square canvas. Source identification: Closed Graphite charging case of the Galaxy Buds2 Pro (matte square case with SAMSUNG wordmark, matching the Buds2 Pro case and distinguishable from the Buds2 case which has no wordmark)."
+  },
+  {
+    "productName": "MX Master 3S",
+    "brand": "Logitech",
+    "imageUrl": "/products/accessories/logitech-mx-master-3s.webp",
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:Logitech_MX_Master_3S_HS11.jpg",
+    "downloadUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/b/bc/Logitech_MX_Master_3S_HS11.jpg/960px-Logitech_MX_Master_3S_HS11.jpg",
+    "author": "Hayden Schiff",
+    "license": "CC BY 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/4.0",
+    "modifications": "Resized to <=900px and converted to WebP; original aspect ratio preserved and centered on a white square canvas. Source identification: Logitech MX Master 3S (Commons structured data \"depicts: Logitech MX Master 3S\"); from the photographer’s 2025 MX Master 3S studio series."
+  },
+  {
+    "productName": "Magic Mouse",
+    "brand": "Apple",
+    "imageUrl": "/products/accessories/apple-magic-mouse.webp",
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:Apple_Magic_Mouse_by_Trisorn_Triboon.jpg",
+    "downloadUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a0/Apple_Magic_Mouse_by_Trisorn_Triboon.jpg/960px-Apple_Magic_Mouse_by_Trisorn_Triboon.jpg",
+    "author": "Tris T7 (Trisorn Triboon)",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "modifications": "Resized to <=900px and converted to WebP; original aspect ratio preserved and centered on a white square canvas. Source identification: Apple Magic Mouse (white, multi-touch top; 2019 photo) matching the seeded product name \"Magic Mouse\"; generation-specific underside markings not visible in this top view."
+  }
+]

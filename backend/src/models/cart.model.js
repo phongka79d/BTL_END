@@ -1,4 +1,5 @@
 const prisma = require('../config/database');
+const { PURCHASE_INVALID_MESSAGE, toQuantity, validatePurchaseQuantity } = require('../utils/quantityValidation');
 
 /**
  * Tính tạm tính từ các mục trong giỏ hàng và đơn giá đã chốt.
@@ -112,9 +113,9 @@ const addItem = async (userId, productId, quantity) => {
     throw new Error('Product ID là bắt buộc và phải là chuỗi');
   }
 
-  const parsedQuantity = parseInt(quantity, 10);
-  if (isNaN(parsedQuantity) || parsedQuantity < 1) {
-    throw new Error('Số lượng phải ít nhất là 1');
+  const parsedQuantity = toQuantity(quantity);
+  if (parsedQuantity === null || parsedQuantity < 1) {
+    throw new Error(PURCHASE_INVALID_MESSAGE);
   }
 
   return prisma.$transaction(async (tx) => {
@@ -139,12 +140,11 @@ const addItem = async (userId, productId, quantity) => {
         }
       }
     });
-
-    const newQuantity = existingItem ? (existingItem.quantity + parsedQuantity) : parsedQuantity;
-
-    // Từ chối khi tổng số lượng trong giỏ vượt quá tồn kho sản phẩm.
-    if (newQuantity > product.quantity) {
-      throw new Error(`Số lượng yêu cầu vượt quá tồn kho (${product.quantity})`);
+    const newQuantity = existingItem
+      ? existingItem.quantity + parsedQuantity
+      : parsedQuantity;
+    if (validatePurchaseQuantity(newQuantity, product.quantity)) {
+      throw new Error(PURCHASE_INVALID_MESSAGE);
     }
 
     if (existingItem) {
@@ -207,7 +207,7 @@ const updateItems = async (userId, updates) => {
   const seenCartItemIds = new Set();
   const normalizedUpdates = updates.map((update) => {
     const cartItemId = update?.id;
-    const quantity = Number(update?.quantity);
+    const quantity = toQuantity(update?.quantity);
 
     if (!cartItemId || typeof cartItemId !== 'string') {
       throw new Error('ID sản phẩm trong giỏ hàng phải là chuỗi.');
@@ -215,8 +215,8 @@ const updateItems = async (userId, updates) => {
     if (seenCartItemIds.has(cartItemId)) {
       throw new Error('Các cập nhật sản phẩm trong giỏ hàng không được chứa ID trùng lặp.');
     }
-    if (!Number.isInteger(quantity) || quantity < 1) {
-      throw new Error('Số lượng phải là số nguyên ít nhất bằng 1.');
+    if (quantity === null || quantity < 1) {
+      throw new Error(PURCHASE_INVALID_MESSAGE);
     }
 
     seenCartItemIds.add(cartItemId);
@@ -247,8 +247,8 @@ const updateItems = async (userId, updates) => {
       if (!cartItem.product) {
         throw new Error(`Không tìm thấy sản phẩm có ID ${cartItem.productId}.`);
       }
-      if (update.quantity > cartItem.product.quantity) {
-        throw new Error(`Số lượng yêu cầu vượt quá tồn kho (${cartItem.product.quantity})`);
+      if (validatePurchaseQuantity(update.quantity, cartItem.product.quantity)) {
+        throw new Error(PURCHASE_INVALID_MESSAGE);
       }
 
       await transaction.cartItem.update({

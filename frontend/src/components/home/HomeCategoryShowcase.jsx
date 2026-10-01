@@ -5,7 +5,8 @@ import {
   formatPrice,
   getProductImageSrc,
   getStockLabel,
-  getStockVariant
+  getStockVariant,
+  handleProductImageError
 } from '../product/productUtils';
 import ProductRatingBadge from '../product/ProductRatingBadge';
 
@@ -33,6 +34,7 @@ export const HomeProductTile = ({ product }) => {
             src={getProductImageSrc(product.imageUrl)}
             alt={product.name}
             loading="lazy"
+            onError={handleProductImageError}
             style={{
               width: '100%',
               height: '100%',

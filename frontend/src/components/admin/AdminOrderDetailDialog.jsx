@@ -16,6 +16,7 @@ import { orderApi } from '../../api/orderApi';
 import OrderDetailPanel from '../order/OrderDetailPanel';
 import Alert from '../common/Alert';
 import { formatDate } from '../common/formatDate';
+import { getOrderRecipient } from '../order/orderRecipientUtils.js';
 
 const sectionLabelStyle = {
   textTransform: 'uppercase',
@@ -130,7 +131,7 @@ export const AdminOrderDetailDialog = ({ isOpen, orderId, onOpenChange }) => {
 
     /* ---- Thành công ---- */
     const customer = order.user || {};
-
+    const recipient = getOrderRecipient(order);
     return (
       <LayoutContent isScrollable>
         <VStack gap={4} style={{ width: '100%' }}>
@@ -147,10 +148,8 @@ export const AdminOrderDetailDialog = ({ isOpen, orderId, onOpenChange }) => {
               </Text>
 
               <HStack gap={1}>
-                <Text color="secondary">Tên</Text>
-                <Text weight="semibold">
-                  {customer.fullName || customer.username || '—'}
-                </Text>
+                <Text color="secondary">Tên người nhận</Text>
+                <Text weight="semibold">{recipient.name}</Text>
               </HStack>
 
               {customer.email && (
@@ -160,10 +159,15 @@ export const AdminOrderDetailDialog = ({ isOpen, orderId, onOpenChange }) => {
                 </HStack>
               )}
 
-              {customer.phone && (
-                <HStack gap={1}>
+              <HStack gap={1}>
                 <Text color="secondary">Số điện thoại</Text>
-                  <Text>{customer.phone}</Text>
+                <Text>{recipient.phone}</Text>
+              </HStack>
+
+              {recipient.note && (
+                <HStack gap={1} style={{ alignItems: 'flex-start' }}>
+                  <Text color="secondary">Ghi chú</Text>
+                  <Text>{recipient.note}</Text>
                 </HStack>
               )}
 

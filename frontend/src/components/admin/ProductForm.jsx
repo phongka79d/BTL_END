@@ -47,8 +47,18 @@ export const ProductForm = ({
   }, [isOpen, product]);
 
   const updateField = (field, value) => {
-    setValues((current) => ({ ...current, [field]: value }));
-    setErrors((current) => ({ ...current, [field]: undefined }));
+    const nextValues = { ...values, [field]: value };
+    setValues(nextValues);
+    setErrors((current) => {
+      const fieldError = validateProductForm(nextValues)[field];
+      if (fieldError) {
+        return { ...current, [field]: fieldError };
+      }
+
+      const nextErrors = { ...current };
+      delete nextErrors[field];
+      return nextErrors;
+    });
   };
 
   const handleSubmit = async (event) => {
@@ -140,14 +150,11 @@ export const ProductForm = ({
                       isRequired
                       width="100%"
                     />
-                    <NumberInput
+                    <TextInput
                       label="Số lượng"
                       value={values.quantity}
                       onChange={(value) => updateField('quantity', value)}
-                      min={0}
-                      step={1}
-                      isIntegerOnly
-                      hasClear
+                      inputMode="numeric"
                       status={fieldStatus(errors.quantity)}
                       isRequired
                       width="100%"
@@ -191,6 +198,7 @@ export const ProductForm = ({
                 form={formId}
                 variant="primary"
                 isLoading={isSubmitting}
+                isDisabled={isSubmitting || Boolean(errors.quantity)}
               />
             </HStack>
           </LayoutFooter>

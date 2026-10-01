@@ -1,6 +1,9 @@
 import React, { useMemo } from 'react';
+import { Link as RouterLink } from 'react-router-dom';
 import {
   Button,
+  HStack,
+  Link,
   MoreMenu,
   Text,
   VStack,
@@ -8,6 +11,10 @@ import {
   proportional
 } from '@astryxdesign/core';
 import AdminTable from './AdminTable';
+
+/** Đường dẫn xem danh sách sản phẩm đã lọc theo danh mục. */
+export const buildCategoryProductsHref = (categoryId) =>
+  `/admin/products?categoryId=${encodeURIComponent(String(categoryId))}`;
 
 export const CategoryTable = ({
   categories,
@@ -34,7 +41,13 @@ export const CategoryTable = ({
       width: proportional(2),
       renderCell: (category) => (
         <VStack gap={0.5}>
-          <Text weight="semibold">{category.name}</Text>
+          <Link
+            as={RouterLink}
+            href={buildCategoryProductsHref(category.id)}
+            weight="semibold"
+          >
+            {category.name}
+          </Link>
           <Text type="supporting">
             {category.description || 'Chưa có mô tả'}
           </Text>
@@ -44,24 +57,35 @@ export const CategoryTable = ({
     {
       key: 'actions',
       header: 'Actions',
-      width: pixel(80),
+      width: pixel(180),
       align: 'end',
       resizable: false,
       renderCell: (category) => (
-        <MoreMenu
-          label={`Thao tác với ${category.name}`}
-          isDisabled={isDeleting}
-          items={[
-            {
-              label: 'Chỉnh sửa',
-              onClick: () => onEdit(category)
-            },
-            {
-              label: 'Xóa',
-              onClick: () => onDelete(category)
-            }
-          ]}
-        />
+        <HStack gap={2} align="center" justify="end">
+          <Button
+            label={`Xem sản phẩm trong ${category.name}`}
+            variant="ghost"
+            size="sm"
+            as={RouterLink}
+            href={buildCategoryProductsHref(category.id)}
+          >
+            Xem sản phẩm
+          </Button>
+          <MoreMenu
+            label={`Thao tác với ${category.name}`}
+            isDisabled={isDeleting}
+            items={[
+              {
+                label: 'Chỉnh sửa',
+                onClick: () => onEdit(category)
+              },
+              {
+                label: 'Xóa',
+                onClick: () => onDelete(category)
+              }
+            ]}
+          />
+        </HStack>
       )
     }
   ], [isDeleting, onDelete, onEdit]);

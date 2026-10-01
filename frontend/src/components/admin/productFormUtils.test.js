@@ -29,7 +29,7 @@ test('validateProductForm requires core product fields', () => {
       name: 'Vui lòng nhập tên sản phẩm.',
       brand: 'Vui lòng nhập thương hiệu.',
       price: 'Vui lòng nhập giá.',
-      quantity: 'Vui lòng nhập số lượng.',
+      quantity: 'Số lượng phải là số nguyên không âm.',
       categoryId: 'Vui lòng chọn danh mục.'
     }
   );
@@ -44,8 +44,24 @@ test('validateProductForm rejects invalid price and quantity values', () => {
     }),
     {
       price: 'Price must be a non-negative number.',
-      quantity: 'Quantity must be a non-negative integer.'
+      quantity: 'Số lượng phải là số nguyên không âm.',
     }
+  );
+});
+
+test('validateProductForm accepts zero and reports negative quantity distinctly', () => {
+  assert.equal(validateProductForm({ ...validProduct, quantity: 0 }).quantity, undefined);
+  assert.equal(
+    validateProductForm({ ...validProduct, quantity: '-1' }).quantity,
+    'Số lượng không được là số âm.'
+  );
+  assert.equal(
+    validateProductForm({ ...validProduct, quantity: '-999' }).quantity,
+    'Số lượng không được là số âm.'
+  );
+  assert.equal(
+    validateProductForm({ ...validProduct, quantity: '' }).quantity,
+    'Số lượng phải là số nguyên không âm.'
   );
 });
 

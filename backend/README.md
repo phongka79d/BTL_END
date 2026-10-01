@@ -169,7 +169,7 @@ All API routes are served under the `/api` prefix. Standard JSON envelopes are r
 ### 4. Products & Categories (`/api/products`, `/api/categories`)
 | Method | Endpoint | Access | Description |
 | :--- | :--- | :--- | :--- |
-| `GET` | `/api/products` | Public | Lists products with search, filters, pagination, sort |
+| `GET` | `/api/products` | Public | Lists products with search, category/price filters, pagination and sorting; `stockStatus=low` means stock ≤ 5 (including zero), `stockStatus=out` means zero; other non-empty values return HTTP 400 |
 | `GET` | `/api/products/:id` | Public | Retrieves detailed product information |
 | `PUT` | `/api/products/:id/stock` | Staff / Admin | Fast inventory stock adjustment |
 | `POST` | `/api/admin/products` | Admin | Creates a new product |
@@ -196,9 +196,14 @@ All API routes are served under the `/api` prefix. Standard JSON envelopes are r
 | `GET` | `/api/orders/my-orders` | Authenticated | Lists orders belonging to authenticated user |
 | `GET` | `/api/orders/:id` | Owner / Staff / Admin | Retrieves specific order details |
 | `PUT` | `/api/orders/:id/cancel` | Owner | Cancels the customer's own order while it is `pending` or `confirmed` and restocks every line item |
-| `GET` | `/api/admin/orders` | Staff / Admin | Lists all system orders with filters and keyword search |
+| `GET` | `/api/admin/orders` | Staff / Admin | Lists orders with combined status, keyword and pagination filters; `searchField=orderId\|customer\|shippingAddress\|all` selects the search domain (default `all`); unknown fields return HTTP 400 |
 | `PUT` | `/api/admin/orders/:id/status` | Staff / Admin | Moves an order to an allowed next status (see lifecycle rules below) |
 | `POST` | `/api/payments/cod` | Authenticated | Processes COD payment creation |
+
+**Checkout request** (`POST /api/orders`):
+- Body: `fullName` (required), `phone` (required, digits only — no spaces or symbols), `shippingAddress` (required), optional `note`, optional `cartItemIds` for partial-cart checkout.
+- The order stores a recipient snapshot (`recipientName`, `recipientPhone`, `note`) taken from the request, so later profile changes never alter an existing order.
+- One `prisma.$transaction`: quantities must be positive integers; stock is decremented with a conditional `quantity >= ordered` write (fails with HTTP 409 when another checkout wins), the order/details/COD `Payment` (`unpaid`, `paymentDate: null`) are created, and only the ordered cart lines are deleted (a mismatched delete count aborts with HTTP 409).
 
 **Order lifecycle enforcement** (`backend/src/models/order.model.js`):
 - Allowed transitions: `pending → confirmed | cancelled`, `confirmed → shipping | cancelled`, `shipping → completed | cancelled`; `completed` and `cancelled` are terminal.
@@ -316,6 +321,16 @@ npm run prisma:migrate
 # Seed database with initial admin, categories, and products
 npm run prisma:seed
 ```
+
+**Existing databases — product images only:** do not re-run the full seed to replace photos. Point both database URLs at the intended isolated local database and take a fresh backup first. This maintenance command connects only through `DATABASE_URL`, never writes another product field, matches exact seed name/brand/category, preserves custom images and non-seed rows, and is idempotent.
+
+```bash
+node prisma/updateProductImages.js                         # Dry run: inspect exact imageUrl changes
+node prisma/updateProductImages.js --apply --backup-confirmed # Apply only after backup and target review
+node prisma/updateProductImages.js --qa                    # Validate all 40 model photo/source configurations
+```
+
+Remote apply is blocked unless the operator explicitly adds `--allow-remote-db`; that flag is not permission for local QA to contact a remote database. All 40 models now have photos: 17 licensed local WebP assets and 23 direct manufacturer/retailer links. `--qa` checks local assets and matching source metadata, and fails missing/invalid configurations; it does not fetch external URLs or verify reuse permission. Local attribution remains in `phones-laptops.json` and `watches-accessories.json`; `linked-phones-laptops.json` and `linked-watches-accessories.json` record direct links, model source pages, and `reusePermission: "unverified"`. All four manifests live in [`frontend/public/products`](../frontend/public/products). External links may change; the frontend retains its broken-image fallback.
 
 ### 4. Start the Server
 ```bash

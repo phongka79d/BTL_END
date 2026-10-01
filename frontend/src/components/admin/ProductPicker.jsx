@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Badge, Button, Card, HStack, Text, TextInput, VStack } from '@astryxdesign/core';
 import { productApi } from '../../api/productApi';
 import Pagination from '../common/Pagination';
-import { formatPrice, getProductImageSrc } from '../product/productUtils';
+import { formatPrice, getProductImageSrc, handleProductImageError } from '../product/productUtils';
 
 const searchDelayMs = 300;
 const defaultPagination = {
@@ -27,6 +27,7 @@ export const ProductSummary = ({ product }) => (
       <img
         src={getProductImageSrc(product.imageUrl)}
         alt={product.name}
+        onError={handleProductImageError}
         style={{
           width: '100%',
           height: '100%',

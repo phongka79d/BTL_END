@@ -1,6 +1,7 @@
 const bcrypt = require('bcrypt');
 const userModel = require('../models/user.model');
 const emailService = require('../services/email.service');
+const { validatePhone } = require('../utils/phoneValidation');
 const { successResponse, errorResponse } = require('../utils/response');
 
 /**
@@ -72,6 +73,11 @@ const updateProfile = async (req, res, next) => {
     }
 
     const { username, fullName, phone, address } = req.body;
+    const phoneError = validatePhone(phone);
+    if (phoneError) {
+      return errorResponse(res, 400, phoneError);
+    }
+
     const updateData = {};
 
     // Kiểm tra và giới hạn cập nhật trong các trường của Plan 1
@@ -153,6 +159,11 @@ const updateUserRole = async (req, res, next) => {
 const updateAdminUser = async (req, res, next) => {
   try {
     const { id } = req.params;
+    const phoneError = validatePhone(req.body.phone);
+    if (phoneError) {
+      return errorResponse(res, 400, phoneError);
+    }
+
     const updateData = getAdminUserUpdateData(req.body);
 
     if (updateData.username !== undefined && updateData.username === '') {
@@ -207,6 +218,11 @@ const updateUserBlocked = async (req, res, next) => {
 const createUser = async (req, res, next) => {
   try {
     const { username, email, password, fullName, phone, address, role } = req.body;
+    const phoneError = validatePhone(phone);
+    if (phoneError) {
+      return errorResponse(res, 400, phoneError);
+    }
+
     const requestedRole = role === undefined || role === null || role === ''
       ? 'staff'
       : String(role).trim();

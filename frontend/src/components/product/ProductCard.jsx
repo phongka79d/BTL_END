@@ -12,6 +12,7 @@ import {
   getProductImageSrc,
   getStockLabel,
   getStockVariant,
+  handleProductImageError,
   truncateText
 } from './productUtils';
 import ProductRatingBadge from './ProductRatingBadge';
@@ -44,6 +45,7 @@ export const ProductCard = ({ product }) => {
           <img
             src={getProductImageSrc(product.imageUrl)}
             alt={product.name}
+            onError={handleProductImageError}
             style={{
               width: '100%',
               height: '100%',

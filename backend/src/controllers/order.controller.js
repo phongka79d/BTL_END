@@ -1,6 +1,8 @@
 const orderModel = require('../models/order.model');
 const { hasRolePermission, PERMISSIONS } = require('../config/permissions');
 const { successResponse, errorResponse } = require('../utils/response');
+const { validatePhone } = require('../utils/phoneValidation');
+const { isOrderSearchField } = require('../utils/orderSearchFields');
 /**
  * Thực hiện checkout của khách hàng / tạo đơn hàng
  * POST /api/orders
@@ -8,7 +10,7 @@ const { successResponse, errorResponse } = require('../utils/response');
 const checkout = async (req, res, next) => {
   try {
     const userId = req.user.id;
-    const { shippingAddress, cartItemIds } = req.body;
+    const { shippingAddress, cartItemIds, fullName, phone, note } = req.body || {};
 
     // Kiểm tra payload shippingAddress
     if (!shippingAddress || typeof shippingAddress !== 'string' || shippingAddress.trim() === '') {
@@ -26,20 +28,29 @@ const checkout = async (req, res, next) => {
       }
     }
 
-    const order = await orderModel.checkout(userId, shippingAddress.trim(), cartItemIds);
+    // Kiểm tra ảnh chụp người nhận: họ tên bắt buộc, số điện thoại chỉ gồm chữ số, ghi chú là chuỗi.
+    if (typeof fullName !== 'string' || fullName.trim() === '') {
+      return errorResponse(res, 400, 'Họ và tên người nhận là bắt buộc');
+    }
+    const phoneError = validatePhone(phone, { required: true });
+    if (phoneError) {
+      return errorResponse(res, 400, phoneError);
+    }
+    if (note !== undefined && note !== null && typeof note !== 'string') {
+      return errorResponse(res, 400, 'Ghi chú phải là chuỗi');
+    }
+
+    const contact = {
+      fullName: fullName.trim(),
+      phone,
+      note: note ?? null
+    };
+
+    const order = await orderModel.checkout(userId, shippingAddress.trim(), contact, cartItemIds);
     return successResponse(res, 201, 'Đã tạo đơn hàng thành công', order);
   } catch (error) {
-    if (
-      error.message === 'Cart is empty.' ||
-      error.message === 'No cart items selected.' ||
-      error.message === 'Selected cart items are unavailable.' ||
-      error.message === 'Shipping address is required.' ||
-      error.message.includes('exceeds available stock')
-    ) {
-      return errorResponse(res, 400, error.message);
-    }
-    if (error.message.includes('not found')) {
-      return errorResponse(res, 404, error.message);
+    if (error && (error.status === 400 || error.status === 404 || error.status === 409)) {
+      return errorResponse(res, error.status, error.message);
     }
     next(error);
   }
@@ -95,17 +106,31 @@ const getOrderById = async (req, res, next) => {
 const getAdminOrders = async (req, res, next) => {
   try {
     const keyword = req.query.keyword || req.query.search;
-    const { status, page, limit } = req.query;
+    const { status, searchField, page, limit } = req.query;
 
-    const result = await orderModel.listForAdmin({ status, keyword, page, limit });
+    // Trường tìm kiếm chỉ chấp nhận giá trị chuỗi trong allowlist; tham số trống
+    // nghĩa là tìm rộng. Giá trị lạ kể cả mảng/đối tượng bị từ chối ngay cả khi
+    // không có từ khóa.
+    if (
+      searchField !== undefined &&
+      searchField !== null &&
+      searchField !== '' &&
+      !isOrderSearchField(searchField)
+    ) {
+      return errorResponse(res, 400, 'Trường tìm kiếm không hợp lệ');
+    }
+
+    const result = await orderModel.listForAdmin({ status, keyword, searchField, page, limit });
     return successResponse(res, 200, 'Đã lấy đơn hàng quản trị thành công', result);
   } catch (error) {
     if (
-      error.message &&
-      (error.message.includes('không hợp lệ') ||
-       error.message.startsWith('Invalid status') ||
-       error.message.includes('Trang phải') ||
-       error.message.includes('Giới hạn phải'))
+      error &&
+      (error.status === 400 ||
+        (error.message &&
+          (error.message.includes('không hợp lệ') ||
+           error.message.startsWith('Invalid status') ||
+           error.message.includes('Trang phải') ||
+           error.message.includes('Giới hạn phải'))))
     ) {
       return errorResponse(res, 400, error.message);
     }

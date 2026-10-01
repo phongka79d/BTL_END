@@ -13,6 +13,7 @@ import {
   VStack
 } from '@astryxdesign/core';
 import Alert from '../common/Alert';
+import { validatePhone } from '../../utils/phoneValidation';
 import { validatePasswordPolicy } from '../../utils/passwordPolicy';
 
 const EMPTY_VALUES = {
@@ -42,17 +43,29 @@ export const UserCreateDialog = ({ isOpen, onOpenChange, onSubmit }) => {
   const formId = useId();
   const [values, setValues] = useState(EMPTY_VALUES);
   const [error, setError] = useState('');
+  const [phoneStatus, setPhoneStatus] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     if (isOpen) {
       setValues(EMPTY_VALUES);
       setError('');
+      setPhoneStatus(null);
     }
   }, [isOpen]);
 
   const updateField = (field, value) => {
     setValues((current) => ({ ...current, [field]: value }));
+
+    if (field === 'phone') {
+      const phoneError = validatePhone(value);
+      setPhoneStatus(phoneError ? { type: 'error', message: phoneError } : null);
+      if (!phoneError) {
+        setError('');
+      }
+      return;
+    }
+
     setError('');
   };
 
@@ -61,12 +74,18 @@ export const UserCreateDialog = ({ isOpen, onOpenChange, onSubmit }) => {
     email: values.email.trim(),
     password: values.password,
     fullName: values.fullName.trim(),
-    phone: values.phone.trim(),
+    phone: values.phone,
     role: values.role,
   });
 
   const handleSubmit = async (event) => {
     event.preventDefault();
+    const phoneError = validatePhone(values.phone);
+    if (phoneError) {
+      setPhoneStatus({ type: 'error', message: phoneError });
+      return;
+    }
+
     const payload = buildPayload();
 
     if (!payload.username) {
@@ -155,6 +174,8 @@ export const UserCreateDialog = ({ isOpen, onOpenChange, onSubmit }) => {
                     label="Số điện thoại"
                     value={values.phone}
                     onChange={(value) => updateField('phone', value)}
+                    status={phoneStatus}
+                    inputMode="numeric"
                     isOptional
                     width="100%"
                   />
@@ -176,7 +197,7 @@ export const UserCreateDialog = ({ isOpen, onOpenChange, onSubmit }) => {
                 label="Tạo tài khoản"
                 type="submit"
                 form={formId}
-                variant="primary"
+                isDisabled={isSubmitting || Boolean(validatePhone(values.phone))}
                 isLoading={isSubmitting}
               />
             </HStack>

@@ -3,6 +3,7 @@ import { Card, HStack, Table, Text, VStack } from '@astryxdesign/core';
 import { formatPrice } from '../product/productUtils';
 import OrderStatusBadge from './OrderStatusBadge';
 import PaymentStatusBadge from './PaymentStatusBadge';
+import { getOrderRecipient } from './orderRecipientUtils.js';
 
 const formatDate = (dateString) => {
   if (!dateString) return '—';
@@ -43,6 +44,8 @@ export const OrderDetailPanel = ({ order }) => {
     payment,
     details = [],
   } = order;
+
+  const recipient = getOrderRecipient(order);
 
   const columns = [
     {
@@ -107,13 +110,27 @@ export const OrderDetailPanel = ({ order }) => {
         </VStack>
       </Card>
 
-      {/* Địa chỉ giao hàng */}
+      {/* Thông tin người nhận và địa chỉ giao hàng */}
       <Card padding={4}>
         <VStack gap={2}>
           <Text size="supporting" color="accent" weight="semibold" style={sectionLabelStyle}>
             Shipping Address
           </Text>
+          <HStack gap={2} style={{ flexWrap: 'wrap', alignItems: 'center' }}>
+            <Text color="secondary">Người nhận</Text>
+            <Text weight="semibold">{recipient.name}</Text>
+          </HStack>
+          <HStack gap={2} style={{ flexWrap: 'wrap', alignItems: 'center' }}>
+            <Text color="secondary">Số điện thoại</Text>
+            <Text>{recipient.phone}</Text>
+          </HStack>
           <Text>{shippingAddress || '—'}</Text>
+          {recipient.note && (
+            <HStack gap={2} style={{ alignItems: 'flex-start' }}>
+              <Text color="secondary">Ghi chú</Text>
+              <Text>{recipient.note}</Text>
+            </HStack>
+          )}
         </VStack>
       </Card>
 

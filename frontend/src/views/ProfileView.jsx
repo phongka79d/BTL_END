@@ -18,6 +18,7 @@ import { userApi } from '../api/userApi';
 import Alert from '../components/common/Alert';
 import ChangePasswordPanel from '../components/profile/ChangePasswordPanel';
 import { useAuth } from '../contexts/AuthContext';
+import { validatePhone } from '../utils/phoneValidation';
 
 const EMPTY_PROFILE = {
   username: '',
@@ -63,14 +64,14 @@ const AddressIcon = () => (
 const toProfileValues = (profile) => ({
   username: profile?.username || '',
   fullName: profile?.fullName || '',
-  phone: profile?.phone || '',
+  phone: profile?.phone ?? '',
   address: profile?.address || '',
 });
 
 const toProfilePayload = (values) => ({
   username: values.username.trim(),
   fullName: values.fullName.trim(),
-  phone: values.phone.trim(),
+  phone: values.phone,
   address: values.address.trim(),
 });
 
@@ -99,6 +100,7 @@ export const ProfileView = () => {
   const [profile, setProfile] = useState(null);
   const [values, setValues] = useState(EMPTY_PROFILE);
   const [usernameStatus, setUsernameStatus] = useState(null);
+  const [phoneStatus, setPhoneStatus] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [loadError, setLoadError] = useState('');
@@ -112,8 +114,11 @@ export const ProfileView = () => {
     try {
       const response = await userApi.getProfile();
       const nextProfile = response?.data?.user || null;
+      const nextValues = toProfileValues(nextProfile);
+      const phoneError = validatePhone(nextValues.phone);
       setProfile(nextProfile);
-      setValues(toProfileValues(nextProfile));
+      setValues(nextValues);
+      setPhoneStatus(phoneError ? { type: 'error', message: phoneError } : null);
       setUsernameStatus(null);
     } catch (error) {
       setProfile(null);
@@ -131,6 +136,16 @@ export const ProfileView = () => {
 
   const updateField = (field, value) => {
     setValues((current) => ({ ...current, [field]: value }));
+
+    if (field === 'phone') {
+      const phoneError = validatePhone(value);
+      setPhoneStatus(phoneError ? { type: 'error', message: phoneError } : null);
+      if (!phoneError) {
+        setFeedback(null);
+      }
+      return;
+    }
+
     if (field === 'username' && usernameStatus) {
       setUsernameStatus(null);
     }
@@ -140,12 +155,19 @@ export const ProfileView = () => {
   const resetForm = () => {
     setValues(toProfileValues(profile));
     setUsernameStatus(null);
+    setPhoneStatus(null);
     setFeedback(null);
   };
 
   const handleSubmit = async (event) => {
     event.preventDefault();
     const payload = toProfilePayload(values);
+    const phoneError = validatePhone(values.phone);
+    if (phoneError) {
+      setPhoneStatus({ type: 'error', message: phoneError });
+      return;
+    }
+
 
     if (!payload.username) {
       setUsernameStatus({ type: 'error', message: 'Tên người dùng không được để trống' });
@@ -294,6 +316,8 @@ export const ProfileView = () => {
                   label="Số điện thoại"
                   startIcon={<PhoneIcon />}
                   value={values.phone}
+                  status={phoneStatus}
+                  inputMode="numeric"
                   onChange={(value) => updateField('phone', value)}
                   isOptional
                   isDisabled={isSaving}
@@ -322,6 +346,7 @@ export const ProfileView = () => {
                   label="Lưu hồ sơ"
                   type="submit"
                   variant="primary"
+                  isDisabled={isSaving || Boolean(validatePhone(values.phone))}
                   isLoading={isSaving}
                 />
               </HStack>

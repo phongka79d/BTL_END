@@ -5,7 +5,8 @@ import MainLayout from '../layouts/MainLayout';
 import AuthLayout from '../layouts/AuthLayout';
 import AdminLayout from '../layouts/AdminLayout';
 import StaffLayout from '../layouts/StaffLayout';
-import { PERMISSIONS } from '../constants/permissions';
+import { canAccessStaffArea } from '../constants/permissions';
+import { canAccessStaffRoute } from './staffRoutePermissions';
 // Nhập các giao diện
 import HomeView from '../views/HomeView';
 import LoginView from '../views/LoginView';
@@ -34,6 +35,23 @@ import StaffOrderView from '../views/staff/StaffOrderView';
 import StaffInventoryView from '../views/staff/StaffInventoryView';
 import StaffReviewView from '../views/staff/StaffReviewView';
 import StaffReportView from '../views/staff/StaffReportView';
+
+/**
+ * Khối hiển thị trong lúc chờ trạng thái xác thực của các route guard.
+ */
+const RouteLoading = () => (
+  <div style={{
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    height: '100vh',
+    fontFamily: 'system-ui, -apple-system, sans-serif',
+    color: 'var(--color-text-secondary, #666)'
+  }}>
+    Đang tải...
+  </div>
+);
+
 /**
  * Lớp bảo vệ route cho người dùng đã xác thực (Customer/Admin).
  * Chuyển hướng đến /login nếu người dùng chưa xác thực.
@@ -42,18 +60,7 @@ export const PrivateRoute = () => {
   const { isAuthenticated, loading } = useAuth();
 
   if (loading) {
-    return (
-      <div style={{
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        height: '100vh',
-        fontFamily: 'system-ui, -apple-system, sans-serif',
-        color: 'var(--color-text-secondary, #666)'
-      }}>
-        Đang tải...
-      </div>
-    );
+    return <RouteLoading />;
   }
 
   return isAuthenticated ? <Outlet /> : <Navigate to="/login" replace />;
@@ -67,18 +74,7 @@ export const AdminRoute = () => {
   const { isAuthenticated, isAdmin, loading } = useAuth();
 
   if (loading) {
-    return (
-      <div style={{
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        height: '100vh',
-        fontFamily: 'system-ui, -apple-system, sans-serif',
-        color: 'var(--color-text-secondary, #666)'
-      }}>
-        Đang tải...
-      </div>
-    );
+    return <RouteLoading />;
   }
 
   if (!isAuthenticated) {
@@ -89,37 +85,54 @@ export const AdminRoute = () => {
 };
 
 /**
- * Lớp bảo vệ route dành cho nhân viên vận hành hoặc admin.
- * Chuyển hướng đến /login nếu chưa xác thực hoặc /unauthorized nếu không có quyền vận hành.
+ * Lớp bảo vệ khu vực vận hành (/staff) dành cho nhân viên vận hành hoặc admin.
+ * Chỉ cần một capability vận hành bất kỳ (ví dụ PRODUCTS_UPDATE_STOCK của trang tồn kho),
+ * không phụ thuộc riêng ORDERS_VIEW_ALL; từng trang con được kiểm tra riêng
+ * bằng StaffCapabilityRoute. Chuyển hướng đến /login nếu chưa xác thực
+ * hoặc /unauthorized nếu không có quyền vận hành.
  */
 export const StaffRoute = () => {
-  const { isAuthenticated, hasPermission, loading } = useAuth();
+  const { isAuthenticated, user, loading } = useAuth();
 
   if (loading) {
-    return (
-      <div style={{
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        height: '100vh',
-        fontFamily: 'system-ui, -apple-system, sans-serif',
-        color: 'var(--color-text-secondary, #666)'
-      }}>
-        Đang tải...
-      </div>
-    );
+    return <RouteLoading />;
   }
 
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
   }
 
-  return hasPermission(PERMISSIONS.ORDERS_VIEW_ALL) ? (
+  return canAccessStaffArea(user?.role) ? (
     <Outlet />
   ) : (
     <Navigate to="/unauthorized" replace />
   );
 };
+
+/**
+ * Lớp bảo vệ route theo capability riêng của từng trang vận hành.
+ * Chuyển hướng đến /login nếu chưa xác thực hoặc /unauthorized nếu thiếu capability.
+ * @param {Object} props
+ * @param {string} props.routeKey - Khóa trang trong STAFF_ROUTE_CAPABILITIES
+ */
+export const StaffCapabilityRoute = ({ routeKey }) => {
+  const { isAuthenticated, user, loading } = useAuth();
+
+  if (loading) {
+    return <RouteLoading />;
+  }
+
+  if (!isAuthenticated) {
+    return <Navigate to="/login" replace />;
+  }
+
+  return canAccessStaffRoute(user?.role, routeKey) ? (
+    <Outlet />
+  ) : (
+    <Navigate to="/unauthorized" replace />
+  );
+};
+
 /**
  * Lớp bảo vệ route chỉ dành cho người dùng chưa xác thực (ví dụ các trang login, register).
  * Chuyển hướng người dùng đã xác thực đến đường dẫn trang chủ/dashboard của họ.
@@ -128,18 +141,7 @@ export const PublicOnlyRoute = () => {
   const { isAuthenticated, isAdmin, loading } = useAuth();
 
   if (loading) {
-    return (
-      <div style={{
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        height: '100vh',
-        fontFamily: 'system-ui, -apple-system, sans-serif',
-        color: 'var(--color-text-secondary, #666)'
-      }}>
-        Đang tải...
-      </div>
-    );
+    return <RouteLoading />;
   }
 
   if (isAuthenticated) {
@@ -188,10 +190,18 @@ export const AppRoutes = () => {
       <Route element={<StaffRoute />}>
         <Route element={<StaffLayout />}>
           <Route path="/staff" element={<StaffDashboardView />} />
-          <Route path="/staff/orders" element={<StaffOrderView />} />
-          <Route path="/staff/inventory" element={<StaffInventoryView />} />
-          <Route path="/staff/reviews" element={<StaffReviewView />} />
-          <Route path="/staff/reports" element={<StaffReportView />} />
+          <Route element={<StaffCapabilityRoute routeKey="orders" />}>
+            <Route path="/staff/orders" element={<StaffOrderView />} />
+          </Route>
+          <Route element={<StaffCapabilityRoute routeKey="inventory" />}>
+            <Route path="/staff/inventory" element={<StaffInventoryView />} />
+          </Route>
+          <Route element={<StaffCapabilityRoute routeKey="reviews" />}>
+            <Route path="/staff/reviews" element={<StaffReviewView />} />
+          </Route>
+          <Route element={<StaffCapabilityRoute routeKey="reports" />}>
+            <Route path="/staff/reports" element={<StaffReportView />} />
+          </Route>
         </Route>
       </Route>
 

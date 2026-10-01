@@ -141,7 +141,7 @@ test('updateAdminUser updates only soft profile fields and ignores role permissi
       body: {
         username: ' ada ',
         fullName: ' Ada Lovelace ',
-        phone: ' 123 ',
+        phone: '0987654321',
         address: ' London ',
         role: 'admin',
         isBlocked: true,
@@ -157,7 +157,7 @@ test('updateAdminUser updates only soft profile fields and ignores role permissi
     data: {
       username: 'ada',
       fullName: 'Ada Lovelace',
-      phone: '123',
+      phone: '0987654321',
       address: 'London',
     },
   });
@@ -214,4 +214,46 @@ test('updateUserBlocked blocks other users but rejects current admin self-block'
   assert.deepEqual(received, { id: 'user-1', isBlocked: true });
   assert.equal(response.statusCode, 200);
   assert.equal(response.body.data.user.isBlocked, true);
+});
+
+test('updateProfile rejects invalid phone values before model invocation', async () => {
+  const controller = require('./user.controller');
+  let updateCalled = false;
+  userModel.update = async () => {
+    updateCalled = true;
+  };
+
+  const response = createResponse();
+  await controller.updateProfile(
+    { user: { id: 'user-1' }, body: { phone: 987654321 } },
+    response,
+    assert.fail
+  );
+
+  assert.equal(response.statusCode, 400);
+  assert.equal(response.body.message, 'Số điện thoại chỉ được chứa chữ số.');
+  assert.equal(updateCalled, false);
+});
+
+test('updateAdminUser rejects invalid phone values before model invocation', async () => {
+  const controller = require('./user.controller');
+  let updateCalled = false;
+  userModel.updateAdminProfile = async () => {
+    updateCalled = true;
+  };
+
+  const response = createResponse();
+  await controller.updateAdminUser(
+    {
+      params: { id: 'user-1' },
+      body: { phone: '09-123' },
+      user: { id: 'admin-1', role: 'admin' },
+    },
+    response,
+    assert.fail
+  );
+
+  assert.equal(response.statusCode, 400);
+  assert.equal(response.body.message, 'Số điện thoại chỉ được chứa chữ số.');
+  assert.equal(updateCalled, false);
 });

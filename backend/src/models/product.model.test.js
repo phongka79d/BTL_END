@@ -181,3 +181,127 @@ test('findAll sorts products by ordered quantity when requested', async () => {
 
   assert.deepEqual(result.items.map((product) => product.id), ['p3', 'p1', 'p2']);
 });
+
+test('findAll filters low stock with quantity <= 5 including zero and paginates the filtered catalog', async () => {
+  const where = { quantity: { lte: 5 } };
+
+  prisma.product.count = async (query) => {
+    assert.deepEqual(query, { where });
+    return 13;
+  };
+
+  prisma.product.findMany = async (query) => {
+    assert.deepEqual(query.where, where);
+    assert.equal(query.skip, 12);
+    assert.equal(query.take, 12);
+    return [{ id: 'p13', name: 'Low stock product' }];
+  };
+
+  prisma.review.groupBy = async () => [];
+
+  const result = await productModel.findAll({ page: 2, limit: 12, stockStatus: 'low' });
+
+  assert.deepEqual(result.pagination, { page: 2, limit: 12, total: 13, totalPages: 2 });
+  assert.deepEqual(result.items.map((product) => product.id), ['p13']);
+});
+
+test('findAll filters out-of-stock products with quantity equal to zero', async () => {
+  const where = { quantity: { equals: 0 } };
+
+  prisma.product.count = async (query) => {
+    assert.deepEqual(query, { where });
+    return 2;
+  };
+
+  prisma.product.findMany = async (query) => {
+    assert.deepEqual(query.where, where);
+    return [
+      { id: 'p1', name: 'Out of stock A' },
+      { id: 'p2', name: 'Out of stock B' },
+    ];
+  };
+
+  prisma.review.groupBy = async () => [];
+
+  const result = await productModel.findAll({ stockStatus: 'out' });
+
+  assert.equal(result.pagination.total, 2);
+  assert.deepEqual(result.items.map((product) => product.id), ['p1', 'p2']);
+});
+
+test('findAll combines stock status with keyword and category filters for count and items', async () => {
+  const where = {
+    OR: [
+      { name: { contains: 'laptop', mode: 'insensitive' } },
+      { brand: { contains: 'laptop', mode: 'insensitive' } },
+    ],
+    categoryId: 'cat-1',
+    quantity: { lte: 5 },
+  };
+
+  prisma.product.count = async (query) => {
+    assert.deepEqual(query, { where });
+    return 1;
+  };
+
+  prisma.product.findMany = async (query) => {
+    assert.deepEqual(query.where, where);
+    return [{ id: 'p1', name: 'Laptop low stock' }];
+  };
+
+  prisma.review.groupBy = async () => [];
+
+  const result = await productModel.findAll({ keyword: 'laptop', categoryId: 'cat-1', stockStatus: 'low' });
+
+  assert.equal(result.pagination.total, 1);
+  assert.deepEqual(result.items.map((product) => product.id), ['p1']);
+});
+
+test('findAll applies the stock status filter when sorting by review quality', async () => {
+  const where = { quantity: { lte: 5 } };
+
+  prisma.product.count = async (query) => {
+    assert.deepEqual(query, { where });
+    return 13;
+  };
+
+  prisma.product.findMany = async (query) => {
+    assert.deepEqual(query.where, where);
+    return Array.from({ length: 13 }, (_, index) => ({
+      id: `p${index + 1}`,
+      name: `Product ${index + 1}`,
+      createdAt: new Date(2026, 0, index + 1),
+    }));
+  };
+
+  prisma.review.groupBy = async () => [];
+
+  const result = await productModel.findAll({ page: 2, limit: 12, sort: 'review', stockStatus: 'low' });
+
+  assert.equal(result.pagination.total, 13);
+  assert.equal(result.items.length, 1);
+});
+
+test('findAll ignores non-allowlisted stock status values instead of injecting Prisma fields', async () => {
+  const invalidValues = ['all', 'LOW', 'heavy', 'constructor', 'quantity', 5, true, {}, ['low'], null];
+
+  for (const stockStatus of invalidValues) {
+    const label = `stockStatus=${String(stockStatus)}`;
+
+    prisma.product.count = async (query) => {
+      assert.deepEqual(query, { where: {} }, label);
+      return 0;
+    };
+
+    prisma.product.findMany = async (query) => {
+      assert.deepEqual(query.where, {}, label);
+      return [];
+    };
+
+    prisma.review.groupBy = async () => [];
+
+    const result = await productModel.findAll({ stockStatus });
+
+    assert.equal(result.pagination.total, 0, label);
+  }
+});
