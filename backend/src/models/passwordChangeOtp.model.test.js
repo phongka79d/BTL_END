@@ -20,38 +20,32 @@ const loadModelWithPrisma = (prisma) => {
   return require('./passwordChangeOtp.model');
 };
 
-test('password change otp model stores only hashed otp and supports invalidation', () => {
-  const source = readFileSync(path.join(__dirname, 'passwordChangeOtp.model.js'), 'utf8');
-
-  assert.match(source, /createPasswordChangeOtp/);
-  assert.match(source, /invalidateActiveOtps/);
-  assert.match(source, /findLatestActiveOtp/);
-  assert.match(source, /incrementOtpAttempts/);
-  assert.match(source, /completePasswordChange/);
-  assert.match(source, /otpHash/);
-  assert.doesNotMatch(source, /plainOtp|otpCode|codeText/);
-  assert.match(source, /prisma\.\$transaction/);
-});
-
-test('findLatestActiveOtp only returns unused and unexpired otp records', async () => {
-  const findFirstCalls = [];
+test('reserveOtpAttempt caps concurrent guesses at the attempt limit', async () => {
+  // Fake honours the same conditions PostgreSQL evaluates atomically for updateMany.
+  const otp = { id: 'otp-1', usedAt: null, expiresAt: new Date(Date.now() + 60_000), attempts: 0 };
   const prisma = {
     passwordChangeOtp: {
-      findFirst: async (query) => {
-        findFirstCalls.push(query);
-        return null;
+      updateMany: async ({ where, data }) => {
+        const matches = where.id === otp.id
+          && otp.usedAt === where.usedAt
+          && otp.expiresAt > where.expiresAt.gt
+          && otp.attempts < where.attempts.lt;
+        if (!matches) return { count: 0 };
+        otp.attempts += data.attempts.increment;
+        return { count: 1 };
       },
     },
   };
-  const { findLatestActiveOtp } = loadModelWithPrisma(prisma);
+  const { reserveOtpAttempt } = loadModelWithPrisma(prisma);
 
-  await findLatestActiveOtp('user-1');
+  const results = await Promise.all(Array.from({ length: 8 }, () => reserveOtpAttempt('otp-1', 5)));
 
-  assert.equal(findFirstCalls.length, 1);
-  assert.equal(findFirstCalls[0].where.userId, 'user-1');
-  assert.equal(findFirstCalls[0].where.usedAt, null);
-  assert.ok(findFirstCalls[0].where.expiresAt.gt instanceof Date);
-  assert.deepEqual(findFirstCalls[0].orderBy, { createdAt: 'desc' });
+  assert.equal(results.filter(Boolean).length, 5);
+  assert.equal(otp.attempts, 5);
+
+  otp.expiresAt = new Date(Date.now() - 1);
+  otp.attempts = 0;
+  assert.equal(await reserveOtpAttempt('otp-1', 5), false);
 });
 
 test('completePasswordChange atomically claims an unused unexpired otp before updating password', async () => {

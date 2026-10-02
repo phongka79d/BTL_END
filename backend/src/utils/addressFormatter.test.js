@@ -2,20 +2,18 @@ const assert = require('node:assert/strict');
 const { test } = require('node:test');
 const { formatVietnamAddress } = require('./addressFormatter');
 
-test('Vietnam address formatting trims each nonempty component in display order', () => {
+test('Vietnam address formatting trims detail, ward, and province in canonical order', () => {
   assert.equal(formatVietnamAddress({
-    detail: '  Căn hộ 12  ',
-    streetName: '  Đường Lê Lợi ',
-    wardName: ' Phường Bến Thành ',
-    provinceName: ' Thành phố Hồ Chí Minh  ',
-  }), 'Căn hộ 12, Đường Lê Lợi, Phường Bến Thành, Thành phố Hồ Chí Minh');
+    detail: '  Số 12, ngõ 5, Phố Hàng Bài  ',
+    wardName: ' Phường Hoàn Kiếm ',
+    provinceName: ' Thành phố Hà Nội  ',
+  }), 'Số 12, ngõ 5, Phố Hàng Bài, Phường Hoàn Kiếm, Thành phố Hà Nội');
 });
 
 test('Vietnam address formatting omits empty and non-string parts without truncating detail', () => {
   const longDetail = `${'x'.repeat(300)} `;
   const formatted = formatVietnamAddress({
     detail: longDetail,
-    streetName: '',
     wardName: 'Ward',
     provinceName: null,
   });

@@ -1,5 +1,10 @@
 const prisma = require('../config/database');
-const { PURCHASE_INVALID_MESSAGE, toQuantity, validatePurchaseQuantity } = require('../utils/quantityValidation');
+const {
+  PURCHASE_INVALID_MESSAGE,
+  purchaseQuantityError,
+  toQuantity,
+  validatePurchaseQuantity
+} = require('../utils/quantityValidation');
 
 /**
  * Tính tạm tính từ các mục trong giỏ hàng và đơn giá đã chốt.
@@ -47,6 +52,15 @@ const findByUserId = async (userId) => {
   return cart;
 };
 
+const CART_ITEM_PRODUCT_SELECT = {
+  id: true,
+  name: true,
+  brand: true,
+  price: true,
+  quantity: true,
+  imageUrl: true
+};
+
 /**
  * Lấy hoặc tạo giỏ hàng của người dùng đã xác thực.
  * @param {string} userId 
@@ -54,47 +68,19 @@ const findByUserId = async (userId) => {
  * @returns {Promise<Object>}
  */
 const getOrCreateCart = async (userId, tx = prisma) => {
-  let cart = await tx.cart.findUnique({
+  // upsert nguyên tử: hai lần tải giỏ đồng thời của người dùng mới không còn đụng unique userId (500).
+  const cart = await tx.cart.upsert({
     where: { userId },
+    create: { userId },
+    update: {},
     include: {
       items: {
         include: {
-          product: {
-            select: {
-              id: true,
-              name: true,
-              brand: true,
-              price: true,
-              quantity: true,
-              imageUrl: true
-            }
-          }
+          product: { select: CART_ITEM_PRODUCT_SELECT }
         }
       }
     },
   });
-
-  if (!cart) {
-    cart = await tx.cart.create({
-      data: { userId },
-      include: {
-        items: {
-          include: {
-            product: {
-              select: {
-                id: true,
-                name: true,
-                brand: true,
-                price: true,
-                quantity: true,
-                imageUrl: true
-              }
-            }
-          }
-        }
-      },
-    });
-  }
 
   cart.subtotal = calculateSubtotal(cart.items);
   return cart;
@@ -131,66 +117,46 @@ const addItem = async (userId, productId, quantity) => {
       throw new Error('Không tìm thấy sản phẩm');
     }
 
-    // 3. Kiểm tra mục giỏ hàng đã tồn tại hay chưa.
-    const existingItem = await tx.cartItem.findUnique({
+    // 3. Tăng số lượng ngay trong CSDL (upsert + increment) để hai lần thêm đồng thời không ghi đè nhau;
+    //    nếu tổng mới vượt tồn kho thì ném lỗi để giao dịch hoàn tác.
+    const cartItem = await tx.cartItem.upsert({
       where: {
         cartId_productId: {
           cartId: cart.id,
           productId
         }
+      },
+      create: {
+        cartId: cart.id,
+        productId,
+        quantity: parsedQuantity,
+        unitPrice: product.price
+      },
+      update: {
+        quantity: { increment: parsedQuantity }
+      },
+      include: {
+        product: { select: CART_ITEM_PRODUCT_SELECT }
       }
     });
-    const newQuantity = existingItem
-      ? existingItem.quantity + parsedQuantity
-      : parsedQuantity;
-    if (validatePurchaseQuantity(newQuantity, product.quantity)) {
-      throw new Error(PURCHASE_INVALID_MESSAGE);
+
+    const stockError = validatePurchaseQuantity(cartItem.quantity, product.quantity, {
+      productName: product.name,
+      inCart: cartItem.quantity - parsedQuantity
+    });
+    if (stockError) {
+      throw purchaseQuantityError(stockError);
     }
 
-    if (existingItem) {
-      // Tăng số lượng của mục đã có.
-      return tx.cartItem.update({
-        where: { id: existingItem.id },
-        data: {
-          quantity: newQuantity
-        },
-        include: {
-          product: {
-            select: {
-              id: true,
-              name: true,
-              brand: true,
-              price: true,
-              quantity: true,
-              imageUrl: true
-            }
-          }
-        }
-      });
-    } else {
-      // Tạo mục giỏ hàng mới và chốt giá sản phẩm làm `unitPrice`.
-      return tx.cartItem.create({
-        data: {
-          cartId: cart.id,
-          productId,
-          quantity: parsedQuantity,
-          unitPrice: product.price
-        },
-        include: {
-          product: {
-            select: {
-              id: true,
-              name: true,
-              brand: true,
-              price: true,
-              quantity: true,
-              imageUrl: true
-            }
-          }
-        }
-      });
-    }
+    return cartItem;
   });
+};
+
+/** Lỗi nghiệp vụ giỏ hàng mang sẵn mã HTTP để controller trả 400/404 thay vì 500. */
+const cartError = (message, status) => {
+  const error = new Error(message);
+  error.status = status;
+  return error;
 };
 
 /**
@@ -201,7 +167,7 @@ const addItem = async (userId, productId, quantity) => {
  */
 const updateItems = async (userId, updates) => {
   if (!Array.isArray(updates) || updates.length === 0) {
-    throw new Error('Các cập nhật sản phẩm trong giỏ hàng là bắt buộc.');
+    throw cartError('Các cập nhật sản phẩm trong giỏ hàng là bắt buộc.', 400);
   }
 
   const seenCartItemIds = new Set();
@@ -210,13 +176,13 @@ const updateItems = async (userId, updates) => {
     const quantity = toQuantity(update?.quantity);
 
     if (!cartItemId || typeof cartItemId !== 'string') {
-      throw new Error('ID sản phẩm trong giỏ hàng phải là chuỗi.');
+      throw cartError('ID sản phẩm trong giỏ hàng phải là chuỗi.', 400);
     }
     if (seenCartItemIds.has(cartItemId)) {
-      throw new Error('Các cập nhật sản phẩm trong giỏ hàng không được chứa ID trùng lặp.');
+      throw cartError('Các cập nhật sản phẩm trong giỏ hàng không được chứa ID trùng lặp.', 400);
     }
     if (quantity === null || quantity < 1) {
-      throw new Error(PURCHASE_INVALID_MESSAGE);
+      throw purchaseQuantityError(PURCHASE_INVALID_MESSAGE);
     }
 
     seenCartItemIds.add(cartItemId);
@@ -237,7 +203,7 @@ const updateItems = async (userId, updates) => {
     });
 
     if (cartItems.length !== normalizedUpdates.length) {
-      throw new Error('Không tìm thấy một hoặc nhiều sản phẩm trong giỏ hàng.');
+      throw cartError('Không tìm thấy một hoặc nhiều sản phẩm trong giỏ hàng.', 404);
     }
 
     const cartItemsById = new Map(cartItems.map((cartItem) => [cartItem.id, cartItem]));
@@ -245,10 +211,13 @@ const updateItems = async (userId, updates) => {
     for (const update of normalizedUpdates) {
       const cartItem = cartItemsById.get(update.id);
       if (!cartItem.product) {
-        throw new Error(`Không tìm thấy sản phẩm có ID ${cartItem.productId}.`);
+        throw cartError(`Không tìm thấy sản phẩm có ID ${cartItem.productId}.`, 404);
       }
-      if (validatePurchaseQuantity(update.quantity, cartItem.product.quantity)) {
-        throw new Error(PURCHASE_INVALID_MESSAGE);
+      const stockError = validatePurchaseQuantity(update.quantity, cartItem.product.quantity, {
+        productName: cartItem.product.name
+      });
+      if (stockError) {
+        throw purchaseQuantityError(stockError);
       }
 
       await transaction.cartItem.update({

@@ -97,7 +97,7 @@ const ProfileInfoRow = ({ icon, label, children }) => (
 
 export const ProfileView = () => {
   const navigate = useNavigate();
-  const { user, isAdmin } = useAuth();
+  const { user, isAdmin, updateUser } = useAuth();
   const [profile, setProfile] = useState(null);
   const [values, setValues] = useState(EMPTY_PROFILE);
   const [addressErrors, setAddressErrors] = useState({});
@@ -202,6 +202,7 @@ export const ProfileView = () => {
       const savedProfile = response?.data?.user;
       if (savedProfile) {
         setProfile(savedProfile);
+        updateUser(savedProfile);
         setValues(toProfileValues(savedProfile));
       }
       setFeedback({
@@ -351,7 +352,7 @@ export const ProfileView = () => {
               {requiresAddressSelection && (
                 <Alert
                   title="Địa chỉ cũ cần xác nhận"
-                  description={`Địa chỉ "${profile.address}" được lưu dạng văn bản tự do và chưa được xác minh. Hãy chọn Tỉnh/Thành phố, Phường/Xã, Đường/Phố và nhập số nhà/ngõ/ngách hoặc thông tin chi tiết bên dưới trước khi lưu.`}
+                  description={`Địa chỉ "${profile.address}" được lưu dạng văn bản tự do và chưa được xác minh. Hãy chọn Tỉnh/Thành phố, Phường/Xã và nhập số nhà, tên đường bên dưới trước khi lưu.`}
                 />
               )}
               <VietnamAddressFields

@@ -73,11 +73,12 @@ export const RegisterView = () => {
     setAddressErrors({});
 
     // Kiểm tra phía máy khách
-    if (!username) {
+    const trimmedUsername = username.trim();
+    if (!trimmedUsername) {
       setUsernameStatus({ type: 'error', message: 'Vui lòng nhập tên người dùng' });
       hasError = true;
-    } else if (username.length < 3) {
-      setUsernameStatus({ type: 'error', message: 'Tên người dùng phải có ít nhất 3 ký tự' });
+    } else if (trimmedUsername.length < 3 || trimmedUsername.length > 50) {
+      setUsernameStatus({ type: 'error', message: 'Tên người dùng phải có từ 3 đến 50 ký tự' });
       hasError = true;
     }
 
@@ -108,7 +109,7 @@ export const RegisterView = () => {
       hasError = true;
     }
 
-    if (!fullName) {
+    if (!fullName.trim()) {
       setFullNameStatus({ type: 'error', message: 'Vui lòng nhập họ và tên' });
       hasError = true;
     }

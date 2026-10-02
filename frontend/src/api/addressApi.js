@@ -19,9 +19,5 @@ export const addressApi = {
   getWards: (provinceCode, { signal } = {}) => apiClient.get(
     `/addresses/wards${buildAddressQuery({ provinceCode })}`,
     getOptions(signal)
-  ),
-  searchStreets: ({ provinceCode, wardCode, query, signal } = {}) => apiClient.get(
-    `/addresses/streets${buildAddressQuery({ provinceCode, wardCode, q: query })}`,
-    getOptions(signal)
   )
 };

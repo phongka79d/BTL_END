@@ -79,9 +79,19 @@ const createProductReview = async (req, res, next) => {
       return errorResponse(res, 400, 'Xác thực thất bại', [parsed.error]);
     }
 
+    // Chỉ khách hàng được đánh giá (khớp giao diện); admin/staff không thể tạo đánh giá qua API.
+    if (req.user.role !== 'customer') {
+      return errorResponse(res, 403, 'Chỉ khách hàng mới có thể đánh giá sản phẩm');
+    }
+
     const product = await productModel.findById(id);
     if (!product) {
       return errorResponse(res, 404, 'Không tìm thấy sản phẩm');
+    }
+
+    // Mỗi khách hàng chỉ đánh giá một lần cho mỗi sản phẩm để không làm sai điểm trung bình.
+    if (await reviewModel.existsForUserAndProduct(req.user.id, id)) {
+      return errorResponse(res, 409, 'Bạn đã đánh giá sản phẩm này rồi.');
     }
 
     const review = await reviewModel.create({

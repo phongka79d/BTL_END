@@ -1,4 +1,6 @@
 const prisma = require('../config/database');
+const createHttpError = (message, status = 400) => Object.assign(new Error(message), { status });
+
 
 /**
  * Kiểm tra dữ liệu danh mục trước khi tạo.
@@ -7,14 +9,13 @@ const prisma = require('../config/database');
 const validateCategoryData = async (data) => {
   const { name } = data;
   if (!name || typeof name !== 'string' || name.trim() === '') {
-    throw new Error('Tên danh mục là bắt buộc.');
+    throw createHttpError('Tên danh mục là bắt buộc.');
   }
-
-  const existing = await prisma.category.findUnique({
-    where: { name: name.trim() },
+  const existing = await prisma.category.findFirst({
+    where: { name: { equals: name.trim(), mode: 'insensitive' } },
   });
   if (existing) {
-    throw new Error('Tên danh mục phải là duy nhất.');
+    throw createHttpError('Tên danh mục phải là duy nhất.', 409);
   }
 };
 
@@ -27,14 +28,13 @@ const validateCategoryUpdateData = async (id, data) => {
   const { name } = data;
   if (name !== undefined) {
     if (!name || typeof name !== 'string' || name.trim() === '') {
-    throw new Error('Tên danh mục không được để trống.');
+      throw createHttpError('Tên danh mục không được để trống.');
     }
-
-    const existing = await prisma.category.findUnique({
-      where: { name: name.trim() },
+    const existing = await prisma.category.findFirst({
+      where: { name: { equals: name.trim(), mode: 'insensitive' } },
     });
     if (existing && existing.id !== id) {
-    throw new Error('Tên danh mục phải là duy nhất.');
+      throw createHttpError('Tên danh mục phải là duy nhất.', 409);
     }
   }
 };
@@ -136,7 +136,7 @@ const hasProducts = async (id) => {
 const destroy = async (id) => {
   const referenced = await hasProducts(id);
   if (referenced) {
-    throw new Error('Không thể xóa danh mục: danh mục đang được sản phẩm hiện có tham chiếu.');
+    throw createHttpError('Không thể xóa danh mục đang có sản phẩm.', 409);
   }
   return prisma.category.delete({
     where: { id },

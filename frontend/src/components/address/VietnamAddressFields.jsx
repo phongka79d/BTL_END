@@ -1,16 +1,13 @@
-import React, { useEffect, useId, useMemo, useState } from 'react';
-import { Button, FormLayout, Selector, TextInput, Typeahead } from '@astryxdesign/core';
+import React, { useEffect, useId, useState } from 'react';
+import { Button, FormLayout, Selector, TextInput } from '@astryxdesign/core';
 import { addressApi } from '../../api/addressApi.js';
 import { formatVietnamAddress } from '../../utils/addressFormatter.js';
 import {
   changeProvince,
-  changeStreet,
   changeWard,
   EMPTY_ADDRESS
 } from './addressFormUtils.js';
 
-const STREET_DEBOUNCE_MS = 350;
-const MIN_STREET_QUERY_LENGTH = 2;
 const ROOT_STYLE = { width: '100%', minWidth: 0 };
 const FIELD_STYLE = { width: '100%', minWidth: 0 };
 const STATUS_STYLE = {
@@ -65,22 +62,6 @@ const toUnitOptions = (items) => items
   ))
   .map((item) => ({ ...item, code: item.code.trim(), name: item.name.trim() }));
 
-const toStreetItems = (items) => items
-  .filter((item) => (
-    item
-    && typeof item.ref === 'string'
-    && item.ref.trim() !== ''
-    && typeof item.name === 'string'
-    && item.name.trim() !== ''
-  ))
-  .map((item) => ({
-    id: item.ref.trim(),
-    label: typeof item.displayName === 'string' && item.displayName.trim()
-      ? item.displayName.trim()
-      : item.name.trim(),
-    auxiliaryData: { ref: item.ref.trim(), name: item.name.trim() }
-  }));
-
 const asSelectorOptions = (items) => items.map((item) => ({
   value: item.code,
   label: item.name
@@ -101,7 +82,6 @@ export const VietnamAddressFields = ({
   const address = value && typeof value === 'object' ? value : EMPTY_ADDRESS;
   const provinceCode = typeof address.provinceCode === 'string' ? address.provinceCode : '';
   const wardCode = typeof address.wardCode === 'string' ? address.wardCode : '';
-  const areaKey = `${provinceCode}\u0000${wardCode}`;
 
   const [provinces, setProvinces] = useState([]);
   const [provincesLoading, setProvincesLoading] = useState(true);
@@ -112,8 +92,6 @@ export const VietnamAddressFields = ({
   const [wardsLoading, setWardsLoading] = useState(false);
   const [wardsFailed, setWardsFailed] = useState(false);
   const [wardRetry, setWardRetry] = useState(0);
-  const [streetFailed, setStreetFailed] = useState(false);
-  const [streetQueryLength, setStreetQueryLength] = useState(0);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -195,79 +173,28 @@ export const VietnamAddressFields = ({
   }, [provinceCode, wardRetry]);
 
 
-  // One search source per selected ward: users can only pick a returned street, never keep typed text.
-  const streetSource = useMemo(() => {
-    let controller = null;
-    return {
-      bootstrap: () => [],
-      cancel() {
-        controller?.abort();
-        controller = null;
-      },
-      async search(query) {
-        this.cancel();
-        const normalizedQuery = query.trim();
-        if (!provinceCode || !wardCode || normalizedQuery.length < MIN_STREET_QUERY_LENGTH) return [];
-        const current = new AbortController();
-        controller = current;
-        try {
-          const response = await addressApi.searchStreets({
-            provinceCode,
-            wardCode,
-            query: normalizedQuery,
-            signal: current.signal
-          });
-          const items = readItems(response);
-          if (items === null) throw new Error('Invalid street response');
-          setStreetFailed(false);
-          return toStreetItems(items);
-        } catch {
-          if (!current.signal.aborted) setStreetFailed(true);
-          return [];
-        }
-      }
-    };
-  }, [provinceCode, wardCode]);
-
-  const clearStreetSearch = () => {
-    setStreetFailed(false);
-    setStreetQueryLength(0);
-  };
-
   const handleProvinceChange = (selectedCode) => {
     const selectedProvince = provinces.find((item) => item.code === selectedCode);
     if (!selectedProvince) return;
-    clearStreetSearch();
     onChange?.(changeProvince(address, selectedProvince));
   };
 
   const handleWardChange = (selectedCode) => {
     const selectedWard = wards.find((item) => item.code === selectedCode);
     if (!selectedWard) return;
-    clearStreetSearch();
     onChange?.(changeWard(address, selectedWard));
   };
 
-  const handleStreetQueryChange = (query) => {
-    setStreetQueryLength(query.trim().length);
-    setStreetFailed(false);
-  };
-
-  const handleStreetSelection = (item) => {
-    setStreetFailed(false);
-    onChange?.(changeStreet(address, item ? item.auxiliaryData : null));
-  };
 
   const runBlur = (field) => (event) => {
     if (event.currentTarget.contains(event.relatedTarget)) return;
     onBlur?.(field);
   };
 
+
   const provinceOptions = asSelectorOptions(provinces);
   const currentWards = wardsProvinceCode === provinceCode ? wards : [];
   const wardOptions = asSelectorOptions(currentWards);
-  const streetName = typeof address.streetName === 'string' ? address.streetName : '';
-  const streetRef = typeof address.streetRef === 'string' ? address.streetRef : '';
   const detail = typeof address.detail === 'string' ? address.detail : '';
   const addressPreview = formatVietnamAddress(address);
 
@@ -336,44 +263,19 @@ export const VietnamAddressFields = ({
           )}
         </div>
 
-        <div id={`${prefix}-street`} style={FIELD_STYLE} onBlur={runBlur('streetRef')}>
-          <Typeahead
-            key={areaKey}
-            label="Đường/Phố"
-            searchSource={streetSource}
-            value={streetRef && streetName ? { id: streetRef, label: streetName, auxiliaryData: { ref: streetRef, name: streetName } } : null}
-            onChange={handleStreetSelection}
-            onChangeQuery={handleStreetQueryChange}
-            debounceMs={STREET_DEBOUNCE_MS}
-            placeholder={provinceCode && wardCode ? 'Gõ ít nhất 2 ký tự rồi chọn đường/phố' : 'Chọn Tỉnh/Thành phố và Phường/Xã trước'}
-            emptySearchResultsText={streetQueryLength < MIN_STREET_QUERY_LENGTH ? 'Nhập ít nhất 2 ký tự để tìm đường/phố.' : 'Không tìm thấy đường/phố phù hợp.'}
-            status={fieldStatus(errors.streetRef)}
-            isRequired={required}
-            isDisabled={disabled || !provinceCode || !wardCode}
-            width="100%"
-          />
-          {streetFailed && (
-            <p role="alert" style={ERROR_STATUS_STYLE}>
-              Không thể tra cứu tên đường lúc này. Hãy gõ lại để thử lại.
-            </p>
-          )}
-        </div>
-
         <div id={`${prefix}-detail`} style={FIELD_STYLE}>
           <TextInput
-            label="Số nhà/ngõ/ngách hoặc thông tin chi tiết"
+            label="Số nhà, tên đường"
             value={detail}
             onChange={(nextDetail) => onChange?.({
               provinceCode,
               provinceName: typeof address.provinceName === 'string' ? address.provinceName : '',
               wardCode,
               wardName: typeof address.wardName === 'string' ? address.wardName : '',
-              streetRef,
-              streetName,
               detail: nextDetail
             })}
             onBlur={() => onBlur?.('detail')}
-            placeholder="Ví dụ: Số 12, ngõ 5"
+            placeholder="Ví dụ: Số 12, ngõ 5, Phố Hàng Bài"
             status={fieldStatus(errors.detail)}
             isRequired={required}
             isDisabled={disabled}

@@ -3,16 +3,13 @@
 const vietnamAdministrativeUnits = require('../data/vietnamAdministrativeUnits.json');
 
 const API_ORIGIN = 'https://maps.vietmap.vn';
-const CACHE_TTL_MS = 30 * 60 * 1000;
-const CACHE_MAX_ENTRIES = 500;
-const MAX_QUERY_LENGTH = 120;
 const MAX_REF_LENGTH = 520;
 const MAX_LEGACY_ADDRESS_LENGTH = 512;
 const MAX_RESPONSE_BYTES = 256 * 1024;
 const MAX_RESULTS = 10;
 const REQUEST_TIMEOUT_MS = 5000;
 const PROVIDER_ERROR = 'Vietnam address provider is unavailable.';
-const INVALID_STREET_ERROR = 'Street reference is invalid or does not identify a current street address.';
+const INVALID_ADDRESS_ERROR = 'Address is invalid or does not identify a current address.';
 
 function addressError(status, message) {
   const error = new Error(message);
@@ -30,30 +27,23 @@ function normalizedName(value) {
   return value.normalize('NFC').trim().replace(/\s+/gu, ' ').toLocaleLowerCase('vi');
 }
 
-function cloneStreet(street) {
-  return { ...street };
+// VietMap and the bundled dataset spell some names differently: old vs new tone-mark
+// placement ("Hoà"/"Hòa"), hyphen spacing, and unit type after reclassification
+// ("Thành phố Quảng Ninh"/"Tỉnh Quảng Ninh", "Phường Kép"/"Xã Kép").
+const TONE_PLACEMENT = [
+  ['oà', 'òa'], ['oá', 'óa'], ['oả', 'ỏa'], ['oã', 'õa'], ['oạ', 'ọa'],
+  ['oè', 'òe'], ['oé', 'óe'], ['oẻ', 'ỏe'], ['oẽ', 'õe'], ['oẹ', 'ọe'],
+  ['uỳ', 'ùy'], ['uý', 'úy'], ['uỷ', 'ủy'], ['uỹ', 'ũy'], ['uỵ', 'ụy'],
+];
+const PROVINCE_TYPE_PREFIX = /^(?:tỉnh|thành phố)\s+/u;
+const WARD_TYPE_PREFIX = /^(?:phường|xã|đặc khu|thị trấn)\s+/u;
+
+function canonicalAdminName(value) {
+  let name = normalizedName(value);
+  for (const [oldStyle, newStyle] of TONE_PLACEMENT) name = name.replaceAll(oldStyle, newStyle);
+  return name.replace(/\s*-\s*/gu, '-');
 }
 
-function cacheGet(cache, key, now) {
-  const entry = cache.get(key);
-  if (!entry) return null;
-  if (entry.expiresAt <= now()) {
-    cache.delete(key);
-    return null;
-  }
-
-  cache.delete(key);
-  cache.set(key, entry);
-  return entry.value;
-}
-
-function cacheSet(cache, key, value, now) {
-  cache.delete(key);
-  cache.set(key, { value, expiresAt: now() + CACHE_TTL_MS });
-  if (cache.size > CACHE_MAX_ENTRIES) {
-    cache.delete(cache.keys().next().value);
-  }
-}
 
 async function readJsonResponse(response) {
   const contentLength = Number(response.headers?.get?.('content-length'));
@@ -99,13 +89,10 @@ async function readJsonResponse(response) {
 function createAddressProvider({
   fetchImpl = globalThis.fetch,
   env = process.env,
-  now = Date.now,
   dataset = vietnamAdministrativeUnits,
 } = {}) {
   const provinces = Array.isArray(dataset?.provinces) ? dataset.provinces : [];
   const wards = Array.isArray(dataset?.wards) ? dataset.wards : [];
-  const searchCache = new Map();
-  const resolvedCache = new Map();
 
   function apiKey() {
     const configuredProvider = env?.ADDRESS_PROVIDER;
@@ -134,18 +121,17 @@ function createAddressProvider({
     return matches.length === 1 ? matches[0] : null;
   }
 
-  function selectedArea(provinceCode, wardCode) {
-    const province = provinceByCode(provinceCode);
-    const ward = wardByCode(wardCode, provinceCode);
-    if (!province || !ward) throw addressError(400, 'Province or ward is invalid.');
-    return { province, ward };
-  }
 
-  function uniqueByName(units, fullName) {
-    const key = normalizedName(fullName);
+  // Exact canonical match first; otherwise ignore the unit type, but only when that is unambiguous.
+  function uniqueByName(units, fullName, typePrefix) {
+    const key = canonicalAdminName(fullName);
     if (!key) return null;
-    const matches = units.filter((unit) => normalizedName(unit?.name) === key);
-    return matches.length === 1 ? matches[0] : null;
+    const exact = units.filter((unit) => canonicalAdminName(unit?.name) === key);
+    if (exact.length === 1) return exact[0];
+    if (exact.length > 1) return null;
+    const bareKey = key.replace(typePrefix, '');
+    const loose = units.filter((unit) => canonicalAdminName(unit?.name).replace(typePrefix, '') === bareKey);
+    return loose.length === 1 ? loose[0] : null;
   }
 
   function mapNewBoundaries(boundaries) {
@@ -154,11 +140,12 @@ function createAddressProvider({
     const provinceBoundaries = boundaries.filter((boundary) => boundary?.type === 0);
     if (wardBoundaries.length !== 1 || provinceBoundaries.length !== 1) return null;
 
-    const province = uniqueByName(provinces, provinceBoundaries[0].full_name);
+    const province = uniqueByName(provinces, provinceBoundaries[0].full_name, PROVINCE_TYPE_PREFIX);
     if (!province || typeof province.code !== 'string') return null;
     const ward = uniqueByName(
       wards.filter((unit) => unit?.provinceCode === province.code),
-      wardBoundaries[0].full_name
+      wardBoundaries[0].full_name,
+      WARD_TYPE_PREFIX
     );
     if (!ward || typeof ward.code !== 'string') return null;
     return { provinceCode: province.code, wardCode: ward.code };
@@ -166,11 +153,12 @@ function createAddressProvider({
 
   function mapPlaceArea(place) {
     if (place.district_id !== 0 || place.district !== '') return null;
-    const province = uniqueByName(provinces, place.city);
+    const province = uniqueByName(provinces, place.city, PROVINCE_TYPE_PREFIX);
     if (!province || typeof province.code !== 'string') return null;
     const ward = uniqueByName(
       wards.filter((unit) => unit?.provinceCode === province.code),
-      place.ward
+      place.ward,
+      WARD_TYPE_PREFIX
     );
     if (!ward || typeof ward.code !== 'string') return null;
     return { provinceCode: province.code, wardCode: ward.code };
@@ -185,7 +173,7 @@ function createAddressProvider({
       .toLocaleLowerCase('vi');
   }
 
-  async function loadCurrentStreetPlace(ref) {
+  async function loadCurrentAddressPlace(ref) {
     const place = await requestJson('/api/place/v4', { refid: ref });
     if (!isRecord(place)
       || typeof place.street !== 'string'
@@ -193,15 +181,13 @@ function createAddressProvider({
       || place.street.trim().length > 256
       || typeof place.name !== 'string'
       || place.name.trim() !== '') {
-      throw addressError(400, INVALID_STREET_ERROR);
+      throw addressError(400, INVALID_ADDRESS_ERROR);
     }
 
     const area = mapPlaceArea(place);
-    if (!area) throw addressError(400, INVALID_STREET_ERROR);
-    const displayName = typeof place.display === 'string' && place.display.trim()
-      ? place.display.trim().slice(0, 512)
-      : place.street.trim();
-    return { place, area, streetName: place.street.trim(), displayName };
+    const houseNumber = typeof place.hs_num === 'string' ? place.hs_num.trim() : '';
+    if (!area || !houseNumber) throw addressError(400, INVALID_ADDRESS_ERROR);
+    return { place, area, detail: `${houseNumber} ${place.street.trim()}` };
   }
 
   async function matchLegacyAddress(legacyText) {
@@ -236,7 +222,7 @@ function createAddressProvider({
 
       let current;
       try {
-        current = await loadCurrentStreetPlace(candidate.ref_id);
+        current = await loadCurrentAddressPlace(candidate.ref_id);
       } catch (error) {
         if (error.statusCode === 400) continue;
         throw error;
@@ -244,12 +230,10 @@ function createAddressProvider({
       if (current.area.provinceCode !== boundaryArea.provinceCode
         || current.area.wardCode !== boundaryArea.wardCode) continue;
 
-      const detail = typeof current.place.hs_num === 'string' ? current.place.hs_num.trim() : '';
-      if (!detail) continue;
       const province = provinceByCode(current.area.provinceCode);
       const ward = wardByCode(current.area.wardCode, current.area.provinceCode);
       if (!province || !ward) continue;
-      const composedDisplay = `${detail} ${current.streetName},${ward.name},${province.name}`;
+      const composedDisplay = `${current.detail},${ward.name},${province.name}`;
       if (normalizedAddress(current.place.display) !== normalizedAddress(composedDisplay)) continue;
 
       matches.set(candidate.ref_id, {
@@ -257,9 +241,7 @@ function createAddressProvider({
         provinceName: province.name,
         wardCode: ward.code,
         wardName: ward.name,
-        streetRef: candidate.ref_id,
-        streetName: current.streetName,
-        detail,
+        detail: current.detail,
       });
       seenRefs.add(candidate.ref_id);
     }
@@ -298,7 +280,7 @@ function createAddressProvider({
       }
       if (!ok) {
         if (path === '/api/place/v4' && (status === 400 || status === 404)) {
-          throw addressError(400, INVALID_STREET_ERROR);
+          throw addressError(400, INVALID_ADDRESS_ERROR);
         }
         throw addressError(503, PROVIDER_ERROR);
       }
@@ -319,82 +301,14 @@ function createAddressProvider({
       && /^(?:auto|geocode):[A-Za-z0-9_-]{1,512}$/u.test(ref);
   }
 
-  async function resolveStreet(ref) {
-    apiKey();
-    if (!validRef(ref)) throw addressError(400, INVALID_STREET_ERROR);
 
-    const cached = cacheGet(resolvedCache, ref, now);
-    if (cached) return cloneStreet(cached);
-
-    const current = await loadCurrentStreetPlace(ref);
-    const resolved = {
-      ref,
-      name: current.streetName,
-      displayName: current.displayName,
-      provinceCode: current.area.provinceCode,
-      wardCode: current.area.wardCode,
-    };
-    cacheSet(resolvedCache, ref, resolved, now);
-    return cloneStreet(resolved);
-  }
-
-  async function searchStreets(input) {
-    apiKey();
-    if (!isRecord(input)) throw addressError(400, 'Street search input is invalid.');
-    const { provinceCode, wardCode } = input;
-    const { province, ward } = selectedArea(provinceCode, wardCode);
-    if (typeof input.query !== 'string') throw addressError(400, 'Street query is invalid.');
-    const query = input.query.normalize('NFC').trim().replace(/\s+/gu, ' ');
-    if (query.length < 2 || query.length > MAX_QUERY_LENGTH) {
-      throw addressError(400, 'Street query is invalid.');
-    }
-
-    const cacheKey = `${provinceCode}\u0000${wardCode}\u0000${normalizedName(query)}`;
-    const cached = cacheGet(searchCache, cacheKey, now);
-    if (cached) return cached.map(cloneStreet);
-
-    const contextualQuery = `${query}, ${ward.name}, ${province.name}`;
-    const suggestions = await requestJson('/api/autocomplete/v4', {
-      text: contextualQuery,
-      display_type: '1',
-      layers: 'STREET',
-    });
-    if (!Array.isArray(suggestions)) throw addressError(503, PROVIDER_ERROR);
-
-    const verified = [];
-    const seenRefs = new Set();
-    for (const suggestion of suggestions.slice(0, MAX_RESULTS)) {
-      if (!isRecord(suggestion) || !validRef(suggestion.ref_id) || seenRefs.has(suggestion.ref_id)) continue;
-      const boundaryArea = mapNewBoundaries(suggestion.boundaries);
-      if (!boundaryArea
-        || boundaryArea.provinceCode !== provinceCode
-        || boundaryArea.wardCode !== wardCode) continue;
-
-      seenRefs.add(suggestion.ref_id);
-      let resolved;
-      try {
-        resolved = await resolveStreet(suggestion.ref_id);
-      } catch (error) {
-        if (error.statusCode === 400) continue;
-        throw error;
-      }
-      if (resolved.provinceCode !== provinceCode || resolved.wardCode !== wardCode) continue;
-      verified.push({ ref: resolved.ref, name: resolved.name, displayName: resolved.displayName });
-    }
-
-    cacheSet(searchCache, cacheKey, verified, now);
-    return verified.map(cloneStreet);
-  }
-
-  return { searchStreets, resolveStreet, matchLegacyAddress };
+  return { matchLegacyAddress };
 }
 
 const productionProvider = createAddressProvider();
 
 module.exports = {
   createAddressProvider,
-  searchStreets: (input) => productionProvider.searchStreets(input),
-  resolveStreet: (ref) => productionProvider.resolveStreet(ref),
   matchLegacyAddress: (legacyText) => productionProvider.matchLegacyAddress(legacyText),
 };
 

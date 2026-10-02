@@ -11,8 +11,6 @@ const USER_SAFE_SELECT = {
   addressProvinceName: true,
   addressWardCode: true,
   addressWardName: true,
-  addressStreetRef: true,
-  addressStreetName: true,
   addressDetail: true,
   role: true,
   isBlocked: true,
@@ -26,8 +24,27 @@ const USER_SAFE_SELECT = {
  * @returns {Promise<Object|null>}
  */
 const findByEmail = async (email) => {
-  return prisma.user.findUnique({
-    where: { email },
+  if (typeof email !== 'string' || email.trim() === '') return null;
+  // Không phân biệt hoa/thường để Ada@x.com và ada@x.com là cùng một tài khoản.
+  return prisma.user.findFirst({
+    where: { email: { equals: email.trim(), mode: 'insensitive' } },
+  });
+};
+
+/**
+ * Tìm người dùng có tên trùng (đã cắt khoảng trắng, không phân biệt hoa/thường).
+ * @param {string} username
+ * @param {string} [excludeId] - bỏ qua chính người dùng đang sửa hồ sơ
+ * @returns {Promise<Object|null>}
+ */
+const findByUsername = async (username, excludeId) => {
+  if (typeof username !== 'string' || username.trim() === '') return null;
+  return prisma.user.findFirst({
+    where: {
+      username: { equals: username.trim(), mode: 'insensitive' },
+      ...(excludeId ? { id: { not: excludeId } } : {}),
+    },
+    select: { id: true },
   });
 };
 
@@ -89,6 +106,12 @@ const findAll = async (params = {}) => {
     where.role = role;
   }
 
+  if (keyword !== undefined && keyword !== '' && typeof keyword !== 'string') {
+    const error = new Error('Từ khóa tìm kiếm không hợp lệ');
+    error.status = 400;
+    error.statusCode = 400;
+    throw error;
+  }
   if (keyword) {
     where.OR = [
       { username: { contains: keyword, mode: 'insensitive' } },
@@ -171,6 +194,7 @@ const updateBlocked = async (id, isBlocked) => {
 
 module.exports = {
   findByEmail,
+  findByUsername,
   findById,
   create,
   update,

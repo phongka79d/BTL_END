@@ -7,17 +7,14 @@ const orderModel = require('./order.model');
 const structuredAddress = {
   provinceCode: '01',
   wardCode: '00001',
-  streetRef: '1',
-  detail: 'Số nhà 123'
+  detail: 'Số nhà 123, Đường ABC'
 };
 const resolvedAddress = {
   provinceCode: '01',
   provinceName: 'Hà Nội',
   wardCode: '00001',
   wardName: 'Phường Phúc Xá',
-  streetRef: '1',
-  streetName: 'Đường ABC',
-  detail: 'Số nhà 123'
+  detail: 'Số nhà 123, Đường ABC'
 };
 const withTransactionStub = async (tx, run, { resolveAddress = async () => resolvedAddress } = {}) => {
   const originalTransaction = prisma.$transaction;
@@ -36,13 +33,11 @@ const withTransactionStub = async (tx, run, { resolveAddress = async () => resol
   addressService.toOrderAddressFields = (address) => {
     if (tx.calls) tx.calls.addressMappings.push(address);
     return {
-      shippingAddress: `${address.detail}, ${address.streetName}, ${address.wardName}, ${address.provinceName}`,
+      shippingAddress: `${address.detail}, ${address.wardName}, ${address.provinceName}`,
       shippingProvinceCode: address.provinceCode,
       shippingProvinceName: address.provinceName,
       shippingWardCode: address.wardCode,
       shippingWardName: address.wardName,
-      shippingStreetRef: address.streetRef,
-      shippingStreetName: address.streetName,
       shippingAddressDetail: address.detail
     };
   };
@@ -61,7 +56,7 @@ const hasOwn = (object, key) => Object.prototype.hasOwnProperty.call(object, key
  * Tx stub cho checkout: giữ tồn kho thật trong `stock` để chứng minh
  * chuỗi 34 -> 4 (trừ) và 4 -> 34 (hủy đơn) thay vì chỉ ghi lại lời gọi.
  */
-const createCheckoutTxStub = ({ cart, stock = {}, stockUpdateCounts = {}, cartDeleteCount } = {}) => {
+const createCheckoutTxStub = ({ cart, stock = {}, stockUpdateCounts = {}, cartDeleteCount, cartLineQuantities = {} } = {}) => {
   const calls = {
     transactionOpens: 0,
     productStockUpdates: [],
@@ -88,7 +83,10 @@ const createCheckoutTxStub = ({ cart, stock = {}, stockUpdateCounts = {}, cartDe
           stock[productId] -= args.data.quantity.decrement;
         }
         return { count };
-      }
+      },
+      findUnique: async (args) => (
+        typeof stock[args.where.id] === 'number' ? { quantity: stock[args.where.id] } : null
+      )
     },
     order: {
       create: async (args) => {
@@ -121,8 +119,13 @@ const createCheckoutTxStub = ({ cart, stock = {}, stockUpdateCounts = {}, cartDe
     cartItem: {
       deleteMany: async (args) => {
         calls.cartItemDeletes.push(args);
-        const selectedCount = args.where.id.in.length;
-        return { count: cartDeleteCount === undefined ? selectedCount : cartDeleteCount };
+        if (cartDeleteCount !== undefined) return { count: cartDeleteCount };
+        // Mô phỏng xóa có điều kiện: chỉ xóa dòng có số lượng hiện tại khớp số lượng đã đọc.
+        const currentQuantity = (id) => (
+          hasOwn(cartLineQuantities, id) ? cartLineQuantities[id] : cart?.items?.find((item) => item.id === id)?.quantity
+        );
+        const count = args.where.OR.filter((line) => currentQuantity(line.id) === line.quantity).length;
+        return { count };
       }
     },
     user: {
@@ -187,7 +190,7 @@ test('checkout decrements the selected line 34 -> 4 and deletes only that cart l
   // Chỉ mục giỏ hàng được chọn bị xóa.
   assert.equal(tx.calls.cartItemDeletes.length, 1);
   assert.equal(tx.calls.cartItemDeletes[0].where.cartId, 'cart_1');
-  assert.deepEqual(tx.calls.cartItemDeletes[0].where.id.in, ['item_a']);
+  assert.deepEqual(tx.calls.cartItemDeletes[0].where.OR, [{ id: 'item_a', quantity: 30 }]);
 
   // Đơn hàng chỉ có dòng được chọn, tổng tiền và thanh toán COD là Prisma Decimal.
   assert.equal(tx.calls.orderCreates.length, 1);
@@ -203,7 +206,7 @@ test('checkout decrements the selected line 34 -> 4 and deletes only that cart l
   assert.equal(Number(tx.calls.paymentCreates[0].data.amount), 3000);
 
   assert.equal(order.id, 'order_new');
-  assert.equal(order.shippingAddress, `${resolvedAddress.detail}, ${resolvedAddress.streetName}, ${resolvedAddress.wardName}, ${resolvedAddress.provinceName}`);
+  assert.equal(order.shippingAddress, `${resolvedAddress.detail}, ${resolvedAddress.wardName}, ${resolvedAddress.provinceName}`);
 });
 
 test('checkout then cancel restores the stock it took (34 -> 4 -> 34)', async () => {
@@ -244,7 +247,7 @@ test('checkout then cancel restores the stock it took (34 -> 4 -> 34)', async ()
   assert.equal(stock.product_a, 34);
 });
 
-test('checkout rejects a quantity above stock (5 from 4) without writing anything', async () => {
+test('checkout rejects a quantity above stock (5 from 4) with the remaining stock, without writing anything', async () => {
   const stock = { product_a: 4 };
   const tx = createCheckoutTxStub({
     cart: selectedCart({
@@ -264,7 +267,7 @@ test('checkout rejects a quantity above stock (5 from 4) without writing anythin
   await withTransactionStub(tx, async () => {
     await assert.rejects(
       () => orderModel.checkout('user_1', structuredAddress, contact, ['item_a']),
-      (error) => error.status === 400 && /vượt quá tồn kho/.test(error.message)
+      (error) => error.status === 409 && error.message === 'Sản phẩm "Laptop" chỉ còn 4 sản phẩm trong kho.'
     );
   });
 
@@ -302,8 +305,9 @@ test('checkout rejects cart quantities that are not positive integers', async ()
   }
 });
 
-test('checkout rolls back when a conditional stock write loses the race', async () => {
-  const stock = { product_a: 34, product_b: 50 };
+test('checkout rolls back and reports the stock that is actually left when another order wins the race', async () => {
+  // Another customer bought Mouse between loading the cart and the conditional write: only 1 left.
+  const stock = { product_a: 34, product_b: 1 };
   const tx = createCheckoutTxStub({
     cart: selectedCart(),
     stock,
@@ -313,7 +317,7 @@ test('checkout rolls back when a conditional stock write loses the race', async 
   await withTransactionStub(tx, async () => {
     await assert.rejects(
       () => orderModel.checkout('user_1', structuredAddress, contact, ['item_a', 'item_b']),
-      (error) => error.status === 409 && /Mouse/.test(error.message)
+      (error) => error.status === 409 && error.message === 'Sản phẩm "Mouse" chỉ còn 1 sản phẩm trong kho.'
     );
   });
 
@@ -329,11 +333,12 @@ test('checkout rolls back when a conditional stock write loses the race', async 
   assert.equal(tx.calls.cartItemDeletes.length, 0);
 });
 
-test('checkout rejects when the cart changed concurrently before the cart line could be removed', async () => {
+test('checkout rolls back when another tab changed the cart line quantity before it could be removed', async () => {
+  // Checkout read item_a at 30, then another tab saved 31: ordering 30 and deleting the line would lose that edit.
   const tx = createCheckoutTxStub({
     cart: selectedCart({ items: [selectedCart().items[0]] }),
     stock: { product_a: 34 },
-    cartDeleteCount: 0
+    cartLineQuantities: { item_a: 31 }
   });
 
   await withTransactionStub(tx, async () => {
@@ -344,7 +349,7 @@ test('checkout rejects when the cart changed concurrently before the cart line c
   });
 
   assert.equal(tx.calls.cartItemDeletes.length, 1);
-  assert.deepEqual(tx.calls.cartItemDeletes[0].where.id.in, ['item_a']);
+  assert.deepEqual(tx.calls.cartItemDeletes[0].where.OR, [{ id: 'item_a', quantity: 30 }]);
 });
 
 test('checkout snapshots the requested recipient instead of the user profile', async () => {
@@ -356,7 +361,6 @@ test('checkout snapshots the requested recipient instead of the user profile', a
       ...structuredAddress,
       provinceName: 'Client Province',
       wardName: 'Client Ward',
-      streetName: 'Client Street',
       shippingProvinceCode: 'forged'
     };
     order = await orderModel.checkout(
@@ -373,7 +377,6 @@ test('checkout snapshots the requested recipient instead of the user profile', a
       ...structuredAddress,
       provinceName: 'Client Province',
       wardName: 'Client Ward',
-      streetName: 'Client Street',
       shippingProvinceCode: 'forged'
     },
     options: { required: true },
@@ -387,8 +390,6 @@ test('checkout snapshots the requested recipient instead of the user profile', a
       shippingProvinceName: data.shippingProvinceName,
       shippingWardCode: data.shippingWardCode,
       shippingWardName: data.shippingWardName,
-      shippingStreetRef: data.shippingStreetRef,
-      shippingStreetName: data.shippingStreetName,
       shippingAddressDetail: data.shippingAddressDetail
     },
     {
@@ -397,9 +398,7 @@ test('checkout snapshots the requested recipient instead of the user profile', a
       shippingProvinceName: 'Hà Nội',
       shippingWardCode: '00001',
       shippingWardName: 'Phường Phúc Xá',
-      shippingStreetRef: '1',
-      shippingStreetName: 'Đường ABC',
-      shippingAddressDetail: 'Số nhà 123'
+      shippingAddressDetail: 'Số nhà 123, Đường ABC'
     }
   );
 

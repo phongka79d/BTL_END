@@ -11,20 +11,6 @@ const providerDataset = {
   wards: [{ code: '00001', provinceCode: '79', name: 'Phường Chợ Quán', type: 'ward' }],
 };
 
-const documentedAutocomplete = (ref = 'auto:documented_fixture-ref') => ([{
-  ref_id: ref,
-  distance: 0.05,
-  address: 'Phường Chợ Quán,Thành Phố Hồ Chí Minh',
-  name: '197 Trần Phú',
-  display: '197 Trần Phú Phường Chợ Quán,Thành Phố Hồ Chí Minh',
-  boundaries: [
-    { type: 2, id: 18700, name: 'Chợ Quán', prefix: 'Phường', full_name: 'Phường Chợ Quán' },
-    { type: 0, id: 12, name: 'Hồ Chí Minh', prefix: 'Thành Phố', full_name: 'Thành Phố Hồ Chí Minh' },
-  ],
-  categories: [],
-  entry_points: [],
-}]);
-
 const documentedPlace = {
   display: '197 Đường Trần Phú,Phường Chợ Quán,Thành Phố Hồ Chí Minh',
   name: '',
@@ -44,7 +30,10 @@ const documentedPlace = {
 const documentedGeocode = (ref = 'geocode:documented_fixture-ref', oldDisplay = null) => ({
   ref_id: ref,
   display: '197 Trần Phú Phường Chợ Quán,Thành Phố Hồ Chí Minh',
-  boundaries: documentedAutocomplete()[0].boundaries,
+  boundaries: [
+    { type: 2, full_name: 'Phường Chợ Quán' },
+    { type: 0, full_name: 'Thành Phố Hồ Chí Minh' },
+  ],
   categories: [],
   data_old: oldDisplay ? { display: oldDisplay } : null,
 });
@@ -69,9 +58,7 @@ test('legacy address matching is exported and verifies exact current and old dis
     provinceName: 'Thành phố Hồ Chí Minh',
     wardCode: '00001',
     wardName: 'Phường Chợ Quán',
-    streetRef: 'geocode:documented_fixture-ref',
-    streetName: 'Đường Trần Phú',
-    detail: '197',
+    detail: '197 Đường Trần Phú',
   };
   const oldDisplay = '197 Trần Phú Phường 4,Quận 5,Thành Phố Hồ Chí Minh';
   for (const [label, legacyText, result] of [
@@ -93,7 +80,7 @@ test('legacy address matching is exported and verifies exact current and old dis
         requests.push(requestUrl);
         if (requestUrl.pathname === '/api/search/v4') return jsonResponse([result]);
         assert.equal(requestUrl.pathname, '/api/place/v4');
-        assert.equal(requestUrl.searchParams.get('refid'), expected.streetRef);
+        assert.equal(requestUrl.searchParams.get('refid'), 'geocode:documented_fixture-ref');
         return jsonResponse(documentedPlace);
       });
 
@@ -300,95 +287,101 @@ test('legacy address matching treats malformed responses and provider failures a
   });
 });
 
-test('search contextualizes v4 STREET results and returns only Place-verified local area matches', async () => {
-  const requests = [];
-  const fetchImpl = async (url) => {
-    const requestUrl = new URL(url);
-    requests.push(requestUrl);
-    if (requestUrl.pathname.endsWith('/autocomplete/v4')) {
-      const mismatched = documentedAutocomplete('auto:wrong_area')[0];
-      mismatched.boundaries[0].full_name = 'Phường Tân Định';
-      const legacy = documentedAutocomplete('auto:legacy_area')[0];
-      legacy.boundaries.splice(1, 0, {
-        type: 1, id: 1292, name: '5', prefix: 'Quận', full_name: 'Quận 5',
+
+test('legacy matching accepts administrative-name spelling variants only when unambiguous', async (t) => {
+  const cases = [
+    {
+      label: 'tone placement',
+      dataset: { province: 'Tỉnh Thanh Hoá', ward: 'Xã Hoà Lộc' },
+      vietmap: { province: 'Tỉnh Thanh Hóa', ward: 'Xã Hòa Lộc' },
+    },
+    {
+      label: 'hyphen spacing',
+      dataset: { province: 'Thành phố Hà Nội', ward: 'Phường Văn Miếu - Quốc Tử Giám' },
+      vietmap: { province: 'Thành phố Hà Nội', ward: 'Phường Văn Miếu-Quốc Tử Giám' },
+    },
+    {
+      label: 'reclassified unit types',
+      dataset: { province: 'Thành phố Bắc Ninh', ward: 'Phường Kép' },
+      vietmap: { province: 'Tỉnh Bắc Ninh', ward: 'Xã Kép' },
+    },
+  ];
+
+  for (const { label, dataset, vietmap } of cases) {
+    await t.test(label, async () => {
+      const candidate = {
+        ...documentedGeocode(),
+        boundaries: [
+          { type: 2, full_name: vietmap.ward },
+          { type: 0, full_name: vietmap.province },
+        ],
+      };
+      const place = {
+        ...documentedPlace,
+        city: vietmap.province,
+        ward: vietmap.ward,
+        display: `${documentedPlace.hs_num} ${documentedPlace.street},${dataset.ward},${dataset.province}`,
+      };
+      const provider = providerWith(async (url) => (
+        new URL(url).pathname === '/api/search/v4'
+          ? jsonResponse([candidate])
+          : jsonResponse(place)
+      ), {
+        dataset: {
+          ...providerDataset,
+          provinces: [{ code: '38', name: dataset.province, type: 'province' }],
+          wards: [{ code: '00002', provinceCode: '38', name: dataset.ward, type: 'commune' }],
+        },
       });
-      return jsonResponse([...documentedAutocomplete(), mismatched, legacy]);
-    }
-    assert.equal(requestUrl.pathname, '/api/place/v4');
-    assert.equal(requestUrl.searchParams.get('refid'), 'auto:documented_fixture-ref');
-    return jsonResponse(documentedPlace);
-  };
 
-  const provider = providerWith(fetchImpl);
-  const results = await provider.searchStreets({ provinceCode: '79', wardCode: '00001', query: '  tran phu  ' });
-
-  assert.deepEqual(results, [{
-    ref: 'auto:documented_fixture-ref',
-    name: 'Đường Trần Phú',
-    displayName: documentedPlace.display,
-  }]);
-  assert.equal(requests.length, 2);
-  const autocomplete = requests[0];
-  assert.equal(autocomplete.searchParams.get('display_type'), '1');
-  assert.equal(autocomplete.searchParams.get('layers'), 'STREET');
-  assert.equal(autocomplete.searchParams.get('text'), 'tran phu, Phường Chợ Quán, Thành phố Hồ Chí Minh');
-  assert.equal(autocomplete.searchParams.has('cityId'), false);
-  assert.equal(autocomplete.searchParams.has('wardId'), false);
-  assert.equal(autocomplete.searchParams.get('apikey'), 'test-only-key');
-});
-
-test('Place v4 cannot validate forged or old-format refs and POIs are rejected', async (t) => {
-  await t.test('mismatched Place boundary names fail with a safe client error', async () => {
-    const provider = providerWith(async () => jsonResponse({
-      ...documentedPlace,
-      city: 'Thành phố Hà Nội',
-    }));
-    await assert.rejects(provider.resolveStreet('auto:forged-ref'), (error) => {
-      assert.equal(error.status, 400);
-      assert.equal(error.statusCode, 400);
-      return true;
+      assert.deepEqual(await provider.matchLegacyAddress(candidate.display), {
+        status: 'matched',
+        address: {
+          provinceCode: '38',
+          provinceName: dataset.province,
+          wardCode: '00002',
+          wardName: dataset.ward,
+          detail: '197 Đường Trần Phú',
+        },
+      });
     });
+  }
+
+  await t.test('a unit type is not ignored when the bare name is ambiguous', async () => {
+    let placeCalls = 0;
+    const candidate = {
+      ...documentedGeocode(),
+      boundaries: [
+        { type: 2, full_name: 'Thị trấn Kép' },
+        { type: 0, full_name: 'Tỉnh Bắc Ninh' },
+      ],
+    };
+    const provider = providerWith(async (url) => {
+      if (new URL(url).pathname === '/api/search/v4') return jsonResponse([candidate]);
+      placeCalls += 1;
+      return jsonResponse(documentedPlace);
+    }, {
+      dataset: {
+        ...providerDataset,
+        provinces: [{ code: '24', name: 'Thành phố Bắc Ninh', type: 'province' }],
+        wards: [
+          { code: '00010', provinceCode: '24', name: 'Phường Kép', type: 'ward' },
+          { code: '00011', provinceCode: '24', name: 'Xã Kép', type: 'commune' },
+        ],
+      },
+    });
+    assert.deepEqual(await provider.matchLegacyAddress(candidate.display), { status: 'unmatched' });
+    assert.equal(placeCalls, 0);
   });
-
-  await t.test('old district format is rejected', async () => {
-    const provider = providerWith(async () => jsonResponse({
-      ...documentedPlace,
-      district_id: 1292,
-      district: 'Quận 5',
-    }));
-    await assert.rejects(provider.resolveStreet('auto:old-format-ref'), (error) => error.statusCode === 400);
-  });
-
-  await t.test('a POI result is not accepted as a street', async () => {
-    const provider = providerWith(async () => jsonResponse({ ...documentedPlace, name: 'Cửa hàng' }));
-    await assert.rejects(provider.resolveStreet('auto:poi-ref'), (error) => error.statusCode === 400);
-  });
-});
-
-test('ambiguous local boundary mapping is rejected without resolving any candidate ref', async () => {
-  let requests = 0;
-  const duplicateWardDataset = {
-    ...providerDataset,
-    wards: [
-      ...providerDataset.wards,
-      { code: '00002', provinceCode: '79', name: 'Phường Chợ Quán', type: 'ward' },
-    ],
-  };
-  const provider = providerWith(async () => {
-    requests += 1;
-    return jsonResponse(documentedAutocomplete());
-  }, { dataset: duplicateWardDataset });
-
-  assert.deepEqual(await provider.searchStreets({ provinceCode: '79', wardCode: '00001', query: 'le loi' }), []);
-  assert.equal(requests, 1);
 });
 
 test('provider outages and missing credentials fail closed without exposing credentials', async () => {
   const secret = 'secret-vietmap-key-do-not-leak';
+  const legacyText = documentedGeocode().display;
   const unavailable = providerWith(async () => {
     throw new Error(`request failed for apikey=${secret}`);
   }, { env: { VIETMAP_API_KEY: secret } });
-  await assert.rejects(unavailable.searchStreets({ provinceCode: '79', wardCode: '00001', query: 'le loi' }), (error) => {
+  await assert.rejects(unavailable.matchLegacyAddress(legacyText), (error) => {
     assert.equal(error.status, 503);
     assert.equal(error.statusCode, 503);
     assert.doesNotMatch(error.message, /secret-vietmap-key-do-not-leak/);
@@ -400,7 +393,7 @@ test('provider outages and missing credentials fail closed without exposing cred
     fetchCalls += 1;
     return jsonResponse([]);
   }, { env: {} });
-  await assert.rejects(missingKey.resolveStreet('auto:valid-looking-ref'), (error) => {
+  await assert.rejects(missingKey.matchLegacyAddress(legacyText), (error) => {
     assert.equal(error.statusCode, 503);
     assert.doesNotMatch(error.message, /apikey|test-only-key/i);
     return true;
@@ -410,6 +403,7 @@ test('provider outages and missing credentials fail closed without exposing cred
 
 test('provider configuration defaults empty values and rejects unsupported values', async (t) => {
   const secret = 'secret-provider-configuration-key';
+  const legacyText = documentedGeocode().display;
   let fetchCalls = 0;
   for (const [label, configuredProvider] of [
     ['unsupported provider', 'other-provider'],
@@ -421,7 +415,7 @@ test('provider configuration defaults empty values and rejects unsupported value
         fetchCalls += 1;
         return jsonResponse(documentedPlace);
       }, { env: { ADDRESS_PROVIDER: configuredProvider, VIETMAP_API_KEY: secret } });
-      await assert.rejects(provider.resolveStreet('auto:valid-looking-ref'), (error) => {
+      await assert.rejects(provider.matchLegacyAddress(legacyText), (error) => {
         assert.equal(error.status, 503);
         assert.equal(error.statusCode, 503);
         assert.equal(error.message, 'Vietnam address provider is unavailable.');
@@ -435,49 +429,52 @@ test('provider configuration defaults empty values and rejects unsupported value
   let requestUrl;
   const emptyConfig = providerWith(async (url) => {
     requestUrl = new URL(url);
-    return jsonResponse(documentedPlace);
+    return requestUrl.pathname === '/api/search/v4'
+      ? jsonResponse([documentedGeocode()])
+      : jsonResponse(documentedPlace);
   }, { env: { ADDRESS_PROVIDER: '  ', VIETMAP_API_KEY: secret } });
-  assert.deepEqual(await emptyConfig.resolveStreet('auto:empty-provider-config'), {
-    ref: 'auto:empty-provider-config',
-    name: 'Đường Trần Phú',
-    displayName: documentedPlace.display,
-    provinceCode: '79',
-    wardCode: '00001',
+  assert.deepEqual(await emptyConfig.matchLegacyAddress(legacyText), {
+    status: 'matched',
+    address: {
+      provinceCode: '79',
+      provinceName: 'Thành phố Hồ Chí Minh',
+      wardCode: '00001',
+      wardName: 'Phường Chợ Quán',
+      detail: '197 Đường Trần Phú',
+    },
   });
   assert.equal(requestUrl.origin, 'https://maps.vietmap.vn');
 });
 
-test('Place v4 maps nonexistent valid-looking refs to safe client errors', async (t) => {
+test('Place v4 maps nonexistent valid-looking legacy candidates to unmatched results', async (t) => {
   const secret = 'secret-vietmap-key-for-place-error';
+  const candidate = documentedGeocode();
   for (const status of [400, 404]) {
     await t.test(`Place status ${status}`, async () => {
       let requestUrl;
       const provider = providerWith(async (url) => {
         requestUrl = new URL(url);
-        return jsonResponse({ error: `request failed with apikey=${secret}` }, status);
+        return requestUrl.pathname === '/api/search/v4'
+          ? jsonResponse([candidate])
+          : jsonResponse({ error: `request failed with apikey=${secret}` }, status);
       }, { env: { ADDRESS_PROVIDER: 'vietmap', VIETMAP_API_KEY: secret } });
 
-      await assert.rejects(provider.resolveStreet('auto:valid-looking-ref'), (error) => {
-        assert.equal(error.status, 400);
-        assert.equal(error.statusCode, 400);
-        assert.equal(error.message, 'Street reference is invalid or does not identify a current street address.');
-        assert.doesNotMatch(`${error.message}\n${error.stack}`, /secret-vietmap-key-for-place-error|apikey|maps\.vietmap\.vn/);
-        return true;
-      });
+      assert.deepEqual(await provider.matchLegacyAddress(candidate.display), { status: 'unmatched' });
       assert.equal(requestUrl.pathname, '/api/place/v4');
-      assert.equal(requestUrl.searchParams.get('refid'), 'auto:valid-looking-ref');
+      assert.equal(requestUrl.searchParams.get('refid'), 'geocode:documented_fixture-ref');
     });
   }
 });
 
 test('authentication, rate-limit, and provider failures remain safe outages', async (t) => {
   const secret = 'secret-vietmap-provider-outage';
+  const legacyText = documentedGeocode().display;
   for (const status of [401, 429, 500]) {
     await t.test(`provider status ${status}`, async () => {
       const provider = providerWith(async () => jsonResponse({ error: `apikey=${secret}` }, status), {
         env: { ADDRESS_PROVIDER: 'vietmap', VIETMAP_API_KEY: secret },
       });
-      await assert.rejects(provider.resolveStreet('auto:valid-looking-ref'), (error) => {
+      await assert.rejects(provider.matchLegacyAddress(legacyText), (error) => {
         assert.equal(error.status, 503);
         assert.equal(error.statusCode, 503);
         assert.equal(error.message, 'Vietnam address provider is unavailable.');
@@ -487,36 +484,3 @@ test('authentication, rate-limit, and provider failures remain safe outages', as
     });
   }
 });
-
-test('search and resolved-ref caches are bounded by the 30-minute TTL', async () => {
-  let currentTime = 1_000;
-  let autocompleteCalls = 0;
-  let placeCalls = 0;
-  const fetchImpl = async (url) => {
-    const pathname = new URL(url).pathname;
-    if (pathname.endsWith('/autocomplete/v4')) {
-      autocompleteCalls += 1;
-      return jsonResponse(documentedAutocomplete());
-    }
-    placeCalls += 1;
-    return jsonResponse(documentedPlace);
-  };
-  const provider = providerWith(fetchImpl, { now: () => currentTime });
-
-  const initial = await provider.searchStreets({ provinceCode: '79', wardCode: '00001', query: 'le loi' });
-  initial[0].name = 'caller mutation';
-  assert.deepEqual(await provider.searchStreets({ provinceCode: '79', wardCode: '00001', query: 'le loi' }), [{
-    ref: 'auto:documented_fixture-ref',
-    name: 'Đường Trần Phú',
-    displayName: documentedPlace.display,
-  }]);
-  await provider.searchStreets({ provinceCode: '79', wardCode: '00001', query: 'tran phu' });
-  assert.equal(autocompleteCalls, 2);
-  assert.equal(placeCalls, 1);
-
-  currentTime += 30 * 60 * 1000 + 1;
-  await provider.searchStreets({ provinceCode: '79', wardCode: '00001', query: 'le loi' });
-  assert.equal(autocompleteCalls, 3);
-  assert.equal(placeCalls, 2);
-});
-

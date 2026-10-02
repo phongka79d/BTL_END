@@ -22,19 +22,25 @@ const createCartItem = ({ id, quantity = 1, stock = 34, unitPrice = 1000 }) => (
   product: { quantity: stock }
 });
 
-test('purchase quantity keeps the raw draft contract around stock boundaries', () => {
+test('purchase quantity separates malformed drafts from stock shortages', () => {
   const drafts = [
-    ['37', INVALID_PURCHASE_QUANTITY_MESSAGE],
+    ['37', 'Chỉ còn 34 sản phẩm trong kho.'],
     ['-355', INVALID_PURCHASE_QUANTITY_MESSAGE],
     ['1.5', INVALID_PURCHASE_QUANTITY_MESSAGE],
     ['0', INVALID_PURCHASE_QUANTITY_MESSAGE],
     ['34', null],
-    ['35', INVALID_PURCHASE_QUANTITY_MESSAGE]
+    ['35', 'Chỉ còn 34 sản phẩm trong kho.']
   ];
 
   drafts.forEach(([draft, expectedError]) => {
     assert.equal(validatePurchaseQuantity(draft, 34), expectedError, draft);
   });
+});
+
+test('a cart line whose product sold out after it was added says the product is sold out', () => {
+  // Stock went 1 -> 0 because another customer bought it; the line still holds quantity 1.
+  assert.equal(validatePurchaseQuantity(1, 0), 'Sản phẩm đã hết hàng.');
+  assert.equal(validatePurchaseQuantity(2, 1), 'Chỉ còn 1 sản phẩm trong kho.');
 });
 
 test('purchase quantity rejects empty and nonnumeric drafts without coercing them', () => {
@@ -108,7 +114,7 @@ test('cart update payload carries only valid changed lines while an invalid draf
   const quantityErrors = buildQuantityErrors(items, draftQuantities);
 
   assert.equal(quantityErrors['valid-change'], undefined);
-  assert.equal(quantityErrors['invalid-draft'], INVALID_PURCHASE_QUANTITY_MESSAGE);
+  assert.equal(quantityErrors['invalid-draft'], 'Chỉ còn 34 sản phẩm trong kho.');
   // The payload builder drops invalid lines; CartView also refuses to save while any line is invalid.
   assert.deepEqual(buildQuantityChanges(items, draftQuantities, quantityErrors), [
     { id: 'valid-change', quantity: 34 }
@@ -133,7 +139,7 @@ test('selected valid line stays checkout-ready while an unselected draft is inva
   const quantityErrors = buildQuantityErrors(items, draftQuantities);
 
   assert.equal(quantityErrors.selected, undefined);
-  assert.equal(quantityErrors.unselected, INVALID_PURCHASE_QUANTITY_MESSAGE);
+  assert.equal(quantityErrors.unselected, 'Chỉ còn 34 sản phẩm trong kho.');
   // Checkout only inspects selected lines, while the save gate still covers the whole cart.
   assert.equal(hasInvalidItemQuantity([selectedItem], quantityErrors), false);
   assert.equal(hasInvalidItemQuantity(items, quantityErrors), true);

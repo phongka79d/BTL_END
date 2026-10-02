@@ -3,7 +3,6 @@ import test from 'node:test';
 import {
   addressFromUser,
   changeProvince,
-  changeStreet,
   changeWard,
   EMPTY_ADDRESS,
   hasLegacyAddress,
@@ -16,10 +15,8 @@ const completeProfile = Object.freeze({
   addressProvinceName: ' Hà Nội ',
   addressWardCode: ' 001 ',
   addressWardName: ' Phường Ba Đình ',
-  addressStreetRef: ' street-abc ',
-  addressStreetName: ' Đường ABC ',
-  addressDetail: ' Số 12, ngõ 5 ',
-  address: 'Số 12, Đường ABC, Phường Ba Đình, Hà Nội'
+  addressDetail: ' Số 12, ngõ 5, Phố Hàng Bài ',
+  address: 'Số 12, ngõ 5, Phố Hàng Bài, Phường Ba Đình, Hà Nội'
 });
 
 const completeAddress = () => addressFromUser(completeProfile);
@@ -33,9 +30,7 @@ test('profile addresses are accepted only when every verified field is present',
     provinceName: 'Hà Nội',
     wardCode: '001',
     wardName: 'Phường Ba Đình',
-    streetRef: 'street-abc',
-    streetName: 'Đường ABC',
-    detail: 'Số 12, ngõ 5'
+    detail: 'Số 12, ngõ 5, Phố Hàng Bài'
   });
   assert.equal(isCompleteAddress(first), true);
   assert.notStrictEqual(first, second);
@@ -44,16 +39,14 @@ test('profile addresses are accepted only when every verified field is present',
     addressProvinceName: ' Hà Nội ',
     addressWardCode: ' 001 ',
     addressWardName: ' Phường Ba Đình ',
-    addressStreetRef: ' street-abc ',
-    addressStreetName: ' Đường ABC ',
-    addressDetail: ' Số 12, ngõ 5 ',
-    address: 'Số 12, Đường ABC, Phường Ba Đình, Hà Nội'
+    addressDetail: ' Số 12, ngõ 5, Phố Hàng Bài ',
+    address: 'Số 12, ngõ 5, Phố Hàng Bài, Phường Ba Đình, Hà Nội'
   });
 });
 
 test('legacy strings and partially verified profiles become fresh empty selections', () => {
-  const legacyProfile = { address: '12 Đường ABC, Hà Nội' };
-  const partialProfile = { ...completeProfile, addressStreetName: '   ' };
+  const legacyProfile = { address: '12 Phố Hàng Bài, Hà Nội' };
+  const partialProfile = { ...completeProfile, addressDetail: '   ' };
   const first = addressFromUser(legacyProfile);
   const second = addressFromUser(partialProfile);
 
@@ -85,49 +78,34 @@ test('province and ward changes clear dependent selections while preserving type
     provinceName: 'Hồ Chí Minh',
     wardCode: '',
     wardName: '',
-    streetRef: '',
-    streetName: '',
-    detail: 'Số 12, ngõ 5'
+    detail: 'Số 12, ngõ 5, Phố Hàng Bài'
   });
   assert.deepEqual(afterWard, {
     provinceCode: '79',
     provinceName: 'Hồ Chí Minh',
     wardCode: '760',
     wardName: 'Phường Bến Nghé',
-    streetRef: '',
-    streetName: '',
-    detail: 'Số 12, ngõ 5'
+    detail: 'Số 12, ngõ 5, Phố Hàng Bài'
   });
   assert.notStrictEqual(afterProvince, original);
   assert.notStrictEqual(afterWard, afterProvince);
-  assert.equal(original.streetRef, 'street-abc');
+  assert.equal(original.detail, 'Số 12, ngõ 5, Phố Hàng Bài');
 });
 
-test('only a selected returned street reference is persisted, never search text', () => {
-  const area = completeAddress();
-  const typedSearch = changeStreet(area, 'Đường người dùng tự nhập');
-  const selectedStreet = changeStreet(area, { ref: 'street-new', name: 'Đường Mới' });
+test('user-entered house and road details are written in the detail field', () => {
+  const address = {
+    ...completeAddress(),
+    detail: 'Số 12, ngõ 5, Phố Hàng Bài'
+  };
 
-  assert.equal(typedSearch.streetRef, '');
-  assert.equal(typedSearch.streetName, '');
-  assert.deepEqual(toAddressPayload(typedSearch), {
+  assert.deepEqual(toAddressPayload(address), {
     provinceCode: '01',
     wardCode: '001',
-    streetRef: '',
-    detail: 'Số 12, ngõ 5'
+    detail: 'Số 12, ngõ 5, Phố Hàng Bài'
   });
-  assert.equal(selectedStreet.streetRef, 'street-new');
-  assert.equal(selectedStreet.streetName, 'Đường Mới');
-  assert.deepEqual(toAddressPayload(selectedStreet), {
-    provinceCode: '01',
-    wardCode: '001',
-    streetRef: 'street-new',
-    detail: 'Số 12, ngõ 5'
-  });
-  assert.equal(Object.hasOwn(toAddressPayload(selectedStreet), 'streetName'), false);
 });
 
-test('address payloads trim only canonical write fields and use null for an empty value', () => {
+test('address payloads trim canonical write fields and use null for an empty value', () => {
   assert.equal(toAddressPayload(EMPTY_ADDRESS), null);
   assert.equal(toAddressPayload(null), null);
   assert.deepEqual(toAddressPayload({
@@ -135,13 +113,10 @@ test('address payloads trim only canonical write fields and use null for an empt
     provinceName: 'client value is not sent',
     wardCode: ' 001 ',
     wardName: 'client value is not sent',
-    streetRef: ' ref-1 ',
-    streetName: 'client value is not sent',
-    detail: '  Unit 2  '
+    detail: '  Số 12, Phố Hàng Bài  '
   }), {
     provinceCode: '01',
     wardCode: '001',
-    streetRef: 'ref-1',
-    detail: 'Unit 2'
+    detail: 'Số 12, Phố Hàng Bài'
   });
 });

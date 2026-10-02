@@ -9,17 +9,10 @@ const ADDRESS_DATASET = {
   provinces: [{ code: '01', name: 'Thành phố Hà Nội', type: 'thành phố' }],
   wards: [{ code: '00070', provinceCode: '01', name: 'Phường Hoàn Kiếm', type: 'phường' }],
 };
-const STREET_RECORD = {
-  ref: 'street-01',
-  name: 'Phố Đinh Tiên Hoàng',
-  provinceCode: '01',
-  wardCode: '00070',
-};
 const SELECTED_ADDRESS = {
   provinceCode: '01',
   wardCode: '00070',
-  streetRef: 'street-01',
-  detail: 'Số 12, ngách 3',
+  detail: 'Số 12, ngách 3, Phố Đinh Tiên Hoàng',
 };
 const CANONICAL_USER_ADDRESS_FIELDS = {
   address: 'Số 12, ngách 3, Phố Đinh Tiên Hoàng, Phường Hoàn Kiếm, Thành phố Hà Nội',
@@ -27,13 +20,7 @@ const CANONICAL_USER_ADDRESS_FIELDS = {
   addressProvinceName: 'Thành phố Hà Nội',
   addressWardCode: '00070',
   addressWardName: 'Phường Hoàn Kiếm',
-  addressStreetRef: 'street-01',
-  addressStreetName: 'Phố Đinh Tiên Hoàng',
-  addressDetail: 'Số 12, ngách 3',
-};
-
-const defaultAddressProvider = {
-  resolveStreet: async (ref) => ref === STREET_RECORD.ref ? { ...STREET_RECORD } : null,
+  addressDetail: 'Số 12, ngách 3, Phố Đinh Tiên Hoàng',
 };
 
 const createMockResponse = () => {
@@ -60,10 +47,7 @@ const withStubs = async (stubs, run) => {
     resolveAddress: addressService.resolveAddress,
     toUserAddressFields: addressService.toUserAddressFields,
   };
-  const service = addressService.createAddressService({
-    dataset: ADDRESS_DATASET,
-    provider: stubs.addressProvider || defaultAddressProvider,
-  });
+  const service = addressService.createAddressService({ dataset: ADDRESS_DATASET });
 
   userModel.findByEmail = stubs.findByEmail;
   userModel.create = stubs.create;
@@ -125,14 +109,16 @@ test('createUser provisions a staff account, hashes the password and emails cred
   assert.deepEqual({
     address: createdPayload.address,
     addressProvinceCode: createdPayload.addressProvinceCode,
+    addressProvinceName: createdPayload.addressProvinceName,
     addressWardCode: createdPayload.addressWardCode,
-    addressStreetRef: createdPayload.addressStreetRef,
+    addressWardName: createdPayload.addressWardName,
     addressDetail: createdPayload.addressDetail,
   }, {
     address: null,
     addressProvinceCode: null,
+    addressProvinceName: null,
     addressWardCode: null,
-    addressStreetRef: null,
+    addressWardName: null,
     addressDetail: null,
   });
   assert.ok(createdPayload.passwordHash);
@@ -272,12 +258,13 @@ test('createUser rejects non-string phone values before any model invocation', a
   assert.equal(findByEmailCalled, false);
   assert.equal(createCalled, false);
 });
-test('createUser persists resolver-authoritative address fields and ignores forged names and root columns', async () => {
+test('createUser persists server-derived address fields and ignores forged names and unknown fields', async () => {
   const selectedAddress = {
     ...SELECTED_ADDRESS,
     provinceName: 'Forged Province',
     wardName: 'Forged Ward',
-    streetName: 'Forged Street',
+    [['street', 'Ref'].join('')]: 'ignored',
+    [['street', 'Name'].join('')]: 'ignored',
   };
   let persisted = null;
 
@@ -300,13 +287,6 @@ test('createUser persists resolver-authoritative address fields and ignores forg
             password: 'Matkhau123!',
             phone: '0123456789',
             address: selectedAddress,
-            addressProvinceCode: 'FORGED',
-            addressProvinceName: 'Forged root province',
-            addressWardCode: 'FORGED',
-            addressWardName: 'Forged root ward',
-            addressStreetRef: 'forged-root-street',
-            addressStreetName: 'Forged root street',
-            addressDetail: 'Forged root detail',
             role: 'staff',
           },
         },
@@ -323,8 +303,6 @@ test('createUser persists resolver-authoritative address fields and ignores forg
     addressProvinceName: persisted.addressProvinceName,
     addressWardCode: persisted.addressWardCode,
     addressWardName: persisted.addressWardName,
-    addressStreetRef: persisted.addressStreetRef,
-    addressStreetName: persisted.addressStreetName,
     addressDetail: persisted.addressDetail,
   }, CANONICAL_USER_ADDRESS_FIELDS);
   assert.equal(persisted.phone, '0123456789');
@@ -332,9 +310,8 @@ test('createUser persists resolver-authoritative address fields and ignores forg
   assert.equal(persisted.addressProvinceCode, '01');
 });
 
-test('createUser rejects invalid phone length before address resolution or model access', async () => {
+test('createUser rejects invalid phone length before model access', async () => {
   let findByEmailCalled = false;
-  let providerCalled = false;
   let createCalled = false;
 
   await withStubs(
@@ -347,12 +324,6 @@ test('createUser rejects invalid phone length before address resolution or model
         createCalled = true;
       },
       sendAccountCredentialsEmail: async () => ({ delivery: 'console' }),
-      addressProvider: {
-        resolveStreet: async () => {
-          providerCalled = true;
-          return { ...STREET_RECORD };
-        },
-      },
     },
     async () => {
       const res = createMockResponse();
@@ -375,7 +346,6 @@ test('createUser rejects invalid phone length before address resolution or model
   );
 
   assert.equal(findByEmailCalled, false);
-  assert.equal(providerCalled, false);
   assert.equal(createCalled, false);
 });
 
@@ -410,8 +380,6 @@ test('createUser accepts absent, null, and empty optional addresses as empty per
       addressProvinceName: persisted.addressProvinceName,
       addressWardCode: persisted.addressWardCode,
       addressWardName: persisted.addressWardName,
-      addressStreetRef: persisted.addressStreetRef,
-      addressStreetName: persisted.addressStreetName,
       addressDetail: persisted.addressDetail,
     }, {
       address: null,
@@ -419,64 +387,18 @@ test('createUser accepts absent, null, and empty optional addresses as empty per
       addressProvinceName: null,
       addressWardCode: null,
       addressWardName: null,
-      addressStreetRef: null,
-      addressStreetName: null,
       addressDetail: null,
     });
     assert.equal(persisted.phone, null);
   }
 });
 
-test('createUser returns a safe 503 and does not persist when street verification is unavailable', async () => {
-  let findByEmailCalled = false;
-  let createCalled = false;
 
-  await withStubs(
-    {
-      findByEmail: async () => {
-        findByEmailCalled = true;
-        return null;
-      },
-      create: async () => {
-        createCalled = true;
-      },
-      sendAccountCredentialsEmail: async () => ({ delivery: 'console' }),
-      addressProvider: {
-        resolveStreet: async () => {
-          throw new Error('provider credential=private');
-        },
-      },
-    },
-    async () => {
-      const res = createMockResponse();
-      await userController.createUser(
-        {
-          body: {
-            username: 'provider-down',
-            email: 'provider-down@example.com',
-            password: 'Matkhau123!',
-            address: SELECTED_ADDRESS,
-          },
-        },
-        res,
-        assert.fail
-      );
-      assert.equal(res.statusCode, 503);
-      assert.equal(res.body.message, 'Không thể xác thực địa chỉ lúc này. Vui lòng thử lại.');
-      assert.equal(res.body.errors[0].field, 'address');
-      assert.doesNotMatch(res.body.message, /private/);
-    }
-  );
-
-  assert.equal(findByEmailCalled, false);
-  assert.equal(createCalled, false);
-});
-
-test('createUser rejects partial hierarchy and typed streets without writing', async () => {
+test('createUser rejects partial and mismatched province/ward addresses without writing', async () => {
   for (const address of [
-    { provinceCode: '01', wardCode: '00070', detail: 'Số 12, ngách 3' },
-    { ...SELECTED_ADDRESS, streetRef: 'Phố Đinh Tiên Hoàng' },
+    { provinceCode: '01', wardCode: '00070', detail: '' },
     { ...SELECTED_ADDRESS, wardCode: '99999' },
+    { ...SELECTED_ADDRESS, provinceCode: '79' },
   ]) {
     let createCalled = false;
     await withStubs(

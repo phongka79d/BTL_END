@@ -1,16 +1,12 @@
 const storefrontContentModel = require('../models/storefrontContent.model');
 const { successResponse, errorResponse } = require('../utils/response');
 
+// Lỗi xác thực của model được viết bằng tiếng Việt; nhận diện cả mã trạng thái gắn sẵn lẫn từ khóa.
 const isValidationError = (error) => (
-  error.message &&
-  (
-    error.message.includes('required') ||
-    error.message.includes('invalid') ||
-    error.message.includes('not found') ||
-    error.message.includes('must') ||
-    error.message.includes('belong') ||
-    error.message.includes('between')
-  )
+  error.status === 400 ||
+  error.status === 409 ||
+  (error.message &&
+    /required|invalid|not found|must|belong|between|bắt buộc|không hợp lệ|không tìm thấy|phải|đã tồn tại/i.test(error.message))
 );
 
 const getPublicCarousel = async (req, res, next) => {

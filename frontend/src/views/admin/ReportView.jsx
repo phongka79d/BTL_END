@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Button, Heading, HStack, Text, VStack } from '@astryxdesign/core';
 import { reportApi } from '../../api/reportApi';
 import Alert from '../../components/common/Alert';
@@ -36,8 +36,10 @@ export const ReportView = () => {
   const [appliedRange, setAppliedRange] = useState(null);
   const [isExporting, setIsExporting] = useState(false);
   const [exportError, setExportError] = useState('');
+  const requestIdRef = useRef(0);
 
   const fetchReports = useCallback(async () => {
+    const requestId = ++requestIdRef.current;
     setIsLoading(true);
     setError(null);
 
@@ -49,12 +51,15 @@ export const ReportView = () => {
           reportApi.getOrderSummaryReport(appliedRange),
         ]);
 
+      if (requestId !== requestIdRef.current) return;
+
       setRevenue(revenueResponse?.data || EMPTY_REVENUE);
       setProducts(
         Array.isArray(productsResponse?.data) ? productsResponse.data : []
       );
       setOrderSummary(orderSummaryResponse?.data || {});
     } catch (err) {
+      if (requestId !== requestIdRef.current) return;
       setRevenue(EMPTY_REVENUE);
       setProducts([]);
       setOrderSummary({});
@@ -64,7 +69,7 @@ export const ReportView = () => {
           : err?.message || 'Không thể tải báo cáo. Vui lòng thử lại.'
       );
     } finally {
-      setIsLoading(false);
+      if (requestId === requestIdRef.current) setIsLoading(false);
     }
   }, [appliedRange]);
 
@@ -195,7 +200,7 @@ export const ReportView = () => {
             label="Xóa lọc"
             variant="secondary"
             onClick={handleResetFilter}
-            isDisabled={isLoading && !appliedRange && !startDate && !endDate}
+            isDisabled={isLoading}
           />
           <Button
             label="Xuất Excel"

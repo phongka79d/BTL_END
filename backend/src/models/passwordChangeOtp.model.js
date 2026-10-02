@@ -34,19 +34,6 @@ const createPasswordChangeOtp = async ({ userId, otpHash, expiresAt }) => {
   });
 };
 
-const findLatestActiveOtp = async (userId) => {
-  return prisma.passwordChangeOtp.findFirst({
-    where: {
-      userId,
-      usedAt: null,
-      expiresAt: { gt: new Date() },
-    },
-    orderBy: {
-      createdAt: 'desc',
-    },
-  });
-};
-
 const findLatestUnusedOtp = async (userId) => {
   return prisma.passwordChangeOtp.findFirst({
     where: {
@@ -59,15 +46,26 @@ const findLatestUnusedOtp = async (userId) => {
   });
 };
 
-const incrementOtpAttempts = async (id) => {
-  return prisma.passwordChangeOtp.update({
-    where: { id },
+/**
+ * Giữ chỗ nguyên tử một lượt thử OTP: chỉ tăng khi OTP còn hiệu lực và chưa đạt giới hạn.
+ * Nhiều yêu cầu đồng thời không thể vượt quá maxAttempts lượt so khớp.
+ * @returns {Promise<boolean>} true nếu còn lượt thử.
+ */
+const reserveOtpAttempt = async (id, maxAttempts) => {
+  const result = await prisma.passwordChangeOtp.updateMany({
+    where: {
+      id,
+      usedAt: null,
+      expiresAt: { gt: new Date() },
+      attempts: { lt: maxAttempts },
+    },
     data: {
       attempts: {
         increment: 1,
       },
     },
   });
+  return result.count === 1;
 };
 
 const completePasswordChange = async ({ otpId, userId, passwordHash }) => {
@@ -97,8 +95,7 @@ const completePasswordChange = async ({ otpId, userId, passwordHash }) => {
 module.exports = {
   invalidateActiveOtps,
   createPasswordChangeOtp,
-  findLatestActiveOtp,
   findLatestUnusedOtp,
-  incrementOtpAttempts,
+  reserveOtpAttempt,
   completePasswordChange,
 };

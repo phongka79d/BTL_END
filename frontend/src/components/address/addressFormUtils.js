@@ -3,8 +3,6 @@ export const EMPTY_ADDRESS = Object.freeze({
   provinceName: '',
   wardCode: '',
   wardName: '',
-  streetRef: '',
-  streetName: '',
   detail: ''
 });
 
@@ -13,12 +11,10 @@ const PROFILE_FIELDS = [
   ['provinceName', 'addressProvinceName'],
   ['wardCode', 'addressWardCode'],
   ['wardName', 'addressWardName'],
-  ['streetRef', 'addressStreetRef'],
-  ['streetName', 'addressStreetName'],
   ['detail', 'addressDetail']
 ];
 const ADDRESS_FIELDS = PROFILE_FIELDS.map(([field]) => field);
-const PAYLOAD_FIELDS = ['provinceCode', 'wardCode', 'streetRef', 'detail'];
+const PAYLOAD_FIELDS = ['provinceCode', 'wardCode', 'detail'];
 const asTrimmedString = (value) => (typeof value === 'string' ? value.trim() : '');
 const isRecord = (value) => value !== null && typeof value === 'object' && !Array.isArray(value);
 const emptyAddress = () => ({ ...EMPTY_ADDRESS });
@@ -70,13 +66,3 @@ export const changeWard = (address, selectedWard) => ({
   detail: typeof address?.detail === 'string' ? address.detail : ''
 });
 
-export const changeStreet = (address, selectedStreet) => ({
-  ...EMPTY_ADDRESS,
-  provinceCode: asTrimmedString(address?.provinceCode),
-  provinceName: asTrimmedString(address?.provinceName),
-  wardCode: asTrimmedString(address?.wardCode),
-  wardName: asTrimmedString(address?.wardName),
-  streetRef: getSelection(selectedStreet, 'ref'),
-  streetName: getSelection(selectedStreet, 'name'),
-  detail: typeof address?.detail === 'string' ? address.detail : ''
-});

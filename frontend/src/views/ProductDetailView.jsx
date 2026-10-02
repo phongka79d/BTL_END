@@ -158,6 +158,7 @@ export const ProductDetailView = () => {
   const [feedback, setFeedback] = useState(null);
   const [reviews, setReviews] = useState([]);
   const [isReviewsLoading, setIsReviewsLoading] = useState(false);
+  const [reviewsProductId, setReviewsProductId] = useState(null);
   const [reviewsError, setReviewsError] = useState(null);
   const [isReviewSubmitting, setIsReviewSubmitting] = useState(false);
   const requestIdRef = useRef(0);
@@ -225,6 +226,7 @@ export const ProductDetailView = () => {
   const loadReviews = useCallback(async () => {
     if (!id) {
       setReviews([]);
+      setReviewsProductId(null);
       setReviewsError(null);
       setIsReviewsLoading(false);
       return;
@@ -244,6 +246,7 @@ export const ProductDetailView = () => {
       }
 
       setReviews(response?.data || []);
+      setReviewsProductId(String(id));
     } catch (err) {
       if (requestId !== reviewRequestIdRef.current) {
         return;
@@ -325,8 +328,21 @@ export const ProductDetailView = () => {
       actionLabel: signInRequired ? 'Đăng nhập' : undefined,
       onAction: signInRequired ? () => navigate('/login') : undefined
     });
+
+    // Tồn kho có thể đã đổi (người khác vừa mua): làm mới số lượng hiển thị mà không xóa thông báo lỗi.
+    if (!signInRequired) {
+      productApi.getProductById(product.id)
+        .then((response) => {
+          const nextProduct = response?.data?.product;
+          if (nextProduct && nextProduct.id === product.id) setProduct(nextProduct);
+        })
+        .catch(() => {});
+    }
   };
 
+  const hasAlreadyReviewed = user?.id != null
+    && reviewsProductId === String(id)
+    && reviews.some((review) => String(review.userId) === String(user.id));
   const canWriteReview = isAuthenticated && user?.role !== 'admin';
 
   const handleReviewSubmit = async (payload) => {
@@ -452,11 +468,20 @@ export const ProductDetailView = () => {
           onRetry={loadReviews}
         />
 
-        {canWriteReview ? (
+        {canWriteReview && !hasAlreadyReviewed ? (
           <ProductReviewForm
             onSubmit={handleReviewSubmit}
             isSubmitting={isReviewSubmitting}
           />
+        ) : hasAlreadyReviewed ? (
+          <Card padding={4}>
+            <VStack gap={1}>
+              <Text weight="semibold">Bạn đã gửi đánh giá cho sản phẩm này.</Text>
+              <Text size="supporting" color="secondary">
+                Cảm ơn bạn đã chia sẻ ý kiến.
+              </Text>
+            </VStack>
+          </Card>
         ) : (
           <Card padding={4}>
             <VStack gap={3}>

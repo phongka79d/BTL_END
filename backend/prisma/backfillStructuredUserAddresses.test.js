@@ -14,8 +14,6 @@ const ADDRESS_FIELDS = [
   'addressProvinceName',
   'addressWardCode',
   'addressWardName',
-  'addressStreetRef',
-  'addressStreetName',
   'addressDetail',
 ];
 const MATCHED = {
@@ -25,9 +23,7 @@ const MATCHED = {
     provinceName: 'Thành phố Hồ Chí Minh',
     wardCode: '26734',
     wardName: 'Phường Bến Thành',
-    streetRef: 'auto:street_1',
-    streetName: 'Lê Lợi',
-    detail: '12A',
+    detail: '12A Lê Lợi',
   },
 };
 const LEGACY_EXACT = '12A Lê Lợi, Phường Bến Thành, Thành phố Hồ Chí Minh';
@@ -95,12 +91,10 @@ test('dry run stages exact, ambiguous, unmatched, and conflicting partial record
       addressProvinceName: MATCHED.address.provinceName,
       addressWardCode: MATCHED.address.wardCode,
       addressWardName: MATCHED.address.wardName,
-      addressStreetRef: MATCHED.address.streetRef,
-      addressStreetName: MATCHED.address.streetName,
       addressDetail: MATCHED.address.detail,
     }),
   ];
-  const orders = [{ id: 'historical-order', shippingAddress: 'historic free-form value', shippingStreetRef: null }];
+  const orders = [{ id: 'historical-order', shippingAddress: 'historic free-form value' }];
   const { prisma, state, updateCalls } = makePrisma(users, orders);
   const before = structuredClone(state);
   const { logger, lines } = captureLogger();
@@ -181,8 +175,6 @@ test('apply updates only verified exact matches, leaves legacy and historical or
       MATCHED.address.provinceName,
       MATCHED.address.wardCode,
       MATCHED.address.wardName,
-      MATCHED.address.streetRef,
-      MATCHED.address.streetName,
       MATCHED.address.detail,
     ]);
   }
@@ -207,7 +199,7 @@ test('conditional update skips a user whose legacy address changed after plannin
     [],
     { onTransaction: (current) => {
       current.users[0].address = 'new concurrent address';
-      current.users[0].addressStreetName = 'concurrent structured update';
+      current.users[0].addressDetail = 'concurrent structured update';
     } }
   );
   const result = await runBackfill({
@@ -221,7 +213,7 @@ test('conditional update skips a user whose legacy address changed after plannin
   assert.deepEqual(updateCalls[0].where, { id: 'stale-id', address: LEGACY_EXACT, ...originalStructured });
   assert.equal(state.users[0].address, 'new concurrent address');
   assert.deepEqual(ADDRESS_FIELDS.map((field) => state.users[0][field]), [
-    null, null, null, null, null, 'concurrent structured update', null,
+    null, null, null, null, 'concurrent structured update',
   ]);
   assert.equal(result.counts.stale, 1);
   assert.equal(result.results[0].status, 'stale');

@@ -1,4 +1,4 @@
-const ADDRESS_DISPLAY_FIELDS = ['detail', 'streetName', 'wardName', 'provinceName'];
+const ADDRESS_DISPLAY_FIELDS = ['detail', 'wardName', 'provinceName'];
 
 const formatVietnamAddress = (address) => {
   if (!address || typeof address !== 'object' || Array.isArray(address)) {

@@ -17,9 +17,7 @@ const validAddress = {
   provinceName: 'Hà Nội',
   wardCode: '00001',
   wardName: 'Phường Phúc Xá',
-  streetRef: 'street-1',
-  streetName: 'Đường ABC',
-  detail: '12/3'
+  detail: '12/3, Phố ABC'
 };
 
 const validValues = {
@@ -39,8 +37,7 @@ test('checkout validates selected address and sends only structured address fiel
     address: {
       provinceCode: '01',
       wardCode: '00001',
-      streetRef: 'street-1',
-      detail: '12/3'
+      detail: '12/3, Phố ABC'
     },
     note: 'Giao giờ hành chính',
     cartItemIds: ['cart-item-1']
@@ -100,7 +97,7 @@ test('checkout blocks out-of-range and non-digit phone values', () => {
   }
 });
 
-test('checkout reports required address fields as nested errors', () => {
+test('checkout reports missing address fields as nested errors', () => {
   const missingAddress = validateCheckoutValues({
     ...validValues,
     address: EMPTY_ADDRESS
@@ -108,16 +105,15 @@ test('checkout reports required address fields as nested errors', () => {
   assert.deepEqual(missingAddress.address, {
     provinceCode: 'Vui lòng chọn Tỉnh/Thành phố.',
     wardCode: 'Vui lòng chọn Phường/Xã.',
-    streetRef: 'Vui lòng chọn Đường/Phố.',
-    detail: 'Vui lòng nhập số nhà/ngõ/ngách hoặc thông tin chi tiết.'
+    detail: 'Vui lòng nhập số nhà, ngõ/ngách, tên đường.'
   });
 
-  const missingStreet = validateCheckoutValues({
+  const missingWard = validateCheckoutValues({
     ...validValues,
-    address: { ...validAddress, streetRef: '', streetName: '' }
+    address: { ...validAddress, wardCode: '', wardName: '' }
   });
-  assert.deepEqual(missingStreet.address, {
-    streetRef: 'Vui lòng chọn Đường/Phố.'
+  assert.deepEqual(missingWard.address, {
+    wardCode: 'Vui lòng chọn Phường/Xã.'
   });
 
   const missingDetail = validateCheckoutValues({
@@ -125,13 +121,13 @@ test('checkout reports required address fields as nested errors', () => {
     address: { ...validAddress, detail: '  ' }
   });
   assert.deepEqual(missingDetail.address, {
-    detail: 'Vui lòng nhập số nhà/ngõ/ngách hoặc thông tin chi tiết.'
+    detail: 'Vui lòng nhập số nhà, ngõ/ngách, tên đường.'
   });
 });
 
 test('legacy profile addresses cannot satisfy checkout address validation', () => {
   const legacyProfile = {
-    address: '12 Đường cũ, Phường cũ, Hà Nội',
+    address: 'Số 12, Phố cũ, Phường cũ, Hà Nội',
     addressProvinceCode: '01',
     addressProvinceName: 'Hà Nội'
   };
@@ -149,8 +145,7 @@ test('legacy profile addresses cannot satisfy checkout address validation', () =
   assert.deepEqual(request.errors.address, {
     provinceCode: 'Vui lòng chọn Tỉnh/Thành phố.',
     wardCode: 'Vui lòng chọn Phường/Xã.',
-    streetRef: 'Vui lòng chọn Đường/Phố.',
-    detail: 'Vui lòng nhập số nhà/ngõ/ngách hoặc thông tin chi tiết.'
+    detail: 'Vui lòng nhập số nhà, ngõ/ngách, tên đường.'
   });
   assert.equal(request.run, null);
   assert.equal(requestCount, 0);
@@ -159,7 +154,7 @@ test('legacy profile addresses cannot satisfy checkout address validation', () =
 test('checkout request snapshots do not share address or selected-item state', () => {
   const values = {
     ...validValues,
-    address: { ...validAddress, detail: ' 12/3 ' }
+    address: { ...validAddress, detail: '12/3, Phố ABC' }
   };
   const items = [{ id: 'cart-item-1' }];
   const request = createCheckoutRequest({
@@ -174,8 +169,7 @@ test('checkout request snapshots do not share address or selected-item state', (
   assert.deepEqual(request.run().address, {
     provinceCode: '01',
     wardCode: '00001',
-    streetRef: 'street-1',
-    detail: '12/3'
+    detail: '12/3, Phố ABC'
   });
   assert.deepEqual(request.run().cartItemIds, ['cart-item-1']);
 });

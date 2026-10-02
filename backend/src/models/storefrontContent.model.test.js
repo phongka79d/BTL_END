@@ -29,6 +29,9 @@ const prisma = {
     findUnique: async () => {
       throw new Error('Unexpected storefrontNavItem.findUnique call');
     },
+    // Mặc định: không có mục trùng nhãn và không có mục con.
+    findFirst: async () => null,
+    count: async () => 0,
     create: async () => {
       throw new Error('Unexpected storefrontNavItem.create call');
     },

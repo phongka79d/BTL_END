@@ -14,10 +14,17 @@ const validateBody = (requiredFields, options = {}) => {
     const body = req.body || {};
 
     requiredFields.forEach((field) => {
-      if (body[field] === undefined || body[field] === null || String(body[field]).trim() === '') {
+      const value = body[field];
+      if (value === undefined || value === null || (typeof value === 'string' && value.trim() === '')) {
         errors.push({
           field,
           message: `${field} là bắt buộc`
+        });
+      } else if (typeof value !== 'string') {
+        // Chặn mảng/đối tượng/số bị ép thành chuỗi như "[object Object]" rồi lưu vào CSDL.
+        errors.push({
+          field,
+          message: `${field} phải là chuỗi`
         });
       }
     });

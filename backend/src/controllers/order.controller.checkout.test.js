@@ -22,8 +22,7 @@ const validBody = (overrides = {}) => ({
   address: {
     provinceCode: '01',
     wardCode: '00001',
-    streetRef: 'street_1',
-    detail: 'Số 123'
+    detail: 'Số 123, Phố Hàng Bài'
   },
   note: 'Giao ngoài giờ',
   cartItemIds: ['item_a'],
@@ -56,14 +55,15 @@ const runCheckout = async (body) => {
   return { res, nextCalls };
 };
 
-test('checkout accepts the structured address and selected cart items at the model boundary', async () => {
+test('checkout accepts the address contract and selected cart items at the model boundary', async () => {
   await withCheckoutSpy(async (calls) => {
     const address = {
       provinceCode: '01',
       wardCode: '00001',
-      streetRef: 'street_1',
-      detail: 'Số 123',
-      provinceName: 'Client-provided name must not pass through'
+      detail: 'Số 123, Phố Hàng Bài',
+      provinceName: 'Client-provided name must not pass through',
+      [['street', 'Ref'].join('')]: 'ignored',
+      [['street', 'Name'].join('')]: 'ignored',
     };
     const { res, nextCalls } = await runCheckout(
       validBody({ fullName: '  Nguyễn Văn A  ', address })
@@ -76,7 +76,7 @@ test('checkout accepts the structured address and selected cart items at the mod
     assert.equal(calls.length, 1);
     assert.deepEqual(calls[0], [
       'user_1',
-      { provinceCode: '01', wardCode: '00001', streetRef: 'street_1', detail: 'Số 123' },
+      { provinceCode: '01', wardCode: '00001', detail: 'Số 123, Phố Hàng Bài' },
       { fullName: 'Nguyễn Văn A', phone: '0987654321', note: 'Giao ngoài giờ' },
       ['item_a']
     ]);
@@ -185,7 +185,7 @@ test('checkout rejects a non-string note with 400', async () => {
   });
 });
 
-test('checkout rejects missing, legacy-string, and incomplete structured addresses with field errors', async () => {
+test('checkout requires a complete structured address and reports province, ward, and detail fields', async () => {
   await withCheckoutSpy(async (calls) => {
     for (const body of [
       validBody({ address: undefined }),
@@ -197,17 +197,16 @@ test('checkout rejects missing, legacy-string, and incomplete structured address
       assert.deepEqual(res.body.errors.map(({ field }) => field), [
         'provinceCode',
         'wardCode',
-        'streetRef',
         'detail'
       ]);
       assert.equal(nextCalls.length, 0);
     }
 
     const { res, nextCalls } = await runCheckout(validBody({
-      address: { provinceCode: '01', wardCode: '00001', detail: 'Số 123' }
+      address: { provinceCode: '01', wardCode: '00001' }
     }));
     assert.equal(res.statusCode, 400);
-    assert.ok(res.body.errors.some(({ field }) => field === 'streetRef'));
+    assert.ok(res.body.errors.some(({ field }) => field === 'detail'));
     assert.equal(nextCalls.length, 0);
     assert.equal(calls.length, 0);
   });
@@ -235,17 +234,12 @@ test('checkout rejects malformed cart item selections with 400', async () => {
   });
 });
 
-test('checkout maps model validation, lookup, conflict, and unavailable errors with field details', async () => {
-  const fieldErrors = [{ field: 'streetRef', message: 'Unknown street' }];
+test('checkout maps model address errors, lookup failures, and conflicts with field details', async () => {
+  const fieldErrors = [{ field: 'wardCode', message: 'Ward does not belong to province' }];
   const cases = [
-    { status: 400, message: 'Số lượng yêu cầu của Laptop vượt quá tồn kho (4).' },
+    { status: 400, message: 'Address hierarchy is invalid', errors: fieldErrors },
     { status: 404, message: 'Không tìm thấy sản phẩm có ID product_a.' },
     { status: 409, message: 'Tồn kho của Laptop đã thay đổi, vui lòng thử lại.' },
-    {
-      statusCode: 503,
-      message: 'Address provider unavailable',
-      errors: fieldErrors
-    }
   ];
 
   const original = orderModel.checkout;

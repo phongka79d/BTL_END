@@ -31,41 +31,31 @@ export const StaffDashboardView = () => {
     const fetchDashboardData = async () => {
       setLoading(true);
       try {
-        const [ordersRes, productsRes, reviewsRes] = await Promise.all([
-          orderApi.getAdminOrders({ limit: 10 }),
-          productApi.getProducts({ limit: 50 }),
-          reviewApi.getAdminReviews({ limit: 20 })
+        const [
+          recentOrdersRes,
+          pendingOrdersRes,
+          shippingOrdersRes,
+          lowStockProductsRes,
+          reviewsRes
+        ] = await Promise.all([
+          orderApi.getAdminOrders({ page: 1, limit: 5 }),
+          orderApi.getAdminOrders({ status: 'pending', page: 1, limit: 1 }),
+          orderApi.getAdminOrders({ status: 'shipping', page: 1, limit: 1 }),
+          productApi.getProducts({ stockStatus: 'low', page: 1, limit: 1 }),
+          reviewApi.getAdminReviews()
         ]);
 
-        let pendingCount = 0;
-        let shippingCount = 0;
-        let recentOrdersList = [];
-
-        if (ordersRes.success && ordersRes.data) {
-          const orders = ordersRes.data.orders || ordersRes.data.items || [];
-          recentOrdersList = orders.slice(0, 5);
-          pendingCount = orders.filter((o) => o.status === 'pending').length;
-          shippingCount = orders.filter((o) => o.status === 'shipping').length;
-        }
-
-        let lowStockCount = 0;
-        if (productsRes.success && productsRes.data) {
-          const products = productsRes.data.products || productsRes.data.items || [];
-          lowStockCount = products.filter((p) => (p.quantity || 0) <= 5).length;
-        }
-
-        let reviewsCount = 0;
-        if (reviewsRes.success && reviewsRes.data) {
-          const reviews = reviewsRes.data.reviews || reviewsRes.data.items || [];
-          reviewsCount = reviews.length;
-        }
+        const recentOrders = recentOrdersRes.data?.items || recentOrdersRes.data?.orders || [];
+        const reviews = Array.isArray(reviewsRes.data)
+          ? reviewsRes.data
+          : reviewsRes.data?.reviews || reviewsRes.data?.items || [];
 
         setStats({
-          pendingOrders: pendingCount,
-          shippingOrders: shippingCount,
-          lowStockProducts: lowStockCount,
-          visibleReviews: reviewsCount,
-          recentOrders: recentOrdersList
+          pendingOrders: Number(pendingOrdersRes.data?.pagination?.total) || 0,
+          shippingOrders: Number(shippingOrdersRes.data?.pagination?.total) || 0,
+          lowStockProducts: Number(lowStockProductsRes.data?.pagination?.total) || 0,
+          visibleReviews: reviewsRes.success ? reviews.length : 0,
+          recentOrders: recentOrdersRes.success ? recentOrders.slice(0, 5) : []
         });
       } catch (err) {
         console.error('Failed to load staff dashboard data:', err);

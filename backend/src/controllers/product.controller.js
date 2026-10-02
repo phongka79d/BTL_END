@@ -9,22 +9,20 @@ const { successResponse, errorResponse } = require('../utils/response');
 const getProducts = async (req, res, next) => {
   try {
     const { keyword, categoryId, minPrice, maxPrice, page, limit, sort, stockStatus } = req.query;
-    // Bộ lọc trạng thái tồn kho chỉ chấp nhận giá trị chuỗi trong allowlist; tham số trống nghĩa là không lọc.
     if (stockStatus !== undefined && stockStatus !== '' && !productModel.STOCK_STATUSES.includes(stockStatus)) {
       return errorResponse(res, 400, 'Trạng thái tồn kho không hợp lệ');
     }
+    const validatedParams = productModel.validateListParams({ page, limit, minPrice, maxPrice });
     const result = await productModel.findAll({
       keyword,
       categoryId,
-      minPrice,
-      maxPrice,
-      page,
-      limit,
+      ...validatedParams,
       sort,
       stockStatus
     });
     return successResponse(res, 200, 'Đã lấy sản phẩm thành công', result);
   } catch (error) {
+    if (error.status) return errorResponse(res, error.status, error.message);
     next(error);
   }
 };
@@ -64,14 +62,7 @@ const createProduct = async (req, res, next) => {
     });
     return successResponse(res, 201, 'Đã tạo sản phẩm thành công', { product });
   } catch (error) {
-    if (error.message && (
-      error.message.includes('bắt buộc') ||
-      error.message.includes('không được để trống') ||
-      error.message.includes('không âm') ||
-      error.message.includes('Số lượng')
-    )) {
-      return errorResponse(res, 400, error.message);
-    }
+    if (error.status) return errorResponse(res, error.status, error.message);
     next(error);
   }
 };
@@ -83,29 +74,17 @@ const createProduct = async (req, res, next) => {
 const updateProduct = async (req, res, next) => {
   try {
     const { id } = req.params;
-    // Kiểm tra trước sự tồn tại để trả về phản hồi 404 chính xác
     const existing = await productModel.findById(id);
     if (!existing) {
       return errorResponse(res, 404, 'Không tìm thấy sản phẩm');
     }
-
     const product = await productModel.update(id, req.body);
     return successResponse(res, 200, 'Đã cập nhật sản phẩm thành công', { product });
   } catch (error) {
     if (error.code === 'P2025') {
       return errorResponse(res, 404, 'Không tìm thấy sản phẩm');
     }
-    if (error.message && (
-      error.message.includes('cannot be') ||
-      error.message.includes('must be') ||
-      error.message.includes('non-negative') ||
-      error.message.includes('bắt buộc') ||
-      error.message.includes('không được để trống') ||
-      error.message.includes('không âm') ||
-      error.message.includes('Số lượng')
-    )) {
-      return errorResponse(res, 400, error.message);
-    }
+    if (error.status) return errorResponse(res, error.status, error.message);
     next(error);
   }
 };
@@ -124,18 +103,15 @@ const updateStock = async (req, res, next) => {
     if (quantityError) {
       return errorResponse(res, 400, quantityError);
     }
-
     const existing = await productModel.findById(id);
     if (!existing) {
       return errorResponse(res, 404, 'Không tìm thấy sản phẩm');
     }
-
     const product = await productModel.updateStock(id, quantity);
     return successResponse(res, 200, 'Đã cập nhật số lượng tồn kho thành công', { product });
   } catch (error) {
-    if (error.message && error.message.includes('Số lượng')) {
-      return errorResponse(res, 400, error.message);
-    }
+    if (error.code === 'P2025') return errorResponse(res, 404, 'Không tìm thấy sản phẩm');
+    if (error.status) return errorResponse(res, error.status, error.message);
     next(error);
   }
 };

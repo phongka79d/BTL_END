@@ -40,13 +40,13 @@ test('cart add rejects malformed quantity values before reading stock', async ()
   }
 });
 
-test('cart add accepts stock boundary one and rejects a request above stock', async () => {
+test('cart add accepts stock boundary one and rejects a request above stock with the remaining stock', async () => {
   const originalFindById = productModel.findById;
   const originalGetOrCreateCart = cartModel.getOrCreateCart;
   const originalAddItem = cartModel.addItem;
 
   try {
-    productModel.findById = async () => ({ id: 'product-1', quantity: 34 });
+    productModel.findById = async () => ({ id: 'product-1', name: 'Laptop', quantity: 34 });
     cartModel.getOrCreateCart = async () => ({ items: [] });
     cartModel.addItem = async (_userId, _productId, quantity) => ({ quantity });
 
@@ -67,7 +67,18 @@ test('cart add accepts stock boundary one and rejects a request above stock', as
       () => {}
     );
     assert.equal(rejected.statusCode, 400);
-    assert.equal(rejected.body.message, INVALID_QUANTITY);
+    assert.equal(rejected.body.message, 'Sản phẩm "Laptop" chỉ còn 34 sản phẩm trong kho.');
+
+    // Already holding 30 in the cart: adding 5 more mentions what is in the cart.
+    cartModel.getOrCreateCart = async () => ({ items: [{ productId: 'product-1', quantity: 30 }] });
+    const overCart = createMockResponse();
+    await cartController.addCartItem(
+      { user: { id: 'user-1' }, body: { productId: 'product-1', quantity: 5 } },
+      overCart,
+      () => {}
+    );
+    assert.equal(overCart.statusCode, 400);
+    assert.equal(overCart.body.message, 'Sản phẩm "Laptop" chỉ còn 34 sản phẩm trong kho, bạn đã có 30 trong giỏ hàng.');
   } finally {
     productModel.findById = originalFindById;
     cartModel.getOrCreateCart = originalGetOrCreateCart;
@@ -94,7 +105,7 @@ test('cart update rejects malformed quantity values before loading the cart item
   }
 });
 
-test('cart update rejects quantities above the current product stock', async () => {
+test('cart update of a line whose product sold out says it is sold out', async () => {
   const originalFindById = cartItemModel.findById;
   const originalGetOrCreateCart = cartModel.getOrCreateCart;
   const originalProductFindById = productModel.findById;
@@ -102,17 +113,17 @@ test('cart update rejects quantities above the current product stock', async () 
   try {
     cartItemModel.findById = async () => ({ cartId: 'cart-1', productId: 'product-1' });
     cartModel.getOrCreateCart = async () => ({ id: 'cart-1' });
-    productModel.findById = async () => ({ id: 'product-1', quantity: 34 });
+    productModel.findById = async () => ({ id: 'product-1', name: 'Laptop', quantity: 0 });
 
     const rejected = createMockResponse();
     await cartController.updateCartItem(
-      { user: { id: 'user-1' }, params: { id: 'item-1' }, body: { quantity: 35 } },
+      { user: { id: 'user-1' }, params: { id: 'item-1' }, body: { quantity: 1 } },
       rejected,
       () => {}
     );
 
     assert.equal(rejected.statusCode, 400);
-    assert.equal(rejected.body.message, INVALID_QUANTITY);
+    assert.equal(rejected.body.message, 'Sản phẩm "Laptop" đã hết hàng.');
   } finally {
     cartItemModel.findById = originalFindById;
     cartModel.getOrCreateCart = originalGetOrCreateCart;

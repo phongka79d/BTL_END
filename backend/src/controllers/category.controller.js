@@ -24,12 +24,8 @@ const createCategory = async (req, res, next) => {
     const category = await categoryModel.create({ name, description });
     return successResponse(res, 201, 'Đã tạo danh mục thành công', { category });
   } catch (error) {
-    if (error.message && (
-      error.message.includes('required') || 
-      error.message.includes('unique')
-    )) {
-      return errorResponse(res, 400, error.message);
-    }
+    if (error.status) return errorResponse(res, error.status, error.message);
+    if (error.code === 'P2002') return errorResponse(res, 409, 'Tên danh mục phải là duy nhất.');
     next(error);
   }
 };
@@ -41,24 +37,16 @@ const createCategory = async (req, res, next) => {
 const updateCategory = async (req, res, next) => {
   try {
     const { id } = req.params;
-    // Kiểm tra trước sự tồn tại để trả về phản hồi 404 chính xác
     const existing = await categoryModel.findById(id);
     if (!existing) {
       return errorResponse(res, 404, 'Không tìm thấy danh mục');
     }
-
     const category = await categoryModel.update(id, req.body);
     return successResponse(res, 200, 'Đã cập nhật danh mục thành công', { category });
   } catch (error) {
-    if (error.code === 'P2025') {
-      return errorResponse(res, 404, 'Không tìm thấy danh mục');
-    }
-    if (error.message && (
-      error.message.includes('cannot be') || 
-      error.message.includes('unique')
-    )) {
-      return errorResponse(res, 400, error.message);
-    }
+    if (error.code === 'P2025') return errorResponse(res, 404, 'Không tìm thấy danh mục');
+    if (error.status) return errorResponse(res, error.status, error.message);
+    if (error.code === 'P2002') return errorResponse(res, 409, 'Tên danh mục phải là duy nhất.');
     next(error);
   }
 };
@@ -70,21 +58,16 @@ const updateCategory = async (req, res, next) => {
 const deleteCategory = async (req, res, next) => {
   try {
     const { id } = req.params;
-    // Kiểm tra trước sự tồn tại để trả về phản hồi 404 chính xác
     const existing = await categoryModel.findById(id);
     if (!existing) {
       return errorResponse(res, 404, 'Không tìm thấy danh mục');
     }
-
     await categoryModel.destroy(id);
     return successResponse(res, 200, 'Đã xóa danh mục thành công');
   } catch (error) {
-    if (error.code === 'P2025') {
-      return errorResponse(res, 404, 'Không tìm thấy danh mục');
-    }
-    if (error.message && error.message.includes('referenced')) {
-      return errorResponse(res, 400, error.message);
-    }
+    if (error.code === 'P2025') return errorResponse(res, 404, 'Không tìm thấy danh mục');
+    if (error.status) return errorResponse(res, error.status, error.message);
+    if (error.code === 'P2003') return errorResponse(res, 409, 'Không thể xóa danh mục đang có sản phẩm.');
     next(error);
   }
 };

@@ -7,8 +7,6 @@ const USER_ADDRESS_FIELDS = Object.freeze([
   ['addressProvinceName', 'provinceName'],
   ['addressWardCode', 'wardCode'],
   ['addressWardName', 'wardName'],
-  ['addressStreetRef', 'streetRef'],
-  ['addressStreetName', 'streetName'],
   ['addressDetail', 'detail'],
 ]);
 const USER_ADDRESS_FIELD_NAMES = USER_ADDRESS_FIELDS.map(([name]) => name);
@@ -129,7 +127,7 @@ const isCompleteAddress = (user) => USER_ADDRESS_FIELD_NAMES.every((field) => ha
 /**
  * Resolve every legacy value before the first database write. The resulting
  * compare-and-set predicates include both the original free-form address and
- * all seven original structured fields, so concurrent user edits are skipped.
+ * all five original structured fields, so concurrent user edits are skipped.
  */
 const runBackfill = async ({
   prisma,

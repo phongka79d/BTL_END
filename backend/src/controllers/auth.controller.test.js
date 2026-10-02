@@ -30,9 +30,9 @@ beforeEach(() => {
   userModel.create = async () => null;
   userModel.findById = async () => null;
   passwordChangeOtpModel.createPasswordChangeOtp = async () => null;
-  passwordChangeOtpModel.findLatestActiveOtp = async () => null;
   passwordChangeOtpModel.findLatestUnusedOtp = async () => null;
-  passwordChangeOtpModel.incrementOtpAttempts = async () => null;
+  passwordChangeOtpModel.reserveOtpAttempt = async () => true;
+  userModel.findByUsername = async () => null;
   passwordChangeOtpModel.completePasswordChange = async () => null;
   passwordChangeOtpModel.invalidateActiveOtps = async () => null;
   emailService.sendPasswordChangeOtpEmail = async () => ({ delivery: 'console' });
@@ -58,7 +58,7 @@ test('register rejects invalid phone values before looking up or creating an acc
   ]) {
     const response = createResponse();
     await controller.register(
-      { body: { username: 'ada', email: 'ada@example.com', password: 'password', phone } },
+      { body: { username: 'ada', fullName: 'Ada Lovelace', email: 'ada@example.com', password: 'password', phone } },
       response,
       assert.fail
     );
@@ -112,8 +112,6 @@ test('register accepts an empty optional phone and no address while storing null
       addressProvinceName: null,
       addressWardCode: null,
       addressWardName: null,
-      addressStreetRef: null,
-      addressStreetName: null,
       addressDetail: null,
     }
   );
@@ -348,7 +346,7 @@ test('confirmPasswordChange rejects invalid otp and does not update password', a
     passwordHash,
     isBlocked: false,
   });
-  passwordChangeOtpModel.findLatestActiveOtp = async () => ({
+  passwordChangeOtpModel.findLatestUnusedOtp = async () => ({
     id: 'otp-1',
     userId: 'user-1',
     otpHash,
@@ -356,8 +354,9 @@ test('confirmPasswordChange rejects invalid otp and does not update password', a
     expiresAt: new Date(Date.now() + 60_000),
     usedAt: null,
   });
-  passwordChangeOtpModel.incrementOtpAttempts = async () => {
+  passwordChangeOtpModel.reserveOtpAttempt = async () => {
     attemptsIncremented = true;
+    return true;
   };
   passwordChangeOtpModel.completePasswordChange = async () => {
     completed = true;
@@ -396,7 +395,7 @@ test('confirmPasswordChange updates password only after current password and otp
     passwordHash,
     isBlocked: false,
   });
-  passwordChangeOtpModel.findLatestActiveOtp = async () => ({
+  passwordChangeOtpModel.findLatestUnusedOtp = async () => ({
     id: 'otp-1',
     userId: 'user-1',
     otpHash,
@@ -508,8 +507,9 @@ test('verifyForgotPasswordOtp rejects invalid otp without updating password', as
     expiresAt: new Date(Date.now() + 60_000),
     usedAt: null,
   });
-  passwordChangeOtpModel.incrementOtpAttempts = async () => {
+  passwordChangeOtpModel.reserveOtpAttempt = async () => {
     attemptsIncremented = true;
+    return true;
   };
   passwordChangeOtpModel.completePasswordChange = async () => {
     completed = true;

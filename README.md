@@ -39,7 +39,8 @@ This repository root coordinates the full development, build, and deployment lif
 │   │   │   ├── 20260709000000_add_password_change_otp/
 │   │   │   ├── 20260710000000_add_staff_role/
 │   │   │   ├── 20260930000000_add_order_recipient_snapshot/
-│   │   │   └── 20261002000000_add_structured_vietnam_addresses/
+│   │   │   ├── 20261002000000_add_structured_vietnam_addresses/
+│   │   │   └── 20261002120000_remove_street_selection/
 │   │   ├── schema.prisma        # Authoritative PostgreSQL data schema (customer, staff, admin)
 │   │   └── seed.js              # Initial database seed script (admin, categories, products)
 │   ├── src/                     # Backend application source code
@@ -172,8 +173,8 @@ flowchart TB
 
 ### 4. Shopping Cart & Transactional COD Checkout
 - **Cart Management:** Authenticated users add products to their cart. Cart state is persisted to PostgreSQL (`Cart` and `CartItem` tables) and synchronized with `CartContext`.
-- **Checkout:** The checkout form prefills the recipient name, phone, and a complete structured address from the user's profile. If profile loading fails, it leaves those fields blank, displays a notice, and still allows manual entry. `POST /api/orders` requires a 10–50 character full name (after trimming), a phone kept as a 9–11 digit string (preserving leading zeroes), and the structured address `{ provinceCode, wardCode, streetRef, detail }`; the server resolves authoritative current names before writing. It stores an immutable recipient and structured shipping-address snapshot per order, so later profile edits do not change existing orders. Order details, COD payment (`unpaid`), conditional stock decrement, and selected cart-line removal remain atomic; stock/cart races return HTTP 409.
-- **Vietnam address selection:** Address entry uses two current administrative levels—province/city then ward/commune/special zone—with provider-backed street selection; there is no district field. A legacy-only `User.address` is displayed as unverified, read-only text and must be reselected before checkout or profile replacement. The bundled data is v5.2.0, effective 2026-09-20 (upstream updated `2026-09-20T13:13:17Z`); the backend README documents source, MIT license, address API, exact validations, and rollout/backfill rules.
+- **Checkout:** The checkout form prefills the recipient name, phone, and a complete structured address from the user's profile. If profile loading fails, it leaves those fields blank, displays a notice, and still allows manual entry. `POST /api/orders` requires a 10–50 character full name (after trimming), a phone kept as a 9–11 digit string (preserving leading zeroes), and the address `{ provinceCode, wardCode, detail }`; users select Tỉnh/Thành phố and Phường/Xã, then type their house number and street in `detail`. The server resolves authoritative current names and formats `${detail}, ${wardName}, ${provinceName}`. It stores an immutable recipient and structured shipping-address snapshot per order, so later profile edits do not change existing orders. Order details, COD payment (`unpaid`), conditional stock decrement, and selected cart-line removal remain atomic; stock/cart races return HTTP 409.
+- **Vietnam address entry:** Address entry uses two current administrative levels—province/city then ward/commune/special zone—with no district field. A legacy-only `User.address` is displayed as unverified, read-only text. The bundled data is v5.2.0, effective 2026-09-20 (upstream updated `2026-09-20T13:13:17Z`); the backend README documents the address API, validations, and migration/backfill rules.
 - **Order Tracking & Self-Cancel:** `OrderHistoryView` lists the customer's orders and `OrderDetailView` shows one order with a `Hủy đơn hàng` action. `PUT /api/orders/:id/cancel` is accepted only while the order is `pending` or `confirmed`; the backend cancels it transactionally and restocks every line item. The page then renders the `cancelled` state and hides the cancel action.
 
 ### 5. Administration & Staff Operations
@@ -199,8 +200,8 @@ Create `backend/.env` using `backend/.env.example` as a template:
 | `JWT_SECRET` | Yes | - | Secret key for signing and verifying JWT tokens |
 | `JWT_EXPIRES_IN` | No | `7d` | JWT expiration duration |
 | `NODE_ENV` | No | `development` | Application environment (`development` / `production`) |
-| `ADDRESS_PROVIDER` | Yes for provider-backed address operations | `vietmap` | Server-side address provider selection; never configure it in Vite |
-| `VIETMAP_API_KEY` | Yes for provider-backed address operations | - | Backend-only VietMap secret; never expose it as a frontend `VITE_` variable |
+| `ADDRESS_PROVIDER` | No | `vietmap` | Optional legacy-address backfill provider selection; do not configure it in Vite |
+| `VIETMAP_API_KEY` | No | - | Optional backend-only key used only for legacy-address backfill; never expose it as a frontend `VITE_` variable |
 | `PASSWORD_OTP_EXPIRES_MINUTES` | No | `10` | Expiration window for password change OTPs |
 | `PASSWORD_OTP_MAX_ATTEMPTS` | No | `5` | Maximum failed OTP attempts before invalidation |
 | `PASSWORD_OTP_DELIVERY_MODE` | No | `console` | OTP delivery mode: `console` (dev) or `smtp` (prod) |
@@ -212,7 +213,7 @@ Create `backend/.env` using `backend/.env.example` as a template:
 
 > **Local QA migration safety:** point **both** `DATABASE_URL` and `DIRECT_URL` at the same isolated local database before running any Prisma command. `backend/prisma/schema.prisma` declares `directUrl = env("DIRECT_URL")`, and Prisma uses that URL for schema and migration work, overriding the connection otherwise used by the CLI — if `DIRECT_URL` points anywhere else, `prisma migrate` writes there instead. Never point local QA at a shared or remote database, and never commit `.env` files.
 
-> **Structured address rollout:** The additive migration and legacy-backfill runbook is in [backend/README.md](./backend/README.md). Backfill defaults to dry-run; writes require `--apply --backup-confirmed`, and a remote database additionally requires `--allow-remote-db`. The CLI uses only `DATABASE_URL`, preserves `User.address` and all orders, and requires a reviewed/restorable backup. The runbook does not claim a production migration or live VietMap provider QA has occurred.
+> **Structured address migration:** Migration `20261002120000_remove_street_selection` folds any existing street name into the detail text, then drops the four street columns. The legacy backfill defaults to dry-run; writes require `--apply --backup-confirmed`, and a remote database additionally requires `--allow-remote-db`. The CLI uses only `DATABASE_URL`, preserves `User.address` and existing order address text, and requires a reviewed/restorable backup. `VIETMAP_API_KEY` is optional and used only for the legacy backfill.
 
 ### Frontend Environment (`frontend/.env`)
 Create `frontend/.env` using `frontend/.env.example` as a template:

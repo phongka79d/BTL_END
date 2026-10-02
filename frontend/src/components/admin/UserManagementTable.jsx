@@ -13,6 +13,12 @@ import AdminTable from './AdminTable';
 
 export const getUserDisplayName = (user) => user.fullName || user.username || user.email || 'Người dùng';
 
+const ROLE_ACTION_LABELS = {
+  admin: 'Đổi thành Quản trị viên (Admin)',
+  staff: 'Đổi thành Nhân viên vận hành (Staff)',
+  customer: 'Đổi thành Khách hàng (Customer)'
+};
+
 export const UserManagementTable = ({
   currentUserId,
   error,
@@ -102,28 +108,21 @@ export const UserManagementTable = ({
         const nextBlockedState = !item.isBlocked;
         const isSelf = currentUserId === item.id;
 
-        const roleItems = [];
-        if (item.role !== 'admin') {
-          roleItems.push({
-            label: 'Đổi thành Quản trị viên (Admin)',
-            onClick: () => onRoleChange(item, 'admin'),
-            isDisabled: isSelf
-          });
-        }
-        if (item.role !== 'staff') {
-          roleItems.push({
-            label: 'Đổi thành Nhân viên vận hành (Staff)',
-            onClick: () => onRoleChange(item, 'staff'),
-            isDisabled: isSelf
-          });
-        }
-        if (item.role !== 'customer') {
-          roleItems.push({
-            label: 'Đổi thành Khách hàng (Customer)',
-            onClick: () => onRoleChange(item, 'customer'),
-            isDisabled: isSelf
-          });
-        }
+        // Admin không được tự đổi vai trò hay tự khóa tài khoản của chính mình (backend cũng chặn).
+        const accessItems = isSelf
+          ? [{ label: 'Không thể tự đổi vai trò hoặc tự khóa tài khoản của bạn', isDisabled: true }]
+          : [
+            ...['admin', 'staff', 'customer']
+              .filter((role) => role !== item.role)
+              .map((role) => ({
+                label: ROLE_ACTION_LABELS[role],
+                onClick: () => onRoleChange(item, role)
+              })),
+            {
+              label: nextBlockedState ? 'Khóa người dùng' : 'Mở khóa người dùng',
+              onClick: () => onBlockedChange(item, nextBlockedState)
+            }
+          ];
 
         return (
           <MoreMenu
@@ -134,12 +133,7 @@ export const UserManagementTable = ({
                 label: 'Chỉnh sửa hồ sơ',
                 onClick: () => onEdit(item)
               },
-              ...roleItems,
-              {
-                label: nextBlockedState ? 'Khóa người dùng' : 'Mở khóa người dùng',
-                onClick: () => onBlockedChange(item, nextBlockedState),
-                isDisabled: isSelf
-              }
+              ...accessItems
             ]}
           />
         );

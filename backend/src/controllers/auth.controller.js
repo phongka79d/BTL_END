@@ -47,7 +47,11 @@ const verifyCurrentPassword = async (user, currentPassword) => {
   return bcrypt.compare(currentPassword, user.passwordHash);
 };
 
-const normalizeEmail = (email) => String(email || '').trim();
+// Email so khớp không phân biệt hoa/thường: luôn lưu và tra cứu ở dạng chữ thường.
+const normalizeEmail = (email) => (typeof email === 'string' ? email.trim().toLowerCase() : '');
+
+const USERNAME_MIN_LENGTH = 3;
+const USERNAME_MAX_LENGTH = 50;
 
 const validateNewPassword = (res, newPassword, confirmPassword) => {
   if (newPassword !== confirmPassword) {
@@ -83,7 +87,9 @@ const validateOtpForUser = async ({ user, otp, res, requiredMessage }) => {
   }
 
   const maxAttempts = getPasswordOtpMaxAttempts();
-  if (passwordChangeOtp.attempts >= maxAttempts) {
+  // Giữ chỗ lượt thử trước khi so khớp để các lần đoán đồng thời không vượt giới hạn.
+  const attemptReserved = await passwordChangeOtpModel.reserveOtpAttempt(passwordChangeOtp.id, maxAttempts);
+  if (!attemptReserved) {
     await passwordChangeOtpModel.invalidateActiveOtps(user.id);
     errorResponse(res, 400, 'Quá nhiều lần thử OTP. Hãy yêu cầu OTP mới');
     return null;
@@ -91,7 +97,6 @@ const validateOtpForUser = async ({ user, otp, res, requiredMessage }) => {
 
   const otpMatches = await compareOtp(otp, passwordChangeOtp.otpHash);
   if (!otpMatches) {
-    await passwordChangeOtpModel.incrementOtpAttempts(passwordChangeOtp.id);
     errorResponse(res, 400, 'OTP không hợp lệ');
     return null;
   }
@@ -124,7 +129,16 @@ const createAndSendPasswordOtp = async (user) => {
  */
 const register = async (req, res, next) => {
   try {
-    const { username, email, password, fullName, phone, address } = req.body;
+    const { password, fullName, phone, address } = req.body;
+    const email = normalizeEmail(req.body.email);
+    const username = typeof req.body.username === 'string' ? req.body.username.trim() : '';
+    // Đồng bộ với quy tắc trên form đăng ký: không cho phép bỏ qua bằng cách gọi API trực tiếp.
+    if (username.length < USERNAME_MIN_LENGTH || username.length > USERNAME_MAX_LENGTH) {
+      return errorResponse(res, 400, `Tên người dùng phải có từ ${USERNAME_MIN_LENGTH} đến ${USERNAME_MAX_LENGTH} ký tự`);
+    }
+    if (typeof fullName !== 'string' || fullName.trim() === '') {
+      return errorResponse(res, 400, 'Họ và tên là bắt buộc');
+    }
     const phoneError = validatePhone(phone);
     if (phoneError) {
       return errorResponse(res, 400, phoneError);
@@ -143,10 +157,13 @@ const register = async (req, res, next) => {
     }
     const addressFields = addressService.toUserAddressFields(resolvedAddress);
 
-    // Kiểm tra xem email đã được đăng ký chưa
+    // Kiểm tra trùng email (không phân biệt hoa/thường) và trùng tên người dùng
     const existingUser = await userModel.findByEmail(email);
     if (existingUser) {
       return errorResponse(res, 400, 'Email đã được đăng ký');
+    }
+    if (await userModel.findByUsername(username)) {
+      return errorResponse(res, 400, 'Tên người dùng đã được sử dụng');
     }
 
     // Băm mật khẩu
@@ -157,7 +174,7 @@ const register = async (req, res, next) => {
       username,
       email,
       passwordHash,
-      fullName,
+      fullName: fullName.trim(),
       phone,
       ...addressFields,
       role: 'customer' // Mặc định là customer
@@ -180,6 +197,10 @@ const register = async (req, res, next) => {
       token
     });
   } catch (error) {
+    // Hai lần đăng ký đồng thời cùng email: bên thua nhận lỗi trùng thay vì 500.
+    if (error && error.code === 'P2002') {
+      return errorResponse(res, 400, 'Email đã được đăng ký');
+    }
     next(error);
   }
 };
@@ -190,7 +211,8 @@ const register = async (req, res, next) => {
  */
 const login = async (req, res, next) => {
   try {
-    const { email, password } = req.body;
+    const { password } = req.body;
+    const email = normalizeEmail(req.body.email);
 
     // Tìm người dùng theo email
     const user = await userModel.findByEmail(email);
@@ -306,30 +328,14 @@ const confirmPasswordChange = async (req, res, next) => {
       return errorResponse(res, 400, 'Mật khẩu hiện tại không chính xác');
     }
 
-    const passwordChangeOtp = await passwordChangeOtpModel.findLatestActiveOtp(user.id);
+    const passwordChangeOtp = await validateOtpForUser({
+      user,
+      otp,
+      res,
+      requiredMessage: 'OTP đổi mật khẩu là bắt buộc',
+    });
     if (!passwordChangeOtp) {
-      return errorResponse(res, 400, 'OTP đổi mật khẩu là bắt buộc');
-    }
-
-    if (passwordChangeOtp.usedAt) {
-      return errorResponse(res, 400, 'OTP đã được sử dụng');
-    }
-
-    if (passwordChangeOtp.expiresAt <= new Date()) {
-      await passwordChangeOtpModel.invalidateActiveOtps(user.id);
-      return errorResponse(res, 400, 'OTP đã hết hạn');
-    }
-
-    const maxAttempts = getPasswordOtpMaxAttempts();
-    if (passwordChangeOtp.attempts >= maxAttempts) {
-      await passwordChangeOtpModel.invalidateActiveOtps(user.id);
-      return errorResponse(res, 400, 'Quá nhiều lần thử OTP. Hãy yêu cầu OTP mới');
-    }
-
-    const otpMatches = await compareOtp(otp, passwordChangeOtp.otpHash);
-    if (!otpMatches) {
-      await passwordChangeOtpModel.incrementOtpAttempts(passwordChangeOtp.id);
-      return errorResponse(res, 400, 'OTP không hợp lệ');
+      return null;
     }
 
     const passwordHash = await bcrypt.hash(newPassword, SALT_ROUNDS);

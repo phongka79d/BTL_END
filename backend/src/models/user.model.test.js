@@ -24,8 +24,6 @@ const users = [
   addressProvinceName: 'Hà Nội',
   addressWardCode: '00001',
   addressWardName: 'Phường Ba Đình',
-  addressStreetRef: 'street-1',
-  addressStreetName: 'Phố Một',
   addressDetail: 'Số 1',
 }));
 
@@ -109,8 +107,6 @@ test('findAll combines each role with keyword search before counting and paginat
     assert.equal(row.addressProvinceName, 'Hà Nội');
     assert.equal(row.addressWardCode, '00001');
     assert.equal(row.addressWardName, 'Phường Ba Đình');
-    assert.equal(row.addressStreetRef, 'street-1');
-    assert.equal(row.addressStreetName, 'Phố Một');
     assert.equal(row.addressDetail, 'Số 1');
     assert.equal(Object.hasOwn(row, 'passwordHash'), false);
   }

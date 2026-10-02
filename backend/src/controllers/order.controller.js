@@ -5,7 +5,7 @@ const { validatePhone } = require('../utils/phoneValidation');
 const { validateAddress } = require('../utils/addressValidation');
 const { validateCheckoutFullName } = require('../utils/checkoutValidation');
 const { isOrderSearchField } = require('../utils/orderSearchFields');
-const CHECKOUT_ADDRESS_FIELDS = ['provinceCode', 'wardCode', 'streetRef', 'detail'];
+const CHECKOUT_ADDRESS_FIELDS = ['provinceCode', 'wardCode', 'detail'];
 /**
  * Thực hiện checkout của khách hàng / tạo đơn hàng
  * POST /api/orders

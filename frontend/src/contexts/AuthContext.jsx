@@ -104,6 +104,9 @@ export const AuthProvider = ({ children }) => {
     if (!user) return false;
     return hasRolePermission(user.role, permission);
   };
+  const updateUser = (updatedUser) => {
+    setUser((currentUser) => ({ ...currentUser, ...updatedUser }));
+  };
 
   const value = {
     user,
@@ -113,6 +116,7 @@ export const AuthProvider = ({ children }) => {
     login,
     register,
     logout,
+    updateUser,
     isAuthenticated: !!user,
     isAdmin: user?.role === 'admin',
     isStaff: user?.role === 'staff',

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Badge, Banner, Button, Dialog, Heading, HStack, VStack, Text, TextInput, Selector } from '@astryxdesign/core';
 import PageHeader from '../../components/common/PageHeader';
 import FilterBar from '../../components/common/FilterBar';
@@ -28,13 +28,17 @@ export const StaffInventoryView = () => {
   const [saving, setSaving] = useState(false);
   const { notifySuccess, notifyError } = useNotification();
   const stockDraftError = getStockDraftError(newQuantity);
+  const requestIdRef = useRef(0);
 
   const fetchProducts = useCallback(async (page = 1) => {
+    const requestId = ++requestIdRef.current;
     setLoading(true);
     try {
       const res = await productApi.getProducts(
         buildInventoryQuery({ page, keyword: search, stockStatus: stockFilter })
       );
+
+      if (requestId !== requestIdRef.current) return;
 
       if (res && res.success && res.data) {
         const items = res.data.products || res.data.items || [];
@@ -45,10 +49,11 @@ export const StaffInventoryView = () => {
         setLoadError(res?.message || INVENTORY_LOAD_ERROR_MESSAGE);
       }
     } catch (err) {
+      if (requestId !== requestIdRef.current) return;
       console.error('Failed to fetch inventory:', err);
       setLoadError(err?.message || INVENTORY_LOAD_ERROR_MESSAGE);
     } finally {
-      setLoading(false);
+      if (requestId === requestIdRef.current) setLoading(false);
     }
   }, [search, stockFilter]);
 

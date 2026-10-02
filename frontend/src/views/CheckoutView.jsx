@@ -169,7 +169,7 @@ export const CheckoutView = () => {
 
   const handleFieldBlur = useCallback(
     (field) => {
-      const errorField = ['provinceCode', 'wardCode', 'streetRef', 'detail'].includes(field)
+      const errorField = ['provinceCode', 'wardCode', 'detail'].includes(field)
         ? 'address'
         : field;
       setTouched((prev) => ({ ...prev, [errorField]: true }));
@@ -247,6 +247,10 @@ export const CheckoutView = () => {
       const message =
         err?.message || 'Không thể đặt đơn hàng. Vui lòng thử lại.';
       setApiError(message);
+      // 409 = tồn kho đã đổi (người khác vừa mua); tải lại giỏ để hiển thị số lượng còn lại thực tế.
+      if (err?.status === 409) {
+        refreshCart().catch(() => {});
+      }
     } finally {
       submissionGuard.end();
       setIsSubmitting(false);

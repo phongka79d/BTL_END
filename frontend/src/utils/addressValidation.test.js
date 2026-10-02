@@ -5,14 +5,12 @@ import { ADDRESS_INVALID_MESSAGE, validateAddress } from './addressValidation.js
 const FULL_SELECTION = {
   provinceCode: '01',
   wardCode: '00123',
-  streetRef: 'street-ref-1',
-  detail: 'Số 12'
+  detail: 'Số 12, Phố Hàng Bài'
 };
 
 const COMPLETE_NORMALIZED_ADDRESS = {
   ...FULL_SELECTION,
-  detail: '123',
-  streetName: 'A',
+  detail: '123456',
   wardName: 'B',
   provinceName: 'C'
 };
@@ -20,8 +18,7 @@ const COMPLETE_NORMALIZED_ADDRESS = {
 const REQUIRED_ERRORS = {
   provinceCode: 'Vui lòng chọn Tỉnh/Thành phố.',
   wardCode: 'Vui lòng chọn Phường/Xã.',
-  streetRef: 'Vui lòng chọn Đường/Phố.',
-  detail: 'Vui lòng nhập số nhà/ngõ/ngách hoặc thông tin chi tiết.'
+  detail: 'Vui lòng nhập số nhà, ngõ/ngách, tên đường.'
 };
 
 test('optional empty addresses are accepted while required empty addresses report every required field', () => {
@@ -35,8 +32,7 @@ test('optional empty addresses are accepted while required empty addresses repor
 test('each missing selector reports its own guidance and missing detail is field-specific', () => {
   const missingSelectors = [
     ['provinceCode', 'Vui lòng chọn Tỉnh/Thành phố.'],
-    ['wardCode', 'Vui lòng chọn Phường/Xã.'],
-    ['streetRef', 'Vui lòng chọn Đường/Phố.']
+    ['wardCode', 'Vui lòng chọn Phường/Xã.']
   ];
 
   for (const [field, message] of missingSelectors) {
@@ -44,18 +40,17 @@ test('each missing selector reports its own guidance and missing detail is field
   }
 
   assert.deepEqual(validateAddress({ ...FULL_SELECTION, detail: '  ' }), {
-    detail: 'Vui lòng nhập số nhà/ngõ/ngách hoặc thông tin chi tiết.'
+    detail: 'Vui lòng nhập số nhà, ngõ/ngách, tên đường.'
   });
   assert.deepEqual(validateAddress({ provinceCode: '01' }), {
     wardCode: 'Vui lòng chọn Phường/Xã.',
-    streetRef: 'Vui lòng chọn Đường/Phố.',
-    detail: 'Vui lòng nhập số nhà/ngõ/ngách hoặc thông tin chi tiết.'
+    detail: 'Vui lòng nhập số nhà, ngõ/ngách, tên đường.'
   });
 });
 
-test('address references must be present and populated canonical fields must be strings', () => {
-  assert.deepEqual(validateAddress({ ...FULL_SELECTION, streetRef: undefined }), {
-    streetRef: 'Vui lòng chọn Đường/Phố.'
+test('required address codes and populated canonical fields must be strings', () => {
+  assert.deepEqual(validateAddress({ ...FULL_SELECTION, wardCode: undefined }), {
+    wardCode: 'Vui lòng chọn Phường/Xã.'
   });
   assert.deepEqual(validateAddress({ ...FULL_SELECTION, wardCode: 1 }), {
     address: ADDRESS_INVALID_MESSAGE
@@ -63,9 +58,9 @@ test('address references must be present and populated canonical fields must be 
   assert.deepEqual(validateAddress([]), { address: ADDRESS_INVALID_MESSAGE });
 });
 
-test('minimum length applies at the normalized boundary only when all canonical names exist', () => {
+test('minimum length applies to the canonical formatted address when names exist', () => {
   assert.equal(
-    `${COMPLETE_NORMALIZED_ADDRESS.detail}, ${COMPLETE_NORMALIZED_ADDRESS.streetName}, ${COMPLETE_NORMALIZED_ADDRESS.wardName}, ${COMPLETE_NORMALIZED_ADDRESS.provinceName}`.length,
+    `${COMPLETE_NORMALIZED_ADDRESS.detail}, ${COMPLETE_NORMALIZED_ADDRESS.wardName}, ${COMPLETE_NORMALIZED_ADDRESS.provinceName}`.length,
     12
   );
   assert.deepEqual(validateAddress(COMPLETE_NORMALIZED_ADDRESS), {});

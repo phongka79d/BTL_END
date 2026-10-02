@@ -34,6 +34,86 @@ const STOCK_STATUSES = Object.keys(STOCK_STATUS_FILTERS);
 const normalizeSort = (sort) => (
   Object.values(PRODUCT_SORTS).includes(sort) ? sort : PRODUCT_SORTS.DEFAULT
 );
+const createHttpError = (message, status = 400) => Object.assign(new Error(message), { status });
+const PRICE_STRING_PATTERN = /^(?:\+)?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?$/;
+const FILTER_PRICE_PATTERN = /^(?:\d+(?:\.\d*)?|\.\d+)$/;
+
+const isValidPrice = (value) => {
+  if (typeof value === 'number') return Number.isFinite(value) && value >= 0;
+  if (typeof value !== 'string' || !PRICE_STRING_PATTERN.test(value.trim())) return false;
+  const price = Number(value);
+  return Number.isFinite(price) && price >= 0;
+};
+
+const normalizeImageUrl = (value) => {
+  if (value === undefined || value === null) return value;
+  if (typeof value !== 'string') {
+    throw createHttpError('URL hình ảnh phải là chuỗi hoặc để trống.');
+  }
+  const imageUrl = value.trim();
+  if (!imageUrl || (imageUrl.startsWith('/') && !imageUrl.startsWith('//'))) return imageUrl;
+  try {
+    const parsed = new URL(imageUrl);
+    if (['http:', 'https:'].includes(parsed.protocol) && parsed.hostname) return imageUrl;
+  } catch {
+    // Fall through to one validation response for malformed URLs.
+  }
+  throw createHttpError('URL hình ảnh phải là URL http(s) hợp lệ hoặc đường dẫn bắt đầu bằng /.');
+};
+
+const parsePositiveInteger = (value, field, defaultValue, maximum) => {
+  if (value === undefined) return defaultValue;
+  const parsed = typeof value === 'number'
+    ? value
+    : (typeof value === 'string' && /^\d+$/.test(value) ? Number(value) : NaN);
+  if (!Number.isSafeInteger(parsed) || parsed < 1 || (maximum !== undefined && parsed > maximum)) {
+    const range = maximum === undefined ? 'số nguyên dương' : `số nguyên từ 1 đến ${maximum}`;
+    throw createHttpError(`${field} phải là ${range}.`);
+  }
+  return parsed;
+};
+
+const validateListParams = ({ page, limit, minPrice, maxPrice } = {}, { allowNumbers = false } = {}) => {
+  const parseFilterPrice = (value, field) => {
+    if (value === undefined) return undefined;
+    const isNumber = allowNumbers && typeof value === 'number';
+    if (!isNumber && (typeof value !== 'string' || !FILTER_PRICE_PATTERN.test(value))) {
+      throw createHttpError(`${field} phải là số thập phân không âm.`);
+    }
+    const parsed = Number(value);
+    if (!Number.isFinite(parsed) || parsed < 0) {
+      throw createHttpError(`${field} phải là số thập phân không âm.`);
+    }
+    return parsed;
+  };
+  const parsedPage = parsePositiveInteger(page, 'Trang', 1);
+  const parsedLimit = parsePositiveInteger(limit, 'Giới hạn', 12, 100);
+  const parsedMinPrice = parseFilterPrice(minPrice, 'Giá tối thiểu');
+  const parsedMaxPrice = parseFilterPrice(maxPrice, 'Giá tối đa');
+  if (parsedMinPrice !== undefined && parsedMaxPrice !== undefined && parsedMinPrice > parsedMaxPrice) {
+    throw createHttpError('Giá tối thiểu không được lớn hơn giá tối đa.');
+  }
+  return { page: parsedPage, limit: parsedLimit, minPrice: parsedMinPrice, maxPrice: parsedMaxPrice };
+};
+
+const normalizeProductKey = (value) => value.trim().toLowerCase();
+const trimProductText = (value) => typeof value === 'string' ? value.trim() : value;
+
+const ensureUniqueProduct = async ({ name, brand, categoryId }, excludeId) => {
+  const existingProducts = await prisma.product.findMany({
+    where: { categoryId },
+    select: { id: true, name: true, brand: true },
+  });
+  const duplicate = existingProducts.some((product) => (
+    product.id !== excludeId &&
+    normalizeProductKey(product.name) === normalizeProductKey(name) &&
+    normalizeProductKey(product.brand) === normalizeProductKey(brand)
+  ));
+  if (duplicate) {
+    throw createHttpError(`Sản phẩm "${name}" (${brand}) đã tồn tại trong danh mục này.`, 409);
+  }
+};
+
 
 const toTimestamp = (value) => {
   const time = value ? new Date(value).getTime() : 0;
@@ -132,21 +212,22 @@ const sortByOrderedQuantity = async (items) => {
 const validateProductData = (data) => {
   const { name, brand, price, quantity, categoryId } = data;
   if (!name || typeof name !== 'string' || name.trim() === '') {
-    throw new Error('Tên sản phẩm là bắt buộc.');
+    throw createHttpError('Tên sản phẩm là bắt buộc.');
   }
   if (!brand || typeof brand !== 'string' || brand.trim() === '') {
-    throw new Error('Thương hiệu sản phẩm là bắt buộc.');
+    throw createHttpError('Thương hiệu sản phẩm là bắt buộc.');
   }
-  if (price === undefined || price === null || (typeof price === 'string' && price.trim() === '') || typeof price === 'boolean' || !Number.isFinite(Number(price)) || Number(price) < 0) {
-    throw new Error('Giá phải là số không âm.');
+  if (price === undefined || price === null || !isValidPrice(price)) {
+    throw createHttpError('Giá phải là số không âm.');
   }
   const quantityError = validateInventoryQuantity(quantity);
   if (quantityError) {
-    throw new Error(quantityError);
+    throw createHttpError(quantityError);
   }
   if (!categoryId || typeof categoryId !== 'string' || categoryId.trim() === '') {
-    throw new Error('Category ID là bắt buộc.');
+    throw createHttpError('Category ID là bắt buộc.');
   }
+  normalizeImageUrl(data.imageUrl);
 };
 
 
@@ -157,23 +238,24 @@ const validateProductData = (data) => {
 const validateProductUpdateData = (data) => {
   const { name, brand, price, quantity, categoryId } = data;
   if (name !== undefined && (!name || typeof name !== 'string' || name.trim() === '')) {
-    throw new Error('Tên sản phẩm không được để trống.');
+    throw createHttpError('Tên sản phẩm không được để trống.');
   }
   if (brand !== undefined && (!brand || typeof brand !== 'string' || brand.trim() === '')) {
-    throw new Error('Thương hiệu sản phẩm không được để trống.');
+    throw createHttpError('Thương hiệu sản phẩm không được để trống.');
   }
-  if (price !== undefined && (price === null || (typeof price === 'string' && price.trim() === '') || typeof price === 'boolean' || !Number.isFinite(Number(price)) || Number(price) < 0)) {
-    throw new Error('Giá phải là số không âm.');
+  if (price !== undefined && (price === null || !isValidPrice(price))) {
+    throw createHttpError('Giá phải là số không âm.');
   }
   if (quantity !== undefined) {
     const quantityError = validateInventoryQuantity(quantity);
     if (quantityError) {
-      throw new Error(quantityError);
+      throw createHttpError(quantityError);
     }
   }
   if (categoryId !== undefined && (!categoryId || typeof categoryId !== 'string' || categoryId.trim() === '')) {
-    throw new Error('Category ID không được để trống.');
+    throw createHttpError('Category ID không được để trống.');
   }
+  if (data.imageUrl !== undefined) normalizeImageUrl(data.imageUrl);
 };
 
 /**
@@ -209,7 +291,8 @@ const findById = async (id) => {
  * @returns {Promise<Object>}
  */
 const findAll = async (params = {}) => {
-  const { keyword, categoryId, minPrice, maxPrice, page, limit, stockStatus } = params;
+  const { keyword, categoryId, stockStatus } = params;
+  const { minPrice, maxPrice, page: pageNum, limit: limitNum } = validateListParams(params, { allowNumbers: true });
   const sort = normalizeSort(params.sort);
   const where = {};
 
@@ -224,17 +307,17 @@ const findAll = async (params = {}) => {
     where.categoryId = categoryId;
   }
 
-  if (minPrice !== undefined && minPrice !== null && minPrice !== '') {
+  if (minPrice !== undefined) {
     where.price = {
       ...where.price,
-      gte: parseFloat(minPrice)
+      gte: minPrice
     };
   }
 
-  if (maxPrice !== undefined && maxPrice !== null && maxPrice !== '') {
+  if (maxPrice !== undefined) {
     where.price = {
       ...where.price,
-      lte: parseFloat(maxPrice)
+      lte: maxPrice
     };
   }
 
@@ -244,10 +327,6 @@ const findAll = async (params = {}) => {
   }
 
   const total = await prisma.product.count({ where });
-
-  const pageNum = page ? parseInt(page, 10) : 1;
-  const limitNum = limit ? parseInt(limit, 10) : 12;
-  
   const skip = (pageNum - 1) * limitNum;
   const take = limitNum;
 
@@ -312,9 +391,14 @@ const create = async (data) => {
   validateProductData(data);
   const formattedData = {
     ...data,
-    price: parseFloat(data.price),
-    quantity: parseInt(data.quantity, 10),
+    name: trimProductText(data.name),
+    brand: trimProductText(data.brand),
+    categoryId: trimProductText(data.categoryId),
+    imageUrl: normalizeImageUrl(data.imageUrl),
+    price: Number(data.price),
+    quantity: toQuantity(data.quantity),
   };
+  await ensureUniqueProduct(formattedData);
   return prisma.product.create({
     data: formattedData,
     include: {
@@ -337,11 +421,25 @@ const create = async (data) => {
 const update = async (id, data) => {
   validateProductUpdateData(data);
   const formattedData = { ...data };
-  if (data.price !== undefined) {
-    formattedData.price = parseFloat(data.price);
-  }
-  if (data.quantity !== undefined) {
-    formattedData.quantity = parseInt(data.quantity, 10);
+  if (data.name !== undefined) formattedData.name = trimProductText(data.name);
+  if (data.brand !== undefined) formattedData.brand = trimProductText(data.brand);
+  if (data.categoryId !== undefined) formattedData.categoryId = trimProductText(data.categoryId);
+  if (data.imageUrl !== undefined) formattedData.imageUrl = normalizeImageUrl(data.imageUrl);
+  if (data.price !== undefined) formattedData.price = Number(data.price);
+  if (data.quantity !== undefined) formattedData.quantity = toQuantity(data.quantity);
+
+  if (data.name !== undefined || data.brand !== undefined || data.categoryId !== undefined) {
+    const existing = await prisma.product.findUnique({
+      where: { id },
+      select: { id: true, name: true, brand: true, categoryId: true },
+    });
+    if (existing) {
+      await ensureUniqueProduct({
+        name: formattedData.name ?? existing.name,
+        brand: formattedData.brand ?? existing.brand,
+        categoryId: formattedData.categoryId ?? existing.categoryId,
+      }, id);
+    }
   }
   return prisma.product.update({
     where: { id },
@@ -376,7 +474,7 @@ const destroy = async (id) => {
 const updateStock = async (id, quantity) => {
   const quantityError = validateInventoryQuantity(quantity);
   if (quantityError) {
-    throw new Error(quantityError);
+    throw createHttpError(quantityError);
   }
   const parsedQuantity = toQuantity(quantity);
   return prisma.product.update({
@@ -394,6 +492,7 @@ const updateStock = async (id, quantity) => {
 };
 
 module.exports = {
+  validateListParams,
   STOCK_STATUSES,
   findById,
   findAll,

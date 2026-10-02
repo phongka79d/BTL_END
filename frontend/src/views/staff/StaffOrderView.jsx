@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Button, HStack, VStack, Text, Selector } from '@astryxdesign/core';
 import PageHeader from '../../components/common/PageHeader';
 import FilterBar from '../../components/common/FilterBar';
@@ -27,6 +27,7 @@ export const StaffOrderView = () => {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [updatingStatus, setUpdatingStatus] = useState(false);
   const { notifySuccess, notifyError } = useNotification();
+  const requestIdRef = useRef(0);
 
   const fetchOrders = useCallback(async ({
     page = 1,
@@ -34,11 +35,14 @@ export const StaffOrderView = () => {
     searchField: activeField = ORDER_SEARCH_FIELDS.ORDER_ID,
     status = ''
   } = {}) => {
+    const requestId = ++requestIdRef.current;
     setLoading(true);
     try {
       const res = await orderApi.getAdminOrders(
         buildOrderSearchQuery({ page, keyword: activeKeyword, searchField: activeField, status })
       );
+      if (requestId !== requestIdRef.current) return;
+
       if (res.success && res.data) {
         const items = res.data.items || res.data.orders || [];
         setOrders(items);
@@ -50,10 +54,11 @@ export const StaffOrderView = () => {
         });
       }
     } catch (err) {
+      if (requestId !== requestIdRef.current) return;
       console.error('Failed to fetch orders:', err);
       notifyError('Không thể tải danh sách đơn hàng');
     } finally {
-      setLoading(false);
+      if (requestId === requestIdRef.current) setLoading(false);
     }
   }, [notifyError]);
 

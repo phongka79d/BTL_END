@@ -3,9 +3,11 @@ const { Prisma } = require('@prisma/client');
 const addressService = require('../services/address.service');
 const { validatePhone } = require('../utils/phoneValidation');
 const { validateCheckoutFullName } = require('../utils/checkoutValidation');
-const { PURCHASE_INVALID_MESSAGE, toQuantity } = require('../utils/quantityValidation');
+const { PURCHASE_INVALID_MESSAGE, stockShortageMessage, toQuantity } = require('../utils/quantityValidation');
 const { ORDER_SEARCH_FIELDS, isOrderSearchField } = require('../utils/orderSearchFields');
 
+// Giới hạn của cột Decimal(10,2) dùng cho Order.totalAmount và Payment.amount.
+const MAX_ORDER_TOTAL = new Prisma.Decimal('99999999.99');
 const checkoutError = (message, status = 400) => {
   const error = new Error(message);
   error.status = status;
@@ -84,8 +86,7 @@ const findById = async (id) => {
  * 11. Xóa các mục giỏ hàng đã đặt và xác minh không có dòng nào bị thay đổi đồng thời.
  * 12. Trả về đơn hàng gồm chi tiết, tóm tắt sản phẩm và dữ liệu thanh toán.
  * 
- * @param {string} userId
- * @param {{provinceCode: string, wardCode: string, streetRef: string, detail: string}} address
+ * @param {{provinceCode: string, wardCode: string, detail: string}} address
  * @param {{fullName: string, phone: string, note?: string|null}} contact
  * @param {string[]|undefined} cartItemIds
  * @returns {Promise<Object>}
@@ -139,11 +140,16 @@ const checkout = async (userId, address, contact, cartItemIds) => {
         throw checkoutError(PURCHASE_INVALID_MESSAGE);
       }
       if (quantity > item.product.quantity) {
-        throw checkoutError(`Số lượng yêu cầu của ${item.product.name} vượt quá tồn kho (${item.product.quantity}).`);
+        throw checkoutError(stockShortageMessage({ productName: item.product.name, available: item.product.quantity }), 409);
       }
 
       orderLines.push({ item, quantity });
       total = total.plus(new Prisma.Decimal(item.unitPrice).times(quantity));
+    }
+
+    // Order.totalAmount / Payment.amount là Decimal(10,2): chặn trước khi ghi để không thành lỗi 500.
+    if (total.greaterThan(MAX_ORDER_TOTAL)) {
+      throw checkoutError('Tổng giá trị đơn hàng vượt quá giới hạn 99.999.999,99 ₫. Vui lòng chia thành nhiều đơn hàng.');
     }
 
     // 7. Trừ tồn kho bằng cập nhật có điều kiện; count !== 1 nghĩa là tồn kho vừa bị thay đổi.
@@ -159,8 +165,13 @@ const checkout = async (userId, address, contact, cartItemIds) => {
       });
 
       if (stockUpdate.count !== 1) {
+        // Một đơn khác vừa lấy hàng: báo số lượng còn lại thực tế thay vì lỗi chung.
+        const current = await tx.product.findUnique({
+          where: { id: line.item.productId },
+          select: { quantity: true }
+        });
         throw checkoutError(
-          `Tồn kho của ${line.item.product.name} đã thay đổi, vui lòng thử lại.`,
+          stockShortageMessage({ productName: line.item.product.name, available: current ? current.quantity : 0 }),
           409
         );
       }
@@ -203,10 +214,11 @@ const checkout = async (userId, address, contact, cartItemIds) => {
     });
 
     // 11. Chỉ xóa mục giỏ hàng khi các thay đổi đơn hàng/chi tiết/thanh toán/tồn kho đã sẵn sàng commit.
+    //     Xóa kèm điều kiện số lượng đã đọc: nếu tab khác vừa sửa số lượng thì hủy toàn bộ giao dịch.
     const cartDelete = await tx.cartItem.deleteMany({
       where: {
         cartId: cart.id,
-        id: { in: orderLines.map((line) => line.item.id) }
+        OR: orderLines.map((line) => ({ id: line.item.id, quantity: line.quantity }))
       }
     });
 

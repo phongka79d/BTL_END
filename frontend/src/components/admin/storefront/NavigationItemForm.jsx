@@ -52,11 +52,13 @@ export const NavigationItemForm = ({
   }, [isOpen, item]);
 
   const parentSelectorOptions = useMemo(
-    () => parentOptions.map((parent) => ({
-      label: parent.label,
-      value: parent.id,
-    })),
-    [parentOptions]
+    () => parentOptions
+      .filter((parent) => parent.id !== item?.id)
+      .map((parent) => ({
+        label: parent.label,
+        value: parent.id,
+      })),
+    [item?.id, parentOptions]
   );
 
   const updateField = (field, value) => {

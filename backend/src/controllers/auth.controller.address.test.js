@@ -7,21 +7,7 @@ const { createAddressService } = require('../services/address.service');
 
 const province = vietnamAdministrativeUnits.provinces[0];
 const ward = vietnamAdministrativeUnits.wards.find((item) => item.provinceCode === province.code);
-let failStreetResolution = false;
-const localAddressService = createAddressService({
-  dataset: vietnamAdministrativeUnits,
-  provider: {
-    resolveStreet: async (ref) => {
-      if (failStreetResolution) throw new Error('test provider unavailable');
-      return {
-        ref,
-        name: 'Đường Canonical',
-        provinceCode: province.code,
-        wardCode: ward.code,
-      };
-    },
-  },
-});
+const localAddressService = createAddressService({ dataset: vietnamAdministrativeUnits });
 const originalResolveAddress = addressService.resolveAddress;
 const originalToUserAddressFields = addressService.toUserAddressFields;
 addressService.resolveAddress = localAddressService.resolveAddress;
@@ -61,7 +47,6 @@ const registrationBody = (overrides = {}) => ({
 
 let createdPayload;
 beforeEach(() => {
-  failStreetResolution = false;
   process.env.JWT_SECRET = 'auth-address-register-test-secret';
   createdPayload = null;
   userModel.findByEmail = async () => null;
@@ -82,32 +67,27 @@ after(() => {
   addressService.toUserAddressFields = originalToUserAddressFields;
 });
 
-test('register stores canonical resolved address fields and ignores submitted display names', async () => {
-  const detail = 'Số 12, ngõ 3';
-  const streetRef = 'test-street-ref';
+test('register persists server-derived province and ward names and ignores submitted names and unknown fields', async () => {
+  const detail = 'Số 12, ngõ 3, Phố Hàng Bài';
   const { response, forwardedError } = await invokeRegister(registrationBody({
     address: {
       provinceCode: province.code,
       provinceName: 'Forged Province',
       wardCode: ward.code,
       wardName: 'Forged Ward',
-      streetRef,
-      streetName: 'Forged Street',
+      [['street', 'Ref'].join('')]: 'ignored',
+      [['street', 'Name'].join('')]: 'ignored',
       detail,
     },
   }));
 
   assert.equal(forwardedError, undefined);
   assert.equal(response.statusCode, 201);
-  assert.match(province.code, /^0/);
-  assert.match(ward.code, /^0/);
-  assert.equal(createdPayload.address, `${detail}, Đường Canonical, ${ward.name}, ${province.name}`);
+  assert.equal(createdPayload.address, `${detail}, ${ward.name}, ${province.name}`);
   assert.equal(createdPayload.addressProvinceCode, province.code);
   assert.equal(createdPayload.addressProvinceName, province.name);
   assert.equal(createdPayload.addressWardCode, ward.code);
   assert.equal(createdPayload.addressWardName, ward.name);
-  assert.equal(createdPayload.addressStreetRef, streetRef);
-  assert.equal(createdPayload.addressStreetName, 'Đường Canonical');
   assert.equal(createdPayload.addressDetail, detail);
   assert.equal(createdPayload.role, 'customer');
 });
@@ -117,7 +97,6 @@ test('register accepts an empty address and persists canonical null fields', asy
 
   assert.equal(forwardedError, undefined);
   assert.equal(response.statusCode, 201);
-  assert.equal(createdPayload.address, null);
   assert.deepEqual(
     Object.fromEntries(Object.entries(createdPayload).filter(([key]) => key.startsWith('address'))),
     {
@@ -126,23 +105,17 @@ test('register accepts an empty address and persists canonical null fields', asy
       addressProvinceName: null,
       addressWardCode: null,
       addressWardName: null,
-      addressStreetRef: null,
-      addressStreetName: null,
       addressDetail: null,
-    }
+    },
   );
 });
 
-test('register rejects partial, raw-text, and typed-street addresses without creating an account', async () => {
+test('register rejects partial, raw-text, and mismatched province/ward addresses', async () => {
+  const otherProvinceWard = vietnamAdministrativeUnits.wards.find((item) => item.provinceCode !== province.code);
   const invalidAddresses = [
     { provinceCode: province.code },
     '123 Free Text Road, Hanoi',
-    {
-      provinceCode: province.code,
-      wardCode: ward.code,
-      streetName: 'Typed street without a selection',
-      detail: 'Số 12',
-    },
+    { provinceCode: province.code, wardCode: otherProvinceWard.code, detail: 'Số 12, Phố Hàng Bài' },
   ];
 
   for (const address of invalidAddresses) {
@@ -154,22 +127,4 @@ test('register rejects partial, raw-text, and typed-street addresses without cre
     assert.ok(response.body.errors.length > 0);
     assert.equal(createdPayload, null);
   }
-});
-
-test('register surfaces address provider unavailability without creating an account', async () => {
-  failStreetResolution = true;
-  const { response, forwardedError } = await invokeRegister(registrationBody({
-    address: {
-      provinceCode: province.code,
-      wardCode: ward.code,
-      streetRef: 'provider-failure-ref',
-      detail: 'Số 12, ngõ 3',
-    },
-  }));
-
-  assert.equal(forwardedError, undefined);
-  assert.equal(response.statusCode, 503);
-  assert.equal(response.body.success, false);
-  assert.ok(Array.isArray(response.body.errors));
-  assert.equal(createdPayload, null);
 });

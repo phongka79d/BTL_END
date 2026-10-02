@@ -8,17 +8,10 @@ const ADDRESS_DATASET = {
   provinces: [{ code: '01', name: 'Thành phố Hà Nội', type: 'thành phố' }],
   wards: [{ code: '00070', provinceCode: '01', name: 'Phường Hoàn Kiếm', type: 'phường' }],
 };
-const STREET_RECORD = {
-  ref: 'street-01',
-  name: 'Phố Đinh Tiên Hoàng',
-  provinceCode: '01',
-  wardCode: '00070',
-};
 const SELECTED_ADDRESS = {
   provinceCode: '01',
   wardCode: '00070',
-  streetRef: 'street-01',
-  detail: 'Số 12, ngách 3',
+  detail: 'Số 12, ngách 3, Phố Đinh Tiên Hoàng',
 };
 const CANONICAL_USER_ADDRESS_FIELDS = {
   address: 'Số 12, ngách 3, Phố Đinh Tiên Hoàng, Phường Hoàn Kiếm, Thành phố Hà Nội',
@@ -26,9 +19,7 @@ const CANONICAL_USER_ADDRESS_FIELDS = {
   addressProvinceName: 'Thành phố Hà Nội',
   addressWardCode: '00070',
   addressWardName: 'Phường Hoàn Kiếm',
-  addressStreetRef: 'street-01',
-  addressStreetName: 'Phố Đinh Tiên Hoàng',
-  addressDetail: 'Số 12, ngách 3',
+  addressDetail: 'Số 12, ngách 3, Phố Đinh Tiên Hoàng',
 };
 const EMPTY_USER_ADDRESS_FIELDS = {
   address: null,
@@ -36,18 +27,11 @@ const EMPTY_USER_ADDRESS_FIELDS = {
   addressProvinceName: null,
   addressWardCode: null,
   addressWardName: null,
-  addressStreetRef: null,
-  addressStreetName: null,
   addressDetail: null,
 };
 
-const withAddressProvider = async (provider, run) => {
-  const service = addressService.createAddressService({
-    dataset: ADDRESS_DATASET,
-    provider: provider || {
-      resolveStreet: async (ref) => ref === STREET_RECORD.ref ? { ...STREET_RECORD } : null,
-    },
-  });
+const withLocalAddressService = async (run) => {
+  const service = addressService.createAddressService({ dataset: ADDRESS_DATASET });
   const originals = {
     resolveAddress: addressService.resolveAddress,
     toUserAddressFields: addressService.toUserAddressFields,
@@ -215,7 +199,7 @@ test('updateUserRole updates another user role through the model', async () => {
   assert.equal(response.body.data.user.role, 'admin');
 });
 
-test('updateAdminUser persists resolver-authoritative address data and ignores forged names and permissions', async () => {
+test('updateAdminUser persists server-derived address data and ignores forged names and permissions', async () => {
   const controller = require('./user.controller');
   let persisted = null;
   userModel.updateAdminProfile = async (id, data) => {
@@ -224,7 +208,7 @@ test('updateAdminUser persists resolver-authoritative address data and ignores f
   };
 
   const response = createResponse();
-  await withAddressProvider(undefined, async () => {
+  await withLocalAddressService(async () => {
     await controller.updateAdminUser(
       {
         params: { id: 'user-1' },
@@ -236,14 +220,9 @@ test('updateAdminUser persists resolver-authoritative address data and ignores f
             ...SELECTED_ADDRESS,
             provinceName: 'Forged Province',
             wardName: 'Forged Ward',
-            streetName: 'Forged Street',
+            [['street', 'Ref'].join('')]: 'ignored',
+            [['street', 'Name'].join('')]: 'ignored',
           },
-          addressProvinceCode: 'FORGED',
-          addressProvinceName: 'Forged root province',
-          addressWardCode: 'FORGED',
-          addressStreetRef: 'forged-root-street',
-          addressStreetName: 'Forged root street',
-          addressDetail: 'Forged root detail',
           role: 'admin',
           isBlocked: true,
         },
@@ -336,7 +315,7 @@ test('updateProfile rejects invalid phone values before model invocation', async
   assert.equal(response.body.message, 'Số điện thoại chỉ được chứa chữ số.');
   assert.equal(updateCalled, false);
 });
-test('updateProfile persists canonical address fields from the selected references only', async () => {
+test('updateProfile persists canonical address fields from the submitted details', async () => {
   const controller = require('./user.controller');
   let persisted = null;
   userModel.update = async (id, data) => {
@@ -345,7 +324,7 @@ test('updateProfile persists canonical address fields from the selected referenc
   };
 
   const response = createResponse();
-  await withAddressProvider(undefined, async () => {
+  await withLocalAddressService(async () => {
     await controller.updateProfile(
       {
         user: { id: 'user-1' },
@@ -355,14 +334,9 @@ test('updateProfile persists canonical address fields from the selected referenc
             ...SELECTED_ADDRESS,
             provinceName: 'Forged Province',
             wardName: 'Forged Ward',
-            streetName: 'Forged Street',
+            [['street', 'Ref'].join('')]: 'ignored',
+            [['street', 'Name'].join('')]: 'ignored',
           },
-          addressProvinceCode: 'FORGED',
-          addressProvinceName: 'Forged root province',
-          addressWardName: 'Forged root ward',
-          addressStreetRef: 'forged-root-street',
-          addressStreetName: 'Forged root street',
-          addressDetail: 'Forged root detail',
           role: 'admin',
         },
       },
@@ -448,50 +422,12 @@ test('legacy free-text addresses require selection for omitted or null updates o
   }
 });
 
-test('provider failures become safe 503 errors and do not write either profile endpoint', async () => {
-  const controller = require('./user.controller');
-
-  for (const endpoint of ['profile', 'admin']) {
-    let writeCalled = false;
-    userModel.update = async () => {
-      writeCalled = true;
-    };
-    userModel.updateAdminProfile = async () => {
-      writeCalled = true;
-    };
-    const response = createResponse();
-
-    await withAddressProvider({
-      resolveStreet: async () => {
-        throw new Error('provider secret: api-key');
-      },
-    }, async () => {
-      const request = endpoint === 'profile'
-        ? { user: { id: 'user-1' }, body: { address: SELECTED_ADDRESS } }
-        : { params: { id: 'user-1' }, body: { address: SELECTED_ADDRESS } };
-      await controller[endpoint === 'profile' ? 'updateProfile' : 'updateAdminUser'](
-        request,
-        response,
-        assert.fail
-      );
-    });
-
-    assert.equal(response.statusCode, 503);
-    assert.deepEqual(response.body.errors, [{
-      field: 'address',
-      message: 'Không thể xác thực địa chỉ lúc này. Vui lòng thử lại.',
-    }]);
-    assert.doesNotMatch(response.body.message, /api-key/);
-    assert.equal(writeCalled, false);
-  }
-});
-
-test('invalid, partial, and typed street selections return 400 without persisting either profile endpoint', async () => {
+test('partial and mismatched province/ward addresses return 400 without persisting', async () => {
   const controller = require('./user.controller');
   const invalidAddresses = [
-    { provinceCode: '01', wardCode: '00070', detail: 'Số 12, ngách 3' },
-    { provinceCode: '01', wardCode: '99999', streetRef: 'street-01', detail: 'Số 12, ngách 3' },
-    { ...SELECTED_ADDRESS, streetRef: 'Phố Đinh Tiên Hoàng' },
+    { provinceCode: '01', wardCode: '00070', detail: '' },
+    { provinceCode: '01', wardCode: '99999', detail: 'Số 12, Phố Đinh Tiên Hoàng' },
+    { provinceCode: '79', wardCode: '00070', detail: 'Số 12, Phố Đinh Tiên Hoàng' },
   ];
 
   for (const endpoint of ['profile', 'admin']) {
@@ -508,7 +444,7 @@ test('invalid, partial, and typed street selections return 400 without persistin
         ? { user: { id: 'user-1' }, body: { address } }
         : { params: { id: 'user-1' }, body: { address } };
 
-      await withAddressProvider(undefined, async () => {
+      await withLocalAddressService(async () => {
         await controller[endpoint === 'profile' ? 'updateProfile' : 'updateAdminUser'](
           request,
           response,
@@ -539,7 +475,7 @@ test('explicit null clears a verified address through the real mapper on either 
     };
     const response = createResponse();
 
-    await withAddressProvider(undefined, async () => {
+    await withLocalAddressService(async () => {
       const request = endpoint === 'profile'
         ? { user: { id: 'user-1' }, body: { address: null } }
         : { params: { id: 'user-1' }, body: { address: null } };

@@ -74,8 +74,12 @@ export const AdminStorefrontView = () => {
   }, [loadStorefront]);
 
   const topLevelMegaMenus = useMemo(
-    () => navItems.filter((item) => !item.parentId && item.itemType === 'mega_menu'),
-    [navItems]
+    () => navItems.filter(
+      (item) => !item.parentId
+        && item.itemType === 'mega_menu'
+        && item.id !== editingNavItem?.id
+    ),
+    [navItems, editingNavItem?.id]
   );
 
   const openCreateSlide = () => {

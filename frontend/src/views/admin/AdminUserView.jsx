@@ -144,7 +144,7 @@ export const AdminUserView = () => {
   };
 
   const handleRoleChange = async (target, nextRole) => {
-    if (!target || target.role === nextRole) return;
+    if (!target || target.role === nextRole || target.id === currentUser?.id) return;
 
     setIsUpdating(true);
     setFeedback(null);
@@ -169,7 +169,7 @@ export const AdminUserView = () => {
   };
 
   const handleBlockedChange = async (target, nextBlockedState) => {
-    if (!target || target.isBlocked === nextBlockedState) return;
+    if (!target || target.isBlocked === nextBlockedState || target.id === currentUser?.id) return;
 
     setIsUpdating(true);
     setFeedback(null);

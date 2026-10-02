@@ -32,7 +32,9 @@ backend/
 │   ├── migrations/              # Database schema migrations
 │   │   ├── 20260708193000_add_user_blocked_status/
 │   │   ├── 20260709000000_add_password_change_otp/
-│   │   └── 20260710000000_add_staff_role/
+│   │   ├── 20260710000000_add_staff_role/
+│   │   ├── 20261002000000_add_structured_vietnam_addresses/
+│   │   └── 20261002120000_remove_street_selection/
 │   ├── schema.prisma            # Authoritative Prisma database schema (customer, staff, admin)
 │   └── seed.js                  # Database seeding script for demo data
 ├── src/
@@ -174,11 +176,10 @@ All API routes are served under the `/api` prefix. Standard JSON envelopes are r
 | :--- | :--- | :--- | :--- |
 | `GET` | `/api/addresses/provinces` | Public | Lists current provinces and centrally governed cities |
 | `GET` | `/api/addresses/wards?provinceCode={code}` | Public | Lists wards/communes/special zones belonging to the selected province |
-| `GET` | `/api/addresses/streets?provinceCode={code}&wardCode={code}&q={text}` | Public | Searches current streets within the selected ward and province |
 
-Successful address lookups use the standard success envelope, with `data.items` holding the results. Province items contain string `code` and canonical `name` (and `type` when supplied); ward items also include their parent `provinceCode`; street items contain provider `ref`, canonical `name`, and `displayName`. Street queries must contain 2–100 characters. Invalid area/query input returns HTTP 400. Provider-backed street lookup is limited to 60 requests per minute per `req.ip`; HTTP 429 includes `Retry-After`. Provider outages return a retryable HTTP 503 in the standard error envelope (`success: false`, `message`, and optional `errors`), never an empty or unmatched result.
+Successful lookups use the standard success envelope, with `data.items` holding the results. Province items contain string `code` and canonical `name` (and `type` when supplied); ward items also include their parent `provinceCode`. Users select Tỉnh/Thành phố and Phường/Xã, then type the house number and street in the free-text detail field.
 
-Profile updates (`PUT /api/users/profile`) and checkout (`POST /api/orders`) use a structured `address` object with this request shape: `{ provinceCode: string, wardCode: string, streetRef: string, detail: string }`. Province, ward, and street names are resolved by the server; clients must send the selected string codes/reference and the user's house number or other detail, not authoritative names or a preformatted address. Checkout requires this object. Profile address is optional: omit `address` to leave it unchanged; `null` or an all-empty object clears it when there is no legacy-address reselection guard. A non-empty partial object is rejected rather than saved.
+Profile updates (`PUT /api/users/profile`) and checkout (`POST /api/orders`) use the request shape `{ provinceCode, wardCode, detail }`. The server validates the province/ward relationship against the local administrative dataset and formats the address as `${detail}, ${wardName}, ${provinceName}`. Checkout requires all three fields. Profile address is optional: omit `address` to leave it unchanged; `null` or an all-empty object clears it when there is no legacy-address reselection guard. A non-empty partial object is rejected rather than saved.
 
 ### 4. Products & Categories (`/api/products`, `/api/categories`)
 | Method | Endpoint | Access | Description |
@@ -215,9 +216,9 @@ Profile updates (`PUT /api/users/profile`) and checkout (`POST /api/orders`) use
 | `POST` | `/api/payments/cod` | Authenticated | Processes COD payment creation |
 
 **Checkout request** (`POST /api/orders`):
-- Body: `fullName` (required, 10–50 characters after trimming), `phone` (required JSON string of 9–11 ASCII digits, with no spaces or symbols), `address` (required structured object `{ provinceCode, wardCode, streetRef, detail }`), optional `note`, and optional `cartItemIds` for partial-cart checkout.
-- The server checks that the province and ward codes form a current parent/child pair, resolves the selected street reference against the current provider place hierarchy, and builds the canonical address from local administrative data. `detail` must be non-empty and the complete formatted address must be at least 12 characters. Names supplied by the client are not authoritative.
-- Checkout initializes `fullName`, `phone`, and a complete structured address from the user's profile. If profile loading fails, checkout leaves these values blank, shows a notice, and still allows the customer to enter them. An old unstructured `User.address` is shown as unverified, read-only text; it is never treated as a checkout address, so the customer must reselect the current province, ward, and street.
+- Body: `fullName` (required, 10–50 characters after trimming), `phone` (required JSON string of 9–11 ASCII digits, with no spaces or symbols), `address` (required structured object `{ provinceCode, wardCode, detail }`), optional `note`, and optional `cartItemIds` for partial-cart checkout.
+- The server validates that the province and ward codes form a current parent/child pair and builds the canonical address from local administrative data. `detail` is free text for the house number and street; the complete formatted address must be at least 12 characters. Names supplied by the client are not authoritative.
+- Checkout initializes `fullName`, `phone`, and a complete structured address from the user's profile. If profile loading fails, checkout leaves these values blank, shows a notice, and still allows the customer to enter them. An old unstructured `User.address` is shown as unverified, read-only text; it is never treated as a checkout address.
 - Each order stores its own immutable recipient (`recipientName`, `recipientPhone`, `note`) and canonical structured shipping-address snapshot; later user profile changes do not rewrite existing orders.
 - One `prisma.$transaction`: quantities must be positive integers; stock is decremented with a conditional `quantity >= ordered` write (fails with HTTP 409 when another checkout wins), the order/details/COD `Payment` (`unpaid`, `paymentDate: null`) are created, and only the ordered cart lines are deleted (a mismatched delete count aborts with HTTP 409).
 
@@ -265,26 +266,22 @@ Profile updates (`PUT /api/users/profile`) and checkout (`POST /api/orders`) use
 
 ---
 
-## Vietnam Address Data, Validation & Availability
+## Vietnam Address Data & Validation
 
 The current two-level administrative dataset is vendored at `backend/src/data/vietnamAdministrativeUnits.json`. It is pinned to [ThangLeQuoc/vietnamese-provinces-database v5.2.0](https://github.com/ThangLeQuoc/vietnamese-provinces-database/tree/v5.2.0) (raw source: [full JSON](https://raw.githubusercontent.com/ThangLeQuoc/vietnamese-provinces-database/v5.2.0/json/full_json_generated_data_vn_units.json)); the file records effective date `2026-09-20`, upstream `lastUpdated` `2026-09-20T13:13:17Z`, and latest decree `388/NQ-UBTVQH16`. The official National Statistics Office administrative directory is [DMDVHC.asmx](https://danhmuchanhchinh.nso.gov.vn/DMDVHC.asmx). The snapshot contains 34 provinces and 3,321 wards, communes, and special zones, with upstream full names and codes retained as strings (including leading zeroes); the domain has no district level. The source is MIT-licensed, Copyright (c) 2021 Thang Le Quoc; the vendored JSON metadata retains the full MIT notice and links to the pinned [LICENSE](https://raw.githubusercontent.com/ThangLeQuoc/vietnamese-provinces-database/v5.2.0/LICENSE).
 
-The browser's selections are not trusted as address authority. The server validates the province/ward relationship against this local snapshot, resolves the street reference with VietMap Place v4, and requires that the resolved street belongs to the same current province and ward. Names persisted to profiles and orders are server-derived. VietMap's relevant references are [Geocode v4](https://maps.vietmap.vn/docs/map-api/geocode-version/geocode-v4/) and [Place v4](https://maps.vietmap.vn/docs/map-api/place-v4/).
+The browser's selected province and ward are not trusted as address authority. The server validates their parent/child relationship against this local snapshot and derives the persisted province and ward names from the dataset. Users select Tỉnh/Thành phố and Phường/Xã, then enter their house number and street in the detail field; the formatted address is `${detail}, ${wardName}, ${provinceName}`.
 
 - Checkout requires the complete structured address and validates the formatted current address at 12 or more characters. A checkout name must be 10–50 characters after trimming. A required phone is a JSON string of 9–11 ASCII digits; do not send a number, because a string preserves leading zeroes. Profile phone is optional, but a non-empty value follows the same 9–11 digit string rule.
-- A profile may have no address: omit `address` to keep its current value, or clear it with `null`/an empty address object when no legacy-address guard applies. If any address field is populated, province, ward, street reference, and detail must all be complete; partial addresses are rejected with HTTP 400. A non-empty legacy `User.address` without a complete structured address is shown only as unverified, read-only text. Profile edits and checkout require selecting a current structured address before the legacy value can be replaced; it is never parsed or silently converted in the UI.
-- Street lookup is debounced in the UI by 350 ms and begins at two query characters. The provider-backed lookup is limited to 60 requests per minute per `req.ip`; bounded server caches retain provider results for 30 minutes. A provider outage or missing API key is a safe, retryable HTTP 503, not an empty search or a backfill `unmatched` classification. The UI offers retry for lookup failures.
+- A profile may have no address: omit `address` to keep its current value, or clear it with `null`/an empty address object when no legacy-address guard applies. If any address field is populated, province code, ward code, and detail must all be complete; partial addresses are rejected with HTTP 400. A non-empty legacy `User.address` without a complete structured address is shown only as unverified, read-only text. The UI does not parse or silently convert that legacy value.
 
 ---
 
 ## Structured Address Migration & Legacy Backfill
 
-Migration `20261002000000_add_structured_vietnam_addresses` is additive: it adds seven nullable structured-address columns to `User` and seven nullable structured-address snapshot columns to `Order`. It does not transform the legacy `User.address` or existing order rows. Use a staged expand-and-fill rollout:
+Migration `20261002000000_add_structured_vietnam_addresses` introduced nullable structured-address columns for `User` and `Order`. Migration `20261002120000_remove_street_selection` folds any existing street name into the detail text, then drops the four street columns. The resulting user fields are `addressProvinceCode`, `addressProvinceName`, `addressWardCode`, `addressWardName`, and `addressDetail`; order snapshots use `shippingProvinceCode`, `shippingProvinceName`, `shippingWardCode`, `shippingWardName`, and `shippingAddressDetail`. The removal migration preserves legacy `User.address` and historical order address text.
 
-1. Take a fresh database backup and confirm it is restorable; rehearse the migration and backfill dry run against an isolated copy first. Confirm the intended database, provider configuration, and release/rollback plan before touching a shared or production database.
-2. Apply the additive migration through the controlled Prisma migration deployment process, then verify the migration and new nullable columns before deploying code that writes them. Keep the old columns and rows intact; do not treat the backfill as a migration substitute.
-3. Deploy the backend and frontend with `ADDRESS_PROVIDER=vietmap` and `VIETMAP_API_KEY` supplied only in the backend's secret environment. Confirm the deployment's address endpoints and ordinary checkout path in the intended non-production environment before production rollout.
-4. Review the legacy backfill's dry-run classifications and counts. Resolve ambiguous/conflicting cases manually, take/confirm a fresh backup, then explicitly enable writes. Afterward compare counts and preserve the original legacy text and every order record. An application rollback should leave these additive columns in place; do not drop them as an automatic rollback.
+Before applying migrations to a shared database, take a fresh restorable backup and rehearse the migration and backfill dry run against an isolated copy. Apply migrations through the controlled Prisma deployment process; then review the backfill dry-run classifications, resolve ambiguous/conflicting cases manually, and explicitly enable writes only after a fresh backup. The VietMap API key is optional and used only by the legacy-address backfill, not by ordinary address lookup, profile updates, or checkout.
 
 Run `node prisma/backfillStructuredUserAddresses.js -h` or `node prisma/backfillStructuredUserAddresses.js --help` for CLI help. A plain `node prisma/backfillStructuredUserAddresses.js` is a dry run and performs no writes. Apply requires both a completed backup and explicit confirmation:
 
@@ -298,11 +295,11 @@ For a remote database, add the separate `--allow-remote-db` guard:
 node prisma/backfillStructuredUserAddresses.js --apply --backup-confirmed --allow-remote-db
 ```
 
-The CLI uses `DATABASE_URL` only and never `DIRECT_URL`; it does not create a backup, and `--backup-confirmed` is an operator assertion, not a backup command. Only the seven `User` structured `address*` columns may be filled. The CLI never rewrites `User.address`, order rows, recipient/contact fields, or roles. It stages all classifications before mutation, so provider failure causes no writes; updates are conditional on the original address and structured-field snapshot, preventing a concurrent user edit from being overwritten. Complete records are skipped on reruns; ambiguous or unmatched records stay unchanged; conflicting partial structured values require manual review.
+The CLI uses `DATABASE_URL` only and never `DIRECT_URL`; it does not create a backup, and `--backup-confirmed` is an operator assertion, not a backup command. Only the five structured user address fields may be filled. The CLI never rewrites `User.address`, order rows, recipient/contact fields, or roles. It stages all classifications before mutation, so provider failure causes no writes; updates are conditional on the original address and structured-field snapshot, preventing a concurrent user edit from being overwritten. Complete records are skipped on reruns; ambiguous or unmatched records stay unchanged; conflicting partial structured values require manual review.
 
-Legacy matching calls VietMap Geocode v4 `/api/search/v4` with `layers=ADDRESS` and `display_type=5`, then `/api/place/v4` for each current-format Place candidate; POIs are not accepted. Confidence is exact only: after NFC, case, comma, and whitespace normalization, the old text must exactly equal a current provider display or `data_old.display`. It does not use fuzzy matching, abbreviation expansion, accent removal, district parsing, or top-result guessing. Candidates must pass current local province/ward boundary validation and current Place hierarchy validation, contain a non-empty house number from `hs_num`, and compose current detail + street + ward + province back to the current display. Multiple distinct exact place references are ambiguous; duplicate hits for the same reference are not. Provider outages remain retryable failures and never become `unmatched`. Logs report IDs, statuses, and counts—not original address text, credentials, or authenticated URLs.
+The legacy matcher uses the optional VietMap provider to match legacy values exactly against current or previously displayed address text. It rejects uncertain, incomplete, mismatched, and place-of-interest results, verifies current local province/ward boundaries, and returns detail as the house number plus street. Multiple distinct exact provider references are ambiguous; duplicate hits for the same reference are not. Provider outages remain retryable failures and never become `unmatched`. Logs report IDs, statuses, and counts—not original address text, credentials, or authenticated URLs.
 
-This runbook describes the rollout; it does not assert that a production migration has been applied. Fixture-backed checks are not live VietMap provider QA, and no live-provider success is claimed here.
+This runbook describes the rollout; it does not assert that a production migration has been applied. Fixture-backed checks are not live provider QA, and no live-provider success is claimed here.
 
 ---
 
@@ -342,8 +339,8 @@ Configure environment variables in `backend/.env` (see `.env.example`):
 | `JWT_SECRET` | Yes | - | Secret key used to sign and verify JWT tokens |
 | `JWT_EXPIRES_IN` | No | `7d` | JWT token validity duration |
 | `NODE_ENV` | No | `development` | Runtime environment (`development` / `production`) |
-| `ADDRESS_PROVIDER` | Yes for provider-backed address operations | `vietmap` | Selects the server-side VietMap address provider; `vietmap` is the supported value |
-| `VIETMAP_API_KEY` | Yes for provider-backed address operations | - | VietMap credential, configured as a backend-only secret; never expose it through frontend `VITE_` variables |
+| `ADDRESS_PROVIDER` | No | `vietmap` | Optional legacy-address backfill provider selection; `vietmap` is the supported value |
+| `VIETMAP_API_KEY` | No | - | Optional backend-only credential used only for legacy-address backfill; never expose it through frontend `VITE_` variables |
 | `PASSWORD_OTP_EXPIRES_MINUTES`| No | `10` | Expiration time for password OTPs in minutes |
 | `PASSWORD_OTP_MAX_ATTEMPTS` | No | `5` | Maximum failed verification attempts before invalidation |
 | `PASSWORD_OTP_DELIVERY_MODE` | No | `console` | OTP delivery channel (`console` or `smtp`) |
@@ -366,7 +363,7 @@ npm install
 ### 2. Configure Environment
 ```bash
 cp .env.example .env
-# Configure DATABASE_URL and JWT_SECRET; set ADDRESS_PROVIDER=vietmap and keep VIETMAP_API_KEY only in the backend environment when enabling provider-backed address operations.
+# Configure DATABASE_URL and JWT_SECRET; VIETMAP_API_KEY is optional and only needed for legacy-address backfill.
 ```
 
 ### 3. Database Migration & Seeding

@@ -163,11 +163,15 @@ const updateCarouselSlide = async (id, data) => {
 
 const deleteCarouselSlide = (id) => prisma.carouselSlide.delete({ where: { id } });
 
-const validateNavigationPayload = async (data) => {
+const validateNavigationPayload = async (data, currentId = null) => {
   if (!isNonEmptyString(data.label)) throw new Error('Nhãn điều hướng là bắt buộc.');
   if (!Object.values(NAV_ITEM_TYPES).includes(data.itemType)) throw new Error('Loại mục điều hướng không hợp lệ.');
 
   if (data.parentId) {
+    // Không cho mục tự làm cha của chính nó (sẽ biến mất khỏi menu công khai).
+    if (currentId && data.parentId === currentId) {
+      throw new Error('Mục điều hướng không thể là mục cha của chính nó.');
+    }
     const parent = await prisma.storefrontNavItem.findUnique({
       where: { id: data.parentId },
       select: { id: true, parentId: true, itemType: true },
@@ -175,6 +179,23 @@ const validateNavigationPayload = async (data) => {
     if (!parent || parent.parentId || parent.itemType !== NAV_ITEM_TYPES.MEGA_MENU) {
       throw new Error('Mục điều hướng con phải thuộc một mega menu cấp cao nhất.');
     }
+    // Mục đang có mục con không thể trở thành mục con (menu chỉ hỗ trợ 2 cấp).
+    if (currentId && await prisma.storefrontNavItem.count({ where: { parentId: currentId } }) > 0) {
+      throw new Error('Mục điều hướng đang có mục con nên không thể chuyển thành mục con.');
+    }
+  }
+
+  // Chặn trùng nhãn trong cùng cấp (không phân biệt hoa/thường).
+  const duplicate = await prisma.storefrontNavItem.findFirst({
+    where: {
+      parentId: data.parentId || null,
+      label: { equals: data.label.trim(), mode: 'insensitive' },
+      ...(currentId ? { id: { not: currentId } } : {}),
+    },
+    select: { id: true },
+  });
+  if (duplicate) {
+    throw new Error(`Mục điều hướng "${data.label.trim()}" đã tồn tại ở cấp này.`);
   }
 
   if (!data.parentId && data.itemType === NAV_ITEM_TYPES.LINK) {
@@ -309,7 +330,7 @@ const createNavigationItem = async (data) => {
 };
 
 const updateNavigationItem = async (id, data) => {
-  await validateNavigationPayload(data);
+  await validateNavigationPayload(data, id);
   return prisma.storefrontNavItem.update({
     where: { id },
     data: normalizeNavigationPayload(data),

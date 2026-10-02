@@ -44,8 +44,6 @@ const hasCompleteStructuredAddress = (user) => [
   'addressProvinceName',
   'addressWardCode',
   'addressWardName',
-  'addressStreetRef',
-  'addressStreetName',
   'addressDetail',
 ].every((field) => typeof user?.[field] === 'string' && user[field].trim() !== '');
 
@@ -101,6 +99,31 @@ const getProfile = async (req, res, next) => {
   }
 };
 
+const USERNAME_MIN_LENGTH = 3;
+const USERNAME_MAX_LENGTH = 50;
+
+/**
+ * Kiểm tra tên người dùng: chuỗi, 3–50 ký tự sau khi cắt khoảng trắng, không trùng người khác
+ * (không phân biệt hoa/thường). Bỏ qua khi tên không đổi so với currentUsername, để các tài khoản
+ * cũ (trùng tên hoặc tên ngắn từ trước) vẫn lưu được hồ sơ. Trả về thông báo lỗi hoặc null.
+ */
+const checkUsername = async (username, excludeUserId, currentUsername) => {
+  if (typeof username !== 'string' || username.trim() === '') {
+    return 'Tên người dùng không được để trống';
+  }
+  const trimmed = username.trim();
+  if (typeof currentUsername === 'string' && currentUsername.trim().toLowerCase() === trimmed.toLowerCase()) {
+    return null;
+  }
+  if (trimmed.length < USERNAME_MIN_LENGTH || trimmed.length > USERNAME_MAX_LENGTH) {
+    return `Tên người dùng phải có từ ${USERNAME_MIN_LENGTH} đến ${USERNAME_MAX_LENGTH} ký tự`;
+  }
+  if (await userModel.findByUsername(trimmed, excludeUserId)) {
+    return 'Tên người dùng đã được sử dụng';
+  }
+  return null;
+};
+
 /**
  * Cập nhật hồ sơ người dùng hiện tại
  * PUT /api/users/profile
@@ -120,10 +143,11 @@ const updateProfile = async (req, res, next) => {
     const updateData = {};
 
     if (username !== undefined) {
-      if (username === null || String(username).trim() === '') {
-        return errorResponse(res, 400, 'Tên người dùng không được để trống');
+      const usernameError = await checkUsername(username, req.user.id, req.user.username);
+      if (usernameError) {
+        return errorResponse(res, 400, usernameError);
       }
-      updateData.username = username;
+      updateData.username = username.trim();
     }
     if (fullName !== undefined) updateData.fullName = fullName;
     if (phone !== undefined) updateData.phone = phone;
@@ -181,6 +205,9 @@ const getUsers = async (req, res, next) => {
       pagination: result.pagination
     });
   } catch (error) {
+    if (error.status === 400) {
+      return errorResponse(res, 400, error.message);
+    }
     next(error);
   }
 };
@@ -226,8 +253,13 @@ const updateAdminUser = async (req, res, next) => {
 
     const updateData = getAdminUserUpdateData(req.body);
 
-    if (updateData.username !== undefined && updateData.username === '') {
-      return errorResponse(res, 400, 'Tên người dùng không được để trống');
+    if (updateData.username !== undefined) {
+      const target = await userModel.findById(id);
+      const usernameError = await checkUsername(updateData.username, id, target ? target.username : undefined);
+      if (usernameError) {
+        return errorResponse(res, 400, usernameError);
+      }
+      updateData.username = updateData.username.trim();
     }
 
     if (Object.keys(updateData).length === 0) {
@@ -316,16 +348,20 @@ const createUser = async (req, res, next) => {
     }
     const userAddressFields = addressService.toUserAddressFields(resolvedAddress);
 
-    const normalizedEmail = String(email).trim();
+    const normalizedEmail = String(email).trim().toLowerCase();
     const existingUser = await userModel.findByEmail(normalizedEmail);
     if (existingUser) {
       return errorResponse(res, 400, 'Email đã được đăng ký');
+    }
+    const usernameError = await checkUsername(username);
+    if (usernameError) {
+      return errorResponse(res, 400, usernameError);
     }
 
     const passwordHash = await bcrypt.hash(password, SALT_ROUNDS);
 
     const user = await userModel.create({
-      username: String(username).trim(),
+      username: username.trim(),
       email: normalizedEmail,
       passwordHash,
       fullName: fullName ? String(fullName).trim() : null,

@@ -77,9 +77,14 @@ export const ProductReviewForm = ({
         description: 'Đánh giá của bạn đã được gửi.',
       });
     } catch (error) {
+      const message = typeof error?.message === 'string' ? error.message.trim() : '';
       notification.error({
         title: 'Không thể gửi đánh giá',
-        description: error?.message || 'Không thể gửi đánh giá của bạn.',
+        description: message || (
+          error?.status === 409
+            ? 'Bạn đã gửi đánh giá cho sản phẩm này.'
+            : 'Không thể gửi đánh giá của bạn.'
+        ),
       });
     } finally {
       setIsSubmitting(false);

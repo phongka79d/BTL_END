@@ -139,7 +139,7 @@ export const UserProfileDialog = ({
                       Địa chỉ cũ: {typeof user?.address === 'string' ? user.address : ''}
                     </p>
                     <p>
-                      Vui lòng chọn lại Tỉnh/Thành phố, Phường/Xã, Đường/Phố và nhập số nhà/ngõ/ngách hoặc thông tin chi tiết trước khi lưu.
+                      Vui lòng chọn lại Tỉnh/Thành phố, Phường/Xã và nhập số nhà, tên đường trước khi lưu.
                     </p>
                   </div>
                 )}

@@ -147,7 +147,7 @@ test('getProducts forwards stockStatus filter to the model and returns the filte
     assert.equal(res.statusCode, 200);
     assert.equal(res.body.success, true);
     assert.equal(receivedParams.stockStatus, 'out');
-    assert.equal(receivedParams.page, '2');
+    assert.equal(receivedParams.page, 2);
     assert.deepEqual(res.body.data.items.map((product) => product.id), ['p1']);
     assert.equal(res.body.data.pagination.total, 13);
     assert.equal(res.body.data.pagination.totalPages, 2);

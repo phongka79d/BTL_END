@@ -82,6 +82,20 @@ const findById = async (id) => {
 };
 
 /**
+ * Người dùng đã có đánh giá (kể cả đã bị ẩn) cho sản phẩm này chưa.
+ * @param {string} userId
+ * @param {string} productId
+ * @returns {Promise<boolean>}
+ */
+const existsForUserAndProduct = async (userId, productId) => {
+  const existing = await prisma.review.findFirst({
+    where: { userId, productId },
+    select: { id: true },
+  });
+  return Boolean(existing);
+};
+
+/**
  * Tạo đánh giá hiển thị cho một sản phẩm
  * @param {Object} data
  * @param {string} data.userId
@@ -140,5 +154,6 @@ module.exports = {
   listVisibleByProductId,
   findById,
   create,
+  existsForUserAndProduct,
   hide,
 };

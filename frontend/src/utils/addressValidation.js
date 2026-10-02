@@ -2,10 +2,9 @@ import { formatVietnamAddress } from './addressFormatter.js';
 
 const REQUIRED_FIELD_MESSAGES = {
   provinceCode: 'Vui lòng chọn Tỉnh/Thành phố.',
-  wardCode: 'Vui lòng chọn Phường/Xã.',
-  streetRef: 'Vui lòng chọn Đường/Phố.'
+  wardCode: 'Vui lòng chọn Phường/Xã.'
 };
-const DETAIL_REQUIRED_MESSAGE = 'Vui lòng nhập số nhà/ngõ/ngách hoặc thông tin chi tiết.';
+const DETAIL_REQUIRED_MESSAGE = 'Vui lòng nhập số nhà, ngõ/ngách, tên đường.';
 const ADDRESS_TOO_SHORT_MESSAGE = 'Địa chỉ phải có ít nhất 12 ký tự.';
 export const ADDRESS_INVALID_MESSAGE = 'Địa chỉ không hợp lệ.';
 
@@ -14,11 +13,9 @@ const ADDRESS_FIELDS = [
   'provinceName',
   'wardCode',
   'wardName',
-  'streetRef',
-  'streetName',
   'detail'
 ];
-const REQUIRED_FIELDS = ['provinceCode', 'wardCode', 'streetRef'];
+const REQUIRED_FIELDS = ['provinceCode', 'wardCode'];
 const isBlank = (value) => value === null || value === undefined || (typeof value === 'string' && value.trim() === '');
 
 const getRequiredErrors = () => ({
@@ -54,7 +51,7 @@ export const validateAddress = (address, { required = false } = {}) => {
     errors.detail = DETAIL_REQUIRED_MESSAGE;
   }
 
-  const hasCanonicalNames = ['streetName', 'wardName', 'provinceName']
+  const hasCanonicalNames = ['wardName', 'provinceName']
     .every((field) => typeof address[field] === 'string' && address[field].trim() !== '');
   if (Object.keys(errors).length === 0 && hasCanonicalNames && formatVietnamAddress(address).length < 12) {
     errors.address = ADDRESS_TOO_SHORT_MESSAGE;
