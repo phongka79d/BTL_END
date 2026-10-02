@@ -9,6 +9,7 @@ import {
   TextInput,
   VStack
 } from '@astryxdesign/core';
+import VietnamAddressFields from '../address/VietnamAddressFields.jsx';
 
 /**
  * CheckoutForm
@@ -28,7 +29,9 @@ export const CheckoutForm = ({
   errors,
   touched,
   onChange,
-  onBlur
+  onBlur,
+  legacyAddress = '',
+  disabled = false
 }) => {
   return (
     <Card padding={4}>
@@ -45,33 +48,48 @@ export const CheckoutForm = ({
         <FormLayout>
           <TextInput
             label="Full name *"
+            type="text"
             value={values.fullName}
             onChange={(value) => onChange('fullName', value)}
             onBlur={() => onBlur('fullName')}
             status={fieldStatus(touched.fullName && errors.fullName)}
             width="100%"
+            disabled={disabled}
           />
 
           <TextInput
             label="Phone number *"
+            type="text"
             value={values.phone}
             inputMode="numeric"
             onChange={(value) => onChange('phone', value)}
             onBlur={() => onBlur('phone')}
             status={fieldStatus(touched.phone && errors.phone)}
+            disabled={disabled}
           />
 
-          <TextArea
-            label="Shipping address *"
-            value={values.shippingAddress}
-            onChange={(value) => onChange('shippingAddress', value)}
-            onBlur={() => onBlur('shippingAddress')}
-            rows={3}
-            status={fieldStatus(
-              touched.shippingAddress && errors.shippingAddress
+          <VStack gap={2}>
+            <VietnamAddressFields
+              idPrefix="checkout-address"
+              value={values.address}
+              onChange={(address) => onChange('address', address)}
+              onBlur={onBlur}
+              errors={touched.address ? errors.address : {}}
+              required
+              disabled={disabled}
+            />
+            {legacyAddress && (
+              <Card padding={3}>
+                <VStack gap={1}>
+                  <Text weight="semibold">Địa chỉ đã lưu trước đây (chưa xác minh)</Text>
+                  <Text color="secondary">{legacyAddress}</Text>
+                  <Text color="secondary">
+                    Vui lòng chọn lại địa chỉ theo danh sách trước khi đặt hàng.
+                  </Text>
+                </VStack>
+              </Card>
             )}
-            width="100%"
-          />
+          </VStack>
 
           <TextArea
             label="Order note"
@@ -80,6 +98,7 @@ export const CheckoutForm = ({
             rows={2}
             isOptional
             width="100%"
+            disabled={disabled}
           />
         </FormLayout>
 

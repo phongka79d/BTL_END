@@ -1,6 +1,8 @@
 const prisma = require('../config/database');
 const { Prisma } = require('@prisma/client');
+const addressService = require('../services/address.service');
 const { validatePhone } = require('../utils/phoneValidation');
+const { validateCheckoutFullName } = require('../utils/checkoutValidation');
 const { PURCHASE_INVALID_MESSAGE, toQuantity } = require('../utils/quantityValidation');
 const { ORDER_SEARCH_FIELDS, isOrderSearchField } = require('../utils/orderSearchFields');
 
@@ -14,8 +16,9 @@ const normalizeCheckoutContact = (contact) => {
   if (!contact || typeof contact !== 'object') {
     throw checkoutError('Thông tin người nhận là bắt buộc.');
   }
-  if (typeof contact.fullName !== 'string' || contact.fullName.trim() === '') {
-    throw checkoutError('Họ và tên người nhận là bắt buộc.');
+  const fullNameError = validateCheckoutFullName(contact.fullName);
+  if (fullNameError) {
+    throw checkoutError(fullNameError);
   }
 
   const phoneError = validatePhone(contact.phone, { required: true });
@@ -68,7 +71,7 @@ const findById = async (id) => {
 
 /**
  * Thực hiện giao dịch checkout nguyên tử:
- * 1. Chuẩn hóa ảnh chụp người nhận (họ tên, số điện thoại chỉ gồm chữ số, ghi chú tùy chọn).
+ * 1. Chuẩn hóa ảnh chụp người nhận và giải quyết địa chỉ giao hàng trước giao dịch.
  * 2. Tải giỏ hàng của người dùng cùng các mục và dữ liệu sản phẩm.
  * 3. Chọn các mục giỏ hàng được yêu cầu, hoặc toàn bộ mục để tương thích ngược.
  * 4. Từ chối lựa chọn thiếu/rỗng trước khi tạo bất kỳ dòng đơn hàng nào.
@@ -81,19 +84,17 @@ const findById = async (id) => {
  * 11. Xóa các mục giỏ hàng đã đặt và xác minh không có dòng nào bị thay đổi đồng thời.
  * 12. Trả về đơn hàng gồm chi tiết, tóm tắt sản phẩm và dữ liệu thanh toán.
  * 
- * @param {string} userId 
- * @param {string} shippingAddress
+ * @param {string} userId
+ * @param {{provinceCode: string, wardCode: string, streetRef: string, detail: string}} address
  * @param {{fullName: string, phone: string, note?: string|null}} contact
  * @param {string[]|undefined} cartItemIds
  * @returns {Promise<Object>}
  */
-const checkout = async (userId, shippingAddress, contact, cartItemIds) => {
-  if (!shippingAddress || typeof shippingAddress !== 'string' || shippingAddress.trim() === '') {
-    throw checkoutError('Địa chỉ giao hàng là bắt buộc.');
-  }
-
-  // 1. Ảnh chụp người nhận phải hợp lệ trước khi mở giao dịch.
+const checkout = async (userId, address, contact, cartItemIds) => {
+  // 1. Kiểm tra contact và giải quyết ảnh chụp địa chỉ trước khi mở giao dịch.
   const recipient = normalizeCheckoutContact(contact);
+  const resolvedAddress = await addressService.resolveAddress(address, { required: true });
+  const orderAddressFields = addressService.toOrderAddressFields(resolvedAddress);
 
   return prisma.$transaction(async (tx) => {
     // 2. Tải giỏ hàng, các mục và dữ liệu sản phẩm bên trong giao dịch.
@@ -165,13 +166,13 @@ const checkout = async (userId, shippingAddress, contact, cartItemIds) => {
       }
     }
 
-    // 8. Tạo đơn hàng trạng thái "pending" kèm ảnh chụp người nhận và địa chỉ giao hàng.
+    // 8. Tạo đơn hàng trạng thái "pending" với ảnh chụp địa chỉ canonical và người nhận.
     const order = await tx.order.create({
       data: {
         userId,
         totalAmount: total,
         status: 'pending',
-        shippingAddress: shippingAddress.trim(),
+        ...orderAddressFields,
         recipientName: recipient.fullName,
         recipientPhone: recipient.phone,
         note: recipient.note

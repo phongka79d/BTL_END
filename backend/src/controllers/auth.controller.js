@@ -5,6 +5,8 @@ const emailService = require('../services/email.service');
 const generateToken = require('../utils/generateToken');
 const { compareOtp, generateOtp, getOtpExpiry, hashOtp } = require('../utils/otp');
 const { validatePasswordPolicy } = require('../utils/passwordPolicy');
+const { validatePhone } = require('../utils/phoneValidation');
+const addressService = require('../services/address.service');
 const { successResponse, errorResponse } = require('../utils/response');
 
 const SALT_ROUNDS = 10;
@@ -123,6 +125,23 @@ const createAndSendPasswordOtp = async (user) => {
 const register = async (req, res, next) => {
   try {
     const { username, email, password, fullName, phone, address } = req.body;
+    const phoneError = validatePhone(phone);
+    if (phoneError) {
+      return errorResponse(res, 400, phoneError);
+    }
+
+    const addressInput = typeof address === 'string' && address.trim() === '' ? null : address;
+    let resolvedAddress;
+    try {
+      resolvedAddress = await addressService.resolveAddress(addressInput);
+    } catch (error) {
+      const statusCode = error && (error.statusCode || error.status);
+      if (Number.isInteger(statusCode) && statusCode >= 400 && statusCode <= 599) {
+        return errorResponse(res, statusCode, error.message, error.errors);
+      }
+      throw error;
+    }
+    const addressFields = addressService.toUserAddressFields(resolvedAddress);
 
     // Kiểm tra xem email đã được đăng ký chưa
     const existingUser = await userModel.findByEmail(email);
@@ -140,7 +159,7 @@ const register = async (req, res, next) => {
       passwordHash,
       fullName,
       phone,
-      address,
+      ...addressFields,
       role: 'customer' // Mặc định là customer
     });
 

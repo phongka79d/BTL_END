@@ -19,7 +19,12 @@ const createMockResponse = () => ({
 const validBody = (overrides = {}) => ({
   fullName: 'Nguyễn Văn A',
   phone: '0987654321',
-  shippingAddress: '123 Đường ABC',
+  address: {
+    provinceCode: '01',
+    wardCode: '00001',
+    streetRef: 'street_1',
+    detail: 'Số 123'
+  },
   note: 'Giao ngoài giờ',
   cartItemIds: ['item_a'],
   ...overrides
@@ -51,10 +56,17 @@ const runCheckout = async (body) => {
   return { res, nextCalls };
 };
 
-test('checkout forwards the trimmed shipping address, recipient snapshot, and selected cart items', async () => {
+test('checkout accepts the structured address and selected cart items at the model boundary', async () => {
   await withCheckoutSpy(async (calls) => {
+    const address = {
+      provinceCode: '01',
+      wardCode: '00001',
+      streetRef: 'street_1',
+      detail: 'Số 123',
+      provinceName: 'Client-provided name must not pass through'
+    };
     const { res, nextCalls } = await runCheckout(
-      validBody({ fullName: '  Nguyễn Văn A  ', shippingAddress: '  123 Đường ABC  ' })
+      validBody({ fullName: '  Nguyễn Văn A  ', address })
     );
 
     assert.equal(res.statusCode, 201);
@@ -64,7 +76,7 @@ test('checkout forwards the trimmed shipping address, recipient snapshot, and se
     assert.equal(calls.length, 1);
     assert.deepEqual(calls[0], [
       'user_1',
-      '123 Đường ABC',
+      { provinceCode: '01', wardCode: '00001', streetRef: 'street_1', detail: 'Số 123' },
       { fullName: 'Nguyễn Văn A', phone: '0987654321', note: 'Giao ngoài giờ' },
       ['item_a']
     ]);
@@ -87,8 +99,10 @@ test('checkout sends a null note when the optional note is omitted or null', asy
   });
 });
 
-test('checkout rejects phone numbers that are not raw digits with 400', async () => {
+test('checkout rejects phone numbers outside the required digit-only 9–11 character range', async () => {
   const invalidPhones = [
+    '12345678',
+    '123456789012',
     'abc',
     '0987abc',
     '090 123 4567',
@@ -121,8 +135,30 @@ test('checkout rejects phone numbers that are not raw digits with 400', async ()
   });
 });
 
-test('checkout rejects a missing recipient name with 400', async () => {
-  const invalidNames = ['', '   ', null, undefined, 123, {}, ['Nguyễn Văn A']];
+test('checkout accepts exact full-name and phone length boundaries', async () => {
+  await withCheckoutSpy(async () => {
+    for (const fullName of ['A'.repeat(10), 'A'.repeat(50)]) {
+      for (const phone of ['1'.repeat(9), '1'.repeat(11)]) {
+        const { res, nextCalls } = await runCheckout(validBody({ fullName, phone }));
+        assert.equal(res.statusCode, 201);
+        assert.equal(nextCalls.length, 0);
+      }
+    }
+  });
+});
+
+test('checkout rejects recipient names outside the required 10–50 character range', async () => {
+  const invalidNames = [
+    '',
+    '   ',
+    'A'.repeat(9),
+    'A'.repeat(51),
+    null,
+    undefined,
+    123,
+    {},
+    ['Nguyễn Văn A']
+  ];
 
   await withCheckoutSpy(async (calls) => {
     for (const fullName of invalidNames) {
@@ -149,15 +185,30 @@ test('checkout rejects a non-string note with 400', async () => {
   });
 });
 
-test('checkout rejects a missing shipping address with 400', async () => {
+test('checkout rejects missing, legacy-string, and incomplete structured addresses with field errors', async () => {
   await withCheckoutSpy(async (calls) => {
-    for (const shippingAddress of ['', '   ', null, undefined, 123, {}]) {
-      const { res, nextCalls } = await runCheckout(validBody({ shippingAddress }));
-      assert.equal(res.statusCode, 400, String(shippingAddress));
-      assert.match(res.body.message, /Địa chỉ giao hàng/, String(shippingAddress));
-      assert.equal(nextCalls.length, 0, String(shippingAddress));
+    for (const body of [
+      validBody({ address: undefined }),
+      validBody({ address: undefined, shippingAddress: '123 Đường ABC' })
+    ]) {
+      const { res, nextCalls } = await runCheckout(body);
+      assert.equal(res.statusCode, 400);
+      assert.equal(res.body.success, false);
+      assert.deepEqual(res.body.errors.map(({ field }) => field), [
+        'provinceCode',
+        'wardCode',
+        'streetRef',
+        'detail'
+      ]);
+      assert.equal(nextCalls.length, 0);
     }
 
+    const { res, nextCalls } = await runCheckout(validBody({
+      address: { provinceCode: '01', wardCode: '00001', detail: 'Số 123' }
+    }));
+    assert.equal(res.statusCode, 400);
+    assert.ok(res.body.errors.some(({ field }) => field === 'streetRef'));
+    assert.equal(nextCalls.length, 0);
     assert.equal(calls.length, 0);
   });
 });
@@ -184,11 +235,17 @@ test('checkout rejects malformed cart item selections with 400', async () => {
   });
 });
 
-test('checkout maps model failures with a status onto the matching HTTP response', async () => {
+test('checkout maps model validation, lookup, conflict, and unavailable errors with field details', async () => {
+  const fieldErrors = [{ field: 'streetRef', message: 'Unknown street' }];
   const cases = [
     { status: 400, message: 'Số lượng yêu cầu của Laptop vượt quá tồn kho (4).' },
     { status: 404, message: 'Không tìm thấy sản phẩm có ID product_a.' },
-    { status: 409, message: 'Tồn kho của Laptop đã thay đổi, vui lòng thử lại.' }
+    { status: 409, message: 'Tồn kho của Laptop đã thay đổi, vui lòng thử lại.' },
+    {
+      statusCode: 503,
+      message: 'Address provider unavailable',
+      errors: fieldErrors
+    }
   ];
 
   const original = orderModel.checkout;
@@ -196,14 +253,17 @@ test('checkout maps model failures with a status onto the matching HTTP response
     for (const testCase of cases) {
       orderModel.checkout = async () => {
         const error = new Error(testCase.message);
-        error.status = testCase.status;
+        if (testCase.status) error.status = testCase.status;
+        if (testCase.statusCode) error.statusCode = testCase.statusCode;
+        if (testCase.errors) error.errors = testCase.errors;
         throw error;
       };
 
       const { res, nextCalls } = await runCheckout(validBody());
-      assert.equal(res.statusCode, testCase.status, testCase.message);
+      assert.equal(res.statusCode, testCase.statusCode || testCase.status, testCase.message);
       assert.equal(res.body.success, false);
       assert.equal(res.body.message, testCase.message);
+      assert.deepEqual(res.body.errors, testCase.errors || []);
       assert.equal(nextCalls.length, 0);
     }
   } finally {

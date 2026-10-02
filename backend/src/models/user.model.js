@@ -7,6 +7,13 @@ const USER_SAFE_SELECT = {
   fullName: true,
   phone: true,
   address: true,
+  addressProvinceCode: true,
+  addressProvinceName: true,
+  addressWardCode: true,
+  addressWardName: true,
+  addressStreetRef: true,
+  addressStreetName: true,
+  addressDetail: true,
   role: true,
   isBlocked: true,
   createdAt: true,
@@ -65,11 +72,22 @@ const update = async (id, userData) => {
  * @param {string} [params.keyword]
  * @param {number|string} [params.page]
  * @param {number|string} [params.limit]
+ * @param {string} [params.role]
  * @returns {Promise<Object>}
  */
 const findAll = async (params = {}) => {
-  const { keyword, page, limit } = params;
+  const { keyword, page, limit, role } = params;
   const where = {};
+
+  if (role !== undefined && role !== '') {
+    if (typeof role !== 'string' || !['customer', 'staff', 'admin'].includes(role)) {
+      const error = new Error('Vai trò phải là customer, staff hoặc admin');
+      error.status = 400;
+      error.statusCode = 400;
+      throw error;
+    }
+    where.role = role;
+  }
 
   if (keyword) {
     where.OR = [

@@ -2,6 +2,66 @@ const assert = require('node:assert/strict');
 const { beforeEach, test } = require('node:test');
 
 const userModel = require('../models/user.model');
+const addressService = require('../services/address.service');
+
+const ADDRESS_DATASET = {
+  provinces: [{ code: '01', name: 'Thành phố Hà Nội', type: 'thành phố' }],
+  wards: [{ code: '00070', provinceCode: '01', name: 'Phường Hoàn Kiếm', type: 'phường' }],
+};
+const STREET_RECORD = {
+  ref: 'street-01',
+  name: 'Phố Đinh Tiên Hoàng',
+  provinceCode: '01',
+  wardCode: '00070',
+};
+const SELECTED_ADDRESS = {
+  provinceCode: '01',
+  wardCode: '00070',
+  streetRef: 'street-01',
+  detail: 'Số 12, ngách 3',
+};
+const CANONICAL_USER_ADDRESS_FIELDS = {
+  address: 'Số 12, ngách 3, Phố Đinh Tiên Hoàng, Phường Hoàn Kiếm, Thành phố Hà Nội',
+  addressProvinceCode: '01',
+  addressProvinceName: 'Thành phố Hà Nội',
+  addressWardCode: '00070',
+  addressWardName: 'Phường Hoàn Kiếm',
+  addressStreetRef: 'street-01',
+  addressStreetName: 'Phố Đinh Tiên Hoàng',
+  addressDetail: 'Số 12, ngách 3',
+};
+const EMPTY_USER_ADDRESS_FIELDS = {
+  address: null,
+  addressProvinceCode: null,
+  addressProvinceName: null,
+  addressWardCode: null,
+  addressWardName: null,
+  addressStreetRef: null,
+  addressStreetName: null,
+  addressDetail: null,
+};
+
+const withAddressProvider = async (provider, run) => {
+  const service = addressService.createAddressService({
+    dataset: ADDRESS_DATASET,
+    provider: provider || {
+      resolveStreet: async (ref) => ref === STREET_RECORD.ref ? { ...STREET_RECORD } : null,
+    },
+  });
+  const originals = {
+    resolveAddress: addressService.resolveAddress,
+    toUserAddressFields: addressService.toUserAddressFields,
+  };
+  addressService.resolveAddress = service.resolveAddress;
+  addressService.toUserAddressFields = service.toUserAddressFields;
+  try {
+    return await run();
+  } finally {
+    Object.assign(addressService, originals);
+  }
+};
+
+const structuredUser = () => ({ ...CANONICAL_USER_ADDRESS_FIELDS });
 
 const createResponse = () => {
   const response = {
@@ -20,6 +80,7 @@ const createResponse = () => {
 };
 
 beforeEach(() => {
+  userModel.findById = async () => null;
   userModel.findAll = async () => ({
     items: [
       {
@@ -60,28 +121,56 @@ beforeEach(() => {
   });
 });
 
-test('getUsers forwards admin search pagination query to model and returns items with pagination', async () => {
+test('getUsers accepts supported and absent roles while preserving the pagination envelope', async () => {
   const controller = require('./user.controller');
-  let receivedParams = null;
+  const calls = [];
   userModel.findAll = async (params) => {
-    receivedParams = params;
+    calls.push(params);
     return {
       items: [{ id: 'user-1', username: 'Ada', email: 'ada@example.com', role: 'customer' }],
       pagination: { page: 2, limit: 10, total: 11, totalPages: 2 },
     };
   };
 
-  const response = createResponse();
-  await controller.getUsers(
-    { query: { keyword: 'ada', page: '2', limit: '10' } },
-    response,
-    assert.fail
-  );
+  for (const role of [undefined, '', 'customer', 'staff', 'admin']) {
+    const query = { keyword: 'ada', page: '2', limit: '10' };
+    if (role !== undefined) query.role = role;
+    const response = createResponse();
+    await controller.getUsers({ query }, response, assert.fail);
 
-  assert.deepEqual(receivedParams, { keyword: 'ada', page: '2', limit: '10' });
-  assert.equal(response.statusCode, 200);
-  assert.deepEqual(response.body.data.pagination, { page: 2, limit: 10, total: 11, totalPages: 2 });
-  assert.equal(response.body.data.items[0].email, 'ada@example.com');
+    assert.equal(response.statusCode, 200);
+    assert.deepEqual(response.body.data.pagination, { page: 2, limit: 10, total: 11, totalPages: 2 });
+    assert.equal(response.body.data.items[0].email, 'ada@example.com');
+    assert.equal(response.body.data.items[0].role, 'customer');
+  }
+
+  assert.deepEqual(calls, [
+    { keyword: 'ada', page: '2', limit: '10' },
+    { keyword: 'ada', page: '2', limit: '10' },
+    { keyword: 'ada', page: '2', limit: '10', role: 'customer' },
+    { keyword: 'ada', page: '2', limit: '10', role: 'staff' },
+    { keyword: 'ada', page: '2', limit: '10', role: 'admin' },
+  ]);
+});
+
+test('getUsers rejects unknown, array, object, and null roles without querying the model', async () => {
+  const controller = require('./user.controller');
+  let findAllCalled = false;
+  userModel.findAll = async () => {
+    findAllCalled = true;
+    return { items: [], pagination: {} };
+  };
+
+  for (const role of ['owner', ['customer', 'staff'], { value: 'customer' }, null]) {
+    const response = createResponse();
+    await controller.getUsers({ query: { role } }, response, assert.fail);
+    assert.equal(response.statusCode, 400);
+    assert.deepEqual(response.body.errors, [{
+      field: 'role',
+      message: 'Vai trò phải là customer, staff hoặc admin',
+    }]);
+  }
+  assert.equal(findAllCalled, false);
 });
 
 test('updateUserRole rejects invalid roles and any current admin self role change', async () => {
@@ -126,43 +215,56 @@ test('updateUserRole updates another user role through the model', async () => {
   assert.equal(response.body.data.user.role, 'admin');
 });
 
-test('updateAdminUser updates only soft profile fields and ignores role permission fields', async () => {
+test('updateAdminUser persists resolver-authoritative address data and ignores forged names and permissions', async () => {
   const controller = require('./user.controller');
-  let received = null;
+  let persisted = null;
   userModel.updateAdminProfile = async (id, data) => {
-    received = { id, data };
+    persisted = { id, ...structuredClone(data) };
     return { id, email: 'ada@example.com', role: 'customer', isBlocked: false, ...data };
   };
 
   const response = createResponse();
-  await controller.updateAdminUser(
-    {
-      params: { id: 'user-1' },
-      body: {
-        username: ' ada ',
-        fullName: ' Ada Lovelace ',
-        phone: '0987654321',
-        address: ' London ',
-        role: 'admin',
-        isBlocked: true,
+  await withAddressProvider(undefined, async () => {
+    await controller.updateAdminUser(
+      {
+        params: { id: 'user-1' },
+        body: {
+          username: ' ada ',
+          fullName: ' Ada Lovelace ',
+          phone: '0987654321',
+          address: {
+            ...SELECTED_ADDRESS,
+            provinceName: 'Forged Province',
+            wardName: 'Forged Ward',
+            streetName: 'Forged Street',
+          },
+          addressProvinceCode: 'FORGED',
+          addressProvinceName: 'Forged root province',
+          addressWardCode: 'FORGED',
+          addressStreetRef: 'forged-root-street',
+          addressStreetName: 'Forged root street',
+          addressDetail: 'Forged root detail',
+          role: 'admin',
+          isBlocked: true,
+        },
+        user: { id: 'admin-1', role: 'admin' },
       },
-      user: { id: 'admin-1', role: 'admin' },
-    },
-    response,
-    assert.fail
-  );
+      response,
+      assert.fail
+    );
+  });
 
-  assert.deepEqual(received, {
+  assert.deepEqual(persisted, {
     id: 'user-1',
-    data: {
-      username: 'ada',
-      fullName: 'Ada Lovelace',
-      phone: '0987654321',
-      address: 'London',
-    },
+    username: 'ada',
+    fullName: 'Ada Lovelace',
+    phone: '0987654321',
+    ...CANONICAL_USER_ADDRESS_FIELDS,
   });
   assert.equal(response.statusCode, 200);
   assert.equal(response.body.data.user.username, 'ada');
+  assert.equal(response.body.data.user.role, 'customer');
+  assert.equal(response.body.data.user.isBlocked, false);
 });
 
 test('updateAdminUser rejects empty username and empty profile payload', async () => {
@@ -234,6 +336,254 @@ test('updateProfile rejects invalid phone values before model invocation', async
   assert.equal(response.body.message, 'Số điện thoại chỉ được chứa chữ số.');
   assert.equal(updateCalled, false);
 });
+test('updateProfile persists canonical address fields from the selected references only', async () => {
+  const controller = require('./user.controller');
+  let persisted = null;
+  userModel.update = async (id, data) => {
+    persisted = { id, ...structuredClone(data) };
+    return { id, ...data };
+  };
+
+  const response = createResponse();
+  await withAddressProvider(undefined, async () => {
+    await controller.updateProfile(
+      {
+        user: { id: 'user-1' },
+        body: {
+          phone: '0987654321',
+          address: {
+            ...SELECTED_ADDRESS,
+            provinceName: 'Forged Province',
+            wardName: 'Forged Ward',
+            streetName: 'Forged Street',
+          },
+          addressProvinceCode: 'FORGED',
+          addressProvinceName: 'Forged root province',
+          addressWardName: 'Forged root ward',
+          addressStreetRef: 'forged-root-street',
+          addressStreetName: 'Forged root street',
+          addressDetail: 'Forged root detail',
+          role: 'admin',
+        },
+      },
+      response,
+      assert.fail
+    );
+  });
+
+  assert.deepEqual(persisted, {
+    id: 'user-1',
+    phone: '0987654321',
+    ...CANONICAL_USER_ADDRESS_FIELDS,
+  });
+  assert.equal(response.statusCode, 200);
+});
+
+test('omitting address preserves verified and empty addresses on both profile endpoints', async () => {
+  const controller = require('./user.controller');
+  const currentUsers = [
+    structuredUser(),
+    { address: null, addressProvinceCode: null, addressProvinceName: null },
+  ];
+
+  for (const endpoint of ['profile', 'admin']) {
+    for (const currentUser of currentUsers) {
+      let persisted = null;
+      userModel.findById = async () => currentUser;
+      userModel.update = async (id, data) => {
+        persisted = { id, ...structuredClone(data) };
+        return { id, ...data };
+      };
+      userModel.updateAdminProfile = async (id, data) => {
+        persisted = { id, ...structuredClone(data) };
+        return { id, ...data };
+      };
+
+      const response = createResponse();
+      const request = endpoint === 'profile'
+        ? { user: { id: 'user-1' }, body: { phone: '0987654321' } }
+        : { params: { id: 'user-1' }, body: { phone: '0987654321' } };
+      await controller[endpoint === 'profile' ? 'updateProfile' : 'updateAdminUser'](
+        request,
+        response,
+        assert.fail
+      );
+      assert.equal(response.statusCode, 200);
+      assert.deepEqual(persisted, { id: 'user-1', phone: '0987654321' });
+    }
+  }
+});
+
+test('legacy free-text addresses require selection for omitted or null updates on both profile endpoints', async () => {
+  const controller = require('./user.controller');
+
+  for (const endpoint of ['profile', 'admin']) {
+    for (const address of [undefined, null]) {
+      let writeCalled = false;
+      userModel.findById = async () => ({ address: 'Old unstructured address' });
+      userModel.update = async () => {
+        writeCalled = true;
+      };
+      userModel.updateAdminProfile = async () => {
+        writeCalled = true;
+      };
+      const body = { phone: '0987654321' };
+      if (address !== undefined) body.address = address;
+      const request = endpoint === 'profile'
+        ? { user: { id: 'user-1' }, body }
+        : { params: { id: 'user-1' }, body };
+      const response = createResponse();
+
+      await controller[endpoint === 'profile' ? 'updateProfile' : 'updateAdminUser'](
+        request,
+        response,
+        assert.fail
+      );
+
+      assert.equal(response.statusCode, 400);
+      assert.equal(response.body.errors[0].field, 'address');
+      assert.match(response.body.message, /chọn lại địa chỉ/);
+      assert.equal(writeCalled, false);
+    }
+  }
+});
+
+test('provider failures become safe 503 errors and do not write either profile endpoint', async () => {
+  const controller = require('./user.controller');
+
+  for (const endpoint of ['profile', 'admin']) {
+    let writeCalled = false;
+    userModel.update = async () => {
+      writeCalled = true;
+    };
+    userModel.updateAdminProfile = async () => {
+      writeCalled = true;
+    };
+    const response = createResponse();
+
+    await withAddressProvider({
+      resolveStreet: async () => {
+        throw new Error('provider secret: api-key');
+      },
+    }, async () => {
+      const request = endpoint === 'profile'
+        ? { user: { id: 'user-1' }, body: { address: SELECTED_ADDRESS } }
+        : { params: { id: 'user-1' }, body: { address: SELECTED_ADDRESS } };
+      await controller[endpoint === 'profile' ? 'updateProfile' : 'updateAdminUser'](
+        request,
+        response,
+        assert.fail
+      );
+    });
+
+    assert.equal(response.statusCode, 503);
+    assert.deepEqual(response.body.errors, [{
+      field: 'address',
+      message: 'Không thể xác thực địa chỉ lúc này. Vui lòng thử lại.',
+    }]);
+    assert.doesNotMatch(response.body.message, /api-key/);
+    assert.equal(writeCalled, false);
+  }
+});
+
+test('invalid, partial, and typed street selections return 400 without persisting either profile endpoint', async () => {
+  const controller = require('./user.controller');
+  const invalidAddresses = [
+    { provinceCode: '01', wardCode: '00070', detail: 'Số 12, ngách 3' },
+    { provinceCode: '01', wardCode: '99999', streetRef: 'street-01', detail: 'Số 12, ngách 3' },
+    { ...SELECTED_ADDRESS, streetRef: 'Phố Đinh Tiên Hoàng' },
+  ];
+
+  for (const endpoint of ['profile', 'admin']) {
+    for (const address of invalidAddresses) {
+      let writeCalled = false;
+      userModel.update = async () => {
+        writeCalled = true;
+      };
+      userModel.updateAdminProfile = async () => {
+        writeCalled = true;
+      };
+      const response = createResponse();
+      const request = endpoint === 'profile'
+        ? { user: { id: 'user-1' }, body: { address } }
+        : { params: { id: 'user-1' }, body: { address } };
+
+      await withAddressProvider(undefined, async () => {
+        await controller[endpoint === 'profile' ? 'updateProfile' : 'updateAdminUser'](
+          request,
+          response,
+          assert.fail
+        );
+      });
+
+      assert.equal(response.statusCode, 400);
+      assert.equal(response.body.success, false);
+      assert.equal(writeCalled, false);
+    }
+  }
+});
+
+test('explicit null clears a verified address through the real mapper on either profile endpoint', async () => {
+  const controller = require('./user.controller');
+
+  for (const endpoint of ['profile', 'admin']) {
+    let persisted = null;
+    userModel.findById = async () => structuredUser();
+    userModel.update = async (id, data) => {
+      persisted = { id, ...structuredClone(data) };
+      return { id, ...data };
+    };
+    userModel.updateAdminProfile = async (id, data) => {
+      persisted = { id, ...structuredClone(data) };
+      return { id, ...data };
+    };
+    const response = createResponse();
+
+    await withAddressProvider(undefined, async () => {
+      const request = endpoint === 'profile'
+        ? { user: { id: 'user-1' }, body: { address: null } }
+        : { params: { id: 'user-1' }, body: { address: null } };
+      await controller[endpoint === 'profile' ? 'updateProfile' : 'updateAdminUser'](
+        request,
+        response,
+        assert.fail
+      );
+    });
+
+    assert.equal(response.statusCode, 200);
+    assert.deepEqual(persisted, { id: 'user-1', ...EMPTY_USER_ADDRESS_FIELDS });
+  }
+});
+
+test('unexpected profile storage failures are forwarded to next without being swallowed', async () => {
+  const controller = require('./user.controller');
+  const failure = new Error('database write failed');
+
+  for (const endpoint of ['profile', 'admin']) {
+    const forwarded = [];
+    const response = createResponse();
+    userModel.update = async () => {
+      throw failure;
+    };
+    userModel.updateAdminProfile = async () => {
+      throw failure;
+    };
+    const request = endpoint === 'profile'
+      ? { user: { id: 'user-1' }, body: { phone: '0987654321' } }
+      : { params: { id: 'user-1' }, body: { phone: '0987654321' } };
+
+    await controller[endpoint === 'profile' ? 'updateProfile' : 'updateAdminUser'](
+      request,
+      response,
+      (error) => forwarded.push(error)
+    );
+
+    assert.deepEqual(forwarded, [failure]);
+    assert.equal(response.statusCode, null);
+    assert.equal(response.body, null);
+  }
+});
+
 
 test('updateAdminUser rejects invalid phone values before model invocation', async () => {
   const controller = require('./user.controller');

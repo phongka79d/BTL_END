@@ -2,7 +2,10 @@ const orderModel = require('../models/order.model');
 const { hasRolePermission, PERMISSIONS } = require('../config/permissions');
 const { successResponse, errorResponse } = require('../utils/response');
 const { validatePhone } = require('../utils/phoneValidation');
+const { validateAddress } = require('../utils/addressValidation');
+const { validateCheckoutFullName } = require('../utils/checkoutValidation');
 const { isOrderSearchField } = require('../utils/orderSearchFields');
+const CHECKOUT_ADDRESS_FIELDS = ['provinceCode', 'wardCode', 'streetRef', 'detail'];
 /**
  * Thực hiện checkout của khách hàng / tạo đơn hàng
  * POST /api/orders
@@ -10,12 +13,26 @@ const { isOrderSearchField } = require('../utils/orderSearchFields');
 const checkout = async (req, res, next) => {
   try {
     const userId = req.user.id;
-    const { shippingAddress, cartItemIds, fullName, phone, note } = req.body || {};
+    const { address, cartItemIds, fullName, phone, note } = req.body || {};
 
-    // Kiểm tra payload shippingAddress
-    if (!shippingAddress || typeof shippingAddress !== 'string' || shippingAddress.trim() === '') {
-      return errorResponse(res, 400, 'Địa chỉ giao hàng là bắt buộc');
+    let addressInput = address;
+    if (address && typeof address === 'object' && !Array.isArray(address)) {
+      addressInput = {};
+      for (const field of CHECKOUT_ADDRESS_FIELDS) {
+        if (Object.prototype.hasOwnProperty.call(address, field)) {
+          addressInput[field] = address[field];
+        }
+      }
     }
+    const addressErrors = validateAddress(
+      addressInput === undefined ? {} : addressInput,
+      { required: true }
+    );
+    if (Object.keys(addressErrors).length > 0) {
+      const errors = Object.entries(addressErrors).map(([field, message]) => ({ field, message }));
+      return errorResponse(res, 400, errors[0].message, errors);
+    }
+
     if (cartItemIds !== undefined) {
       if (!Array.isArray(cartItemIds) || cartItemIds.length === 0) {
         return errorResponse(res, 400, 'Phải chọn ít nhất một sản phẩm trong giỏ hàng');
@@ -28,9 +45,9 @@ const checkout = async (req, res, next) => {
       }
     }
 
-    // Kiểm tra ảnh chụp người nhận: họ tên bắt buộc, số điện thoại chỉ gồm chữ số, ghi chú là chuỗi.
-    if (typeof fullName !== 'string' || fullName.trim() === '') {
-      return errorResponse(res, 400, 'Họ và tên người nhận là bắt buộc');
+    const fullNameError = validateCheckoutFullName(fullName);
+    if (fullNameError) {
+      return errorResponse(res, 400, fullNameError);
     }
     const phoneError = validatePhone(phone, { required: true });
     if (phoneError) {
@@ -46,11 +63,12 @@ const checkout = async (req, res, next) => {
       note: note ?? null
     };
 
-    const order = await orderModel.checkout(userId, shippingAddress.trim(), contact, cartItemIds);
+    const order = await orderModel.checkout(userId, addressInput, contact, cartItemIds);
     return successResponse(res, 201, 'Đã tạo đơn hàng thành công', order);
   } catch (error) {
-    if (error && (error.status === 400 || error.status === 404 || error.status === 409)) {
-      return errorResponse(res, error.status, error.message);
+    const statusCode = error && (error.statusCode || error.status);
+    if ([400, 404, 409, 503].includes(statusCode)) {
+      return errorResponse(res, statusCode, error.message, error.errors);
     }
     next(error);
   }

@@ -6,6 +6,7 @@ const userModel = require('../models/user.model');
 const passwordChangeOtpModel = require('../models/passwordChangeOtp.model');
 const emailService = require('../services/email.service');
 const { PASSWORD_POLICY_MESSAGE } = require('../utils/passwordPolicy');
+const { PHONE_LENGTH_MESSAGE, PHONE_VALIDATION_MESSAGE } = require('../utils/phoneValidation');
 
 const createResponse = () => {
   const response = {
@@ -26,6 +27,7 @@ const createResponse = () => {
 beforeEach(() => {
   process.env.JWT_SECRET = 'test-secret';
   userModel.findByEmail = async () => null;
+  userModel.create = async () => null;
   userModel.findById = async () => null;
   passwordChangeOtpModel.createPasswordChangeOtp = async () => null;
   passwordChangeOtpModel.findLatestActiveOtp = async () => null;
@@ -34,6 +36,96 @@ beforeEach(() => {
   passwordChangeOtpModel.completePasswordChange = async () => null;
   passwordChangeOtpModel.invalidateActiveOtps = async () => null;
   emailService.sendPasswordChangeOtpEmail = async () => ({ delivery: 'console' });
+});
+
+test('register rejects invalid phone values before looking up or creating an account', async () => {
+  const controller = require('./auth.controller');
+  let lookups = 0;
+  let creates = 0;
+  userModel.findByEmail = async () => {
+    lookups += 1;
+    return null;
+  };
+  userModel.create = async () => {
+    creates += 1;
+  };
+
+  for (const [phone, expectedMessage] of [
+    ['12345678', PHONE_LENGTH_MESSAGE],
+    ['123456789012', PHONE_LENGTH_MESSAGE],
+    [123456789, PHONE_VALIDATION_MESSAGE],
+    ['012-3456789', PHONE_VALIDATION_MESSAGE],
+  ]) {
+    const response = createResponse();
+    await controller.register(
+      { body: { username: 'ada', email: 'ada@example.com', password: 'password', phone } },
+      response,
+      assert.fail
+    );
+    assert.equal(response.statusCode, 400);
+    assert.equal(response.body.message, expectedMessage);
+  }
+
+  assert.equal(lookups, 0);
+  assert.equal(creates, 0);
+});
+
+test('register accepts an empty optional phone and no address while storing null address fields', async () => {
+  const controller = require('./auth.controller');
+  let createdPayload;
+  userModel.create = async (payload) => {
+    createdPayload = payload;
+    return {
+      id: 'user-1',
+      username: payload.username,
+      email: payload.email,
+      fullName: payload.fullName,
+      role: payload.role,
+      passwordHash: payload.passwordHash,
+    };
+  };
+
+  const response = createResponse();
+  await controller.register(
+    {
+      body: {
+        username: 'ada',
+        email: 'ada@example.com',
+        password: 'password',
+        fullName: 'Ada Lovelace',
+        phone: '',
+        role: 'admin',
+      },
+    },
+    response,
+    assert.fail
+  );
+
+  assert.equal(response.statusCode, 201);
+  assert.equal(createdPayload.phone, '');
+  assert.equal(createdPayload.role, 'customer');
+  assert.deepEqual(
+    Object.fromEntries(Object.entries(createdPayload).filter(([key]) => key.startsWith('address'))),
+    {
+      address: null,
+      addressProvinceCode: null,
+      addressProvinceName: null,
+      addressWardCode: null,
+      addressWardName: null,
+      addressStreetRef: null,
+      addressStreetName: null,
+      addressDetail: null,
+    }
+  );
+  assert.deepEqual(response.body.data.user, {
+    id: 'user-1',
+    username: 'ada',
+    email: 'ada@example.com',
+    fullName: 'Ada Lovelace',
+    role: 'customer',
+  });
+  assert.equal(Object.hasOwn(response.body.data.user, 'passwordHash'), false);
+  assert.equal(typeof response.body.data.token, 'string');
 });
 
 test('login rejects blocked users before issuing a token', async () => {

@@ -6,6 +6,9 @@ const buildUserQuery = (filters = {}) => {
   if (filters.keyword) {
     params.set('keyword', filters.keyword);
   }
+  if (filters.role) {
+    params.set('role', filters.role);
+  }
   if (filters.page) {
     params.set('page', String(filters.page));
   }
@@ -37,7 +40,7 @@ export const userApi = {
 
   /**
    * Lấy danh sách người dùng có phân trang (chỉ Admin)
-   * @param {Object} filters - keyword, page, limit
+   * @param {Object} filters - keyword, role, page, limit
    * @returns {Promise<Object>} Mảng tất cả người dùng
    */
   getAdminUsers: (filters = {}) => apiClient.get(`/admin/users${buildUserQuery(filters)}`),

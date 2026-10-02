@@ -1,6 +1,6 @@
 export const PHONE_VALIDATION_MESSAGE = 'Số điện thoại chỉ được chứa chữ số.';
+export const PHONE_LENGTH_MESSAGE = 'Số điện thoại phải gồm từ 9 đến 11 chữ số.';
 export const PHONE_REQUIRED_MESSAGE = 'Số điện thoại không được để trống.';
-
 export const validatePhone = (value, { required = false } = {}) => {
   const isEmpty = value === '' || value === null || value === undefined;
 
@@ -10,6 +10,10 @@ export const validatePhone = (value, { required = false } = {}) => {
 
   if (typeof value !== 'string' || !/^[0-9]+$/.test(value)) {
     return PHONE_VALIDATION_MESSAGE;
+  }
+
+  if (value.length < 9 || value.length > 11) {
+    return PHONE_LENGTH_MESSAGE;
   }
 
   return null;

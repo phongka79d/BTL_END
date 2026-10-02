@@ -59,6 +59,13 @@ model User {
   fullName           String?             @map("full_name")
   phone              String?
   address            String?
+  addressProvinceCode String?             @map("address_province_code")
+  addressProvinceName String?             @map("address_province_name")
+  addressWardCode     String?             @map("address_ward_code")
+  addressWardName     String?             @map("address_ward_name")
+  addressStreetRef    String?             @map("address_street_ref")
+  addressStreetName   String?             @map("address_street_name")
+  addressDetail       String?             @map("address_detail")
   role               Role                @default(customer)
   isBlocked          Boolean             @default(false) @map("is_blocked")
   cart               Cart?
@@ -147,6 +154,13 @@ model Order {
   totalAmount     Decimal       @map("total_amount") @db.Decimal(10, 2)
   status          OrderStatus   @default(pending)
   shippingAddress String        @map("shipping_address")
+  shippingProvinceCode  String?       @map("shipping_province_code")
+  shippingProvinceName  String?       @map("shipping_province_name")
+  shippingWardCode      String?       @map("shipping_ward_code")
+  shippingWardName      String?       @map("shipping_ward_name")
+  shippingStreetRef     String?       @map("shipping_street_ref")
+  shippingStreetName    String?       @map("shipping_street_name")
+  shippingAddressDetail String?       @map("shipping_address_detail")
   recipientName   String?       @map("recipient_name")
   recipientPhone  String?       @map("recipient_phone")
   note            String?

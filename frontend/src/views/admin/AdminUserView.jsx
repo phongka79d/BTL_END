@@ -1,8 +1,9 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
   Button,
   Heading,
   HStack,
+  Selector,
   Text,
   TextInput,
   Toolbar,
@@ -15,7 +16,15 @@ import Pagination from '../../components/common/Pagination';
 import UserProfileDialog from '../../components/admin/UserProfileDialog';
 import UserCreateDialog from '../../components/admin/UserCreateDialog';
 import UserManagementTable, { getUserDisplayName } from '../../components/admin/UserManagementTable';
-
+import {
+  applyUserRoleFilter,
+  applyUserSearchFilter,
+  getPageAfterUserListLoad,
+  getUserListErrorMessage,
+  isCurrentUserListRequest,
+  resetUserFilters,
+  USER_ROLE_FILTER_OPTIONS
+} from './adminUserFilterUtils.js';
 const DEFAULT_PAGINATION = {
   page: 1,
   limit: 10,
@@ -30,6 +39,9 @@ export const AdminUserView = () => {
   const [page, setPage] = useState(1);
   const [draftSearch, setDraftSearch] = useState('');
   const [search, setSearch] = useState('');
+  const [roleFilter, setRoleFilter] = useState('');
+  const activeFiltersRef = useRef({ page, search, role: roleFilter });
+  const latestRequestIdRef = useRef(0);
   const [isLoading, setIsLoading] = useState(true);
   const [isUpdating, setIsUpdating] = useState(false);
   const [loadError, setLoadError] = useState('');
@@ -37,43 +49,98 @@ export const AdminUserView = () => {
   const [editingUser, setEditingUser] = useState(null);
   const [isCreateOpen, setIsCreateOpen] = useState(false);
 
-  const loadUsers = useCallback(async () => {
+  const commitFilters = useCallback((nextFilters) => {
+    activeFiltersRef.current = nextFilters;
+    setPage(nextFilters.page);
+    setSearch(nextFilters.search);
+    setRoleFilter(nextFilters.role);
+  }, []);
+
+  const loadUsers = useCallback(async (filters = activeFiltersRef.current) => {
+    const requestId = ++latestRequestIdRef.current;
+    const requestFilters = { ...filters };
     setIsLoading(true);
     setLoadError('');
 
     try {
       const response = await userApi.getAdminUsers({
-        keyword: search,
-        page,
+        keyword: requestFilters.search,
+        role: requestFilters.role,
+        page: requestFilters.page,
         limit: DEFAULT_PAGINATION.limit
       });
-      setUsers(response?.data?.items || []);
-      setPagination(response?.data?.pagination || {
+      const items = response?.data?.items || [];
+      const responsePagination = response?.data?.pagination;
+
+      if (!isCurrentUserListRequest({
+        requestId,
+        latestRequestId: latestRequestIdRef.current,
+        requestFilters,
+        activeFilters: activeFiltersRef.current
+      })) {
+        return;
+      }
+
+      const validPage = getPageAfterUserListLoad({
+        requestedPage: requestFilters.page,
+        pagination: responsePagination,
+        items
+      });
+      if (validPage !== requestFilters.page) {
+        const nextFilters = { ...activeFiltersRef.current, page: validPage };
+        activeFiltersRef.current = nextFilters;
+        setPage(validPage);
+        return;
+      }
+
+      setUsers(items);
+      setPagination(responsePagination || {
         ...DEFAULT_PAGINATION,
-        page
+        page: requestFilters.page
       });
     } catch (error) {
-      setUsers([]);
-      setPagination({ ...DEFAULT_PAGINATION, page });
-      setLoadError(error?.message || 'Không thể tải người dùng.');
+      if (isCurrentUserListRequest({
+        requestId,
+        latestRequestId: latestRequestIdRef.current,
+        requestFilters,
+        activeFilters: activeFiltersRef.current
+      })) {
+        setUsers([]);
+        setPagination({ ...DEFAULT_PAGINATION, page: requestFilters.page });
+        setLoadError(getUserListErrorMessage(error));
+      }
     } finally {
-      setIsLoading(false);
+      if (isCurrentUserListRequest({
+        requestId,
+        latestRequestId: latestRequestIdRef.current,
+        requestFilters,
+        activeFilters: activeFiltersRef.current
+      })) {
+        setIsLoading(false);
+      }
     }
-  }, [page, search]);
+  }, []);
 
   useEffect(() => {
     loadUsers();
-  }, [loadUsers]);
+  }, [loadUsers, page, roleFilter, search]);
 
   const submitSearch = () => {
-    setPage(1);
-    setSearch(draftSearch.trim());
+    commitFilters(applyUserSearchFilter(activeFiltersRef.current, draftSearch));
   };
 
-  const clearSearch = () => {
+  const changeRoleFilter = (role) => {
+    commitFilters(applyUserRoleFilter(activeFiltersRef.current, role));
+  };
+
+  const changePage = (nextPage) => {
+    if (!Number.isInteger(nextPage) || nextPage < 1) return;
+    commitFilters({ ...activeFiltersRef.current, page: nextPage });
+  };
+
+  const clearFilters = () => {
     setDraftSearch('');
-    setPage(1);
-    setSearch('');
+    commitFilters(resetUserFilters());
   };
 
   const handleRoleChange = async (target, nextRole) => {
@@ -83,16 +150,13 @@ export const AdminUserView = () => {
     setFeedback(null);
 
     try {
-      const response = await userApi.updateUserRole(target.id, nextRole);
-      const updatedUser = response?.data?.user;
-      setUsers((currentUsers) => currentUsers.map((item) => (
-        item.id === target.id ? { ...item, ...(updatedUser || {}), role: nextRole } : item
-      )));
+      await userApi.updateUserRole(target.id, nextRole);
       setFeedback({
         title: 'Đã cập nhật vai trò',
         description: `${getUserDisplayName(target)} hiện có vai trò ${nextRole}.`,
         status: 'success'
       });
+      await loadUsers(activeFiltersRef.current);
     } catch (error) {
       setFeedback({
         title: 'Không thể cập nhật vai trò',
@@ -111,16 +175,13 @@ export const AdminUserView = () => {
     setFeedback(null);
 
     try {
-      const response = await userApi.updateUserBlocked(target.id, nextBlockedState);
-      const updatedUser = response?.data?.user;
-      setUsers((currentUsers) => currentUsers.map((item) => (
-        item.id === target.id ? { ...item, ...(updatedUser || {}), isBlocked: nextBlockedState } : item
-      )));
+      await userApi.updateUserBlocked(target.id, nextBlockedState);
       setFeedback({
         title: nextBlockedState ? 'Đã khóa người dùng' : 'Đã mở khóa người dùng',
         description: `${getUserDisplayName(target)} hiện ${nextBlockedState ? 'bị khóa' : 'đang hoạt động'}.`,
         status: 'success'
       });
+      await loadUsers(activeFiltersRef.current);
     } catch (error) {
       setFeedback({
         title: 'Không thể cập nhật trạng thái khóa',
@@ -151,7 +212,7 @@ export const AdminUserView = () => {
         description: `${getUserDisplayName(createdUser || payload)} đã được tạo.${deliveryNote}`,
         status: 'success'
       });
-      await loadUsers();
+      await loadUsers(activeFiltersRef.current);
     } catch (error) {
       setFeedback({
         title: 'Không thể tạo tài khoản',
@@ -167,17 +228,13 @@ export const AdminUserView = () => {
   const handleProfileSave = async (payload) => {
     if (!editingUser) return;
 
-    const response = await userApi.updateAdminUser(editingUser.id, payload);
-    const updatedUser = response?.data?.user;
-
-    setUsers((currentUsers) => currentUsers.map((item) => (
-      item.id === editingUser.id ? { ...item, ...(updatedUser || {}), ...payload } : item
-    )));
+    await userApi.updateAdminUser(editingUser.id, payload);
     setFeedback({
       title: 'Đã cập nhật hồ sơ',
       description: `${getUserDisplayName(editingUser)} đã được cập nhật.`,
       status: 'success'
     });
+    await loadUsers(activeFiltersRef.current);
   };
 
   return (
@@ -200,16 +257,29 @@ export const AdminUserView = () => {
       <Toolbar
         label="Quản lý người dùng"
         startContent={(
-          <TextInput
-            label="Tìm kiếm người dùng"
-            isLabelHidden
-            value={draftSearch}
-            onChange={setDraftSearch}
-            onEnter={submitSearch}
-            placeholder="Tìm tên người dùng, email hoặc tên"
-            hasClear
-            width="100%"
-          />
+          <HStack gap={2} align="center" wrap="wrap">
+            <div style={{ flex: '1 1 220px', minWidth: '180px' }}>
+              <TextInput
+                label="Tìm kiếm người dùng"
+                isLabelHidden
+                value={draftSearch}
+                onChange={setDraftSearch}
+                onEnter={submitSearch}
+                placeholder="Tìm tên người dùng, email hoặc tên"
+                hasClear
+                width="100%"
+              />
+            </div>
+            <Selector
+              label="Lọc theo vai trò"
+              isLabelHidden
+              value={roleFilter}
+              onChange={changeRoleFilter}
+              options={USER_ROLE_FILTER_OPTIONS}
+              placeholder="Tất cả vai trò"
+              width="220px"
+            />
+          </HStack>
         )}
         endContent={(
           <HStack gap={2}>
@@ -219,18 +289,18 @@ export const AdminUserView = () => {
               onClick={submitSearch}
               isDisabled={isLoading}
             />
-            {search && (
+            {(search || roleFilter || draftSearch) && (
               <Button
-                label="Xóa tìm kiếm"
+                label="Xóa bộ lọc"
                 variant="ghost"
-                onClick={clearSearch}
+                onClick={clearFilters}
                 isDisabled={isLoading}
               />
             )}
             <Button
               label="Làm mới"
               variant="secondary"
-              onClick={loadUsers}
+              onClick={() => loadUsers(activeFiltersRef.current)}
               isDisabled={isLoading}
             />
             <Button
@@ -250,18 +320,18 @@ export const AdminUserView = () => {
         isUpdating={isUpdating}
         error={loadError}
         search={search}
-        onBlockedChange={handleBlockedChange}
-        onClearSearch={clearSearch}
+        onClearSearch={clearFilters}
         onEdit={setEditingUser}
-        onRetry={loadUsers}
+        onRetry={() => loadUsers(activeFiltersRef.current)}
         onRoleChange={handleRoleChange}
+        onBlockedChange={handleBlockedChange}
       />
 
       {!isLoading && !loadError && users.length > 0 && (
         <Pagination
           page={pagination.page}
           totalPages={pagination.totalPages}
-          onPageChange={setPage}
+          onPageChange={changePage}
         />
       )}
 

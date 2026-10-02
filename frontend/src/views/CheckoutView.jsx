@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import {
   Button,
@@ -13,6 +13,7 @@ import {
 import { useCart } from '../contexts/CartContext';
 import { useNotification } from '../contexts/NotificationContext';
 import { orderApi } from '../api/orderApi';
+import { userApi } from '../api/userApi';
 import Alert from '../components/common/Alert';
 import { CartIcon } from '../components/common/LayoutIcons';
 import CheckoutForm from '../components/checkout/CheckoutForm';
@@ -22,11 +23,16 @@ import {
   createSubmissionGuard,
   validateCheckoutValues
 } from '../components/checkout/checkoutFormUtils.js';
+import {
+  addressFromUser,
+  EMPTY_ADDRESS,
+  hasLegacyAddress as hasLegacyStructuredAddress
+} from '../components/address/addressFormUtils.js';
 
 const INITIAL_VALUES = {
   fullName: '',
   phone: '',
-  shippingAddress: '',
+  address: EMPTY_ADDRESS,
   note: ''
 };
 
@@ -92,11 +98,60 @@ export const CheckoutView = () => {
   const [touched, setTouched] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [apiError, setApiError] = useState(null);
+  const [hasInitializedValues, setHasInitializedValues] = useState(false);
+  const [profileLoadFailed, setProfileLoadFailed] = useState(false);
+  const [legacyAddress, setLegacyAddress] = useState('');
+  const initializedRef = useRef(false);
   const submissionGuardRef = useRef(null);
 
   if (!submissionGuardRef.current) {
     submissionGuardRef.current = createSubmissionGuard();
   }
+
+  useEffect(() => {
+    if (initializedRef.current) {
+      return undefined;
+    }
+
+    let isCurrent = true;
+
+    const initializeCheckout = async () => {
+      const profileRequest = Promise.resolve().then(() => userApi.getProfile());
+      const cartRequest = Promise.resolve().then(() => refreshCart());
+      const [profileResult] = await Promise.allSettled([profileRequest, cartRequest]);
+
+      if (!isCurrent || initializedRef.current) {
+        return;
+      }
+
+      initializedRef.current = true;
+      const profile = profileResult.status === 'fulfilled'
+        ? profileResult.value?.data?.user
+        : null;
+      const profileAvailable = profile !== null
+        && typeof profile === 'object'
+        && !Array.isArray(profile);
+
+      setValues({
+        fullName: typeof profile?.fullName === 'string' ? profile.fullName : '',
+        phone: typeof profile?.phone === 'string' ? profile.phone : '',
+        address: addressFromUser(profile),
+        note: ''
+      });
+      setProfileLoadFailed(!profileAvailable);
+      setLegacyAddress(
+        profileAvailable && hasLegacyStructuredAddress(profile)
+          ? profile.address
+          : ''
+      );
+      setHasInitializedValues(true);
+    };
+
+    initializeCheckout();
+    return () => {
+      isCurrent = false;
+    };
+  }, [refreshCart]);
 
   const handleFieldChange = useCallback((field, value) => {
     setValues((prev) => ({ ...prev, [field]: value }));
@@ -114,12 +169,21 @@ export const CheckoutView = () => {
 
   const handleFieldBlur = useCallback(
     (field) => {
-      setTouched((prev) => ({ ...prev, [field]: true }));
+      const errorField = ['provinceCode', 'wardCode', 'streetRef', 'detail'].includes(field)
+        ? 'address'
+        : field;
+      setTouched((prev) => ({ ...prev, [errorField]: true }));
 
       const fieldErrors = validateCheckoutValues(values);
-      if (fieldErrors[field]) {
-        setErrors((prev) => ({ ...prev, [field]: fieldErrors[field] }));
-      }
+      setErrors((prev) => {
+        const next = { ...prev };
+        if (fieldErrors[errorField]) {
+          next[errorField] = fieldErrors[errorField];
+        } else {
+          delete next[errorField];
+        }
+        return next;
+      });
     },
     [values]
   );
@@ -140,7 +204,7 @@ export const CheckoutView = () => {
     const allTouched = {
       fullName: true,
       phone: true,
-      shippingAddress: true,
+      address: true,
       note: true
     };
 
@@ -189,7 +253,7 @@ export const CheckoutView = () => {
     }
   }, [navigate, notifySuccess, refreshCart, selectedItems, values]);
 
-  if (loading) {
+  if (loading || !hasInitializedValues) {
     return (
       <VStack
         style={{
@@ -304,6 +368,12 @@ export const CheckoutView = () => {
         </Text>
       </VStack>
 
+      {profileLoadFailed && (
+        <Text color="secondary" role="status">
+          Không thể tải hồ sơ. Vui lòng nhập thông tin giao hàng để tiếp tục.
+        </Text>
+      )}
+
       {apiError && (
         <Alert
           title="Không thể đặt đơn hàng"
@@ -324,6 +394,8 @@ export const CheckoutView = () => {
           touched={touched}
           onChange={handleFieldChange}
           onBlur={handleFieldBlur}
+          legacyAddress={legacyAddress}
+          disabled={isSubmitting}
         />
 
         <CheckoutOrderSummary

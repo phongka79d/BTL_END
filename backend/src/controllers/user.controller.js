@@ -1,8 +1,10 @@
 const bcrypt = require('bcrypt');
 const userModel = require('../models/user.model');
 const emailService = require('../services/email.service');
+const addressService = require('../services/address.service');
 const { validatePhone } = require('../utils/phoneValidation');
 const { successResponse, errorResponse } = require('../utils/response');
+const ADDRESS_PROVIDER_ERROR_MESSAGE = 'Không thể xác thực địa chỉ lúc này. Vui lòng thử lại.';
 
 /**
  * Hàm hỗ trợ loại bỏ passwordHash khỏi đối tượng người dùng
@@ -20,10 +22,7 @@ const SALT_ROUNDS = 10;
 const ADMIN_EDITABLE_FIELDS = ['username', 'fullName', 'phone', 'address'];
 
 const normalizeEditableValue = (value) => {
-  if (value === null) {
-    return null;
-  }
-
+  if (value === null) return null;
   return typeof value === 'string' ? value.trim() : value;
 };
 
@@ -32,11 +31,51 @@ const getAdminUserUpdateData = (body) => {
 
   ADMIN_EDITABLE_FIELDS.forEach((field) => {
     if (body[field] !== undefined) {
-      updateData[field] = normalizeEditableValue(body[field]);
+      updateData[field] = field === 'address'
+        ? body[field]
+        : normalizeEditableValue(body[field]);
     }
   });
 
   return updateData;
+};
+const hasCompleteStructuredAddress = (user) => [
+  'addressProvinceCode',
+  'addressProvinceName',
+  'addressWardCode',
+  'addressWardName',
+  'addressStreetRef',
+  'addressStreetName',
+  'addressDetail',
+].every((field) => typeof user?.[field] === 'string' && user[field].trim() !== '');
+
+const hasUnstructuredLegacyAddress = (user) => (
+  typeof user?.address === 'string'
+  && user.address.trim() !== ''
+  && !hasCompleteStructuredAddress(user)
+);
+
+const rejectLegacyAddressEdit = async (id, res) => {
+  const currentUser = await userModel.findById(id);
+  if (!hasUnstructuredLegacyAddress(currentUser)) return false;
+
+  const message = 'Vui lòng chọn lại địa chỉ theo danh sách.';
+  errorResponse(res, 400, message, [{ field: 'address', message }]);
+  return true;
+};
+
+const respondToAddressError = (res, error) => {
+  const status = error?.statusCode || error?.status;
+  if (status !== 400 && status !== 503) return false;
+
+  const message = status === 503
+    ? ADDRESS_PROVIDER_ERROR_MESSAGE
+    : (typeof error.message === 'string' ? error.message : 'Địa chỉ không hợp lệ.');
+  const errors = Array.isArray(error.errors)
+    ? error.errors
+    : [{ field: 'address', message }];
+  errorResponse(res, status, message, errors);
+  return true;
 };
 
 /**
@@ -80,7 +119,6 @@ const updateProfile = async (req, res, next) => {
 
     const updateData = {};
 
-    // Kiểm tra và giới hạn cập nhật trong các trường của Plan 1
     if (username !== undefined) {
       if (username === null || String(username).trim() === '') {
         return errorResponse(res, 400, 'Tên người dùng không được để trống');
@@ -89,12 +127,24 @@ const updateProfile = async (req, res, next) => {
     }
     if (fullName !== undefined) updateData.fullName = fullName;
     if (phone !== undefined) updateData.phone = phone;
-    if (address !== undefined) updateData.address = address;
+    if (address === null && await rejectLegacyAddressEdit(req.user.id, res)) return;
+    if (address !== undefined) {
+      let resolvedAddress = null;
+      if (address !== null) {
+        try {
+          resolvedAddress = await addressService.resolveAddress(address, { required: true });
+        } catch (error) {
+          if (respondToAddressError(res, error)) return;
+          throw error;
+        }
+      }
+      Object.assign(updateData, addressService.toUserAddressFields(resolvedAddress));
+    }
 
-    // Kiểm tra có dữ liệu nào cần cập nhật hay không
     if (Object.keys(updateData).length === 0) {
       return errorResponse(res, 400, 'Chưa cung cấp trường nào để cập nhật');
     }
+    if (address === undefined && await rejectLegacyAddressEdit(req.user.id, res)) return;
 
     const updatedUser = await userModel.update(req.user.id, updateData);
 
@@ -112,8 +162,18 @@ const updateProfile = async (req, res, next) => {
  */
 const getUsers = async (req, res, next) => {
   try {
-    const { keyword, page, limit } = req.query;
-    const result = await userModel.findAll({ keyword, page, limit });
+    const { keyword, page, limit, role } = req.query;
+    if (role !== undefined && role !== '' && (typeof role !== 'string' || !VALID_ROLES.includes(role))) {
+      const message = 'Vai trò phải là customer, staff hoặc admin';
+      return errorResponse(res, 400, message, [{ field: 'role', message }]);
+    }
+
+    const result = await userModel.findAll({
+      keyword,
+      page,
+      limit,
+      ...(role === undefined || role === '' ? {} : { role })
+    });
     const safeUsers = result.items.map(user => serializeUser(user));
 
     return successResponse(res, 200, 'Đã lấy danh sách người dùng thành công', {
@@ -167,11 +227,27 @@ const updateAdminUser = async (req, res, next) => {
     const updateData = getAdminUserUpdateData(req.body);
 
     if (updateData.username !== undefined && updateData.username === '') {
-        return errorResponse(res, 400, 'Tên người dùng không được để trống');
+      return errorResponse(res, 400, 'Tên người dùng không được để trống');
     }
 
     if (Object.keys(updateData).length === 0) {
       return errorResponse(res, 400, 'Chưa cung cấp trường có thể chỉnh sửa để cập nhật');
+    }
+
+    if (updateData.address === null && await rejectLegacyAddressEdit(id, res)) return;
+    if (updateData.address !== undefined) {
+      let resolvedAddress = null;
+      if (updateData.address !== null) {
+        try {
+          resolvedAddress = await addressService.resolveAddress(updateData.address, { required: true });
+        } catch (error) {
+          if (respondToAddressError(res, error)) return;
+          throw error;
+        }
+      }
+      Object.assign(updateData, addressService.toUserAddressFields(resolvedAddress));
+    } else if (await rejectLegacyAddressEdit(id, res)) {
+      return;
     }
 
     const user = await userModel.updateAdminProfile(id, updateData);
@@ -231,6 +307,15 @@ const createUser = async (req, res, next) => {
       return errorResponse(res, 400, 'Vai trò phải là customer, staff hoặc admin');
     }
 
+    let resolvedAddress;
+    try {
+      resolvedAddress = await addressService.resolveAddress(address, { required: false });
+    } catch (error) {
+      if (respondToAddressError(res, error)) return;
+      throw error;
+    }
+    const userAddressFields = addressService.toUserAddressFields(resolvedAddress);
+
     const normalizedEmail = String(email).trim();
     const existingUser = await userModel.findByEmail(normalizedEmail);
     if (existingUser) {
@@ -245,12 +330,10 @@ const createUser = async (req, res, next) => {
       passwordHash,
       fullName: fullName ? String(fullName).trim() : null,
       phone: phone ? String(phone).trim() : null,
-      address: address ? String(address).trim() : null,
+      ...userAddressFields,
       role: requestedRole
     });
 
-    // Gửi thông tin đăng nhập qua email ở chế độ tốt nhất có thể:
-    // tài khoản vẫn được tạo ngay cả khi kênh email chưa được cấu hình.
     let emailDelivery = 'skipped';
     try {
       const delivery = await emailService.sendAccountCredentialsEmail({

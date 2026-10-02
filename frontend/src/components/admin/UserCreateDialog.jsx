@@ -14,6 +14,9 @@ import {
 } from '@astryxdesign/core';
 import Alert from '../common/Alert';
 import { validatePhone } from '../../utils/phoneValidation';
+import { validateAddress } from '../../utils/addressValidation';
+import VietnamAddressFields from '../address/VietnamAddressFields';
+import { EMPTY_ADDRESS, toAddressPayload } from '../address/addressFormUtils';
 import { validatePasswordPolicy } from '../../utils/passwordPolicy';
 
 const EMPTY_VALUES = {
@@ -23,8 +26,13 @@ const EMPTY_VALUES = {
   fullName: '',
   phone: '',
   role: 'staff',
+  address: EMPTY_ADDRESS
 };
 
+const createEmptyValues = () => ({
+  ...EMPTY_VALUES,
+  address: { ...EMPTY_ADDRESS }
+});
 const ROLE_OPTIONS = [
   { label: 'Nhân viên vận hành', value: 'staff' },
   { label: 'Quản trị viên', value: 'admin' },
@@ -41,17 +49,17 @@ const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
  */
 export const UserCreateDialog = ({ isOpen, onOpenChange, onSubmit }) => {
   const formId = useId();
-  const [values, setValues] = useState(EMPTY_VALUES);
+  const [values, setValues] = useState(createEmptyValues);
   const [error, setError] = useState('');
   const [phoneStatus, setPhoneStatus] = useState(null);
+  const [addressErrors, setAddressErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
-    if (isOpen) {
-      setValues(EMPTY_VALUES);
-      setError('');
-      setPhoneStatus(null);
-    }
+    setValues(createEmptyValues());
+    setError('');
+    setPhoneStatus(null);
+    setAddressErrors({});
   }, [isOpen]);
 
   const updateField = (field, value) => {
@@ -69,6 +77,14 @@ export const UserCreateDialog = ({ isOpen, onOpenChange, onSubmit }) => {
     setError('');
   };
 
+  const updateAddress = (address) => {
+    setValues((current) => ({ ...current, address }));
+    if (Object.keys(addressErrors).length > 0) {
+      setAddressErrors(validateAddress(address));
+    }
+    setError('');
+  };
+
   const buildPayload = () => ({
     username: values.username.trim(),
     email: values.email.trim(),
@@ -76,6 +92,7 @@ export const UserCreateDialog = ({ isOpen, onOpenChange, onSubmit }) => {
     fullName: values.fullName.trim(),
     phone: values.phone,
     role: values.role,
+    address: toAddressPayload(values.address)
   });
 
   const handleSubmit = async (event) => {
@@ -83,6 +100,11 @@ export const UserCreateDialog = ({ isOpen, onOpenChange, onSubmit }) => {
     const phoneError = validatePhone(values.phone);
     if (phoneError) {
       setPhoneStatus({ type: 'error', message: phoneError });
+      return;
+    }
+    const nextAddressErrors = validateAddress(values.address);
+    setAddressErrors(nextAddressErrors);
+    if (Object.keys(nextAddressErrors).length > 0) {
       return;
     }
 
@@ -180,6 +202,15 @@ export const UserCreateDialog = ({ isOpen, onOpenChange, onSubmit }) => {
                     width="100%"
                   />
                 </FormLayout>
+                <VietnamAddressFields
+                  value={values.address}
+                  onChange={updateAddress}
+                  onBlur={() => setAddressErrors(validateAddress(values.address))}
+                  errors={addressErrors}
+                  required={false}
+                  disabled={isSubmitting}
+                  idPrefix={`${formId}-address`}
+                />
               </VStack>
             </form>
           </LayoutContent>

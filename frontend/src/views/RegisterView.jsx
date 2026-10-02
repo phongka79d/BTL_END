@@ -6,11 +6,14 @@ import {
   Text,
   Heading,
   Button,
-  TextInput,
-  TextArea
+  TextInput
 } from '@astryxdesign/core';
 import { useAuth } from '../contexts/AuthContext';
 import { useNotification } from '../contexts/NotificationContext';
+import VietnamAddressFields from '../components/address/VietnamAddressFields.jsx';
+import { EMPTY_ADDRESS, toAddressPayload } from '../components/address/addressFormUtils.js';
+import { validateAddress } from '../utils/addressValidation.js';
+import { validatePhone } from '../utils/phoneValidation.js';
 import { validatePasswordPolicy } from '../utils/passwordPolicy';
 
 /**
@@ -31,7 +34,7 @@ export const RegisterView = () => {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [fullName, setFullName] = useState('');
   const [phone, setPhone] = useState('');
-  const [address, setAddress] = useState('');
+  const [address, setAddress] = useState(EMPTY_ADDRESS);
 
   // Trạng thái kiểm tra của các trường (cho thuộc tính status của Astryx)
   const [usernameStatus, setUsernameStatus] = useState(null);
@@ -40,7 +43,7 @@ export const RegisterView = () => {
   const [confirmPasswordStatus, setConfirmPasswordStatus] = useState(null);
   const [fullNameStatus, setFullNameStatus] = useState(null);
   const [phoneStatus, setPhoneStatus] = useState(null);
-  const [addressStatus, setAddressStatus] = useState(null);
+  const [addressErrors, setAddressErrors] = useState({});
 
   // Trạng thái gửi biểu mẫu và phản hồi API
   const [isLoading, setIsLoading] = useState(false);
@@ -67,7 +70,7 @@ export const RegisterView = () => {
     setConfirmPasswordStatus(null);
     setFullNameStatus(null);
     setPhoneStatus(null);
-    setAddressStatus(null);
+    setAddressErrors({});
 
     // Kiểm tra phía máy khách
     if (!username) {
@@ -110,12 +113,17 @@ export const RegisterView = () => {
       hasError = true;
     }
 
-    // Phone là tùy chọn nhưng nếu được nhập thì phải có dạng số
-    if (phone && !/^\+?[0-9\s-]{8,15}$/.test(phone)) {
-      setPhoneStatus({ type: 'error', message: 'Vui lòng nhập số điện thoại hợp lệ' });
+    const phoneError = validatePhone(phone);
+    if (phoneError) {
+      setPhoneStatus({ type: 'error', message: phoneError });
       hasError = true;
     }
 
+    const nextAddressErrors = validateAddress(address);
+    setAddressErrors(nextAddressErrors);
+    if (Object.keys(nextAddressErrors).length > 0) {
+      hasError = true;
+    }
     if (hasError) return;
 
     setIsLoading(true);
@@ -126,7 +134,7 @@ export const RegisterView = () => {
         password,
         fullName,
         phone: phone || undefined,
-        address: address || undefined
+        address: toAddressPayload(address)
       });
 
       if (res.success) {
@@ -248,16 +256,19 @@ export const RegisterView = () => {
             placeholder="Nhập lại mật khẩu"
           />
 
-          <TextArea
-            label="Địa chỉ"
+          <VietnamAddressFields
             value={address}
-            onChange={(val) => {
-              setAddress(val);
-              if (addressStatus) setAddressStatus(null);
+            onChange={(nextAddress) => {
+              setAddress(nextAddress);
+              if (Object.keys(addressErrors).length > 0) {
+                setAddressErrors(validateAddress(nextAddress));
+              }
             }}
-            status={addressStatus}
-            isDisabled={isLoading}
-            placeholder="Nhập địa chỉ giao hàng của bạn"
+            onBlur={() => setAddressErrors(validateAddress(address))}
+            errors={addressErrors}
+            disabled={isLoading}
+            required={false}
+            idPrefix="register-address"
           />
 
           <Button

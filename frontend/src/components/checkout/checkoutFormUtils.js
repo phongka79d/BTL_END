@@ -1,10 +1,14 @@
+import { validateAddress } from '../../utils/addressValidation.js';
+import { validateCheckoutFullName } from '../../utils/checkoutValidation.js';
 import { validatePhone } from '../../utils/phoneValidation.js';
+import { toAddressPayload } from '../address/addressFormUtils.js';
 
 export const validateCheckoutValues = (values) => {
   const errors = {};
 
-  if (!values.fullName.trim()) {
-    errors.fullName = 'Vui lòng nhập họ và tên.';
+  const fullNameError = validateCheckoutFullName(values.fullName);
+  if (fullNameError) {
+    errors.fullName = fullNameError;
   }
 
   const phoneError = validatePhone(values.phone, { required: true });
@@ -12,8 +16,9 @@ export const validateCheckoutValues = (values) => {
     errors.phone = phoneError;
   }
 
-  if (!values.shippingAddress.trim()) {
-    errors.shippingAddress = 'Vui lòng nhập địa chỉ giao hàng.';
+  const addressErrors = validateAddress(values.address, { required: true });
+  if (Object.keys(addressErrors).length > 0) {
+    errors.address = addressErrors;
   }
 
   return errors;
@@ -22,7 +27,7 @@ export const validateCheckoutValues = (values) => {
 export const buildCheckoutPayload = (values, selectedItems) => ({
   fullName: values.fullName.trim(),
   phone: values.phone,
-  shippingAddress: values.shippingAddress.trim(),
+  address: toAddressPayload(values.address),
   note: values.note.trim() || undefined,
   cartItemIds: selectedItems.map((item) => item.id)
 });
@@ -34,9 +39,10 @@ export const createCheckoutRequest = ({ values, selectedItems, createOrder }) =>
     return { errors, run: null };
   }
 
+  const payload = buildCheckoutPayload(values, selectedItems);
   return {
     errors,
-    run: () => createOrder(buildCheckoutPayload(values, selectedItems))
+    run: () => createOrder(payload)
   };
 };
 

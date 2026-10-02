@@ -38,7 +38,8 @@ This repository root coordinates the full development, build, and deployment lif
 │   │   │   ├── 20260708193000_add_user_blocked_status/
 │   │   │   ├── 20260709000000_add_password_change_otp/
 │   │   │   ├── 20260710000000_add_staff_role/
-│   │   │   └── 20260930000000_add_order_recipient_snapshot/
+│   │   │   ├── 20260930000000_add_order_recipient_snapshot/
+│   │   │   └── 20261002000000_add_structured_vietnam_addresses/
 │   │   ├── schema.prisma        # Authoritative PostgreSQL data schema (customer, staff, admin)
 │   │   └── seed.js              # Initial database seed script (admin, categories, products)
 │   ├── src/                     # Backend application source code
@@ -171,13 +172,14 @@ flowchart TB
 
 ### 4. Shopping Cart & Transactional COD Checkout
 - **Cart Management:** Authenticated users add products to their cart. Cart state is persisted to PostgreSQL (`Cart` and `CartItem` tables) and synchronized with `CartContext`.
-- **Checkout:** The user enters shipping details in `CheckoutView`. The request requires `fullName`, a digits-only `phone` (kept as a string so leading zeros survive), and `shippingAddress`, with optional `note` and optional `cartItemIds` for partial-cart checkout. Submitting the order triggers `POST /api/orders`: the backend creates the `Order` (including a recipient snapshot — `recipientName`, `recipientPhone`, `note` — so later profile edits never change an existing order), creates `OrderDetail` line items, creates a `Payment` record with method `COD` and status `unpaid`, decrements stock with a conditional `quantity >= ordered` write, and clears the user's `CartItem` entries in a single atomic database transaction. Concurrent stock or cart changes abort with HTTP 409 instead of overselling, and cart/product reads are served `no-store` so displayed stock is never stale.
+- **Checkout:** The checkout form prefills the recipient name, phone, and a complete structured address from the user's profile. If profile loading fails, it leaves those fields blank, displays a notice, and still allows manual entry. `POST /api/orders` requires a 10–50 character full name (after trimming), a phone kept as a 9–11 digit string (preserving leading zeroes), and the structured address `{ provinceCode, wardCode, streetRef, detail }`; the server resolves authoritative current names before writing. It stores an immutable recipient and structured shipping-address snapshot per order, so later profile edits do not change existing orders. Order details, COD payment (`unpaid`), conditional stock decrement, and selected cart-line removal remain atomic; stock/cart races return HTTP 409.
+- **Vietnam address selection:** Address entry uses two current administrative levels—province/city then ward/commune/special zone—with provider-backed street selection; there is no district field. A legacy-only `User.address` is displayed as unverified, read-only text and must be reselected before checkout or profile replacement. The bundled data is v5.2.0, effective 2026-09-20 (upstream updated `2026-09-20T13:13:17Z`); the backend README documents source, MIT license, address API, exact validations, and rollout/backfill rules.
 - **Order Tracking & Self-Cancel:** `OrderHistoryView` lists the customer's orders and `OrderDetailView` shows one order with a `Hủy đơn hàng` action. `PUT /api/orders/:id/cancel` is accepted only while the order is `pending` or `confirmed`; the backend cancels it transactionally and restocks every line item. The page then renders the `cancelled` state and hides the cancel action.
 
 ### 5. Administration & Staff Operations
 - **Operations Staff Workspace (`/staff/*`):** Staff members process customer orders (`orders.view_all`, `orders.update_status`), monitor and adjust inventory counts (`products.update_stock`), hide inappropriate customer reviews (`reviews.moderate`), and view fulfillment summaries (`reports.view_operational`).
 - **Catalog Management:** Administrators create, edit, and delete categories and products, set pricing, adjust stock levels, and upload product images.
-- **User Moderation & Roles:** Administrators list users, inspect profiles, assign user roles (`customer` / `staff` / `admin`), and block/unblock accounts. The `Thêm tài khoản` dialog (`UserCreateDialog`) posts to `POST /api/admin/users`, which applies the shared password policy and emails the new account its login credentials (email failures are logged without failing the request).
+- **User Moderation & Roles:** Administrators list users, inspect profiles, assign user roles (`customer` / `staff` / `admin`), and block/unblock accounts. `GET /api/admin/users?role=customer|staff|admin` combines the role filter with search; changing role resets to page 1, **Clear filters** resets role/search/page, and successful role changes reload the active results and recover from an empty/out-of-range final page. The `Thêm tài khoản` dialog (`UserCreateDialog`) posts to `POST /api/admin/users`, which applies the shared password policy and emails the new account its login credentials (email failures are logged without failing the request).
 - **Order Processing:** Administrators and Staff view system-wide orders and move them through the enforced lifecycle (`pending → confirmed → shipping → completed`, with `cancelled` reachable from those three states). Illegal transitions are rejected with HTTP 400, cancelling restocks inventory, and completing marks the COD payment as `paid`. The admin status selector only offers the current status plus its allowed next statuses.
 - **Review Moderation:** Administrators and Staff inspect customer reviews and hide inappropriate comments (`status = 'hidden'`) from the storefront.
 - **Financial & Operational Analytics:** Administrators inspect financial revenue reports via `/api/admin/reports/revenue`, while Staff and Administrators inspect operational order status distributions and top-selling product volume via `/api/admin/reports/order-summary` and `/api/admin/reports/best-selling-products`. `ReportView` filters all reports by date range and exports true XLSX workbooks with `Revenue`, `Order Summary`, and `Best Selling Products` sheets; the existing UTF-8 CSV exports remain available.
@@ -197,6 +199,8 @@ Create `backend/.env` using `backend/.env.example` as a template:
 | `JWT_SECRET` | Yes | - | Secret key for signing and verifying JWT tokens |
 | `JWT_EXPIRES_IN` | No | `7d` | JWT expiration duration |
 | `NODE_ENV` | No | `development` | Application environment (`development` / `production`) |
+| `ADDRESS_PROVIDER` | Yes for provider-backed address operations | `vietmap` | Server-side address provider selection; never configure it in Vite |
+| `VIETMAP_API_KEY` | Yes for provider-backed address operations | - | Backend-only VietMap secret; never expose it as a frontend `VITE_` variable |
 | `PASSWORD_OTP_EXPIRES_MINUTES` | No | `10` | Expiration window for password change OTPs |
 | `PASSWORD_OTP_MAX_ATTEMPTS` | No | `5` | Maximum failed OTP attempts before invalidation |
 | `PASSWORD_OTP_DELIVERY_MODE` | No | `console` | OTP delivery mode: `console` (dev) or `smtp` (prod) |
@@ -207,6 +211,8 @@ Create `backend/.env` using `backend/.env.example` as a template:
 | `SMTP_FROM` | If SMTP | `no-reply@example.com` | Sender address for system emails |
 
 > **Local QA migration safety:** point **both** `DATABASE_URL` and `DIRECT_URL` at the same isolated local database before running any Prisma command. `backend/prisma/schema.prisma` declares `directUrl = env("DIRECT_URL")`, and Prisma uses that URL for schema and migration work, overriding the connection otherwise used by the CLI — if `DIRECT_URL` points anywhere else, `prisma migrate` writes there instead. Never point local QA at a shared or remote database, and never commit `.env` files.
+
+> **Structured address rollout:** The additive migration and legacy-backfill runbook is in [backend/README.md](./backend/README.md). Backfill defaults to dry-run; writes require `--apply --backup-confirmed`, and a remote database additionally requires `--allow-remote-db`. The CLI uses only `DATABASE_URL`, preserves `User.address` and all orders, and requires a reviewed/restorable backup. The runbook does not claim a production migration or live VietMap provider QA has occurred.
 
 ### Frontend Environment (`frontend/.env`)
 Create `frontend/.env` using `frontend/.env.example` as a template:

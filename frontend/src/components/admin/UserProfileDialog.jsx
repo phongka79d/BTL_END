@@ -13,19 +13,26 @@ import {
 } from '@astryxdesign/core';
 import Alert from '../common/Alert';
 import { validatePhone } from '../../utils/phoneValidation';
+import { validateAddress } from '../../utils/addressValidation';
+import VietnamAddressFields from '../address/VietnamAddressFields';
+import {
+  addressFromUser,
+  hasLegacyAddress,
+  toAddressPayload
+} from '../address/addressFormUtils';
 
 const getProfileValues = (user) => ({
   username: user?.username || '',
   fullName: user?.fullName || '',
   phone: user?.phone ?? '',
-  address: user?.address || '',
+  address: addressFromUser(user)
 });
 
 const createUserProfilePayload = (values) => ({
   username: values.username.trim(),
   fullName: values.fullName.trim(),
   phone: values.phone,
-  address: values.address.trim(),
+  address: toAddressPayload(values.address)
 });
 
 export const UserProfileDialog = ({
@@ -38,16 +45,16 @@ export const UserProfileDialog = ({
   const [values, setValues] = useState(() => getProfileValues(user));
   const [error, setError] = useState('');
   const [phoneStatus, setPhoneStatus] = useState(null);
+  const [addressErrors, setAddressErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
-    if (isOpen) {
-      const nextValues = getProfileValues(user);
-      const phoneError = validatePhone(nextValues.phone);
-      setValues(nextValues);
-      setError('');
-      setPhoneStatus(phoneError ? { type: 'error', message: phoneError } : null);
-    }
+    const nextValues = getProfileValues(user);
+    const phoneError = isOpen ? validatePhone(nextValues.phone) : null;
+    setValues(nextValues);
+    setError('');
+    setPhoneStatus(phoneError ? { type: 'error', message: phoneError } : null);
+    setAddressErrors({});
   }, [isOpen, user]);
 
   const updateField = (field, value) => {
@@ -65,11 +72,25 @@ export const UserProfileDialog = ({
     setError('');
   };
 
+  const requiresAddressSelection = hasLegacyAddress(user);
+
+  const updateAddress = (address) => {
+    setValues((current) => ({ ...current, address }));
+    if (Object.keys(addressErrors).length > 0) {
+      setAddressErrors(validateAddress(address, { required: requiresAddressSelection }));
+    }
+    setError('');
+  };
+
   const handleSubmit = async (event) => {
     event.preventDefault();
     const phoneError = validatePhone(values.phone);
-    if (phoneError) {
-      setPhoneStatus({ type: 'error', message: phoneError });
+    setPhoneStatus(phoneError ? { type: 'error', message: phoneError } : null);
+    const nextAddressErrors = validateAddress(values.address, {
+      required: requiresAddressSelection
+    });
+    setAddressErrors(nextAddressErrors);
+    if (phoneError || Object.keys(nextAddressErrors).length > 0) {
       return;
     }
 
@@ -112,6 +133,17 @@ export const UserProfileDialog = ({
                     description={error}
                   />
                 )}
+                {requiresAddressSelection && (
+                  <div role="status">
+                    <p>
+                      Địa chỉ cũ: {typeof user?.address === 'string' ? user.address : ''}
+                    </p>
+                    <p>
+                      Vui lòng chọn lại Tỉnh/Thành phố, Phường/Xã, Đường/Phố và nhập số nhà/ngõ/ngách hoặc thông tin chi tiết trước khi lưu.
+                    </p>
+                  </div>
+                )}
+
                 <FormLayout>
                   <TextInput
                     label="Tên người dùng"
@@ -136,14 +168,18 @@ export const UserProfileDialog = ({
                     isOptional
                     width="100%"
                   />
-                  <TextInput
-                    label="Địa chỉ"
-                    value={values.address}
-                    onChange={(value) => updateField('address', value)}
-                    isOptional
-                    width="100%"
-                  />
                 </FormLayout>
+                <VietnamAddressFields
+                  value={values.address}
+                  onChange={updateAddress}
+                  onBlur={() => setAddressErrors(validateAddress(values.address, {
+                    required: requiresAddressSelection
+                  }))}
+                  errors={addressErrors}
+                  required={requiresAddressSelection}
+                  disabled={isSubmitting}
+                  idPrefix={`${formId}-address`}
+                />
               </VStack>
             </form>
           </LayoutContent>

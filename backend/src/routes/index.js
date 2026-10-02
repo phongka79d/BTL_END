@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const addressRoutes = require('./address.routes');
 
 const productRoutes = require('./product.routes');
 const categoryRoutes = require('./category.routes');
@@ -16,6 +17,7 @@ const {
 // Gắn các route dưới tiền tố đường dẫn tương ứng
 // Endpoint sản phẩm/danh mục công khai sẽ khớp, ví dụ GET /api/products, GET /api/categories
 // Endpoint sản phẩm/danh mục admin sẽ khớp, ví dụ POST /api/admin/products, POST /api/admin/categories
+router.use('/addresses', addressRoutes);
 router.use('/products', productRoutes);
 router.use('/admin/products', productRoutes);
 router.use('/categories', categoryRoutes);

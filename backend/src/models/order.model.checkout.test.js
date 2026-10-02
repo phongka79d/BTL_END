@@ -1,18 +1,57 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const prisma = require('../config/database');
+const addressService = require('../services/address.service');
 const orderModel = require('./order.model');
 
-const withTransactionStub = async (tx, run) => {
-  const original = prisma.$transaction;
+const structuredAddress = {
+  provinceCode: '01',
+  wardCode: '00001',
+  streetRef: '1',
+  detail: 'Số nhà 123'
+};
+const resolvedAddress = {
+  provinceCode: '01',
+  provinceName: 'Hà Nội',
+  wardCode: '00001',
+  wardName: 'Phường Phúc Xá',
+  streetRef: '1',
+  streetName: 'Đường ABC',
+  detail: 'Số nhà 123'
+};
+const withTransactionStub = async (tx, run, { resolveAddress = async () => resolvedAddress } = {}) => {
+  const originalTransaction = prisma.$transaction;
+  const originalResolveAddress = addressService.resolveAddress;
+  const originalToOrderAddressFields = addressService.toOrderAddressFields;
   prisma.$transaction = async (handler) => {
     if (tx.calls) tx.calls.transactionOpens += 1;
     return handler(tx);
   };
+  addressService.resolveAddress = async (input, options) => {
+    if (tx.calls) {
+      tx.calls.addressResolutions.push({ input, options, transactionOpens: tx.calls.transactionOpens });
+    }
+    return resolveAddress(input, options);
+  };
+  addressService.toOrderAddressFields = (address) => {
+    if (tx.calls) tx.calls.addressMappings.push(address);
+    return {
+      shippingAddress: `${address.detail}, ${address.streetName}, ${address.wardName}, ${address.provinceName}`,
+      shippingProvinceCode: address.provinceCode,
+      shippingProvinceName: address.provinceName,
+      shippingWardCode: address.wardCode,
+      shippingWardName: address.wardName,
+      shippingStreetRef: address.streetRef,
+      shippingStreetName: address.streetName,
+      shippingAddressDetail: address.detail
+    };
+  };
   try {
     return await run();
   } finally {
-    prisma.$transaction = original;
+    prisma.$transaction = originalTransaction;
+    addressService.resolveAddress = originalResolveAddress;
+    addressService.toOrderAddressFields = originalToOrderAddressFields;
   }
 };
 
@@ -30,6 +69,8 @@ const createCheckoutTxStub = ({ cart, stock = {}, stockUpdateCounts = {}, cartDe
     orderDetailCreates: [],
     paymentCreates: [],
     cartItemDeletes: [],
+    addressResolutions: [],
+    addressMappings: [],
     profileTouches: 0
   };
 
@@ -132,7 +173,7 @@ test('checkout decrements the selected line 34 -> 4 and deletes only that cart l
 
   let order;
   await withTransactionStub(tx, async () => {
-    order = await orderModel.checkout('user_1', '123 Đường ABC', contact, ['item_a']);
+    order = await orderModel.checkout('user_1', structuredAddress, contact, ['item_a']);
   });
 
   // Cập nhật tồn kho có điều kiện: 34 - 30 = 4, dòng không chọn giữ nguyên 50.
@@ -162,7 +203,7 @@ test('checkout decrements the selected line 34 -> 4 and deletes only that cart l
   assert.equal(Number(tx.calls.paymentCreates[0].data.amount), 3000);
 
   assert.equal(order.id, 'order_new');
-  assert.equal(order.shippingAddress, '123 Đường ABC');
+  assert.equal(order.shippingAddress, `${resolvedAddress.detail}, ${resolvedAddress.streetName}, ${resolvedAddress.wardName}, ${resolvedAddress.provinceName}`);
 });
 
 test('checkout then cancel restores the stock it took (34 -> 4 -> 34)', async () => {
@@ -171,7 +212,7 @@ test('checkout then cancel restores the stock it took (34 -> 4 -> 34)', async ()
 
   let placed;
   await withTransactionStub(checkoutTx, async () => {
-    placed = await orderModel.checkout('user_1', '123 Đường ABC', contact, ['item_a']);
+    placed = await orderModel.checkout('user_1', structuredAddress, contact, ['item_a']);
   });
   assert.equal(stock.product_a, 4);
 
@@ -222,7 +263,7 @@ test('checkout rejects a quantity above stock (5 from 4) without writing anythin
 
   await withTransactionStub(tx, async () => {
     await assert.rejects(
-      () => orderModel.checkout('user_1', '123 Đường ABC', contact, ['item_a']),
+      () => orderModel.checkout('user_1', structuredAddress, contact, ['item_a']),
       (error) => error.status === 400 && /vượt quá tồn kho/.test(error.message)
     );
   });
@@ -251,7 +292,7 @@ test('checkout rejects cart quantities that are not positive integers', async ()
 
     await withTransactionStub(tx, async () => {
       await assert.rejects(
-        () => orderModel.checkout('user_1', '123 Đường ABC', contact, ['item_a']),
+        () => orderModel.checkout('user_1', structuredAddress, contact, ['item_a']),
         /Số lượng không hợp lệ/
       );
     });
@@ -271,7 +312,7 @@ test('checkout rolls back when a conditional stock write loses the race', async 
 
   await withTransactionStub(tx, async () => {
     await assert.rejects(
-      () => orderModel.checkout('user_1', '123 Đường ABC', contact, ['item_a', 'item_b']),
+      () => orderModel.checkout('user_1', structuredAddress, contact, ['item_a', 'item_b']),
       (error) => error.status === 409 && /Mouse/.test(error.message)
     );
   });
@@ -297,7 +338,7 @@ test('checkout rejects when the cart changed concurrently before the cart line c
 
   await withTransactionStub(tx, async () => {
     await assert.rejects(
-      () => orderModel.checkout('user_1', '123 Đường ABC', contact, ['item_a']),
+      () => orderModel.checkout('user_1', structuredAddress, contact, ['item_a']),
       (error) => error.status === 409 && /Giỏ hàng đã thay đổi/.test(error.message)
     );
   });
@@ -311,20 +352,56 @@ test('checkout snapshots the requested recipient instead of the user profile', a
 
   let order;
   await withTransactionStub(tx, async () => {
+    const untrustedAddress = {
+      ...structuredAddress,
+      provinceName: 'Client Province',
+      wardName: 'Client Ward',
+      streetName: 'Client Street',
+      shippingProvinceCode: 'forged'
+    };
     order = await orderModel.checkout(
       'user_1',
-      '  123 Đường ABC  ',
+      untrustedAddress,
       { fullName: '  Nguyễn Văn A  ', phone: '0987654321', note: 'Giao ngoài giờ' },
       ['item_a']
     );
   });
 
   const data = tx.calls.orderCreates[0].data;
-  assert.equal(data.shippingAddress, '123 Đường ABC');
-  assert.equal(data.recipientName, 'Nguyễn Văn A');
-  assert.equal(data.recipientPhone, '0987654321');
-  assert.equal(typeof data.recipientPhone, 'string');
-  assert.equal(data.note, 'Giao ngoài giờ');
+  assert.deepEqual(tx.calls.addressResolutions, [{
+    input: {
+      ...structuredAddress,
+      provinceName: 'Client Province',
+      wardName: 'Client Ward',
+      streetName: 'Client Street',
+      shippingProvinceCode: 'forged'
+    },
+    options: { required: true },
+    transactionOpens: 0
+  }]);
+  assert.deepEqual(tx.calls.addressMappings, [resolvedAddress]);
+  assert.deepEqual(
+    {
+      shippingAddress: data.shippingAddress,
+      shippingProvinceCode: data.shippingProvinceCode,
+      shippingProvinceName: data.shippingProvinceName,
+      shippingWardCode: data.shippingWardCode,
+      shippingWardName: data.shippingWardName,
+      shippingStreetRef: data.shippingStreetRef,
+      shippingStreetName: data.shippingStreetName,
+      shippingAddressDetail: data.shippingAddressDetail
+    },
+    {
+      shippingAddress: 'Số nhà 123, Đường ABC, Phường Phúc Xá, Hà Nội',
+      shippingProvinceCode: '01',
+      shippingProvinceName: 'Hà Nội',
+      shippingWardCode: '00001',
+      shippingWardName: 'Phường Phúc Xá',
+      shippingStreetRef: '1',
+      shippingStreetName: 'Đường ABC',
+      shippingAddressDetail: 'Số nhà 123'
+    }
+  );
 
   // Số điện thoại giữ nguyên số 0 đầu và hồ sơ người dùng không bị đọc/ghi đè.
   assert.equal(tx.calls.profileTouches, 0);
@@ -337,24 +414,89 @@ test('checkout requires a valid recipient contact before opening the transaction
 
   await withTransactionStub(tx, async () => {
     await assert.rejects(
-      () => orderModel.checkout('user_1', '123 Đường ABC', undefined, ['item_a']),
+      () => orderModel.checkout('user_1', structuredAddress, undefined, ['item_a']),
       /Thông tin người nhận/
     );
     await assert.rejects(
-      () => orderModel.checkout('user_1', '123 Đường ABC', { fullName: 'Nguyễn Văn A', phone: '09 8765 4321' }, ['item_a']),
+      () => orderModel.checkout('user_1', structuredAddress, { fullName: 'Nguyễn Văn A', phone: '09 8765 4321' }, ['item_a']),
       /chữ số/
     );
     await assert.rejects(
-      () => orderModel.checkout('user_1', '123 Đường ABC', { fullName: '   ', phone: '0987654321' }, ['item_a']),
+      () => orderModel.checkout('user_1', structuredAddress, { fullName: '123456789', phone: '0987654321' }, ['item_a']),
       /Họ và tên/
     );
     await assert.rejects(
-      () => orderModel.checkout('user_1', '123 Đường ABC', { fullName: 'Nguyễn Văn A', phone: '0987654321', note: 42 }, ['item_a']),
+      () => orderModel.checkout('user_1', structuredAddress, { fullName: 'A'.repeat(51), phone: '0987654321' }, ['item_a']),
+      /Họ và tên/
+    );
+    await assert.rejects(
+      () => orderModel.checkout('user_1', structuredAddress, { fullName: 'Nguyễn Văn A', phone: '0987654321', note: 42 }, ['item_a']),
       /Ghi chú/
     );
+    for (const phone of ['12345678', '123456789012']) {
+      await assert.rejects(
+        () => orderModel.checkout('user_1', structuredAddress, { fullName: 'Nguyễn Văn A', phone }, ['item_a']),
+        /Số điện thoại/
+      );
+    }
   });
 
   assert.equal(tx.calls.transactionOpens, 0);
   assert.equal(tx.calls.orderCreates.length, 0);
   assert.equal(tx.calls.productStockUpdates.length, 0);
+  assert.equal(tx.calls.addressResolutions.length, 0);
+});
+
+test('checkout resolves the address before the transaction and propagates provider errors', async () => {
+  const tx = createCheckoutTxStub({ cart: selectedCart({ items: [selectedCart().items[0]] }) });
+  const providerError = Object.assign(new Error('Address provider unavailable'), {
+    status: 503,
+    statusCode: 503
+  });
+
+  await assert.rejects(
+    () => withTransactionStub(
+      tx,
+      () => orderModel.checkout('user_1', structuredAddress, contact, ['item_a']),
+      {
+        resolveAddress: async (input, options) => {
+          assert.deepEqual(input, structuredAddress);
+          assert.deepEqual(options, { required: true });
+          assert.equal(tx.calls.transactionOpens, 0);
+          throw providerError;
+        }
+      }
+    ),
+    (error) => error === providerError
+  );
+
+  assert.equal(tx.calls.transactionOpens, 0);
+  assert.equal(tx.calls.orderCreates.length, 0);
+  assert.equal(tx.calls.productStockUpdates.length, 0);
+  assert.equal(tx.calls.addressResolutions.length, 1);
+  assert.equal(tx.calls.addressMappings.length, 0);
+});
+
+test('checkout accepts trimmed ten-to-fifty-character names and nine-to-eleven-digit phone boundaries', async () => {
+  const validContacts = [
+    { fullName: 'A'.repeat(10), phone: '123456789' },
+    { fullName: 'B'.repeat(50), phone: '12345678901' }
+  ];
+
+  for (const validContact of validContacts) {
+    const tx = createCheckoutTxStub({ cart: selectedCart({ items: [selectedCart().items[0]] }) });
+    let order;
+    await withTransactionStub(tx, async () => {
+      order = await orderModel.checkout(
+        'user_1',
+        structuredAddress,
+        { ...validContact, fullName: `  ${validContact.fullName}  ` },
+        ['item_a']
+      );
+    });
+
+    assert.equal(order.recipientName, validContact.fullName);
+    assert.equal(order.recipientPhone, validContact.phone);
+    assert.equal(tx.calls.transactionOpens, 1);
+  }
 });

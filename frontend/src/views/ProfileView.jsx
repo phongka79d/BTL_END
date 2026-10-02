@@ -10,21 +10,28 @@ import {
   Heading,
   HStack,
   Text,
-  TextArea,
   TextInput,
   VStack
 } from '@astryxdesign/core';
 import { userApi } from '../api/userApi';
 import Alert from '../components/common/Alert';
 import ChangePasswordPanel from '../components/profile/ChangePasswordPanel';
+import VietnamAddressFields from '../components/address/VietnamAddressFields.jsx';
+import {
+  EMPTY_ADDRESS,
+  addressFromUser,
+  hasLegacyAddress,
+  toAddressPayload
+} from '../components/address/addressFormUtils.js';
 import { useAuth } from '../contexts/AuthContext';
-import { validatePhone } from '../utils/phoneValidation';
+import { validateAddress } from '../utils/addressValidation.js';
+import { validatePhone } from '../utils/phoneValidation.js';
 
 const EMPTY_PROFILE = {
   username: '',
   fullName: '',
   phone: '',
-  address: '',
+  address: EMPTY_ADDRESS,
 };
 
 const profileIconStyle = {
@@ -54,25 +61,18 @@ const PhoneIcon = () => (
   </svg>
 );
 
-const AddressIcon = () => (
-  <svg aria-hidden="true" focusable="false" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round" style={profileIconStyle}>
-    <path d="M12 21s7-5.2 7-11a7 7 0 0 0-14 0c0 5.8 7 11 7 11Z" />
-    <path d="M12 12.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5Z" />
-  </svg>
-);
-
 const toProfileValues = (profile) => ({
   username: profile?.username || '',
   fullName: profile?.fullName || '',
   phone: profile?.phone ?? '',
-  address: profile?.address || '',
+  address: addressFromUser(profile),
 });
 
 const toProfilePayload = (values) => ({
   username: values.username.trim(),
   fullName: values.fullName.trim(),
   phone: values.phone,
-  address: values.address.trim(),
+  address: toAddressPayload(values.address),
 });
 
 const getAccountName = (profile, fallbackUser) => (
@@ -94,11 +94,13 @@ const ProfileInfoRow = ({ icon, label, children }) => (
   </HStack>
 );
 
+
 export const ProfileView = () => {
   const navigate = useNavigate();
   const { user, isAdmin } = useAuth();
   const [profile, setProfile] = useState(null);
   const [values, setValues] = useState(EMPTY_PROFILE);
+  const [addressErrors, setAddressErrors] = useState({});
   const [usernameStatus, setUsernameStatus] = useState(null);
   const [phoneStatus, setPhoneStatus] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -120,6 +122,7 @@ export const ProfileView = () => {
       setValues(nextValues);
       setPhoneStatus(phoneError ? { type: 'error', message: phoneError } : null);
       setUsernameStatus(null);
+      setAddressErrors({});
     } catch (error) {
       setProfile(null);
       setLoadError(error?.message || 'Không thể tải hồ sơ của bạn.');
@@ -133,8 +136,16 @@ export const ProfileView = () => {
   }, [loadProfile]);
 
   const accountName = useMemo(() => getAccountName(profile, user), [profile, user]);
-
+  const requiresAddressSelection = hasLegacyAddress(profile);
   const updateField = (field, value) => {
+
+    if (field === 'address') {
+      setAddressErrors((current) => (
+        Object.keys(current).length > 0
+          ? validateAddress(value, { required: requiresAddressSelection })
+          : current
+      ));
+    }
     setValues((current) => ({ ...current, [field]: value }));
 
     if (field === 'phone') {
@@ -156,11 +167,20 @@ export const ProfileView = () => {
     setValues(toProfileValues(profile));
     setUsernameStatus(null);
     setPhoneStatus(null);
+    setAddressErrors({});
     setFeedback(null);
   };
 
   const handleSubmit = async (event) => {
     event.preventDefault();
+    const nextAddressErrors = validateAddress(values.address, {
+      required: requiresAddressSelection
+    });
+    setAddressErrors(nextAddressErrors);
+    if (Object.keys(nextAddressErrors).length > 0) {
+      return;
+    }
+
     const payload = toProfilePayload(values);
     const phoneError = validatePhone(values.phone);
     if (phoneError) {
@@ -179,9 +199,11 @@ export const ProfileView = () => {
 
     try {
       const response = await userApi.updateProfile(payload);
-      const updatedProfile = response?.data?.user || { ...profile, ...payload };
-      setProfile(updatedProfile);
-      setValues(toProfileValues(updatedProfile));
+      const savedProfile = response?.data?.user;
+      if (savedProfile) {
+        setProfile(savedProfile);
+        setValues(toProfileValues(savedProfile));
+      }
       setFeedback({
         title: 'Đã lưu hồ sơ',
         description: 'Thông tin tài khoản của bạn đã được cập nhật.',
@@ -314,6 +336,7 @@ export const ProfileView = () => {
                 />
                 <TextInput
                   label="Số điện thoại"
+                  type="text"
                   startIcon={<PhoneIcon />}
                   value={values.phone}
                   status={phoneStatus}
@@ -323,17 +346,25 @@ export const ProfileView = () => {
                   isDisabled={isSaving}
                   width="100%"
                 />
-                <TextArea
-                  label="Địa chỉ"
-                  startIcon={<AddressIcon />}
-                  value={values.address}
-                  onChange={(value) => updateField('address', value)}
-                  rows={4}
-                  isOptional
-                  isDisabled={isSaving}
-                  width="100%"
-                />
               </FormLayout>
+
+              {requiresAddressSelection && (
+                <Alert
+                  title="Địa chỉ cũ cần xác nhận"
+                  description={`Địa chỉ "${profile.address}" được lưu dạng văn bản tự do và chưa được xác minh. Hãy chọn Tỉnh/Thành phố, Phường/Xã, Đường/Phố và nhập số nhà/ngõ/ngách hoặc thông tin chi tiết bên dưới trước khi lưu.`}
+                />
+              )}
+              <VietnamAddressFields
+                value={values.address}
+                onChange={(value) => updateField('address', value)}
+                onBlur={() => setAddressErrors(validateAddress(values.address, {
+                  required: requiresAddressSelection
+                }))}
+                errors={addressErrors}
+                disabled={isSaving}
+                required={requiresAddressSelection}
+                idPrefix="profile-address"
+              />
 
               <HStack gap={3} justify="end" wrap="wrap" style={{ paddingTop: 'var(--spacing-2)' }}>
                 <Button

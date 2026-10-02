@@ -1,7 +1,9 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { validatePhone } from './phoneValidation.js';
-
+import {
+  PHONE_LENGTH_MESSAGE,
+  validatePhone
+} from './phoneValidation.js';
 const INVALID_PHONE_MESSAGE = 'Số điện thoại chỉ được chứa chữ số.';
 
 test('phone validation allows optional empty values and preserves leading zeroes', () => {
@@ -32,4 +34,14 @@ test('required phone validation rejects empty values', () => {
   assert.equal(validatePhone(null, { required: true }), 'Số điện thoại không được để trống.');
   assert.equal(validatePhone(undefined, { required: true }), 'Số điện thoại không được để trống.');
   assert.equal(validatePhone('0987654321', { required: true }), null);
+});
+
+test('phone validation enforces inclusive nine-to-eleven digit boundaries', () => {
+  ['123456789', '0123456789', '01234567890'].forEach((phone) => {
+    assert.equal(validatePhone(phone), null);
+  });
+
+  ['12345678', '012345678901'].forEach((phone) => {
+    assert.equal(validatePhone(phone), PHONE_LENGTH_MESSAGE);
+  });
 });
